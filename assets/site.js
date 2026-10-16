@@ -105,11 +105,11 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
 })();
 
 // ---- photo lightbox with a noise-dissolve between photos ----
-// Moving to the next/previous photo sweeps a dissolve front across the frame (WebGL):
-// from the right when moving forward, from the left when moving back. Bright areas of the
-// incoming photo burn through first, so the front follows its shapes; an fbm noise
-// field frays the front into tatters and both frames drift slightly sideways against
-// each other. Adapted from the "Morph Gallery" shader, but photos are shown whole
+// Moving to the next/previous photo sweeps a dissolve front across the frame (WebGL),
+// from the right going forward, from the left going back. Contours of the incoming photo
+// switch first, then its areas of similar brightness switch as a whole; a little static
+// noise frays the front. The order is fixed per pixel, so nothing ripples or wobbles.
+// Adapted from the "Morph Gallery" shader, but photos are shown whole
 // (contain, letterboxed in the page colour) instead of cropped.
 // Falls back to a short cross-fade without WebGL (or for file:// previews, where
 // images can't be uploaded as textures), and to an instant swap when the OS asks
@@ -124,6 +124,8 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
   const figs = [...document.querySelectorAll(".grid figure")];
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   const DURATION = 1400;          // ms of dissolve
+  // dissolve order weights: side-to-side sweep, brightness areas, contours, static noise
+  const TUNE = { scale: 5.0, edge: 0.06, wSweep: 0.75, wShape: 0.55, wEdge: 0.35, wNoise: 0.12, bands: 4.0, kEdge: 3.0 };
   let i = -1, opener = null, busy = false, queued = null;
 
   const srcOf = n => { const im = figs[n].querySelector("img"); return im.dataset.full ? new URL(im.dataset.full, location.href).href : im.src; };   // full size, not the grid thumbnail
@@ -147,7 +149,8 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
     precision mediump float;
     #endif
     uniform sampler2D u_from, u_to;
-    uniform float u_progress, u_fromAspect, u_toAspect, u_scale, u_dir, u_edge, u_drift;
+    uniform float u_progress, u_fromAspect, u_toAspect, u_scale, u_dir, u_edge;
+    uniform float u_wSweep, u_wShape, u_wEdge, u_wNoise, u_bands, u_kEdge;
     uniform vec2 u_res;
     uniform vec3 u_bg;
     varying vec2 uv;
@@ -186,23 +189,44 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
       if (t.x < 0.0 || t.y < 0.0 || t.x > 1.0 || t.y > 1.0) return vec4(u_bg, 0.0);   // alpha 0 = letterbox
       return vec4(texture2D(tex, t).rgb, 1.0);
     }
+    // luminance of the incoming photo at q; letterbox areas read as black, so they switch last
+    float lumTo(vec2 q) {
+      vec4 c = photo(u_to, q, u_toAspect);
+      return c.a > 0.5 ? dot(c.rgb, vec3(0.299, 0.587, 0.114)) : 0.0;
+    }
     void main() {
-      float adjusted = u_progress * (1.0 + 2.0 * u_edge) - u_edge;
-      vec2 nuv = (uv - 0.5) * u_res / min(u_res.x, u_res.y);   // round noise in any canvas shape
-      float n = fbm(nuv * u_scale + vec2(u_progress * u_dir, 0.0)) * 0.5 + 0.5;
-      // side to side: the dissolve front sweeps across the frame — from the right when moving
-      // forward, from the left when moving back. Within the front the incoming photo's bright
-      // areas burn through first (so it follows shapes and silhouettes), and the noise frays it.
-      // Letterbox areas get a neutral grey so the noise, not the page colour, decides there.
+      // The order in which each pixel switches is fixed for the whole transition (nothing moves,
+      // so there is no wobble); progress just sweeps a threshold through it:
+      //   sweep — side to side, from the right going forward, from the left going back
+      //   edge  — contours of the incoming photo switch first (Sobel on a 3x3 neighbourhood)
+      //   shape — then whole areas of similar brightness switch together, brightest first
+      //   noise — a little static fbm so the front frays instead of cutting
+      vec2 d = 2.5 / u_res;
+      float l00 = lumTo(uv + vec2(-d.x, -d.y)), l10 = lumTo(uv + vec2(0.0, -d.y)), l20 = lumTo(uv + vec2(d.x, -d.y));
+      float l01 = lumTo(uv + vec2(-d.x, 0.0)),  l11 = lumTo(uv),                   l21 = lumTo(uv + vec2(d.x, 0.0));
+      float l02 = lumTo(uv + vec2(-d.x, d.y)),  l12 = lumTo(uv + vec2(0.0, d.y)),  l22 = lumTo(uv + vec2(d.x, d.y));
+      float gx = (l20 + 2.0 * l21 + l22) - (l00 + 2.0 * l01 + l02);
+      float gy = (l02 + 2.0 * l12 + l22) - (l00 + 2.0 * l10 + l20);
+      float edge = clamp(length(vec2(gx, gy)) * u_kEdge, 0.0, 1.0);
+      // the border between photo and letterbox is not a contour of the photo
+      vec2 s = u_res.x / u_res.y > u_toAspect ? vec2((u_res.x / u_res.y) / u_toAspect, 1.0) : vec2(1.0, u_toAspect / (u_res.x / u_res.y));
+      vec2 tq = (uv - 0.5) * s + 0.5, m = min(tq, 1.0 - tq) / (d * s);
+      edge *= step(1.5, min(m.x, m.y));
+      float mean = (l00 + l10 + l20 + l01 + l11 + l21 + l02 + l12 + l22) / 9.0;
+      float region = floor(mean * u_bands + 0.5) / u_bands;            // flat areas switch as one
+
+      vec2 nuv = (uv - 0.5) * u_res / min(u_res.x, u_res.y);         // round noise in any canvas shape
+      float n = fbm(nuv * u_scale) * 0.5 + 0.5;                       // static: no ripple
       float sweep = u_dir > 0.0 ? 1.0 - uv.x : uv.x;
-      vec4 incoming = photo(u_to, uv, u_toAspect);
-      float lum = incoming.a > 0.5 ? dot(incoming.rgb, vec3(0.299, 0.587, 0.114)) : 0.5;
-      float shape = mix(1.0 - lum, n, 0.4);              // bright areas first, frayed by noise
-      float t = sweep * 0.45 + shape * 0.55;
+
+      float t = u_wSweep * sweep + u_wShape * (1.0 - region) - u_wEdge * edge + u_wNoise * (n - 0.5);
+      float lo = -u_wEdge - 0.5 * u_wNoise, hi = u_wSweep + u_wShape + 0.5 * u_wNoise;
+      t = (t - lo) / (hi - lo);
+
+      float adjusted = u_progress * (1.0 + 2.0 * u_edge) - u_edge;
       float mixF = 1.0 - smoothstep(adjusted - u_edge, adjusted + u_edge, t);
-      // horizontal drift: the outgoing photo slides away, the incoming one settles in
-      vec4 a = photo(u_from, uv + vec2(n * u_progress * u_drift * u_dir, 0.0), u_fromAspect);
-      vec4 b = photo(u_to, uv + vec2(n * (1.0 - u_progress) * -0.5 * u_drift * u_dir, 0.0), u_toAspect);
+      vec4 a = photo(u_from, uv, u_fromAspect);
+      vec4 b = photo(u_to, uv, u_toAspect);
       gl_FragColor = vec4(mix(a.rgb, b.rgb, mixF), 1.0);
     }`;
 
@@ -230,7 +254,7 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
       const loc = gl.getAttribLocation(prog, "p");
       gl.enableVertexAttribArray(loc);
       gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-      for (const k of ["from", "to", "progress", "fromAspect", "toAspect", "scale", "dir", "edge", "drift", "res", "bg"])
+      for (const k of ["from", "to", "progress", "fromAspect", "toAspect", "scale", "dir", "edge", "res", "bg", "wSweep", "wShape", "wEdge", "wNoise", "bands", "kEdge"])
         U[k] = gl.getUniformLocation(prog, "u_" + k);
       gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
       return true;
@@ -273,10 +297,10 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
     gl.uniform3f(U.bg, ...pageColour());
     gl.uniform1f(U.fromAspect, fromIm.naturalWidth / fromIm.naturalHeight);
     gl.uniform1f(U.toAspect, toIm.naturalWidth / toIm.naturalHeight);
-    gl.uniform1f(U.scale, 5.0);
+    // TUNE can be overridden from the console (window.LB_TUNE) to try variants
+    const tune = Object.assign({}, TUNE, window.LB_TUNE || {});
     gl.uniform1f(U.dir, dir);
-    gl.uniform1f(U.edge, 0.05);
-    gl.uniform1f(U.drift, 0.05);
+    for (const k of ["scale", "edge", "wSweep", "wShape", "wEdge", "wNoise", "bands", "kEdge"]) gl.uniform1f(U[k], tune[k]);
     const draw = p => { gl.uniform1f(U.progress, p); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); };
     draw(0);
     return { draw, dispose: () => { gl.deleteTexture(tFrom); gl.deleteTexture(tTo); } };

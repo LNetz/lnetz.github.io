@@ -140,7 +140,7 @@ def shell(lang, file, title, desc, body, scripts=""):
   <main>
 {body}
     <footer class="mono">
-      <span>© 2026 Lukas Netz</span>
+      <span>© 2026 Lukas Netz.</span>
       <nav class="foot-icons" aria-label="{L(T("Sections", "Bereiche"))}">{foot_icons}</nav>
       <a href="#top">↑ {L(T("top", "nach oben"))}</a>
     </footer>
