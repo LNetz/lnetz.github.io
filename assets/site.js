@@ -106,7 +106,8 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
 
 // ---- photo lightbox with a noise-dissolve between photos ----
 // Moving to the next/previous photo sweeps a dissolve front across the frame (WebGL):
-// from the right when moving forward, from the left when moving back. An fbm noise
+// from the right when moving forward, from the left when moving back. Bright areas of the
+// incoming photo burn through first, so the front follows its shapes; an fbm noise
 // field frays the front into tatters and both frames drift slightly sideways against
 // each other. Adapted from the "Morph Gallery" shader, but photos are shown whole
 // (contain, letterboxed in the page colour) instead of cropped.
@@ -190,9 +191,14 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
       vec2 nuv = (uv - 0.5) * u_res / min(u_res.x, u_res.y);   // round noise in any canvas shape
       float n = fbm(nuv * u_scale + vec2(u_progress * u_dir, 0.0)) * 0.5 + 0.5;
       // side to side: the dissolve front sweeps across the frame — from the right when moving
-      // forward, from the left when moving back — and the noise frays its edge into tatters
+      // forward, from the left when moving back. Within the front the incoming photo's bright
+      // areas burn through first (so it follows shapes and silhouettes), and the noise frays it.
+      // Letterbox areas get a neutral grey so the noise, not the page colour, decides there.
       float sweep = u_dir > 0.0 ? 1.0 - uv.x : uv.x;
-      float t = sweep * 0.65 + n * 0.35;
+      vec4 incoming = photo(u_to, uv, u_toAspect);
+      float lum = incoming.a > 0.5 ? length(incoming.rgb) : 0.866;
+      float shape = smoothstep(0.0, 2.0, lum + n);
+      float t = sweep * 0.6 + shape * 0.4;
       float mixF = 1.0 - smoothstep(adjusted - u_edge, adjusted + u_edge, t);
       // horizontal drift: the outgoing photo slides away, the incoming one settles in
       vec4 a = photo(u_from, uv + vec2(n * u_progress * u_drift * u_dir, 0.0), u_fromAspect);
