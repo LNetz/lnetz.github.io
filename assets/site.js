@@ -196,9 +196,9 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
       // Letterbox areas get a neutral grey so the noise, not the page colour, decides there.
       float sweep = u_dir > 0.0 ? 1.0 - uv.x : uv.x;
       vec4 incoming = photo(u_to, uv, u_toAspect);
-      float lum = incoming.a > 0.5 ? length(incoming.rgb) : 0.866;
-      float shape = smoothstep(0.0, 2.0, lum + n);
-      float t = sweep * 0.6 + shape * 0.4;
+      float lum = incoming.a > 0.5 ? dot(incoming.rgb, vec3(0.299, 0.587, 0.114)) : 0.5;
+      float shape = mix(1.0 - lum, n, 0.4);              // bright areas first, frayed by noise
+      float t = sweep * 0.45 + shape * 0.55;
       float mixF = 1.0 - smoothstep(adjusted - u_edge, adjusted + u_edge, t);
       // horizontal drift: the outgoing photo slides away, the incoming one settles in
       vec4 a = photo(u_from, uv + vec2(n * u_progress * u_drift * u_dir, 0.0), u_fromAspect);
@@ -273,10 +273,10 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
     gl.uniform3f(U.bg, ...pageColour());
     gl.uniform1f(U.fromAspect, fromIm.naturalWidth / fromIm.naturalHeight);
     gl.uniform1f(U.toAspect, toIm.naturalWidth / toIm.naturalHeight);
-    gl.uniform1f(U.scale, 3.5);
+    gl.uniform1f(U.scale, 5.0);
     gl.uniform1f(U.dir, dir);
-    gl.uniform1f(U.edge, 0.15);
-    gl.uniform1f(U.drift, 0.15);
+    gl.uniform1f(U.edge, 0.05);
+    gl.uniform1f(U.drift, 0.05);
     const draw = p => { gl.uniform1f(U.progress, p); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); };
     draw(0);
     return { draw, dispose: () => { gl.deleteTexture(tFrom); gl.deleteTexture(tTo); } };
