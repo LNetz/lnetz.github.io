@@ -146,12 +146,16 @@ main { min-width: 0; }
 .page { padding-bottom: var(--space-section); }
 
 .section-head {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: baseline;
   gap: 16px;
-  border-bottom: 1px solid var(--ink);
-  padding-bottom: 8px;
+  padding-bottom: 9px;
+}
+.section-head::after {                    /* the rule; an element (not a border) so it can draw in */
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0;
+  height: 1px; background: var(--ink); transform-origin: left center;
 }
 .section-head h1,
 .section-head h2 { font-size: var(--fs); font-weight: 500; }
@@ -175,6 +179,9 @@ main { min-width: 0; }
   justify-content: start;
   gap: 4px 48px;
 }
+.facts-note { margin-top: 10px; color: var(--ink-3); }
+.facts-note a { color: var(--ink-3); }
+.facts-note a:hover { color: var(--accent); }
 .facts dt { color: var(--ink-3); }
 .facts dd { color: var(--ink); }
 
@@ -186,6 +193,11 @@ section > .group:first-child { padding-top: 0; }
 .quick a { display: block; color: var(--ink-2); padding: 2px; margin: -2px; }
 .quick svg { display: block; width: 24px; height: 24px; transition: color .2s, transform .2s; }
 .quick a:hover { color: var(--accent); }
+
+/* sub-pages: their own icon under the title */
+.page-icon { margin-top: 28px; color: var(--ink-2); }
+.page-icon svg { display: block; width: 24px; height: 24px; }
+.anim .page .page-icon { animation: rise .6s var(--ease-out) .26s both; }
 .quick a:hover svg { transform: translateY(-2px); }
 
 .bio { max-width: 560px; color: var(--ink-2); display: grid; gap: 12px; }
@@ -292,7 +304,7 @@ section > .group:first-child { padding-top: 0; }
 
 /* ---------- photography: banner, series, justified rows (no cropping) ---------- */
 
-.banner { margin-bottom: var(--space-section); }
+.banner { margin-bottom: var(--space-section); overflow: hidden; }
 .banner img { display: block; width: 100%; height: auto; aspect-ratio: 2400 / 769; background: var(--tile); }
 
 .series { display: flex; justify-content: space-between; padding-top: 48px; scroll-margin-top: 24px; }
@@ -355,7 +367,43 @@ section > .group:first-child { padding-top: 0; }
   font: inherit; color: var(--ink-2);
 }
 .lightbox button:hover { color: var(--accent); }
-.lightbox .close { justify-self: end; }
+.lightbox .tools { justify-self: end; display: flex; align-items: center; gap: 4px; }
+.lightbox .tools button { white-space: nowrap; }
+@media (max-width: 1000px) { .lightbox .fs span { display: none; } }   /* narrow windows: ⤢ alone */
+.lightbox .tools i { font-style: normal; }
+.lightbox .play[aria-pressed="true"] { color: var(--accent); }
+
+/* slideshow: a small ring next to "pause" quietly fills while the photo stays */
+.lightbox .progress {
+  width: 12px; height: 12px; margin-right: 2px;
+  transform: rotate(-90deg);                          /* start filling at 12 o'clock */
+  display: none;
+}
+.lightbox.playing .progress { display: block; }
+.lightbox .progress circle {
+  fill: none; stroke: var(--ink-3); stroke-width: 1.5;
+  stroke-dasharray: 40.84; stroke-dashoffset: 40.84;  /* 2π · 6.5 */
+}
+@keyframes lb-progress { from { stroke-dashoffset: 40.84; } to { stroke-dashoffset: 0; } }
+
+/* full screen: dark surround, tighter margins */
+.lightbox.fs {
+  --bg: #0c0c0b; --ink: #ededea; --ink-2: #c2c2bd; --ink-3: #8a8a84;
+  --lb-top: 20px; --lb-side: 20px; --lb-bottom: 64px;
+}
+
+/* undisturbed slideshow / full screen: controls and cursor step back */
+.lightbox .cap { transition: opacity .5s ease; }
+.lightbox.idle { cursor: none; }
+.lightbox.idle .cap { opacity: 0; }
+
+/* gallery page: series links on the left, slideshow on the right */
+.gallery-bar { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.gallery-bar .slideshow {
+  background: none; border: 0; padding: 12px 0; cursor: pointer;
+  font: inherit; color: var(--ink-2); white-space: nowrap;
+}
+.gallery-bar .slideshow:hover { color: var(--accent); }
 
 /* ---------- footer ---------- */
 
@@ -452,6 +500,77 @@ footer > a { justify-self: end; }
   .banner img { aspect-ratio: 4 / 3; }      /* taller 4:3 crop from <picture> on phones */
   .lightbox { --lb-top: 16px; --lb-side: 0px; --lb-bottom: 96px; }
   .lightbox .cap { left: 16px; right: 16px; bottom: 16px; grid-template-columns: auto 1fr; row-gap: 4px; }
+  .lightbox .tools span { display: none; }            /* phones: ▶ ⤢ × without words */
   .lightbox .title { grid-column: 1 / -1; grid-row: 1; text-align: left; }
   .lightbox .nav { margin-left: -10px; }
 }
+
+/* =====================================================================
+   Build-up sequence. Only with html.anim (set in <head> unless the OS
+   asks for reduced motion). The opening sequence is pure CSS, so it can
+   never leave content hidden; scroll reveals are armed by site.js.
+   ===================================================================== */
+
+@keyframes rise   { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+@keyframes draw   { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+/* hero "focus pull": out of focus and slightly zoomed, then sharp — like a lens finding focus */
+@keyframes focus-pull {
+  0%   { opacity: 0; filter: blur(16px); transform: scale(1.06); }
+  35%  { opacity: 1; }
+  100% { opacity: 1; filter: blur(0); transform: none; }
+}
+@keyframes backdrop-in { from { opacity: 0; } to { opacity: var(--backdrop-opacity); } }
+
+.anim {
+  --ease-out: cubic-bezier(.2, .7, .2, 1);
+  --ease-wipe: cubic-bezier(.7, 0, .2, 1);
+}
+
+/* 1 — index column: name, pages one by one, profiles, preferences */
+.anim .index .who,
+.anim .index nav li,
+.anim .index .contact,
+.anim .index .prefs,
+.anim .menu-toggle { animation: rise .6s var(--ease-out) both; }
+.anim .index nav li:nth-child(1) { animation-delay: .08s; }
+.anim .index nav li:nth-child(2) { animation-delay: .14s; }
+.anim .index nav li:nth-child(3) { animation-delay: .20s; }
+.anim .index nav li:nth-child(4) { animation-delay: .26s; }
+.anim .index .contact { animation-delay: .34s; }
+.anim .index .prefs { animation-delay: .42s; }
+.anim .menu-toggle { animation-delay: .1s; }
+
+/* 2 — page title: the rule draws from the left, title and counter follow */
+.anim .page .section-head::after { animation: draw .9s var(--ease-wipe) .1s both; }
+.anim .page .section-head h1 { animation: rise .6s var(--ease-out) .2s both; }
+.anim .page .section-head > span { animation: fadein .6s ease .45s both; }
+
+/* 3 — introduction */
+.anim .page .lead { animation: rise .7s var(--ease-out) .32s both; }
+.anim .page .facts,
+.anim .page .facts-note,
+.anim .page .bio { animation: rise .7s var(--ease-out) .46s both; }
+
+/* 4 — hero: the photo pulls into focus (the figure clips the blur and zoom at its edges) */
+.anim .banner img { animation: focus-pull 1.6s var(--ease-out) .45s both; }
+
+/* 5 — the network graphic breathes in behind everything */
+.anim .backdrop { animation: backdrop-in 2.4s ease .2s both; }
+
+/* 6 — content below: armed by site.js (.reveal), shown when scrolled into view (.in) */
+.anim .reveal { opacity: 0; transform: translateY(12px); }
+.anim .reveal.in {
+  opacity: 1; transform: none;
+  transition: opacity .7s var(--ease-out), transform .7s var(--ease-out);
+  transition-delay: var(--d, 0s);
+}
+.anim .grid figure.reveal { transform: none; }     /* tiles only fade, so the grid never jumps */
+
+/* later pages of a visit: the index column is already "built", only the page content builds up */
+.anim.returning .index .who,
+.anim.returning .index nav li,
+.anim.returning .index .contact,
+.anim.returning .index .prefs,
+.anim.returning .menu-toggle,
+.anim.returning .backdrop { animation: none; }

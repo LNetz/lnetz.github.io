@@ -28,6 +28,13 @@
       }
       window.applyTheme = apply;
       apply();
+      // build-up animation (style.css, .anim) unless the OS asks for reduced motion;
+      // the index column only builds up on the first page of a visit (.returning afterwards)
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) document.documentElement.classList.add("anim");
+      try {
+        if (sessionStorage.getItem("seen")) document.documentElement.classList.add("returning");
+        sessionStorage.setItem("seen", "1");
+      } catch (_) {}
       addEventListener("pageshow", apply);
       os.addEventListener("change", apply);
     })();
@@ -86,8 +93,9 @@
     <header class="page">
       <div class="section-head">
         <h1><span class="mono">03</span>Fotografie</h1>
-        <span class="mono faint">72 Fotografien</span>
+        <span class="mono faint">75 Fotografien</span>
       </div>
+      <div class="page-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><g transform="translate(12 12) scale(.9) translate(-12 -12)" stroke-width="1.95"><path d="M12.697 3.5h-1.394c-.715 0-1.072 0-1.392.112a2 2 0 0 0-.545.292c-.271.204-.47.501-.866 1.096c-.203.305-.502.753-.621.879a2 2 0 0 1-1.106.591c-.17.03-.353.03-.72.03c-.98 0-1.47 0-1.87.113a3 3 0 0 0-2.07 2.07C2 9.083 2 9.573 2 10.553V14.5c0 2.828 0 4.243.879 5.121S5.172 20.5 8 20.5h8c2.829 0 4.243 0 5.122-.879C22 18.743 22 17.328 22 14.5v-3.946c0-.98 0-1.47-.113-1.871a3 3 0 0 0-2.07-2.07c-.4-.113-.89-.113-1.87-.113c-.366 0-.55 0-.72-.03a2 2 0 0 1-1.105-.591c-.12-.126-.419-.574-.622-.879c-.396-.595-.594-.892-.865-1.096a2 2 0 0 0-.545-.292c-.32-.112-.678-.112-1.393-.112"/><path d="M16 13a4 4 0 1 1-8 0a4 4 0 0 1 8 0"/><path d="M19.125 9.5H19m.25 0a.25.25 0 1 1-.5 0a.25.25 0 0 1 .5 0Z"/></g></svg></div>
       <p class="lead">Die Fotografie hat mich vom ersten Moment an begeistert. Die Kamera ist eines der wenigen Werkzeuge, die es einem ermöglichen, nicht nur einen ganz bestimmten Blickwinkel auf die Welt zu zeigen, sondern auch <em>Erinnerungen und Emotionen</em> einzufangen und zu teilen.</p>
       <div class="bio">
         <p>Durch das Spielen mit einem ausgefallen-komplexen Hightech-Instrument, das auf raffinierteste Weise die Grenzen der Physik ausnutzt, kann man die schönsten Momente in einem Bruchteil einer Sekunde für immer festhalten.</p>
@@ -96,7 +104,10 @@
     <figure class="banner"><picture><source media="(max-width: 600px)" srcset="../assets/photos/about-dolomites-m.jpg" width="1200" height="900"><img src="../assets/photos/about-dolomites.jpg" alt="Lukas Netz mit Kamera, Blick über die Dolomiten" width="2400" height="769"></picture></figure>
 
     <section>
-      <nav class="filters mono" aria-label="Serien"><a href="#selected">auswahl</a><a href="#landscape">landschaft</a><a href="#people">menschen</a><a href="#animals">tiere</a><a href="#automotive">automobil</a></nav>
+      <div class="gallery-bar mono">
+        <nav class="filters" aria-label="Serien"><a href="#selected">auswahl</a><a href="#landscape">landschaft</a><a href="#people">menschen</a><a href="#animals">tiere</a><a href="#automotive">automobil</a></nav>
+        <button type="button" class="slideshow" data-slideshow>▶ Diashow</button>
+      </div>
       <div class="group mono series" id="selected"><span>Auswahl</span><span>2019 — 2025 · 10</span></div>
       <div class="grid">
           <figure style="--r:1.7778"><img src="../assets/photos/thumbs/p07.jpg" data-full="../assets/photos/p07.jpg" alt="Luftbild einer Küstenstraße über Felsen und Brandung" loading="lazy" decoding="async" width="2000" height="1125"><figcaption class="mono"><span>Küstenstraße, Luftbild</span><span>f/1.7 · 1/730 · 2023</span></figcaption></figure>
@@ -140,7 +151,7 @@
           <figure style="--r:1.5"><img src="../assets/photos/thumbs/printhno_12.jpg" data-full="../assets/photos/printhno_12.jpg" alt="Holzsteg an einem ruhigen, nebligen See" loading="lazy" decoding="async" width="1800" height="1200"><figcaption class="mono"><span>Steg</span><span></span></figcaption></figure>
           <figure style="--r:2.6277"><img src="../assets/photos/thumbs/printhno_08.jpg" data-full="../assets/photos/printhno_08.jpg" alt="Von Bäumen gesäumter Kanal mit ruhigem Wasser" loading="lazy" decoding="async" width="1800" height="685"><figcaption class="mono"><span>Canal du Midi, Frankreich</span><span></span></figcaption></figure>
       </div>
-      <div class="group mono series" id="people"><span>Menschen</span><span>17</span></div>
+      <div class="group mono series" id="people"><span>Menschen</span><span>20</span></div>
       <div class="grid">
           <figure style="--r:0.5622"><img src="../assets/photos/thumbs/peop_06.jpg" data-full="../assets/photos/peop_06.jpg" alt="Babyhand hält einen Finger, schwarzweiß" loading="lazy" decoding="async" width="1012" height="1800"><figcaption class="mono"><span>Halt</span><span></span></figcaption></figure>
           <figure style="--r:1.4938"><img src="../assets/photos/thumbs/peop_00.jpg" data-full="../assets/photos/peop_00.jpg" alt="Frau unter Wasser mit schwebenden roten Haaren" loading="lazy" decoding="async" width="1800" height="1205"><figcaption class="mono"><span>Unter Wasser</span><span></span></figcaption></figure>
@@ -148,7 +159,10 @@
           <figure style="--r:0.6667"><img src="../assets/photos/thumbs/peop_01.jpg" data-full="../assets/photos/peop_01.jpg" alt="Junge Frau umarmt eine getigerte Katze, schwarzweiß" loading="lazy" decoding="async" width="1200" height="1800"><figcaption class="mono"><span>Katze</span><span></span></figcaption></figure>
           <figure style="--r:1.5"><img src="../assets/photos/thumbs/peop_03.jpg" data-full="../assets/photos/peop_03.jpg" alt="Person auf einem felsigen Gipfel über Bergketten" loading="lazy" decoding="async" width="1800" height="1200"><figcaption class="mono"><span>Gipfel</span><span></span></figcaption></figure>
           <figure style="--r:1.5"><img src="../assets/photos/thumbs/peop_04.jpg" data-full="../assets/photos/peop_04.jpg" alt="Lächelnde Frau, Schwarzweiß-Porträt" loading="lazy" decoding="async" width="1800" height="1200"><figcaption class="mono"><span>Lächeln</span><span></span></figcaption></figure>
+          <figure style="--r:0.6667"><img src="../assets/photos/thumbs/peop_07.jpg" data-full="../assets/photos/peop_07.jpg" alt="Hochzeitspaar springt Hand in Hand vor einem hohen Fenster" loading="lazy" decoding="async" width="1280" height="1920"><figcaption class="mono"><span>Sprung</span><span></span></figcaption></figure>
+          <figure style="--r:0.6667"><img src="../assets/photos/thumbs/peop_08.jpg" data-full="../assets/photos/peop_08.jpg" alt="Mann hebt eine Frau im sonnigen Wald hoch" loading="lazy" decoding="async" width="1280" height="1920"><figcaption class="mono"><span>Hoch</span><span></span></figcaption></figure>
           <figure style="--r:0.6667"><img src="../assets/photos/thumbs/peop_05.jpg" data-full="../assets/photos/peop_05.jpg" alt="Aktstudie eines Torsos, schwarzweiß" loading="lazy" decoding="async" width="1200" height="1800"><figcaption class="mono"><span>Form</span><span></span></figcaption></figure>
+          <figure style="--r:0.6667"><img src="../assets/photos/thumbs/peop_09.jpg" data-full="../assets/photos/peop_09.jpg" alt="Aktstudie einer zusammengerollten, tätowierten Figur von oben, schwarzweiß" loading="lazy" decoding="async" width="1280" height="1920"><figcaption class="mono"><span>Rund</span><span></span></figcaption></figure>
           <figure style="--r:1.25"><img src="../assets/photos/thumbs/portfolio_07.jpg" data-full="../assets/photos/portfolio_07.jpg" alt="Frau mit Locken im Low-Key-Studiolicht" loading="lazy" decoding="async" width="1800" height="1440"><figcaption class="mono"><span>Studio</span><span></span></figcaption></figure>
           <figure style="--r:0.6667"><img src="../assets/photos/thumbs/portfolio_13.jpg" data-full="../assets/photos/portfolio_13.jpg" alt="Lächelnde Frau in Schwarzweiß" loading="lazy" decoding="async" width="1200" height="1800"><figcaption class="mono"><span>Licht</span><span></span></figcaption></figure>
           <figure style="--r:1.5"><img src="../assets/photos/thumbs/portfolio_16.jpg" data-full="../assets/photos/portfolio_16.jpg" alt="Lächelnde ältere Frau, Schwarzweiß-Nahaufnahme" loading="lazy" decoding="async" width="1800" height="1200"><figcaption class="mono"><span>Lachfalten</span><span></span></figcaption></figure>
@@ -199,7 +213,12 @@
   <div class="cap mono">
     <span class="nav"><button type="button" class="prev" aria-label="Vorheriges Foto">←</button><span class="count"></span><button type="button" class="next" aria-label="Nächstes Foto">→</button></span>
     <span class="title" aria-live="polite"></span>
-    <button type="button" class="close">schließen ×</button>
+    <span class="tools">
+      <svg class="progress" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/></svg>
+      <button type="button" class="play" aria-pressed="false"><i aria-hidden="true">▶</i> <span>Diashow</span></button>
+      <button type="button" class="fs"><i aria-hidden="true">⤢</i> <span>Vollbild</span></button>
+      <button type="button" class="close">schließen ×</button>
+    </span>
   </div>
 </div>
 <script src="../assets/site.js"></script>

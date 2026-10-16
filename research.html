@@ -28,6 +28,13 @@
       }
       window.applyTheme = apply;
       apply();
+      // build-up animation (style.css, .anim) unless the OS asks for reduced motion;
+      // the index column only builds up on the first page of a visit (.returning afterwards)
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) document.documentElement.classList.add("anim");
+      try {
+        if (sessionStorage.getItem("seen")) document.documentElement.classList.add("returning");
+        sessionStorage.setItem("seen", "1");
+      } catch (_) {}
       addEventListener("pageshow", apply);
       os.addEventListener("change", apply);
     })();
@@ -88,7 +95,14 @@
         <h1><span class="mono">02</span>Research</h1>
         <span class="mono faint" id="pub-count"></span>
       </div>
+      <div class="page-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 13.5H5l3.5 6.5L13.5 4h8"/><path d="M14.5 10l5 6"/><path d="M19.5 10l-5 6"/></svg></div>
       <p class="lead">I research how <em>large language models</em> and <em>model-driven engineering</em> can make each other better: LLMs that write valid models, and models that keep LLM output in check.</p>
+      <dl class="facts mono">
+        <div><dt>Citations</dt><dd>587</dd></div>
+        <div><dt>h-index</dt><dd>14</dd></div>
+        <div><dt>i10-index</dt><dd>17</dd></div>
+      </dl>
+      <p class="facts-note mono"><a href="https://scholar.google.com/citations?user=5mVkoWsAAAAJ&amp;hl=en" target="_blank" rel="noopener">Google Scholar ↗</a> · as of 10 / 2026</p>
     </header>
     <figure class="banner"><picture><source media="(max-width: 600px)" srcset="assets/photos/banner-lecture-m.jpg" width="1200" height="900"><img src="assets/photos/banner-lecture.jpg" alt="Lukas Netz lecturing in a large RWTH Aachen lecture hall" width="1659" height="532"></picture></figure>
     <section>

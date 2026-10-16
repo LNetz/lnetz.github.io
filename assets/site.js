@@ -4,9 +4,11 @@
 const I18N = {
   en: { theme: { light: "light", dark: "dark", auto: "auto" }, themeLabel: "Theme: ", themeHint: " — click to change",
         pubs: "publications", open: "Open photo: ",
+        slideshow: "slideshow", pause: "pause", fs: "full screen", exitFs: "exit full screen",
         flags: { Article: "Article", Dissertation: "Dissertation" } },
   de: { theme: { light: "hell", dark: "dunkel", auto: "auto" }, themeLabel: "Darstellung: ", themeHint: " — klicken zum Wechseln",
         pubs: "Publikationen", open: "Foto öffnen: ",
+        slideshow: "Diashow", pause: "Pause", fs: "Vollbild", exitFs: "Vollbild beenden",
         flags: { Article: "Artikel", Dissertation: "Dissertation" } },
 };
 const UI = I18N[document.documentElement.lang] || I18N.en;
@@ -125,10 +127,11 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
 
   const srcOf = n => { const im = figs[n].querySelector("img"); return im.dataset.full ? new URL(im.dataset.full, location.href).href : im.src; };   // full size, not the grid thumbnail
   const wrap = n => (n + figs.length) % figs.length;
+  // resolves once the image is downloaded *and* decoded, so a transition never waits for decoding
   const load = src => new Promise((ok, fail) => {
     const im = new Image();
     im.decoding = "async";
-    im.onload = () => ok(im);
+    im.onload = () => (im.decode ? im.decode().catch(() => {}) : Promise.resolve()).then(() => ok(im));
     im.onerror = fail;
     im.src = src;
   });
@@ -287,6 +290,35 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
     img.style.opacity = "1";
   };
 
+  // ---------- loading: thumbnail first, full size as soon as it is there ----------
+  const thumbOf = n => figs[n].querySelector("img").currentSrc || figs[n].querySelector("img").src;
+  const cache = new Map();                              // src -> Promise<HTMLImageElement>
+  const get = src => {
+    if (!cache.has(src)) cache.set(src, load(src).catch(e => { cache.delete(src); throw e; }));
+    return cache.get(src);
+  };
+  const within = (p, ms) => Promise.race([p.catch(() => null), new Promise(r => setTimeout(() => r(null), ms))]);
+  const sharpen = n => get(srcOf(n)).then(() => {   // swap the thumbnail for the full photo once loaded
+    if (i === n && !lb.classList.contains("morphing")) img.src = srcOf(n);
+  }).catch(() => {});
+  // background preloading around the current photo: nearest first (+1, -1, +2, +3, -2, +4),
+  // at most two downloads at a time so the photo on screen is never starved; re-prioritised on
+  // every move, so skipping ahead stays smooth
+  const AHEAD = [1, -1, 2, 3, -2, 4];
+  let queue = [], active = 0;
+  const pump = () => {
+    while (active < 2 && queue.length) {
+      const src = queue.shift();
+      if (cache.has(src)) continue;                     // already loaded or loading
+      active++;
+      get(src).catch(() => {}).finally(() => { active--; pump(); });
+    }
+  };
+  const preload = n => {
+    queue = AHEAD.map(d => srcOf(wrap(n + d))).filter((s, k, all) => all.indexOf(s) === k && s !== srcOf(n));
+    pump();
+  };
+
   // ---------- navigation ----------
   const caption = n => {
     const fig = figs[n];
@@ -294,23 +326,25 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
     title.textContent = [...fig.querySelectorAll("figcaption span")].map(s => s.textContent).filter(Boolean).join("  ·  ");
     img.alt = fig.querySelector("img").alt;
   };
-  const preload = n => { [wrap(n + 1), wrap(n - 1)].forEach(k => { new Image().src = srcOf(k); }); };
 
   const go = async (n, dir) => {
     n = wrap(n);
     if (n === i) return;
     if (busy) { queued = [n, dir]; return; }          // finish the running dissolve, then continue
     busy = true;
+    clearTimeout(timer);
     const from = i;
     i = n;
     caption(n);
-    const src = srcOf(n);
+    // use the full photo if it arrives quickly, otherwise dissolve to the (cached) thumbnail
+    let to = await within(get(srcOf(n)), 350);
+    const src = to ? srcOf(n) : thumbOf(n);
     try {
+      if (!to) to = await get(src);
       if (reduced.matches) {
         img.src = src;
       } else if (from >= 0 && initGL()) {
-        const toIm = await load(src);
-        await morph(img, toIm, dir);
+        await morph(img, to, dir);
         img.src = src;
         await img.decode().catch(() => {});
         lb.classList.remove("morphing");
@@ -322,24 +356,29 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
       glFailed = true;                                  // e.g. file:// — cross-fade from now on
       await fade(src);
     }
+    if (src !== srcOf(n)) sharpen(n);
     preload(n);
     busy = false;
-    if (queued) { const [q, d] = queued; queued = null; go(q, d); }
+    if (queued) { const [q, d] = queued; queued = null; go(q, d); return; }
+    schedule();
   };
 
   const open = n => {
     opener = document.activeElement;
     i = wrap(n);
     caption(i);
-    img.src = srcOf(i);
+    img.src = thumbOf(i);                               // instant: the thumbnail is already loaded
     img.style.opacity = "1";
+    sharpen(i);
     lb.classList.add("open");
     document.body.style.overflow = "hidden";
     lb.focus();
     preload(i);
   };
   const close = () => {
-    lb.classList.remove("open", "morphing");
+    setPlaying(false);
+    if (document.fullscreenElement) exitFs();
+    lb.classList.remove("open", "morphing", "idle");
     document.body.style.overflow = "";
     queued = null;
     if (opener) opener.focus();
@@ -349,6 +388,62 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
   const next = () => go(target() + 1, 1);
   const prev = () => go(target() - 1, -1);
 
+  // ---------- slideshow ----------
+  const INTERVAL = 5000;                                // ms each photo stays (plus the dissolve)
+  const playBtn = lb.querySelector(".play");
+  const fsBtn = lb.querySelector(".fs");
+  const bar = lb.querySelector(".progress circle");   // small ring that fills while a photo stays
+  let playing = false, timer = null;
+
+  function schedule() {
+    clearTimeout(timer);
+    bar.style.animation = "none";
+    if (!playing || document.hidden) return;
+    void bar.offsetWidth;                               // restart the progress line
+    bar.style.animation = `lb-progress ${INTERVAL}ms linear forwards`;
+    timer = setTimeout(() => { if (playing) go(i + 1, 1); }, INTERVAL);
+  }
+  function setPlaying(on) {
+    playing = on;
+    lb.classList.toggle("playing", on);
+    playBtn.setAttribute("aria-pressed", on);
+    playBtn.querySelector("i").textContent = on ? "❚❚" : "▶";
+    playBtn.querySelector("span").textContent = on ? UI.pause : UI.slideshow;
+    if (on) { preload(i); if (!busy) schedule(); } else { clearTimeout(timer); bar.style.animation = "none"; }
+    poke();
+  }
+  document.addEventListener("visibilitychange", () => { if (lb.classList.contains("open")) schedule(); });
+
+  // ---------- full screen ----------
+  // Esc in full screen is swallowed by the browser (it only leaves full screen), so a full-screen
+  // exit we did not ask for closes the lightbox too; the full-screen button only leaves full screen.
+  let leavingOnPurpose = false;
+  const exitFs = () => { leavingOnPurpose = true; return document.exitFullscreen().catch(() => {}); };
+  const toggleFs = () => {
+    if (!document.fullscreenEnabled) return;
+    if (document.fullscreenElement) exitFs();
+    else lb.requestFullscreen().catch(() => {});
+  };
+  if (!document.fullscreenEnabled) fsBtn.hidden = true;   // e.g. iPhone Safari
+  document.addEventListener("fullscreenchange", () => {
+    const fs = document.fullscreenElement === lb;
+    lb.classList.toggle("fs", fs);
+    fsBtn.querySelector("span").textContent = fs ? UI.exitFs : UI.fs;
+    if (!fs && !leavingOnPurpose && lb.classList.contains("open")) close();
+    leavingOnPurpose = false;
+    poke();
+  });
+
+  // controls and cursor fade out while a slideshow or full screen runs undisturbed
+  let idleTimer = null;
+  function poke() {
+    lb.classList.remove("idle");
+    clearTimeout(idleTimer);
+    if (playing || lb.classList.contains("fs")) idleTimer = setTimeout(() => lb.classList.add("idle"), 2500);
+  }
+  lb.addEventListener("pointermove", poke);
+
+  // ---------- wiring ----------
   lb.tabIndex = -1;
   figs.forEach((fig, n) => {
     fig.tabIndex = 0;                                   // photos are reachable by keyboard
@@ -356,11 +451,26 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
     fig.setAttribute("aria-label", UI.open + fig.querySelector("img").alt);
     fig.addEventListener("click", () => open(n));
     fig.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(n); } });
+    // start fetching the full photo as soon as someone shows interest in the tile
+    const warm = () => get(srcOf(n)).catch(() => {});
+    fig.addEventListener("pointerenter", warm, { once: true });
+    fig.addEventListener("touchstart", warm, { once: true, passive: true });
+    fig.addEventListener("focus", warm, { once: true });
   });
 
-  lb.querySelector(".next").addEventListener("click", e => { e.stopPropagation(); next(); });
-  lb.querySelector(".prev").addEventListener("click", e => { e.stopPropagation(); prev(); });
-  lb.querySelector(".close").addEventListener("click", e => { e.stopPropagation(); close(); });
+  const stop = fn => e => { e.stopPropagation(); fn(); };
+  lb.querySelector(".next").addEventListener("click", stop(next));
+  lb.querySelector(".prev").addEventListener("click", stop(prev));
+  lb.querySelector(".close").addEventListener("click", stop(close));
+  playBtn.addEventListener("click", stop(() => setPlaying(!playing)));
+  fsBtn.addEventListener("click", stop(toggleFs));
+
+  // "slideshow" on the gallery page: start at the first photo, full screen where available
+  document.querySelectorAll("[data-slideshow]").forEach(b => b.addEventListener("click", () => {
+    open(0);
+    setPlaying(true);
+    toggleFs();
+  }));
 
   // swipe on touch screens; a plain tap/click on the backdrop or photo closes
   let sx = null, swiped = false;
@@ -371,12 +481,42 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
     sx = null;
     if (Math.abs(dx) > 48) { swiped = true; dx < 0 ? next() : prev(); }
   });
-  lb.addEventListener("click", e => { if (swiped) { swiped = false; return; } if (!e.target.closest(".cap")) close(); });
+  lb.addEventListener("click", e => {
+    if (swiped) { swiped = false; return; }
+    if (e.target.closest(".cap")) return;
+    if (lb.classList.contains("idle")) { poke(); return; }   // first tap just brings the controls back
+    close();
+  });
 
   addEventListener("keydown", e => {
     if (!lb.classList.contains("open")) return;
+    poke();
     if (e.key === "Escape") close();
-    if (e.key === "ArrowRight") { e.preventDefault(); next(); }
-    if (e.key === "ArrowLeft") { e.preventDefault(); prev(); }
+    else if (e.key === "ArrowRight") { e.preventDefault(); next(); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); prev(); }
+    else if (e.key === " ") { e.preventDefault(); setPlaying(!playing); }
+    else if (e.key === "f" || e.key === "F") { e.preventDefault(); toggleFs(); }
   });
+})();
+
+// ---- scroll reveal: content below the page header fades up as it enters the view ----
+// Only armed with html.anim (see <head>); without JS or with reduced motion nothing is hidden.
+(() => {
+  const root = document.documentElement;
+  if (!root.classList.contains("anim") || !("IntersectionObserver" in window)) return;
+  const items = [...document.querySelectorAll(
+    "main section > .group, main section > .filters, .quick, main section > .bio, " +
+    ".themes > div, .spec > li, .rows > li, .year, .grid figure"
+  )];
+  const loadedAt = performance.now();
+  const io = new IntersectionObserver(entries => {
+    // what is visible right after load waits for the opening sequence (~.6s)
+    const base = performance.now() - loadedAt < 400 ? 0.6 : 0;
+    entries.filter(e => e.isIntersecting).forEach((e, k) => {
+      e.target.style.setProperty("--d", `${base + Math.min(k * 0.05, 0.5)}s`);   // gentle stagger per batch
+      e.target.classList.add("in");
+      io.unobserve(e.target);
+    });
+  }, { rootMargin: "0px 0px -6% 0px" });
+  items.forEach(el => { el.classList.add("reveal"); io.observe(el); });
 })();

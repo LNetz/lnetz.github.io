@@ -28,6 +28,13 @@
       }
       window.applyTheme = apply;
       apply();
+      // build-up animation (style.css, .anim) unless the OS asks for reduced motion;
+      // the index column only builds up on the first page of a visit (.returning afterwards)
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) document.documentElement.classList.add("anim");
+      try {
+        if (sessionStorage.getItem("seen")) document.documentElement.classList.add("returning");
+        sessionStorage.setItem("seen", "1");
+      } catch (_) {}
       addEventListener("pageshow", apply);
       os.addEventListener("change", apply);
     })();
@@ -88,6 +95,7 @@
         <h1><span class="mono">01</span>Projects</h1>
         <span class="mono faint">12 entries</span>
       </div>
+      <div class="page-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 7L2.5 12l5 5"/><path d="M16.5 7l5 5-5 5"/><path d="M14 4.5l-4 15"/></svg></div>
       <p class="lead">Software I have built or led — from generator frameworks and production information systems to <em>agentic coding</em> platforms.</p>
     </header>
     <figure class="banner"><picture><source media="(max-width: 600px)" srcset="assets/photos/banner-factory-m.jpg" width="1200" height="900"><img src="assets/photos/banner-factory.jpg" alt="Model factory in the lab, with MontiCore-generated dashboards on three screens behind it" width="2400" height="769"></picture></figure>

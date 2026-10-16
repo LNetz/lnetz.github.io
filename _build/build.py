@@ -85,6 +85,13 @@ def shell(lang, file, title, desc, body, scripts=""):
       }}
       window.applyTheme = apply;
       apply();
+      // build-up animation (style.css, .anim) unless the OS asks for reduced motion;
+      // the index column only builds up on the first page of a visit (.returning afterwards)
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) document.documentElement.classList.add("anim");
+      try {{
+        if (sessionStorage.getItem("seen")) document.documentElement.classList.add("returning");
+        sessionStorage.setItem("seen", "1");
+      }} catch (_) {{}}
       addEventListener("pageshow", apply);
       os.addEventListener("change", apply);
     }})();
@@ -149,16 +156,32 @@ def shell(lang, file, title, desc, body, scripts=""):
 # Building blocks
 # =====================================================================
 
-def page_head(n, title, right, lead, extra="", count_id=False):
+def page_head(n, title, right, lead, extra="", count_id=False, top=""):
     rid = ' id="pub-count"' if count_id else ''
     return f'''    <header class="page">
       <div class="section-head">
         <h1><span class="mono">{n}</span>{title}</h1>
         <span class="mono faint"{rid}>{right}</span>
-      </div>
+      </div>{top}
       <p class="lead">{lead}</p>{extra}
     </header>
 '''
+
+
+def quick_nav(lang):
+    """The three section icons (Projects, Research, Photography) as links — About page."""
+    links = NL.join(
+        f'        <a href="{href}" title="{label[lang]}" aria-label="{label[lang]}">{ICONS[icon]}</a>'
+        for href, icon, label in QUICK)
+    return f'''
+      <nav class="quick" aria-label="{T("Sections", "Bereiche")[lang]}">
+{links}
+      </nav>'''
+
+
+def page_icon(icon):
+    """A sub-page's own icon under its title (decorative)."""
+    return f'\n      <div class="page-icon" aria-hidden="true">{ICONS[icon]}</div>'
 
 
 def banner(A, src, alt, w, h):
@@ -255,14 +278,8 @@ def about(lang):
         L(T("I build software that builds software. My work sits between <em>model-driven engineering</em> and <em>large language models</em>: generators, DSLs and agentic tooling that turn models and intent into full-size, maintainable applications.",
             "Ich baue Software, die Software baut. Meine Arbeit liegt zwischen <em>modellgetriebener Softwareentwicklung</em> und <em>großen Sprachmodellen</em>: Generatoren, DSLs und agentische Werkzeuge, die aus Modellen und Absichten vollwertige, wartbare Anwendungen machen.")),
         facts)
-    quick = NL.join(
-        f'        <a href="{href}" title="{L(label)}" aria-label="{L(label)}">{ICONS[icon]}</a>'
-        for href, icon, label in QUICK)
     return f'''
-{head}    <section>
-      <nav class="quick" aria-label="{L(T("Sections", "Bereiche"))}">
-{quick}
-      </nav>
+{head}    <section>{quick_nav(lang)}
       <div class="bio">
 {NL.join(f"        <p>{L(p)}</p>" for p in bio)}
       </div>
@@ -356,7 +373,8 @@ def projects(lang):
     n = 1 + len(research) + len(gpts)
     head = page_head("01", L(T("Projects", "Projekte")), L(T(f"{n} entries", f"{n} Einträge")),
         L(T("Software I have built or led — from generator frameworks and production information systems to <em>agentic coding</em> platforms.",
-            "Software, die ich gebaut oder geleitet habe — von Generator-Frameworks und produktiven Informationssystemen bis zu Plattformen für <em>agentisches Programmieren</em>.")))
+            "Software, die ich gebaut oder geleitet habe — von Generator-Frameworks und produktiven Informationssystemen bis zu Plattformen für <em>agentisches Programmieren</em>.")),
+        top=page_icon("code"))
     pic = banner(A, "banner-factory.jpg", L(T("Model factory in the lab, with MontiCore-generated dashboards on three screens behind it",
                                               "Modellfabrik im Labor, dahinter MontiCore-generierte Dashboards auf drei Bildschirmen")), 2400, 769)
     return f'''
@@ -398,6 +416,20 @@ TALKS = [   # date, title EN, title DE (original), venue EN, venue DE
      "Gesellschaft für Informatik · Cologne", "Gesellschaft für Informatik · Köln"),
     ("07 / 2023", "MDE for Financial Management", "MDE for Financial Management", "MDENet", "MDENet"),
 ]
+
+
+# Citation metrics from Google Scholar — static, update by hand (and the date with them).
+SCHOLAR = "https://scholar.google.com/citations?user=5mVkoWsAAAAJ&amp;hl=en"
+METRICS = {
+    lang: f'''
+      <dl class="facts mono">
+        <div><dt>{T("Citations", "Zitationen")[lang]}</dt><dd>587</dd></div>
+        <div><dt>h-index</dt><dd>14</dd></div>
+        <div><dt>i10-index</dt><dd>17</dd></div>
+      </dl>
+      <p class="facts-note mono"><a href="{SCHOLAR}" target="_blank" rel="noopener">Google Scholar ↗</a> · {T("as of", "Stand")[lang]} 10 / 2026</p>'''
+    for lang in ("en", "de")
+}
 
 
 def research(lang):
@@ -444,7 +476,7 @@ def research(lang):
     head = page_head("02", L(T("Research", "Forschung")), "",
         L(T("I research how <em>large language models</em> and <em>model-driven engineering</em> can make each other better: LLMs that write valid models, and models that keep LLM output in check.",
             "Ich erforsche, wie <em>große Sprachmodelle</em> und <em>modellgetriebene Softwareentwicklung</em> sich gegenseitig besser machen: LLMs, die valide Modelle schreiben, und Modelle, die LLM-Ausgaben im Zaum halten.")),
-        count_id=True)
+        METRICS[lang], count_id=True, top=page_icon("sqrt"))
     pic = banner(A, "banner-lecture.jpg", L(T("Lukas Netz lecturing in a large RWTH Aachen lecture hall",
                                               "Lukas Netz bei einer Vorlesung in einem großen Hörsaal der RWTH Aachen")), 1659, 532)
     return f'''
@@ -544,7 +576,10 @@ SERIES = [  # (anchor, name, note, photos)
         P("peop_01", 1200, 1800, T("Young woman hugging a tabby cat, black and white", "Junge Frau umarmt eine getigerte Katze, schwarzweiß"), T("Cat", "Katze")),
         P("peop_03", 1800, 1200, T("Person standing on a rocky summit above mountain ranges", "Person auf einem felsigen Gipfel über Bergketten"), T("Summit", "Gipfel")),
         P("peop_04", 1800, 1200, T("Smiling woman, black and white portrait", "Lächelnde Frau, Schwarzweiß-Porträt"), T("Smile", "Lächeln")),
+        P("peop_07", 1280, 1920, T("Wedding couple jumping hand in hand in front of a tall window", "Hochzeitspaar springt Hand in Hand vor einem hohen Fenster"), T("Leap", "Sprung")),
+        P("peop_08", 1280, 1920, T("Man lifting a laughing woman in a sunlit forest", "Mann hebt eine Frau im sonnigen Wald hoch"), T("Lift", "Hoch")),
         P("peop_05", 1200, 1800, T("Fine-art nude study of a torso, black and white", "Aktstudie eines Torsos, schwarzweiß"), T("Form", "Form")),
+        P("peop_09", 1280, 1920, T("Fine-art study of a curled-up tattooed figure from above, black and white", "Aktstudie einer zusammengerollten, tätowierten Figur von oben, schwarzweiß"), T("Curl", "Rund")),
         X("portfolio_07", 1.25, T("Woman with curly hair in low-key studio light", "Frau mit Locken im Low-Key-Studiolicht"), T("Studio", "Studio")),
         X("portfolio_13", 0.6667, T("Smiling woman in black and white", "Lächelnde Frau in Schwarzweiß"), T("Light", "Licht")),
         X("portfolio_16", 1.5, T("Smiling elderly woman, black and white close-up", "Lächelnde ältere Frau, Schwarzweiß-Nahaufnahme"), T("Laugh lines", "Lachfalten")),
@@ -608,13 +643,16 @@ def photography(lang):
     head = page_head("03", L(T("Photography", "Fotografie")), L(T(f"{n} photographs", f"{n} Fotografien")),
         L(T("Photography has fascinated me from the very first moment. The camera is one of the few tools that lets you not only show a very particular perspective on the world, but also capture and share <em>memories and emotions</em>.",
             "Die Fotografie hat mich vom ersten Moment an begeistert. Die Kamera ist eines der wenigen Werkzeuge, die es einem ermöglichen, nicht nur einen ganz bestimmten Blickwinkel auf die Welt zu zeigen, sondern auch <em>Erinnerungen und Emotionen</em> einzufangen und zu teilen.")),
-        extra)
+        extra, top=page_icon("camera"))
     pic = banner(A, "about-dolomites.jpg", L(T("Lukas Netz with a camera, looking out over the Dolomites",
                                                "Lukas Netz mit Kamera, Blick über die Dolomiten")), 2400, 769)
     return f'''
 {head}{pic}
     <section>
-      <nav class="filters mono" aria-label="{L(T("Series", "Serien"))}">{nav}</nav>
+      <div class="gallery-bar mono">
+        <nav class="filters" aria-label="{L(T("Series", "Serien"))}">{nav}</nav>
+        <button type="button" class="slideshow" data-slideshow>▶ {L(T("slideshow", "Diashow"))}</button>
+      </div>
 {NL.join(series(*s) for s in SERIES)}
     </section>
 '''
@@ -650,7 +688,12 @@ def main():
   <div class="cap mono">
     <span class="nav"><button type="button" class="prev" aria-label="{L(T("Previous photo", "Vorheriges Foto"))}">←</button><span class="count"></span><button type="button" class="next" aria-label="{L(T("Next photo", "Nächstes Foto"))}">→</button></span>
     <span class="title" aria-live="polite"></span>
-    <button type="button" class="close">{L(T("close", "schließen"))} ×</button>
+    <span class="tools">
+      <svg class="progress" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/></svg>
+      <button type="button" class="play" aria-pressed="false"><i aria-hidden="true">▶</i> <span>{L(T("slideshow", "Diashow"))}</span></button>
+      <button type="button" class="fs"><i aria-hidden="true">⤢</i> <span>{L(T("full screen", "Vollbild"))}</span></button>
+      <button type="button" class="close">{L(T("close", "schließen"))} ×</button>
+    </span>
   </div>
 </div>
 '''
