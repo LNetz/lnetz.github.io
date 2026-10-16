@@ -125,7 +125,7 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   const DURATION = 1400;          // ms of dissolve
   // dissolve order weights: side-to-side sweep, brightness areas, contours, static noise
-  const TUNE = { scale: 5.0, edge: 0.06, wSweep: 0.75, wShape: 0.55, wEdge: 0.35, wNoise: 0.12, bands: 4.0, kEdge: 3.0 };
+  const TUNE = { scale: 5.0, edge: 0.08, wSweep: 0.75, wShape: 0.55, wEdge: 0.22, wNoise: 0.12, bands: 4.0, kEdge: 2.4 };
   let i = -1, opener = null, busy = false, queued = null;
 
   const srcOf = n => { const im = figs[n].querySelector("img"); return im.dataset.full ? new URL(im.dataset.full, location.href).href : im.src; };   // full size, not the grid thumbnail
