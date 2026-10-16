@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Projekte — Lukas Netz</title>
+  <meta name="description" content="Softwareprojekte von Lukas Netz: ESACA, MaCoCo, MontiGem, das Golden UML Model Set und mehr.">
+  <meta property="og:title" content="Projekte — Lukas Netz">
+  <meta property="og:description" content="Softwareprojekte von Lukas Netz: ESACA, MaCoCo, MontiGem, das Golden UML Model Set und mehr.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="de_DE">
+  <link rel="alternate" hreflang="en" href="../projects.html">
+  <link rel="alternate" hreflang="de" href="projects.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <script>
+    // Theme from localStorage, applied before first paint (no flash).
+    // Re-applied on pageshow so back/forward (bfcache) pages pick up a newer choice.
+    (function () {
+      function apply() {
+        var t = null;
+        try { t = localStorage.getItem("theme"); } catch (_) {}
+        document.documentElement.dataset.theme = t === "dark" ? "dark" : "light";
+      }
+      apply();
+      addEventListener("pageshow", apply);
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body id="top">
+<div class="backdrop" aria-hidden="true"></div>
+<div class="frame">
+
+  <!-- ============ index column (identical on every page) ============ -->
+  <aside class="index">
+    <div>
+      <a class="name" href="index.html">Lukas Netz</a>
+      <div class="role">Dr. rer. nat.<br>IT-Spezialist<br>mgm technology partners</div>
+    </div>
+
+    <nav aria-label="Seiten">
+      <ol class="mono">
+        <li><a href="index.html"><span>00</span><span>Über mich</span></a></li>
+        <li><a href="projects.html" class="active" aria-current="page"><span>01</span><span>Projekte</span></a></li>
+        <li><a href="research.html"><span>02</span><span>Forschung</span></a></li>
+        <li><a href="photography.html"><span>03</span><span>Fotografie</span></a></li>
+      </ol>
+    </nav>
+
+    <div class="contact mono">
+      <a href="https://www.linkedin.com/in/lukas-netz/" target="_blank" rel="noopener">LinkedIn ↗</a>
+      <a href="https://scholar.google.com/citations?user=5mVkoWsAAAAJ&amp;hl=en" target="_blank" rel="noopener">Google Scholar ↗</a>
+      <a href="https://www.researchgate.net/profile/Lukas-Netz" target="_blank" rel="noopener">ResearchGate ↗</a>
+      <a href="https://orcid.org/0000-0003-2013-2919" target="_blank" rel="noopener">ORCID ↗</a>
+      <a href="https://dblp.org/pid/170/5042.html" target="_blank" rel="noopener">dblp ↗</a>
+      <a href="https://github.com/LNetz" target="_blank" rel="noopener">GitHub ↗</a>
+    </div>
+
+    <div class="prefs mono">
+      <div class="lang" aria-label="Sprache"><a href="../projects.html" hreflang="en" lang="en">EN</a><a href="projects.html" hreflang="de" lang="de" aria-current="true">DE</a></div>
+      <button class="theme-toggle" type="button" id="theme" aria-label="Dunkelmodus umschalten">◐ <span>Dunkelmodus</span></button>
+    </div>
+  </aside>
+
+  <!-- ============ content ============ -->
+  <main>
+
+    <header class="page">
+      <div class="section-head">
+        <h1><span class="mono">01</span>Projekte</h1>
+        <span class="mono faint">12 Einträge</span>
+      </div>
+      <p class="lead">Software, die ich gebaut oder geleitet habe — von Generator-Frameworks und produktiven Informationssystemen bis zu Plattformen für <em>agentisches Programmieren</em>.</p>
+    </header>
+    <figure class="banner"><img src="../assets/photos/banner-factory.jpg" alt="Modellfabrik im Labor, dahinter MontiCore-generierte Dashboards auf drei Bildschirmen" width="2400" height="769"></figure>
+    <section>
+      <div class="group mono">Industrie · mgm technology partners</div>
+      <ul class="spec">
+        <li>
+          <div class="side"><span class="logo"><img src="../assets/logos/esaca.png" alt="" width="48" height="48"></span><span class="mono faint">jetzt</span></div>
+          <div>
+            <h3>ESACA</h3>
+            <p class="what">European Sovereign Agentic Coding Appliance — eine standardisierte On-Premises-Plattform, die KI-Coding-Agenten im eigenen Rechenzentrum betreibt: Agenten in der Sandbox, versionierbare Konfiguration, ein gemeinsamer Hub, Benchmarks auf den eigenen Repositories und eine geführte Workbench vom Ticket bis zum reviewten Code. Air-gapped-fähig, keine externen API-Aufrufe.</p>
+            <div class="tags mono"><span>Agentisches Coding</span><span>On-prem</span><span>Souveräne KI</span></div>
+            <div class="links mono"><a href="https://esaca.eu" target="_blank" rel="noopener">esaca.eu ↗</a></div>
+          </div>
+          <div class="meta mono"><div>Plattform</div><div>mgm × Fsas</div></div>
+        </li>
+      </ul>
+
+      <div class="group mono">Forschungssoftware · RWTH Aachen</div>
+      <ul class="spec">
+        <li>
+          <div class="side"><span class="logo"><img src="../assets/logos/macoco.png" alt="" width="48" height="48"></span><span class="mono faint">2018 — 2026</span></div>
+          <div>
+            <h3>MaCoCo</h3>
+            <p class="what">Management-Cockpit für das Controlling von Lehrstühlen und Instituten — Finanzen, Personal und Projekte in einem mehrbenutzerfähigen Informationssystem, größtenteils aus MontiCore-DSLs generiert. Gemeinsam mit dem Lehrstuhl für Controlling entwickelt; <b>produktiv im Einsatz an der RWTH</b>, mit begleitender Android-App zur Zeiterfassung.</p>
+            <div class="tags mono"><span>MontiGem</span><span>Informationssystem</span><span>Agil</span><span>Android</span></div>
+            <div class="links mono"><a href="https://www.se-rwth.de/projects/MaCoCo/" target="_blank" rel="noopener">Projekt ↗</a><a href="https://www.controlling.rwth-aachen.de/cms/controlling/forschung/forschungsprojekte/laufende-projekte/~mgaz/macoco-lehrstuhlcontrolling/" target="_blank" rel="noopener">Lehrstuhl Controlling ↗</a><a href="https://play.google.com/store/apps/details?id=macoco.stundenzettel.timetracker&amp;hl=de" target="_blank" rel="noopener">Android-App ↗</a></div>
+          </div>
+          <div class="meta mono"><div>Projektleitung</div><div>Produktiv</div></div>
+        </li>
+        <li>
+          <div class="side"><span class="logo"><img src="../assets/logos/uml.png" alt="" width="48" height="48"></span><span class="mono faint">2025</span></div>
+          <div>
+            <h3>Golden UML Model Set</h3>
+            <p class="what">Ein von der Community kuratierter Datensatz von UML-Modellen, jeweils mit einer natürlichsprachlichen Beschreibung der modellierten Domäne. Gecrawlte Modellsammlungen sind voller ungültiger Platzhalter-Modelle; dieser Datensatz ist geprüft, über eine öffentliche Webplattform durchsuchbar und wächst über einen strukturierten Beitrags- und Review-Prozess — ein Benchmark für UML-Forschung, Lehre und die Evaluation von LLMs.</p>
+            <div class="tags mono"><span>Datensatz</span><span>UML</span><span>Benchmark</span><span>Webplattform</span></div>
+            <div class="links mono"><a href="https://golden-uml-modelset.vercel.app/search" target="_blank" rel="noopener">Datensatz erkunden ↗</a><a href="https://doi.org/10.1109/MODELS-C68889.2025.00012" target="_blank" rel="noopener">paper ↗</a></div>
+          </div>
+          <div class="meta mono"><div>Datensatz</div><div>Mehrere Unis</div></div>
+        </li>
+        <li>
+          <div class="side"><span class="logo"><img src="../assets/logos/se-chatty.png" alt="" width="48" height="48"></span><span class="mono faint">2025</span></div>
+          <div>
+            <h3>SE-Chatty</h3>
+            <p class="what">Ein Lehrassistent für Dozierende. Mit Skripten, Büchern, Folien und Videos gefüttert, antwortet er mit vorlesungsspezifischer Tiefe, hilft Studierenden mit generierten Fragebögen bei der Prüfungsvorbereitung und zeigt Dozierenden, welche Teile des Stoffs verstanden werden — und welche nicht.</p>
+            <div class="tags mono"><span>LLM</span><span>RAG</span><span>Lehre</span></div>
+          </div>
+          <div class="meta mono"><div>Werkzeug</div><div>RWTH SE</div></div>
+        </li>
+        <li>
+          <div class="side"><span class="logo"><img src="../assets/logos/epha.png" alt="" width="48" height="48"></span><span class="mono faint">2024 — 2026</span></div>
+          <div>
+            <h3>ePHA</h3>
+            <p class="what">Elektronische Promotions- und Habilitationsauslage. Eine modellgetriebene, mit MontiGem generierte Anwendung, die den Veröffentlichungsprozess von Dissertationen und Habilitationen an der RWTH unterstützt; <b>produktiv im Einsatz</b>.</p>
+            <div class="tags mono"><span>MontiGem</span><span>Informationssystem</span></div>
+            <div class="links mono"><a href="https://epha.rwth-aachen.de/" target="_blank" rel="noopener">epha.rwth-aachen.de ↗</a></div>
+          </div>
+          <div class="meta mono"><div>Leitende Entwicklung</div><div>Produktiv</div></div>
+        </li>
+        <li>
+          <div class="side"><span class="logo mark mono" aria-hidden="true">FORD</span><span class="mono faint">2020 — 2022</span></div>
+          <div>
+            <h3>Ford Pro Werkzeugverfolgung</h3>
+            <p class="what">Pilotprojekt mit dem Ford Research &amp; Innovation Center Aachen: ein integriertes Informationssystem, das Werkzeuge und Maschinen über Transporter und Baustellen hinweg per Bluetooth, GPS und KI verfolgt — Erinnerung an vergessenes Werkzeug, Diebstahlwarnungen, Live-Karte und Suche nach Fahrzeug oder Werkzeug. Die Webanwendung wurde mit MontiGem aus UML-Modellen generiert und von drei Handwerksbetrieben im Raum Köln im Feld getestet.</p>
+            <div class="tags mono"><span>MontiGem</span><span>IoT</span><span>Industrie</span></div>
+            <div class="links mono"><a href="https://media.ford.com/content/fordmedia/feu/en/news/2022/08/31/ford-pro-tool-tracking-tech-could-save-firms-1000s.html" target="_blank" rel="noopener">Ford-Pressemitteilung ↗</a><a href="https://www.se-rwth.de/projects/22.09.MontiGem.Ford.Press.Release/" target="_blank" rel="noopener">RWTH-Meldung ↗</a></div>
+          </div>
+          <div class="meta mono"><div>Technische Leitung</div><div>Industriepartner</div></div>
+        </li>
+        <li>
+          <div class="side"><span class="logo mark mono" aria-hidden="true">ADD</span><span class="mono faint">2018 — 2022</span></div>
+          <div>
+            <h3>Agile Data Development</h3>
+            <p class="what">Modellgetriebene Werkzeuge für einen Windkraftanlagenhersteller (mit WZL, MSE und Bewind): Verzahnung agiler und plangetriebener Entwicklung mit datenbasierter Entscheidungsunterstützung, inklusive generierter Digital-Twin-Cockpits für das Parametermanagement in der Anlagenentwicklung.</p>
+            <div class="tags mono"><span>MontiGem</span><span>Digitaler Zwilling</span><span>Industrie</span></div>
+          </div>
+          <div class="meta mono"><div>Leitende Entwicklung</div><div>Industriepartner</div></div>
+        </li>
+        <li>
+          <div class="side"><span class="logo"><img src="../assets/logos/montigem.png" alt="" width="48" height="48"></span><span class="mono faint">2018 — 2024</span></div>
+          <div>
+            <h3>MontiGem</h3>
+            <p class="what">Generator-Framework für betriebliche Informationssysteme auf Basis der MontiCore Language Workbench. Klassendiagramme und GUI-Modelle rein, eine vollständige Webanwendung raus — eingesetzt in fünf Domänen, vom Lehrstuhl-Controlling bis zu Digital-Twin-Cockpits.</p>
+            <div class="tags mono"><span>MontiCore</span><span>Java</span><span>TypeScript</span><span>Codegenerierung</span></div>
+          </div>
+          <div class="meta mono"><div>Framework</div><div>RWTH SE</div></div>
+        </li>
+        <li>
+          <div class="side"><span class="logo"><img src="../assets/logos/geneial.png" alt="" width="48" height="48"></span><span class="mono faint">2012 — 2016</span></div>
+          <div>
+            <h3>geneial</h3>
+            <p class="what">Eine template-basierte C++11-Bibliothek für genetische Algorithmen, entstanden im DFG-Projekt OASys (Online-Algorithmen zur optimalen Steuerung hybrider Antriebe). CMake-Build, Boost-Unit-Tests, Benchmarks und Doxygen-Dokumentation.</p>
+            <div class="tags mono"><span>C++11</span><span>Evolutionäre Algorithmen</span><span>MIT</span></div>
+            <div class="links mono"><a href="https://github.com/geneial/geneial" target="_blank" rel="noopener">github ↗</a><a href="https://ths.rwth-aachen.de/research/projects/oasys/" target="_blank" rel="noopener">OASys ↗</a></div>
+          </div>
+          <div class="meta mono"><div>Bibliothek</div><div>Open Source</div></div>
+        </li>
+      </ul>
+
+      <div class="group mono">Assistenten · ChatGPT</div>
+      <ul class="spec">
+        <li>
+          <div class="side"><span class="mono faint">GPT</span></div>
+          <div>
+            <h3><a href="https://chatgpt.com/g/g-3DkGCDlNM-sysml-v2-model-creator" target="_blank" rel="noopener">SysML v2 Model Creator</a></h3>
+            <p class="what">Erstellt SysML-v2-Modelle aus natürlichsprachlichen Beschreibungen.</p>
+          </div>
+          <div class="meta mono"><div>SysML v2</div></div>
+        </li>
+        <li>
+          <div class="side"><span class="mono faint">GPT</span></div>
+          <div>
+            <h3><a href="https://chatgpt.com/g/g-Pgayc5wzx-monticore-expert" target="_blank" rel="noopener">MontiCore Expert</a></h3>
+            <p class="what">Beantwortet Fragen zu Grammatiken, Symboltabellen und Generatoren in der MontiCore Language Workbench.</p>
+          </div>
+          <div class="meta mono"><div>MontiCore</div></div>
+        </li>
+        <li>
+          <div class="side"><span class="mono faint">GPT</span></div>
+          <div>
+            <h3><a href="https://chatgpt.com/g/g-sRnmDgQvW-cd4a-class-diagram-creator" target="_blank" rel="noopener">CD4A Class Diagram Creator</a></h3>
+            <p class="what">Schreibt Klassendiagramme in CD4A, der Klassendiagrammsprache von MontiCore.</p>
+          </div>
+          <div class="meta mono"><div>CD4A</div></div>
+        </li>
+      </ul>
+    </section>
+
+    <footer class="mono">
+      <span>© 2026 Lukas Netz</span>
+      <a href="#top">↑ nach oben</a>
+    </footer>
+  </main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

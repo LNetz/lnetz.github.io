@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Forschung — Lukas Netz</title>
+  <meta name="description" content="Forschung und Publikationen von Lukas Netz zu modellgetriebener Softwareentwicklung und großen Sprachmodellen.">
+  <meta property="og:title" content="Forschung — Lukas Netz">
+  <meta property="og:description" content="Forschung und Publikationen von Lukas Netz zu modellgetriebener Softwareentwicklung und großen Sprachmodellen.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="de_DE">
+  <link rel="alternate" hreflang="en" href="../research.html">
+  <link rel="alternate" hreflang="de" href="research.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <script>
+    // Theme from localStorage, applied before first paint (no flash).
+    // Re-applied on pageshow so back/forward (bfcache) pages pick up a newer choice.
+    (function () {
+      function apply() {
+        var t = null;
+        try { t = localStorage.getItem("theme"); } catch (_) {}
+        document.documentElement.dataset.theme = t === "dark" ? "dark" : "light";
+      }
+      apply();
+      addEventListener("pageshow", apply);
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body id="top">
+<div class="backdrop" aria-hidden="true"></div>
+<div class="frame">
+
+  <!-- ============ index column (identical on every page) ============ -->
+  <aside class="index">
+    <div>
+      <a class="name" href="index.html">Lukas Netz</a>
+      <div class="role">Dr. rer. nat.<br>IT-Spezialist<br>mgm technology partners</div>
+    </div>
+
+    <nav aria-label="Seiten">
+      <ol class="mono">
+        <li><a href="index.html"><span>00</span><span>Über mich</span></a></li>
+        <li><a href="projects.html"><span>01</span><span>Projekte</span></a></li>
+        <li><a href="research.html" class="active" aria-current="page"><span>02</span><span>Forschung</span></a></li>
+        <li><a href="photography.html"><span>03</span><span>Fotografie</span></a></li>
+      </ol>
+    </nav>
+
+    <div class="contact mono">
+      <a href="https://www.linkedin.com/in/lukas-netz/" target="_blank" rel="noopener">LinkedIn ↗</a>
+      <a href="https://scholar.google.com/citations?user=5mVkoWsAAAAJ&amp;hl=en" target="_blank" rel="noopener">Google Scholar ↗</a>
+      <a href="https://www.researchgate.net/profile/Lukas-Netz" target="_blank" rel="noopener">ResearchGate ↗</a>
+      <a href="https://orcid.org/0000-0003-2013-2919" target="_blank" rel="noopener">ORCID ↗</a>
+      <a href="https://dblp.org/pid/170/5042.html" target="_blank" rel="noopener">dblp ↗</a>
+      <a href="https://github.com/LNetz" target="_blank" rel="noopener">GitHub ↗</a>
+    </div>
+
+    <div class="prefs mono">
+      <div class="lang" aria-label="Sprache"><a href="../research.html" hreflang="en" lang="en">EN</a><a href="research.html" hreflang="de" lang="de" aria-current="true">DE</a></div>
+      <button class="theme-toggle" type="button" id="theme" aria-label="Dunkelmodus umschalten">◐ <span>Dunkelmodus</span></button>
+    </div>
+  </aside>
+
+  <!-- ============ content ============ -->
+  <main>
+
+    <header class="page">
+      <div class="section-head">
+        <h1><span class="mono">02</span>Forschung</h1>
+        <span class="mono faint" id="pub-count"></span>
+      </div>
+      <p class="lead">Ich erforsche, wie <em>große Sprachmodelle</em> und <em>modellgetriebene Softwareentwicklung</em> sich gegenseitig besser machen: LLMs, die valide Modelle schreiben, und Modelle, die LLM-Ausgaben im Zaum halten.</p>
+    </header>
+    <figure class="banner"><img src="../assets/photos/banner-lecture.jpg" alt="Lukas Netz bei einer Vorlesung in einem großen Hörsaal der RWTH Aachen" width="1659" height="532"></figure>
+    <section>
+      <div class="group mono">Themen</div>
+      <div class="themes">
+        <div><h4>LLMs für die Modellierung</h4><p>Modellsynthese in DSLs, Grammar Masking für syntaktisch valide Ausgaben, wie LLMs textuelle Modelle beschädigen und reparieren.</p></div>
+        <div><h4>Modellgetriebene Entwicklung</h4><p>Generatoren und DSLs, die wartbar bleiben, wenn sich das Modell weiterentwickelt.</p></div>
+        <div><h4>Low-Code &amp; digitale Zwillinge</h4><p>Generierung maßgeschneiderter Low-Code-Plattformen und Cockpits für digitale Zwillinge.</p></div>
+        <div><h4>Informationssysteme</h4><p>Vom modellgetriebenen Prototyp zur vollwertigen Unternehmensanwendung — und die nachträgliche Einführung von Generierung in bestehende Systeme.</p></div>
+      </div>
+
+      <div class="group mono">Community</div>
+      <ul class="rows">
+        <li>
+          <div class="mono faint">2026</div>
+          <div>
+            <h3>MDE Intelligence <span class="mono faint role">Co-Organisator</span></h3>
+            <p>Der internationale Workshop zu Künstlicher Intelligenz und modellgetriebener Softwareentwicklung, seit 2019 Teil der ACM/IEEE-Konferenz MODELS. Er ist das Forum für beide Richtungen der Integration: KI-Techniken, die Modellierung und Modellmanagement intelligenter machen, und MDE-Konzepte — DSLs, Metamodelle, Transformationen —, die KI-Systeme leichter baubar und vertrauenswürdiger machen. Die 8. Ausgabe auf der MODELS 2026 in Málaga habe ich gemeinsam mit Dominik Bork (TU Wien) und Boqi Chen (University of Ottawa) organisiert.</p>
+            <div class="links mono"><a href="https://mde-intelligence.github.io/" target="_blank" rel="noopener">mde-intelligence.github.io ↗</a></div>
+          </div>
+        </li>
+        <li>
+          <div class="mono faint">2024 —</div>
+          <div>
+            <h3>Arbeitskreise AI4RSE <span class="mono faint role">Sprecher</span></h3>
+            <p>Sprecher der Arbeitskreise zu KI für Research Software Engineering in der Gesellschaft für Informatik (GI) und bei de-RSE, dem deutschen Verein für Research Software Engineering.</p>
+          </div>
+        </li>
+        <li>
+          <div class="mono faint">2026</div>
+          <div>
+            <h3>Workshop AI in RSE <span class="mono faint role">Programmkomitee</span></h3>
+            <p>Mitglied im Programmkomitee des Workshops zu KI im Research Software Engineering.</p>
+          </div>
+        </li>
+        <li>
+          <div class="mono faint">2023 —</div>
+          <div>
+            <h3>LLM-Café <span class="mono faint role">Organisator</span></h3>
+            <p>Ein regelmäßiges Diskussionspanel zu großen Sprachmodellen im Informatikzentrum der RWTH Aachen.</p>
+          </div>
+        </li>
+        <li>
+          <div class="mono faint">2025</div>
+          <div>
+            <h3>Golden UML Model Set <span class="mono faint role">Datensatz</span></h3>
+            <p>Ein von der Community kuratierter, qualitätsgesicherter Datensatz von UML-Modellen mit natürlichsprachlichen Domänenbeschreibungen — als Benchmark für Modellierungsforschung, Lehre und die Evaluation von LLMs.</p>
+            <div class="links mono"><a href="https://golden-uml-modelset.vercel.app/search" target="_blank" rel="noopener">Datensatz erkunden ↗</a><a href="https://doi.org/10.1109/MODELS-C68889.2025.00012" target="_blank" rel="noopener">paper ↗</a></div>
+          </div>
+        </li>
+      </ul>
+
+      <div class="group mono">Eingeladene Vorträge</div>
+      <ul class="rows tight">
+        <li>
+          <div class="mono faint">12 / 2025</div>
+          <div>
+            <h3>Künstliche Intelligenz, Agenten &amp; Software Engineering</h3>
+            <p>Gastvortrag, Vorlesung Softwaretechnik · RWTH Aachen</p>
+          </div>
+        </li>
+        <li>
+          <div class="mono faint">09 / 2025</div>
+          <div>
+            <h3>KI im Engineering</h3>
+            <p>Software Engineering Congress · Frankfurt</p>
+          </div>
+        </li>
+        <li>
+          <div class="mono faint">03 / 2025</div>
+          <div>
+            <h3>GenAI in Lehre, Forschung und Software-Entwicklung</h3>
+            <p>Gesellschaft für Informatik · Köln</p>
+          </div>
+        </li>
+        <li>
+          <div class="mono faint">12 / 2024</div>
+          <div>
+            <h3>Künstliche Intelligenz &amp; Software Engineering</h3>
+            <p>Gastvortrag, Vorlesung Softwaretechnik · RWTH Aachen</p>
+          </div>
+        </li>
+        <li>
+          <div class="mono faint">11 / 2024</div>
+          <div>
+            <h3>KI – Ein Blick hinter den Hype</h3>
+            <p>SOPTIM Anwendertage · Köln</p>
+          </div>
+        </li>
+        <li>
+          <div class="mono faint">10 / 2024</div>
+          <div>
+            <h3>Integrating LLMs into Software Engineering: AI as a Component</h3>
+            <p>Gesellschaft für Informatik · Köln</p>
+          </div>
+        </li>
+        <li>
+          <div class="mono faint">07 / 2023</div>
+          <div>
+            <h3>MDE for Financial Management</h3>
+            <p>MDENet</p>
+          </div>
+        </li>
+      </ul>
+
+      <div class="group mono">Publikationen</div>
+      <div class="filters mono" role="group" aria-label="Publikationen filtern">
+        <button type="button" data-f="all" aria-pressed="true">alle</button>
+        <button type="button" data-f="llm" aria-pressed="false">llm</button>
+        <button type="button" data-f="mde" aria-pressed="false">mde</button>
+        <button type="button" data-f="twin" aria-pressed="false">digitale Zwillinge</button>
+        <button type="button" data-f="eis" aria-pressed="false">Informationssysteme</button>
+        <button type="button" data-f="a11y" aria-pressed="false">Barrierefreiheit</button>
+        <button type="button" data-f="ga" aria-pressed="false">genetische Algorithmen</button>
+      </div>
+
+      <div id="pubs"></div>
+    </section>
+
+    <footer class="mono">
+      <span>© 2026 Lukas Netz</span>
+      <a href="#top">↑ nach oben</a>
+    </footer>
+  </main>
+</div>
+<script src="../assets/pubs.js"></script>
+<script src="../assets/site.js"></script>
+</body>
+</html>

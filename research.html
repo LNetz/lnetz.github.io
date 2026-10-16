@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Research — Lukas Netz</title>
+  <meta name="description" content="Research and publications of Lukas Netz on model-driven engineering and large language models.">
+  <meta property="og:title" content="Research — Lukas Netz">
+  <meta property="og:description" content="Research and publications of Lukas Netz on model-driven engineering and large language models.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_US">
+  <link rel="alternate" hreflang="en" href="research.html">
+  <link rel="alternate" hreflang="de" href="de/research.html">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <script>
+    // Theme from localStorage, applied before first paint (no flash).
+    // Re-applied on pageshow so back/forward (bfcache) pages pick up a newer choice.
+    (function () {
+      function apply() {
+        var t = null;
+        try { t = localStorage.getItem("theme"); } catch (_) {}
+        document.documentElement.dataset.theme = t === "dark" ? "dark" : "light";
+      }
+      apply();
+      addEventListener("pageshow", apply);
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body id="top">
+<div class="backdrop" aria-hidden="true"></div>
+<div class="frame">
+
+  <!-- ============ index column (identical on every page) ============ -->
+  <aside class="index">
+    <div>
+      <a class="name" href="index.html">Lukas Netz</a>
+      <div class="role">Dr. rer. nat.<br>IT Specialist<br>mgm technology partners</div>
+    </div>
+
+    <nav aria-label="Pages">
+      <ol class="mono">
+        <li><a href="index.html"><span>00</span><span>About</span></a></li>
+        <li><a href="projects.html"><span>01</span><span>Projects</span></a></li>
+        <li><a href="research.html" class="active" aria-current="page"><span>02</span><span>Research</span></a></li>
+        <li><a href="photography.html"><span>03</span><span>Photography</span></a></li>
+      </ol>
+    </nav>
+
+    <div class="contact mono">
+      <a href="https://www.linkedin.com/in/lukas-netz/" target="_blank" rel="noopener">LinkedIn ↗</a>
+      <a href="https://scholar.google.com/citations?user=5mVkoWsAAAAJ&amp;hl=en" target="_blank" rel="noopener">Google Scholar ↗</a>
+      <a href="https://www.researchgate.net/profile/Lukas-Netz" target="_blank" rel="noopener">ResearchGate ↗</a>
+      <a href="https://orcid.org/0000-0003-2013-2919" target="_blank" rel="noopener">ORCID ↗</a>
+      <a href="https://dblp.org/pid/170/5042.html" target="_blank" rel="noopener">dblp ↗</a>
+      <a href="https://github.com/LNetz" target="_blank" rel="noopener">GitHub ↗</a>
+    </div>
+
+    <div class="prefs mono">
+      <div class="lang" aria-label="Language"><a href="research.html" hreflang="en" lang="en" aria-current="true">EN</a><a href="de/research.html" hreflang="de" lang="de">DE</a></div>
+      <button class="theme-toggle" type="button" id="theme" aria-label="Toggle dark mode">◐ <span>dark mode</span></button>
+    </div>
+  </aside>
+
+  <!-- ============ content ============ -->
+  <main>
+
+    <header class="page">
+      <div class="section-head">
+        <h1><span class="mono">02</span>Research</h1>
+        <span class="mono faint" id="pub-count"></span>
+      </div>
+      <p class="lead">I research how <em>large language models</em> and <em>model-driven engineering</em> can make each other better: LLMs that write valid models, and models that keep LLM output in check.</p>
+    </header>
+    <figure class="banner"><img src="assets/photos/banner-lecture.jpg" alt="Lukas Netz lecturing in a large RWTH Aachen lecture hall" width="1659" height="532"></figure>
+    <section>
+      <div class="group mono">Topics</div>
+      <div class="themes">
+        <div><h4>LLMs for modeling</h4><p>Model synthesis in DSLs, grammar masking for syntactically valid output, how LLMs corrupt and repair textual models.</p></div>
+        <div><h4>Model-driven engineering</h4><p>Generators and DSLs that stay maintainable when the model evolves.</p></div>
+        <div><h4>Low-code &amp; digital twins</h4><p>Generating customized low-code platforms and cockpits for digital twins.</p></div>
+        <div><h4>Information systems</h4><p>From model-driven prototype to full-size enterprise application — and retrofitting generation into existing systems.</p></div>
+      </div>
+
+      <div class="group mono">Community</div>
+      <ul class="rows">
+        <li>
+          <div class="mono faint">2026</div>
+          <div>
+            <h3>MDE Intelligence <span class="mono faint role">Co-organizer</span></h3>
+            <p>The international Workshop on Artificial Intelligence and Model-Driven Engineering, held with the ACM/IEEE MODELS conference since 2019. It is the forum for both directions of the integration: AI techniques that make modeling and model management smarter, and MDE concepts — DSLs, metamodels, transformations — that make AI systems easier to build and to trust. I co-organized its 8th edition at MODELS 2026 in Málaga, together with Dominik Bork (TU Wien) and Boqi Chen (University of Ottawa).</p>
+            <div class="links mono"><a href="https://mde-intelligence.github.io/" target="_blank" rel="noopener">mde-intelligence.github.io ↗</a></div>
+          </div>
+        </li>
+        <li>
+          <div class="mono faint">2024 —</div>
+          <div>
+            <h3>AI4RSE working groups <span class="mono faint role">Spokesperson</span></h3>
+            <p>Spokesperson of the working groups on AI for research software engineering in the German Informatics Society (GI) and in de-RSE, the German association for research software engineering.</p>
+          </div>
+        </li>
+        <li>
+          <div class="mono faint">2026</div>
+          <div>
+            <h3>AI in RSE workshop <span class="mono faint role">Program committee</span></h3>
+            <p>Program committee member of the workshop on AI in research software engineering.</p>
+          </div>
+        </li>
+        <li>
+          <div class="mono faint">2023 —</div>
+          <div>
+            <h3>LLM-Café <span class="mono faint role">Organizer</span></h3>
+            <p>A recurring discussion panel on large language models at the computer science centre of RWTH Aachen.</p>
+          </div>
+        </li>
+        <li>
+          <div class="mono faint">2025</div>
+          <div>
+            <h3>Golden UML Model Set <span class="mono faint role">Dataset</span></h3>
+            <p>A community-curated, quality-assured dataset of UML models with natural-language domain descriptions — built as a benchmark for modeling research, education and LLM evaluation.</p>
+            <div class="links mono"><a href="https://golden-uml-modelset.vercel.app/search" target="_blank" rel="noopener">explore the dataset ↗</a><a href="https://doi.org/10.1109/MODELS-C68889.2025.00012" target="_blank" rel="noopener">paper ↗</a></div>
+          </div>
+        </li>
+      </ul>
+
+      <div class="group mono">Invited talks</div>
+      <ul class="rows tight">
+        <li>
+          <div class="mono faint">12 / 2025</div>
+          <div>
+            <h3>AI, Agents &amp; Software Engineering</h3>
+            <p>Guest lecture, Software Engineering course · RWTH Aachen</p>
+          </div>
+        </li>
+        <li>
+          <div class="mono faint">09 / 2025</div>
+          <div>
+            <h3>AI in Engineering</h3>
+            <p>Software Engineering Congress · Frankfurt</p>
+          </div>
+        </li>
+        <li>
+          <div class="mono faint">03 / 2025</div>
+          <div>
+            <h3>GenAI in Teaching, Research and Software Development</h3>
+            <p>Gesellschaft für Informatik · Cologne</p>
+          </div>
+        </li>
+        <li>
+          <div class="mono faint">12 / 2024</div>
+          <div>
+            <h3>AI &amp; Software Engineering</h3>
+            <p>Guest lecture, Software Engineering course · RWTH Aachen</p>
+          </div>
+        </li>
+        <li>
+          <div class="mono faint">11 / 2024</div>
+          <div>
+            <h3>AI — A Look Behind the Hype</h3>
+            <p>SOPTIM user days · Cologne</p>
+          </div>
+        </li>
+        <li>
+          <div class="mono faint">10 / 2024</div>
+          <div>
+            <h3>Integrating LLMs into Software Engineering: AI as a Component</h3>
+            <p>Gesellschaft für Informatik · Cologne</p>
+          </div>
+        </li>
+        <li>
+          <div class="mono faint">07 / 2023</div>
+          <div>
+            <h3>MDE for Financial Management</h3>
+            <p>MDENet</p>
+          </div>
+        </li>
+      </ul>
+
+      <div class="group mono">Publications</div>
+      <div class="filters mono" role="group" aria-label="Filter publications">
+        <button type="button" data-f="all" aria-pressed="true">all</button>
+        <button type="button" data-f="llm" aria-pressed="false">llm</button>
+        <button type="button" data-f="mde" aria-pressed="false">mde</button>
+        <button type="button" data-f="twin" aria-pressed="false">digital twins</button>
+        <button type="button" data-f="eis" aria-pressed="false">information systems</button>
+        <button type="button" data-f="a11y" aria-pressed="false">accessibility</button>
+        <button type="button" data-f="ga" aria-pressed="false">genetic algorithms</button>
+      </div>
+
+      <div id="pubs"></div>
+    </section>
+
+    <footer class="mono">
+      <span>© 2026 Lukas Netz</span>
+      <a href="#top">↑ top</a>
+    </footer>
+  </main>
+</div>
+<script src="assets/pubs.js"></script>
+<script src="assets/site.js"></script>
+</body>
+</html>

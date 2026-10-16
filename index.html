@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lukas Netz</title>
+  <meta name="description" content="Lukas Netz — IT specialist at mgm technology partners. Model-driven engineering, LLMs for modeling, agentic coding.">
+  <meta property="og:title" content="Lukas Netz">
+  <meta property="og:description" content="Lukas Netz — IT specialist at mgm technology partners. Model-driven engineering, LLMs for modeling, agentic coding.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_US">
+  <link rel="alternate" hreflang="en" href="index.html">
+  <link rel="alternate" hreflang="de" href="de/index.html">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <script>
+    // Theme from localStorage, applied before first paint (no flash).
+    // Re-applied on pageshow so back/forward (bfcache) pages pick up a newer choice.
+    (function () {
+      function apply() {
+        var t = null;
+        try { t = localStorage.getItem("theme"); } catch (_) {}
+        document.documentElement.dataset.theme = t === "dark" ? "dark" : "light";
+      }
+      apply();
+      addEventListener("pageshow", apply);
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body id="top">
+<div class="backdrop" aria-hidden="true"></div>
+<div class="frame">
+
+  <!-- ============ index column (identical on every page) ============ -->
+  <aside class="index">
+    <div>
+      <a class="name" href="index.html">Lukas Netz</a>
+      <div class="role">Dr. rer. nat.<br>IT Specialist<br>mgm technology partners</div>
+    </div>
+
+    <nav aria-label="Pages">
+      <ol class="mono">
+        <li><a href="index.html" class="active" aria-current="page"><span>00</span><span>About</span></a></li>
+        <li><a href="projects.html"><span>01</span><span>Projects</span></a></li>
+        <li><a href="research.html"><span>02</span><span>Research</span></a></li>
+        <li><a href="photography.html"><span>03</span><span>Photography</span></a></li>
+      </ol>
+    </nav>
+
+    <div class="contact mono">
+      <a href="https://www.linkedin.com/in/lukas-netz/" target="_blank" rel="noopener">LinkedIn ↗</a>
+      <a href="https://scholar.google.com/citations?user=5mVkoWsAAAAJ&amp;hl=en" target="_blank" rel="noopener">Google Scholar ↗</a>
+      <a href="https://www.researchgate.net/profile/Lukas-Netz" target="_blank" rel="noopener">ResearchGate ↗</a>
+      <a href="https://orcid.org/0000-0003-2013-2919" target="_blank" rel="noopener">ORCID ↗</a>
+      <a href="https://dblp.org/pid/170/5042.html" target="_blank" rel="noopener">dblp ↗</a>
+      <a href="https://github.com/LNetz" target="_blank" rel="noopener">GitHub ↗</a>
+    </div>
+
+    <div class="prefs mono">
+      <div class="lang" aria-label="Language"><a href="index.html" hreflang="en" lang="en" aria-current="true">EN</a><a href="de/index.html" hreflang="de" lang="de">DE</a></div>
+      <button class="theme-toggle" type="button" id="theme" aria-label="Toggle dark mode">◐ <span>dark mode</span></button>
+    </div>
+  </aside>
+
+  <!-- ============ content ============ -->
+  <main>
+
+    <header class="page">
+      <div class="section-head">
+        <h1><span class="mono">00</span>About</h1>
+        <span class="mono faint"></span>
+      </div>
+      <p class="lead">I build software that builds software. My work sits between <em>model-driven engineering</em> and <em>large language models</em>: generators, DSLs and agentic tooling that turn models and intent into full-size, maintainable applications.</p>
+      <dl class="facts mono">
+        <div><dt>Now</dt><dd>mgm technology partners</dd></div>
+        <div><dt>PhD</dt><dd>RWTH Aachen, 2024</dd></div>
+        <div><dt>Focus</dt><dd>MDE × LLM</dd></div>
+      </dl>
+    </header>
+    <section>
+      <div class="bio">
+        <p>I am an IT specialist at <b>mgm technology partners</b>, working on <a href="https://esaca.eu" target="_blank" rel="noopener">ESACA ↗</a> — a sovereign, on-premises platform for agentic coding in regulated enterprises.</p>
+        <p>Before that I spent several years at the <b>Software Engineering chair of RWTH Aachen University</b>, where I received my doctorate in 2024 with a thesis on model-driven development of full-size web-based information systems. I led the MaCoCo project, built generator-based systems that are still in production, and researched how LLMs can produce syntactically and semantically valid models.</p>
+        <p>In 2026 I co-organized <a href="https://mde-intelligence.github.io/" target="_blank" rel="noopener">MDE Intelligence ↗</a>, the workshop on AI and model-driven engineering at MODELS. Outside of work I enjoy photography and flying my drone.</p>
+      </div>
+    </section>
+
+    <footer class="mono">
+      <span>© 2026 Lukas Netz</span>
+      <a href="#top">↑ top</a>
+    </footer>
+  </main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
