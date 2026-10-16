@@ -1,4 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="10" fill="#2f4bff"/>
-  <text x="32" y="42" text-anchor="middle" font-family="IBM Plex Mono, ui-monospace, Consolas, monospace" font-size="26" font-weight="500" fill="#f7f7f5" letter-spacing="-1">LN</text>
+  <rect width="64" height="64" rx="12" fill="#2f4bff"/>
+  <!-- the site's </> icon (24px grid), scaled around the centre -->
+  <g transform="translate(5.6 5.6) scale(2.2)" fill="none" stroke="#f7f7f5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M7.5 7L2.5 12l5 5"/>
+    <path d="M16.5 7l5 5-5 5"/>
+    <path d="M14 4.5l-4 15"/>
+  </g>
 </svg>

@@ -103,6 +103,15 @@ a:hover { color: var(--accent); }
   flex-direction: column;
   gap: 40px;
 }
+.index .menu { display: flex; flex-direction: column; gap: 40px; }
+
+/* top-bar parts: only shown on small screens */
+.index .here,
+.menu-toggle { display: none; }
+.menu-toggle {
+  background: none; border: 0; padding: 6px 0 6px 12px; cursor: pointer;
+  font: inherit; font-family: var(--mono); font-size: var(--fs-s); color: var(--ink);
+}
 
 .index .name { font-weight: 500; }
 .index .role { color: var(--ink-2); margin-top: 2px; }
@@ -171,6 +180,13 @@ main { min-width: 0; }
 
 section { padding-bottom: var(--space-section); }
 section > .group:first-child { padding-top: 0; }
+
+/* three icon links above the About text (name as tooltip / aria-label) */
+.quick { display: flex; gap: 28px; margin-bottom: 32px; }
+.quick a { display: block; color: var(--ink-2); padding: 2px; margin: -2px; }
+.quick svg { display: block; width: 24px; height: 24px; transition: color .2s, transform .2s; }
+.quick a:hover { color: var(--accent); }
+.quick a:hover svg { transform: translateY(-2px); }
 
 .bio { max-width: 560px; color: var(--ink-2); display: grid; gap: 12px; }
 .bio b { font-weight: 500; color: var(--ink); }
@@ -279,50 +295,148 @@ section > .group:first-child { padding-top: 0; }
 .banner { margin-bottom: var(--space-section); }
 .banner img { display: block; width: 100%; height: auto; aspect-ratio: 2400 / 769; background: var(--tile); }
 
-.series { display: flex; justify-content: space-between; padding-top: 56px; scroll-margin-top: 24px; }
+.series { display: flex; justify-content: space-between; padding-top: 48px; scroll-margin-top: 24px; }
 
-.photos { display: grid; gap: 16px; padding-top: 16px; }
-.photos .row { display: flex; gap: 16px; }
-.photos figure { flex: var(--r) 1 0; min-width: 0; cursor: zoom-in; }
-.photos img {
+/* compact justified grid: every tile grows in proportion to its aspect ratio (--r),
+   so all tiles in a row share one height and the row fills the width uncropped */
+.grid {
+  --row: 116px;                           /* target row height: 3–4 tiles per row on desktop */
+  display: flex; flex-wrap: wrap; gap: 6px;
+  padding-top: 12px;
+}
+.grid::after { content: ""; flex-grow: 1000; }   /* the last row keeps its height instead of stretching */
+.grid figure {
+  flex: var(--r) 1 calc(var(--r) * var(--row));
+  min-width: 0; margin: 0; cursor: zoom-in;
+}
+.grid img {
   display: block; width: 100%; height: auto;
   aspect-ratio: var(--r); background: var(--tile);
   transition: opacity .3s;
 }
-.photos figure:hover img { opacity: .88; }
-.photos figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 12px; padding-top: 6px; color: var(--ink-3); }
+.grid figure:hover img, .grid figure:focus-visible img { opacity: .82; }
+.grid figcaption {                        /* read by the lightbox and screen readers, not shown in the grid */
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
 
+/* lightbox: the resting <img> and the transition <canvas> occupy exactly the same
+   box and both letterbox ("contain"), so swapping between them never jumps */
 .lightbox {
-  position: fixed; inset: 0; z-index: 10;
-  background: color-mix(in srgb, var(--bg) 97%, transparent);
-  display: none; place-items: center; padding: 48px 16px 72px; cursor: zoom-out;
+  --lb-top: 40px; --lb-side: 40px; --lb-bottom: 72px;
+  position: fixed; inset: 0; z-index: 30;
+  background: var(--bg);                  /* solid: the shader letterboxes in this colour */
+  display: none; cursor: zoom-out;
+  touch-action: pan-y;
 }
-.lightbox.open { display: grid; }
-.lightbox img { max-width: 100%; max-height: calc(100vh - 120px); display: block; }
+.lightbox.open { display: block; }
+.lightbox img,
+.lightbox canvas {
+  position: absolute;
+  left: var(--lb-side); top: var(--lb-top);
+  width: calc(100% - 2 * var(--lb-side)); height: calc(100% - var(--lb-top) - var(--lb-bottom));
+  object-fit: contain; display: block;
+  transition: opacity .18s ease;
+}
+.lightbox canvas { display: none; }
+.lightbox.morphing canvas { display: block; }
+.lightbox.morphing img { visibility: hidden; }
+
 .lightbox .cap {
-  position: fixed; left: 0; right: 0; bottom: 24px;
-  display: flex; justify-content: center; gap: 24px; color: var(--ink-3);
+  position: absolute; left: var(--lb-side); right: var(--lb-side); bottom: 20px;
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px;
+  color: var(--ink-3); cursor: default;
 }
+.lightbox .nav { display: flex; align-items: center; gap: 4px; }
+.lightbox .count { min-width: 64px; text-align: center; }
+.lightbox .title { color: var(--ink-2); text-align: center; }
+.lightbox button {
+  background: none; border: 0; padding: 8px 10px; cursor: pointer;
+  font: inherit; color: var(--ink-2);
+}
+.lightbox button:hover { color: var(--accent); }
+.lightbox .close { justify-self: end; }
 
 /* ---------- footer ---------- */
 
 footer {
-  display: flex; justify-content: space-between;
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
   border-top: 1px solid var(--rule);
   padding-top: 12px; color: var(--ink-3);
 }
+footer > a { justify-self: end; }
+.foot-icons { display: flex; gap: 14px; }
+.foot-icons a { color: var(--ink-3); display: block; }
+.foot-icons a:hover { color: var(--accent); }
+.foot-icons svg { display: block; width: 16px; height: 16px; }
 
-/* ---------- small screens ---------- */
+/* ---------- tablet landscape / small laptops: tighter frame ---------- */
+
+@media (max-width: 1100px) {
+  .frame { gap: 0 56px; padding-left: 32px; padding-right: 32px; }
+  .spec > li { grid-template-columns: 96px minmax(0, 1fr) 110px; }
+  .rows > li, .year { grid-template-columns: 96px minmax(0, 1fr); }
+}
+
+/* ---------- tablet portrait + phone: top bar with menu sheet ---------- */
 
 @media (max-width: 900px) {
-  :root { --space-section: 80px; --space-group: 32px; }
-  .frame { grid-template-columns: 1fr; padding: 40px var(--gutter) 64px; gap: 0; }
-  .backdrop { top: -40px; left: -55vw; width: 130vw; }
-  .index { position: static; gap: 24px; padding-bottom: 56px; }
-  .index nav ol { display: flex; flex-wrap: wrap; gap: 6px 18px; }
-  .index nav a span:first-child { display: none; }
-  .index .contact { display: flex; flex-wrap: wrap; gap: 4px 16px; }
-  .prefs { grid-auto-flow: column; gap: 20px; }
+  :root { --space-section: 80px; --space-group: 32px; --gutter: 32px; --bar: 56px; }
+
+  .backdrop { display: none; }        /* no graphic behind running text on small screens */
+
+  .frame { grid-template-columns: 1fr; padding: 0 var(--gutter) 64px; gap: 0; }
+
+  /* the index column becomes a sticky bar */
+  .index {
+    position: sticky; top: 0; z-index: 20;
+    margin: 0 calc(-1 * var(--gutter)) 40px;
+    padding: 0 var(--gutter);
+    gap: 0;
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--rule);
+  }
+  .bar { height: var(--bar); display: flex; align-items: center; justify-content: space-between; }
+  .who { display: flex; align-items: baseline; gap: 12px; min-width: 0; }
+  .index .role { display: none; }
+  .index .here { display: inline; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .menu-toggle { display: block; }
+
+  /* the menu: a calm full-screen sheet under the bar */
+  .index .menu {
+    display: none;
+    position: fixed; left: 0; right: 0; top: var(--bar); bottom: 0;
+    padding: 40px var(--gutter) 48px;
+    background: var(--bg);
+    overflow-y: auto;
+    gap: 48px;
+  }
+  .index.open .menu { display: flex; }
+  /* backdrop-filter would make the bar the containing block of the fixed sheet */
+  .index.open { background: var(--bg); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .series { scroll-margin-top: calc(var(--bar) + 16px); }
+  .grid { --row: 104px; }
+  body.menu-open { overflow: hidden; }
+
+  .index .menu nav ol { gap: 4px; }
+  .index .menu nav a {
+    align-items: baseline; gap: 16px; padding: 6px 0;
+    font-family: var(--sans); font-size: 26px; font-weight: 300; letter-spacing: -0.01em;
+  }
+  .index .menu nav a span:first-child { font-family: var(--mono); font-size: var(--fs-s); width: 22px; }
+  .index .contact { display: grid; grid-template-columns: repeat(2, max-content); gap: 10px 32px; }
+  .prefs { grid-auto-flow: column; justify-content: start; gap: 32px; align-items: center; }
+  .lang { gap: 14px; }
+
+  .page .lead { margin-top: 32px; }
+}
+
+/* ---------- phone: single column ---------- */
+
+@media (max-width: 600px) {
+  :root { --gutter: 16px; --bar: 52px; }
   .page .lead { margin-top: 28px; font-size: 17px; }
   .facts { grid-template-columns: 1fr 1fr; gap: 12px 24px; }
   .spec > li, .rows > li { grid-template-columns: 1fr; gap: 6px; }
@@ -333,5 +447,11 @@ footer {
   .year { grid-template-columns: 1fr; gap: 0; }
   .year > .y { padding-top: 12px; }
   .pubs li { grid-template-columns: 1fr; gap: 2px; }
-  .photos .row { flex-direction: column; }
+  .grid { --row: 84px; gap: 4px; }
+  .index .menu nav a { font-size: 24px; }
+  .banner img { aspect-ratio: 4 / 3; }      /* taller 4:3 crop from <picture> on phones */
+  .lightbox { --lb-top: 16px; --lb-side: 0px; --lb-bottom: 96px; }
+  .lightbox .cap { left: 16px; right: 16px; bottom: 16px; grid-template-columns: auto 1fr; row-gap: 4px; }
+  .lightbox .title { grid-column: 1 / -1; grid-row: 1; text-align: left; }
+  .lightbox .nav { margin-left: -10px; }
 }

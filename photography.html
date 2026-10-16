@@ -13,16 +13,23 @@
   <link rel="alternate" hreflang="de" href="de/photography.html">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <script>
-    // Theme from localStorage, applied before first paint (no flash).
-    // Re-applied on pageshow so back/forward (bfcache) pages pick up a newer choice.
+    // Theme preference in localStorage: "light" (default), "dark" or "auto" (follows the OS).
+    // Applied before first paint (no flash); re-applied on pageshow (back/forward cache)
+    // and whenever the OS switches while "auto" is chosen.
     (function () {
+      var os = matchMedia("(prefers-color-scheme: dark)");
       function apply() {
-        var t = null;
-        try { t = localStorage.getItem("theme"); } catch (_) {}
-        document.documentElement.dataset.theme = t === "dark" ? "dark" : "light";
+        var p = null;
+        try { p = localStorage.getItem("theme"); } catch (_) {}
+        if (p !== "dark" && p !== "auto") p = "light";
+        var root = document.documentElement;
+        root.dataset.themePref = p;
+        root.dataset.theme = p === "auto" ? (os.matches ? "dark" : "light") : p;
       }
+      window.applyTheme = apply;
       apply();
       addEventListener("pageshow", apply);
+      os.addEventListener("change", apply);
     })();
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,34 +41,42 @@
 <div class="backdrop" aria-hidden="true"></div>
 <div class="frame">
 
-  <!-- ============ index column (identical on every page) ============ -->
-  <aside class="index">
-    <div>
-      <a class="name" href="index.html">Lukas Netz</a>
-      <div class="role">Dr. rer. nat.<br>IT Specialist<br>mgm technology partners</div>
+  <!-- ============ index column (identical on every page) ============
+       Desktop: sticky left column.  ≤ 900px: sticky top bar; the menu
+       (pages, profiles, language, theme) opens as a full-screen sheet. -->
+  <aside class="index" id="index">
+    <div class="bar">
+      <div class="who">
+        <a class="name" href="index.html">Lukas Netz</a>
+        <span class="here mono" aria-hidden="true">Photography</span>
+        <div class="role">Dr. rer. nat.<br>IT Specialist<br>mgm technology partners</div>
+      </div>
+      <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">menu</button>
     </div>
 
-    <nav aria-label="Pages">
-      <ol class="mono">
+    <div class="menu" id="menu">
+      <nav aria-label="Pages">
+        <ol class="mono">
         <li><a href="index.html"><span>00</span><span>About</span></a></li>
         <li><a href="projects.html"><span>01</span><span>Projects</span></a></li>
         <li><a href="research.html"><span>02</span><span>Research</span></a></li>
         <li><a href="photography.html" class="active" aria-current="page"><span>03</span><span>Photography</span></a></li>
-      </ol>
-    </nav>
+        </ol>
+      </nav>
 
-    <div class="contact mono">
+      <div class="contact mono">
       <a href="https://www.linkedin.com/in/lukas-netz/" target="_blank" rel="noopener">LinkedIn ↗</a>
       <a href="https://scholar.google.com/citations?user=5mVkoWsAAAAJ&amp;hl=en" target="_blank" rel="noopener">Google Scholar ↗</a>
       <a href="https://www.researchgate.net/profile/Lukas-Netz" target="_blank" rel="noopener">ResearchGate ↗</a>
       <a href="https://orcid.org/0000-0003-2013-2919" target="_blank" rel="noopener">ORCID ↗</a>
       <a href="https://dblp.org/pid/170/5042.html" target="_blank" rel="noopener">dblp ↗</a>
       <a href="https://github.com/LNetz" target="_blank" rel="noopener">GitHub ↗</a>
-    </div>
+      </div>
 
-    <div class="prefs mono">
-      <div class="lang" aria-label="Language"><a href="photography.html" hreflang="en" lang="en" aria-current="true">EN</a><a href="de/photography.html" hreflang="de" lang="de">DE</a></div>
-      <button class="theme-toggle" type="button" id="theme" aria-label="Toggle dark mode">◐ <span>dark mode</span></button>
+      <div class="prefs mono">
+        <div class="lang" aria-label="Language"><a href="photography.html" hreflang="en" lang="en" aria-current="true">EN</a><a href="de/photography.html" hreflang="de" lang="de">DE</a></div>
+        <button class="theme-toggle" type="button" id="theme">◐ <span>light</span></button>
+      </div>
     </div>
   </aside>
 
@@ -71,118 +86,122 @@
     <header class="page">
       <div class="section-head">
         <h1><span class="mono">03</span>Photography</h1>
-        <span class="mono faint">43 photographs</span>
+        <span class="mono faint">72 photographs</span>
       </div>
       <p class="lead">Photography has fascinated me from the very first moment. The camera is one of the few tools that lets you not only show a very particular perspective on the world, but also capture and share <em>memories and emotions</em>.</p>
       <div class="bio">
         <p>By playing with an extraordinarily complex high-tech instrument that exploits the limits of physics in the most ingenious way, you can hold on to the most beautiful moments forever — in a fraction of a second.</p>
       </div>
     </header>
-    <figure class="banner"><img src="assets/photos/about-dolomites.jpg" alt="Lukas Netz with a camera, looking out over the Dolomites" width="2400" height="769"></figure>
+    <figure class="banner"><picture><source media="(max-width: 600px)" srcset="assets/photos/about-dolomites-m.jpg" width="1200" height="900"><img src="assets/photos/about-dolomites.jpg" alt="Lukas Netz with a camera, looking out over the Dolomites" width="2400" height="769"></picture></figure>
 
     <section>
       <nav class="filters mono" aria-label="Series"><a href="#selected">selected</a><a href="#landscape">landscape</a><a href="#people">people</a><a href="#animals">animals</a><a href="#automotive">automotive</a></nav>
-      <div class="group mono series" id="selected"><span>Selected</span><span>2019 — 2025 · 11</span></div>
-      <div class="photos">
-        <div class="row">
-          <figure style="--r:1.778"><img src="assets/photos/p07.jpg" alt="Aerial view of a coastal road curving above rocks and surf" loading="lazy" width="2000" height="1125"><figcaption class="mono"><span>Coast road, aerial</span><span>f/1.7 · 1/730 · 2023</span></figcaption></figure>
-          <figure style="--r:0.6665"><img src="assets/photos/p02.jpg" alt="Bride standing in a tall arched palace window, black and white" loading="lazy" width="1333" height="2000"><figcaption class="mono"><span>Window</span><span></span></figcaption></figure>
-        </div>
-        <div class="row">
-          <figure style="--r:1.5"><img src="assets/photos/p03.jpg" alt="Dog running towards the camera with leaves in its mouth" loading="lazy" width="2000" height="1333"><figcaption class="mono"><span>Retrieve</span><span>85mm · f/1.4 · 2024</span></figcaption></figure>
-          <figure style="--r:0.6665"><img src="assets/photos/p05.jpg" alt="Silhouette of a wedding couple holding hands" loading="lazy" width="1333" height="2000"><figcaption class="mono"><span>Silhouette</span><span>24mm · f/2.8</span></figcaption></figure>
-          <figure style="--r:1.5"><img src="assets/photos/p04.jpg" alt="Woman embracing a dark horse against a blue sky" loading="lazy" width="2000" height="1333"><figcaption class="mono"><span>Trust</span><span>135mm · f/2.8 · 2023</span></figcaption></figure>
-        </div>
-        <div class="row">
-          <figure style="--r:1.4205"><img src="assets/photos/p08.jpg" alt="City lights at night seen from above" loading="lazy" width="2000" height="1408"><figcaption class="mono"><span>City at night, aerial</span><span>1/5 · ISO 1270 · 2025</span></figcaption></figure>
-          <figure style="--r:1.5"><img src="assets/photos/p01.jpg" alt="Black and white portrait with skull face paint" loading="lazy" width="2000" height="1333"><figcaption class="mono"><span>Portrait</span><span></span></figcaption></figure>
-        </div>
-        <div class="row">
-          <figure style="--r:1.5"><img src="assets/photos/p10.jpg" alt="Alpine valley with winding roads under dramatic clouds" loading="lazy" width="2000" height="1333"><figcaption class="mono"><span>Alps</span><span>26mm · f/11 · 2019</span></figcaption></figure>
-          <figure style="--r:1.778"><img src="assets/photos/p06.jpg" alt="Wet dog shaking off water in the sun" loading="lazy" width="2000" height="1125"><figcaption class="mono"><span>Shake</span><span>24mm · 1/4000 · 2025</span></figcaption></figure>
-        </div>
-        <div class="row">
-          <figure style="--r:1.5"><img src="assets/photos/p11.jpg" alt="Couple embracing in an autumn forest" loading="lazy" width="2000" height="1333"><figcaption class="mono"><span>Autumn</span><span>85mm · f/2 · 2019</span></figcaption></figure>
-          <figure style="--r:1.5"><img src="assets/photos/p09.jpg" alt="Wedding couple playfully posing in sand dunes" loading="lazy" width="2000" height="1333"><figcaption class="mono"><span>Dunes</span><span>24mm · f/4 · 2019</span></figcaption></figure>
-        </div>
+      <div class="group mono series" id="selected"><span>Selected</span><span>2019 — 2025 · 10</span></div>
+      <div class="grid">
+          <figure style="--r:1.7778"><img src="assets/photos/thumbs/p07.jpg" data-full="assets/photos/p07.jpg" alt="Aerial view of a coastal road curving above rocks and surf" loading="lazy" decoding="async" width="2000" height="1125"><figcaption class="mono"><span>Coast road, aerial</span><span>f/1.7 · 1/730 · 2023</span></figcaption></figure>
+          <figure style="--r:0.6665"><img src="assets/photos/thumbs/p02.jpg" data-full="assets/photos/p02.jpg" alt="Bride standing in a tall arched palace window, black and white" loading="lazy" decoding="async" width="1333" height="2000"><figcaption class="mono"><span>Window</span><span></span></figcaption></figure>
+          <figure style="--r:1.5004"><img src="assets/photos/thumbs/p03.jpg" data-full="assets/photos/p03.jpg" alt="Dog running towards the camera with leaves in its mouth" loading="lazy" decoding="async" width="2000" height="1333"><figcaption class="mono"><span>Retrieve</span><span>85mm · f/1.4 · 2024</span></figcaption></figure>
+          <figure style="--r:0.6665"><img src="assets/photos/thumbs/p05.jpg" data-full="assets/photos/p05.jpg" alt="Silhouette of a wedding couple holding hands" loading="lazy" decoding="async" width="1333" height="2000"><figcaption class="mono"><span>Silhouette</span><span>24mm · f/2.8</span></figcaption></figure>
+          <figure style="--r:1.4205"><img src="assets/photos/thumbs/p08.jpg" data-full="assets/photos/p08.jpg" alt="City lights at night seen from above" loading="lazy" decoding="async" width="2000" height="1408"><figcaption class="mono"><span>City at night, aerial</span><span>1/5 · ISO 1270 · 2025</span></figcaption></figure>
+          <figure style="--r:1.5004"><img src="assets/photos/thumbs/p01.jpg" data-full="assets/photos/p01.jpg" alt="Black and white portrait with skull face paint" loading="lazy" decoding="async" width="2000" height="1333"><figcaption class="mono"><span>Portrait</span><span></span></figcaption></figure>
+          <figure style="--r:1.5004"><img src="assets/photos/thumbs/p10.jpg" data-full="assets/photos/p10.jpg" alt="Alpine valley with winding roads under dramatic clouds" loading="lazy" decoding="async" width="2000" height="1333"><figcaption class="mono"><span>Alps</span><span>26mm · f/11 · 2019</span></figcaption></figure>
+          <figure style="--r:1.7778"><img src="assets/photos/thumbs/p06.jpg" data-full="assets/photos/p06.jpg" alt="Wet dog shaking off water in the sun" loading="lazy" decoding="async" width="2000" height="1125"><figcaption class="mono"><span>Shake</span><span>24mm · 1/4000 · 2025</span></figcaption></figure>
+          <figure style="--r:1.5004"><img src="assets/photos/thumbs/p11.jpg" data-full="assets/photos/p11.jpg" alt="Couple embracing in an autumn forest" loading="lazy" decoding="async" width="2000" height="1333"><figcaption class="mono"><span>Autumn</span><span>85mm · f/2 · 2019</span></figcaption></figure>
+          <figure style="--r:1.5004"><img src="assets/photos/thumbs/p09.jpg" data-full="assets/photos/p09.jpg" alt="Wedding couple playfully posing in sand dunes" loading="lazy" decoding="async" width="2000" height="1333"><figcaption class="mono"><span>Dunes</span><span>24mm · f/4 · 2019</span></figcaption></figure>
       </div>
-      <div class="group mono series" id="landscape"><span>Landscape</span><span>8</span></div>
-      <div class="photos">
-        <div class="row">
-          <figure style="--r:0.8"><img src="assets/photos/printhno_04.jpg" alt="Rock tower in the Dolomites under heavy clouds" loading="lazy" width="1440" height="1800"><figcaption class="mono"><span>Dolomites</span><span></span></figcaption></figure>
-          <figure style="--r:1.25"><img src="assets/photos/printhno_05.jpg" alt="Jagged Dolomite peaks at dusk" loading="lazy" width="1800" height="1440"><figcaption class="mono"><span>Dolomites</span><span></span></figcaption></figure>
-          <figure style="--r:1.25"><img src="assets/photos/printhno_07.jpg" alt="Dolomite massif above a scree slope" loading="lazy" width="1800" height="1440"><figcaption class="mono"><span>Dolomites</span><span></span></figcaption></figure>
-        </div>
-        <div class="row">
-          <figure style="--r:1.5"><img src="assets/photos/printhno_02.jpg" alt="Alpine valley with layered mountain ridges" loading="lazy" width="1800" height="1200"><figcaption class="mono"><span>Valley</span><span></span></figcaption></figure>
-          <figure style="--r:1.5"><img src="assets/photos/printhno_03.jpg" alt="Snow-capped peak above dark ridges and clouds" loading="lazy" width="1800" height="1200"><figcaption class="mono"><span>Peaks</span><span></span></figcaption></figure>
-        </div>
-        <div class="row">
-          <figure style="--r:1.5"><img src="assets/photos/printhno_10.jpg" alt="Vineyard rows seen from above" loading="lazy" width="1800" height="1200"><figcaption class="mono"><span>Vineyard, aerial</span><span></span></figcaption></figure>
-          <figure style="--r:1.5"><img src="assets/photos/printhno_12.jpg" alt="Wooden jetty on a calm misty lake" loading="lazy" width="1800" height="1200"><figcaption class="mono"><span>Jetty</span><span></span></figcaption></figure>
-        </div>
-        <div class="row">
-          <figure style="--r:2.6277"><img src="assets/photos/printhno_08.jpg" alt="Tree-lined canal with calm water" loading="lazy" width="1800" height="685"><figcaption class="mono"><span>Canal du Midi, France</span><span></span></figcaption></figure>
-        </div>
+      <div class="group mono series" id="landscape"><span>Landscape</span><span>27</span></div>
+      <div class="grid">
+          <figure style="--r:2.7491"><img src="assets/photos/thumbs/land_18.jpg" data-full="assets/photos/land_18.jpg" alt="Panorama of a wide river bend under a low sun" loading="lazy" decoding="async" width="2400" height="873"><figcaption class="mono"><span>River bend, panorama</span><span></span></figcaption></figure>
+          <figure style="--r:1.7787"><img src="assets/photos/thumbs/land_07.jpg" data-full="assets/photos/land_07.jpg" alt="Bridges linking small islands across the sea, seen from above" loading="lazy" decoding="async" width="1800" height="1012"><figcaption class="mono"><span>Island bridges, aerial</span><span></span></figcaption></figure>
+          <figure style="--r:1.7787"><img src="assets/photos/thumbs/land_13.jpg" data-full="assets/photos/land_13.jpg" alt="Glowing lava veins in black rock, seen from above" loading="lazy" decoding="async" width="1800" height="1012"><figcaption class="mono"><span>Lava, aerial</span><span></span></figcaption></figure>
+          <figure style="--r:1.7769"><img src="assets/photos/thumbs/land_15.jpg" data-full="assets/photos/land_15.jpg" alt="Crevassed glacier surface seen from above" loading="lazy" decoding="async" width="1800" height="1013"><figcaption class="mono"><span>Glacier, aerial</span><span></span></figcaption></figure>
+          <figure style="--r:1.7787"><img src="assets/photos/thumbs/land_17.jpg" data-full="assets/photos/land_17.jpg" alt="River cutting through a moss-green canyon, seen from above" loading="lazy" decoding="async" width="1800" height="1012"><figcaption class="mono"><span>Canyon, aerial</span><span></span></figcaption></figure>
+          <figure style="--r:1.7787"><img src="assets/photos/thumbs/land_16.jpg" data-full="assets/photos/land_16.jpg" alt="Road winding through moss-covered hills, seen from above" loading="lazy" decoding="async" width="1800" height="1012"><figcaption class="mono"><span>Road through moss, aerial</span><span></span></figcaption></figure>
+          <figure style="--r:1.7787"><img src="assets/photos/thumbs/land_14.jpg" data-full="assets/photos/land_14.jpg" alt="Waterfall plunging into a gorge, seen from above" loading="lazy" decoding="async" width="1800" height="1012"><figcaption class="mono"><span>Waterfall, aerial</span><span></span></figcaption></figure>
+          <figure style="--r:1.7787"><img src="assets/photos/thumbs/land_11.jpg" data-full="assets/photos/land_11.jpg" alt="Steam rising from a crater in red earth, seen from above" loading="lazy" decoding="async" width="1800" height="1012"><figcaption class="mono"><span>Crater, aerial</span><span></span></figcaption></figure>
+          <figure style="--r:1.7769"><img src="assets/photos/thumbs/land_12.jpg" data-full="assets/photos/land_12.jpg" alt="Dark rocks in white surf, seen from above" loading="lazy" decoding="async" width="1800" height="1013"><figcaption class="mono"><span>Rocks in surf, aerial</span><span></span></figcaption></figure>
+          <figure style="--r:1.7787"><img src="assets/photos/thumbs/land_00.jpg" data-full="assets/photos/land_00.jpg" alt="Turquoise sea breaking on rocks, seen from above" loading="lazy" decoding="async" width="1800" height="1012"><figcaption class="mono"><span>Surf, aerial</span><span></span></figcaption></figure>
+          <figure style="--r:1.7769"><img src="assets/photos/thumbs/land_10.jpg" data-full="assets/photos/land_10.jpg" alt="Small boat drawing a wake across turquoise water, seen from above" loading="lazy" decoding="async" width="1800" height="1013"><figcaption class="mono"><span>Boat, aerial</span><span></span></figcaption></figure>
+          <figure style="--r:1.7787"><img src="assets/photos/thumbs/land_08.jpg" data-full="assets/photos/land_08.jpg" alt="Turquoise river winding through dense forest, seen from above" loading="lazy" decoding="async" width="1800" height="1012"><figcaption class="mono"><span>River, aerial</span><span></span></figcaption></figure>
+          <figure style="--r:3.6641"><img src="assets/photos/thumbs/land_09.jpg" data-full="assets/photos/land_09.jpg" alt="Panorama of a city at night from the air" loading="lazy" decoding="async" width="2400" height="655"><figcaption class="mono"><span>City at night, panorama</span><span></span></figcaption></figure>
+          <figure style="--r:1.5"><img src="assets/photos/thumbs/land_04.jpg" data-full="assets/photos/land_04.jpg" alt="Mountain wrapped in clouds, black and white" loading="lazy" decoding="async" width="1800" height="1200"><figcaption class="mono"><span>Clouds</span><span></span></figcaption></figure>
+          <figure style="--r:1.7804"><img src="assets/photos/thumbs/land_02.jpg" data-full="assets/photos/land_02.jpg" alt="Layered forested hills at dusk" loading="lazy" decoding="async" width="1800" height="1011"><figcaption class="mono"><span>Dusk</span><span></span></figcaption></figure>
+          <figure style="--r:1.7804"><img src="assets/photos/thumbs/land_03.jpg" data-full="assets/photos/land_03.jpg" alt="Path through a tall green forest" loading="lazy" decoding="async" width="1800" height="1011"><figcaption class="mono"><span>Forest</span><span></span></figcaption></figure>
+          <figure style="--r:1.7769"><img src="assets/photos/thumbs/land_06.jpg" data-full="assets/photos/land_06.jpg" alt="Lone walker on a backlit shore below mountains" loading="lazy" decoding="async" width="1800" height="1013"><figcaption class="mono"><span>Shore</span><span></span></figcaption></figure>
+          <figure style="--r:1.7769"><img src="assets/photos/thumbs/land_05.jpg" data-full="assets/photos/land_05.jpg" alt="City skyline across the water under streaked clouds" loading="lazy" decoding="async" width="1800" height="1013"><figcaption class="mono"><span>Skyline</span><span></span></figcaption></figure>
+          <figure style="--r:0.6667"><img src="assets/photos/thumbs/land_01.jpg" data-full="assets/photos/land_01.jpg" alt="Woman in white walking down a long red-pillared corridor" loading="lazy" decoding="async" width="1200" height="1800"><figcaption class="mono"><span>Corridor</span><span></span></figcaption></figure>
+          <figure style="--r:0.8"><img src="assets/photos/thumbs/printhno_04.jpg" data-full="assets/photos/printhno_04.jpg" alt="Rock tower in the Dolomites under heavy clouds" loading="lazy" decoding="async" width="1440" height="1800"><figcaption class="mono"><span>Dolomites</span><span></span></figcaption></figure>
+          <figure style="--r:1.25"><img src="assets/photos/thumbs/printhno_05.jpg" data-full="assets/photos/printhno_05.jpg" alt="Jagged Dolomite peaks at dusk" loading="lazy" decoding="async" width="1800" height="1440"><figcaption class="mono"><span>Dolomites</span><span></span></figcaption></figure>
+          <figure style="--r:1.25"><img src="assets/photos/thumbs/printhno_07.jpg" data-full="assets/photos/printhno_07.jpg" alt="Dolomite massif above a scree slope" loading="lazy" decoding="async" width="1800" height="1440"><figcaption class="mono"><span>Dolomites</span><span></span></figcaption></figure>
+          <figure style="--r:1.5"><img src="assets/photos/thumbs/printhno_02.jpg" data-full="assets/photos/printhno_02.jpg" alt="Alpine valley with layered mountain ridges" loading="lazy" decoding="async" width="1800" height="1200"><figcaption class="mono"><span>Valley</span><span></span></figcaption></figure>
+          <figure style="--r:1.5"><img src="assets/photos/thumbs/printhno_03.jpg" data-full="assets/photos/printhno_03.jpg" alt="Snow-capped peak above dark ridges and clouds" loading="lazy" decoding="async" width="1800" height="1200"><figcaption class="mono"><span>Peaks</span><span></span></figcaption></figure>
+          <figure style="--r:1.5"><img src="assets/photos/thumbs/printhno_10.jpg" data-full="assets/photos/printhno_10.jpg" alt="Vineyard rows seen from above" loading="lazy" decoding="async" width="1800" height="1200"><figcaption class="mono"><span>Vineyard, aerial</span><span></span></figcaption></figure>
+          <figure style="--r:1.5"><img src="assets/photos/thumbs/printhno_12.jpg" data-full="assets/photos/printhno_12.jpg" alt="Wooden jetty on a calm misty lake" loading="lazy" decoding="async" width="1800" height="1200"><figcaption class="mono"><span>Jetty</span><span></span></figcaption></figure>
+          <figure style="--r:2.6277"><img src="assets/photos/thumbs/printhno_08.jpg" data-full="assets/photos/printhno_08.jpg" alt="Tree-lined canal with calm water" loading="lazy" decoding="async" width="1800" height="685"><figcaption class="mono"><span>Canal du Midi, France</span><span></span></figcaption></figure>
       </div>
-      <div class="group mono series" id="people"><span>People</span><span>12</span></div>
-      <div class="photos">
-        <div class="row">
-          <figure style="--r:1.25"><img src="assets/photos/portfolio_07.jpg" alt="Woman with curly hair in low-key studio light" loading="lazy" width="1800" height="1440"><figcaption class="mono"><span>Studio</span><span></span></figcaption></figure>
-          <figure style="--r:0.6667"><img src="assets/photos/portfolio_13.jpg" alt="Smiling woman in black and white" loading="lazy" width="1200" height="1800"><figcaption class="mono"><span>Light</span><span></span></figcaption></figure>
-          <figure style="--r:0.6667"><img src="assets/photos/portfolio_33.jpg" alt="Black and white portrait of a woman with long hair" loading="lazy" width="1200" height="1800"><figcaption class="mono"><span>Portrait</span><span></span></figcaption></figure>
-        </div>
-        <div class="row">
-          <figure style="--r:1.5"><img src="assets/photos/portfolio_16.jpg" alt="Smiling elderly woman, black and white close-up" loading="lazy" width="1800" height="1200"><figcaption class="mono"><span>Laugh lines</span><span></span></figcaption></figure>
-          <figure style="--r:1.5"><img src="assets/photos/portfolio_34.jpg" alt="Close portrait of a woman against a dark background" loading="lazy" width="1800" height="1200"><figcaption class="mono"><span>Gaze</span><span></span></figcaption></figure>
-        </div>
-        <div class="row">
-          <figure style="--r:0.6667"><img src="assets/photos/portfolio_09.jpg" alt="Rider and horse jumping in the dark" loading="lazy" width="1200" height="1800"><figcaption class="mono"><span>Jump</span><span></span></figcaption></figure>
-          <figure style="--r:0.6667"><img src="assets/photos/portfolio_15.jpg" alt="Basketball player mid-dunk, black and white" loading="lazy" width="1200" height="1800"><figcaption class="mono"><span>Dunk</span><span></span></figcaption></figure>
-          <figure style="--r:0.6667"><img src="assets/photos/portfolio_25.jpg" alt="Athlete throwing a ball in backlight" loading="lazy" width="1200" height="1800"><figcaption class="mono"><span>Throw</span><span></span></figcaption></figure>
-          <figure style="--r:0.6667"><img src="assets/photos/portfolio_60.jpg" alt="Low-key black and white profile with hair falling forward" loading="lazy" width="1200" height="1800"><figcaption class="mono"><span>Low key</span><span></span></figcaption></figure>
-        </div>
-        <div class="row">
-          <figure style="--r:1.5"><img src="assets/photos/portfolio_14.jpg" alt="Street scene with silhouettes against the sun" loading="lazy" width="1800" height="1200"><figcaption class="mono"><span>Street</span><span></span></figcaption></figure>
-          <figure style="--r:1.5"><img src="assets/photos/portfolio_48.jpg" alt="Woman lying on a dark surface, black and white" loading="lazy" width="1800" height="1200"><figcaption class="mono"><span>Rest</span><span></span></figcaption></figure>
-          <figure style="--r:0.6667"><img src="assets/photos/portfolio_59.jpg" alt="Woman covering her face with her hands in warm light" loading="lazy" width="1200" height="1800"><figcaption class="mono"><span>Shy</span><span></span></figcaption></figure>
-        </div>
+      <div class="group mono series" id="people"><span>People</span><span>17</span></div>
+      <div class="grid">
+          <figure style="--r:0.5622"><img src="assets/photos/thumbs/peop_06.jpg" data-full="assets/photos/peop_06.jpg" alt="A baby's hand holding an adult's finger, black and white" loading="lazy" decoding="async" width="1012" height="1800"><figcaption class="mono"><span>Hold</span><span></span></figcaption></figure>
+          <figure style="--r:1.4938"><img src="assets/photos/thumbs/peop_00.jpg" data-full="assets/photos/peop_00.jpg" alt="Woman under water with floating red hair" loading="lazy" decoding="async" width="1800" height="1205"><figcaption class="mono"><span>Under water</span><span></span></figcaption></figure>
+          <figure style="--r:1.7769"><img src="assets/photos/thumbs/peop_02.jpg" data-full="assets/photos/peop_02.jpg" alt="Two faces head to toe with playing-card face paint, black and white" loading="lazy" decoding="async" width="1800" height="1013"><figcaption class="mono"><span>Cards</span><span></span></figcaption></figure>
+          <figure style="--r:0.6667"><img src="assets/photos/thumbs/peop_01.jpg" data-full="assets/photos/peop_01.jpg" alt="Young woman hugging a tabby cat, black and white" loading="lazy" decoding="async" width="1200" height="1800"><figcaption class="mono"><span>Cat</span><span></span></figcaption></figure>
+          <figure style="--r:1.5"><img src="assets/photos/thumbs/peop_03.jpg" data-full="assets/photos/peop_03.jpg" alt="Person standing on a rocky summit above mountain ranges" loading="lazy" decoding="async" width="1800" height="1200"><figcaption class="mono"><span>Summit</span><span></span></figcaption></figure>
+          <figure style="--r:1.5"><img src="assets/photos/thumbs/peop_04.jpg" data-full="assets/photos/peop_04.jpg" alt="Smiling woman, black and white portrait" loading="lazy" decoding="async" width="1800" height="1200"><figcaption class="mono"><span>Smile</span><span></span></figcaption></figure>
+          <figure style="--r:0.6667"><img src="assets/photos/thumbs/peop_05.jpg" data-full="assets/photos/peop_05.jpg" alt="Fine-art nude study of a torso, black and white" loading="lazy" decoding="async" width="1200" height="1800"><figcaption class="mono"><span>Form</span><span></span></figcaption></figure>
+          <figure style="--r:1.25"><img src="assets/photos/thumbs/portfolio_07.jpg" data-full="assets/photos/portfolio_07.jpg" alt="Woman with curly hair in low-key studio light" loading="lazy" decoding="async" width="1800" height="1440"><figcaption class="mono"><span>Studio</span><span></span></figcaption></figure>
+          <figure style="--r:0.6667"><img src="assets/photos/thumbs/portfolio_13.jpg" data-full="assets/photos/portfolio_13.jpg" alt="Smiling woman in black and white" loading="lazy" decoding="async" width="1200" height="1800"><figcaption class="mono"><span>Light</span><span></span></figcaption></figure>
+          <figure style="--r:1.5"><img src="assets/photos/thumbs/portfolio_16.jpg" data-full="assets/photos/portfolio_16.jpg" alt="Smiling elderly woman, black and white close-up" loading="lazy" decoding="async" width="1800" height="1200"><figcaption class="mono"><span>Laugh lines</span><span></span></figcaption></figure>
+          <figure style="--r:0.6667"><img src="assets/photos/thumbs/portfolio_09.jpg" data-full="assets/photos/portfolio_09.jpg" alt="Rider and horse jumping in the dark" loading="lazy" decoding="async" width="1200" height="1800"><figcaption class="mono"><span>Jump</span><span></span></figcaption></figure>
+          <figure style="--r:0.6667"><img src="assets/photos/thumbs/portfolio_15.jpg" data-full="assets/photos/portfolio_15.jpg" alt="Basketball player mid-dunk, black and white" loading="lazy" decoding="async" width="1200" height="1800"><figcaption class="mono"><span>Dunk</span><span></span></figcaption></figure>
+          <figure style="--r:0.6667"><img src="assets/photos/thumbs/portfolio_25.jpg" data-full="assets/photos/portfolio_25.jpg" alt="Athlete throwing a ball in backlight" loading="lazy" decoding="async" width="1200" height="1800"><figcaption class="mono"><span>Throw</span><span></span></figcaption></figure>
+          <figure style="--r:0.6667"><img src="assets/photos/thumbs/portfolio_60.jpg" data-full="assets/photos/portfolio_60.jpg" alt="Low-key black and white profile with hair falling forward" loading="lazy" decoding="async" width="1200" height="1800"><figcaption class="mono"><span>Low key</span><span></span></figcaption></figure>
+          <figure style="--r:1.5"><img src="assets/photos/thumbs/portfolio_14.jpg" data-full="assets/photos/portfolio_14.jpg" alt="Street scene with silhouettes against the sun" loading="lazy" decoding="async" width="1800" height="1200"><figcaption class="mono"><span>Street</span><span></span></figcaption></figure>
+          <figure style="--r:1.5"><img src="assets/photos/thumbs/portfolio_48.jpg" data-full="assets/photos/portfolio_48.jpg" alt="Woman lying on a dark surface, black and white" loading="lazy" decoding="async" width="1800" height="1200"><figcaption class="mono"><span>Rest</span><span></span></figcaption></figure>
+          <figure style="--r:0.6667"><img src="assets/photos/thumbs/portfolio_59.jpg" data-full="assets/photos/portfolio_59.jpg" alt="Woman covering her face with her hands in warm light" loading="lazy" decoding="async" width="1200" height="1800"><figcaption class="mono"><span>Shy</span><span></span></figcaption></figure>
       </div>
-      <div class="group mono series" id="animals"><span>Animals</span><span>6</span></div>
-      <div class="photos">
-        <div class="row">
-          <figure style="--r:1.25"><img src="assets/photos/baily_00.jpg" alt="Dog splashing through water" loading="lazy" width="1800" height="1440"><figcaption class="mono"><span>Splash</span><span></span></figcaption></figure>
-          <figure style="--r:0.8"><img src="assets/photos/baily_02.jpg" alt="Border collie sitting in golden grass" loading="lazy" width="1440" height="1800"><figcaption class="mono"><span>Golden hour</span><span></span></figcaption></figure>
-          <figure style="--r:0.8"><img src="assets/photos/baily_13.jpg" alt="Dog with closed eyes on white background" loading="lazy" width="1440" height="1800"><figcaption class="mono"><span>Calm</span><span></span></figcaption></figure>
-        </div>
-        <div class="row">
-          <figure style="--r:0.6667"><img src="assets/photos/baily_06.jpg" alt="Shepherd dog in low-key light" loading="lazy" width="1200" height="1800"><figcaption class="mono"><span>Low key</span><span></span></figcaption></figure>
-          <figure style="--r:0.6667"><img src="assets/photos/baily_11.jpg" alt="Border collie catching a ball on white" loading="lazy" width="1200" height="1800"><figcaption class="mono"><span>Catch</span><span></span></figcaption></figure>
-          <figure style="--r:1.5"><img src="assets/photos/baily_08.jpg" alt="Shepherd dog lying in the dark" loading="lazy" width="1800" height="1200"><figcaption class="mono"><span>Rest</span><span></span></figcaption></figure>
-        </div>
+      <div class="group mono series" id="animals"><span>Animals</span><span>12</span></div>
+      <div class="grid">
+          <figure style="--r:1.5004"><img src="assets/photos/thumbs/p04.jpg" data-full="assets/photos/p04.jpg" alt="Woman embracing a dark horse against a blue sky" loading="lazy" decoding="async" width="2000" height="1333"><figcaption class="mono"><span>Trust</span><span>135mm · f/2.8 · 2023</span></figcaption></figure>
+          <figure style="--r:1.5"><img src="assets/photos/thumbs/anim_02.jpg" data-full="assets/photos/anim_02.jpg" alt="White horse's mane in low-key light" loading="lazy" decoding="async" width="1800" height="1200"><figcaption class="mono"><span>Mane</span><span></span></figcaption></figure>
+          <figure style="--r:0.6667"><img src="assets/photos/thumbs/anim_01.jpg" data-full="assets/photos/anim_01.jpg" alt="Horse grazing, seen from below against the sky" loading="lazy" decoding="async" width="1200" height="1800"><figcaption class="mono"><span>Grazing</span><span></span></figcaption></figure>
+          <figure style="--r:1.4988"><img src="assets/photos/thumbs/anim_04.jpg" data-full="assets/photos/anim_04.jpg" alt="Horse rolling in the sand of a dark arena" loading="lazy" decoding="async" width="1800" height="1201"><figcaption class="mono"><span>Roll</span><span></span></figcaption></figure>
+          <figure style="--r:1.5"><img src="assets/photos/thumbs/anim_00.jpg" data-full="assets/photos/anim_00.jpg" alt="Girl hugging a horse's neck, black and white" loading="lazy" decoding="async" width="1620" height="1080"><figcaption class="mono"><span>Embrace</span><span></span></figcaption></figure>
+          <figure style="--r:1.5"><img src="assets/photos/thumbs/anim_03.jpg" data-full="assets/photos/anim_03.jpg" alt="Rider leading a horse through a dark stable" loading="lazy" decoding="async" width="1800" height="1200"><figcaption class="mono"><span>Stable</span><span></span></figcaption></figure>
+          <figure style="--r:1.25"><img src="assets/photos/thumbs/baily_00.jpg" data-full="assets/photos/baily_00.jpg" alt="Dog splashing through water" loading="lazy" decoding="async" width="1800" height="1440"><figcaption class="mono"><span>Splash</span><span></span></figcaption></figure>
+          <figure style="--r:0.8"><img src="assets/photos/thumbs/baily_02.jpg" data-full="assets/photos/baily_02.jpg" alt="Border collie sitting in golden grass" loading="lazy" decoding="async" width="1440" height="1800"><figcaption class="mono"><span>Golden hour</span><span></span></figcaption></figure>
+          <figure style="--r:0.8"><img src="assets/photos/thumbs/baily_13.jpg" data-full="assets/photos/baily_13.jpg" alt="Dog with closed eyes on white background" loading="lazy" decoding="async" width="1440" height="1800"><figcaption class="mono"><span>Calm</span><span></span></figcaption></figure>
+          <figure style="--r:0.6667"><img src="assets/photos/thumbs/baily_06.jpg" data-full="assets/photos/baily_06.jpg" alt="Shepherd dog in low-key light" loading="lazy" decoding="async" width="1200" height="1800"><figcaption class="mono"><span>Low key</span><span></span></figcaption></figure>
+          <figure style="--r:0.6667"><img src="assets/photos/thumbs/baily_11.jpg" data-full="assets/photos/baily_11.jpg" alt="Border collie catching a ball on white" loading="lazy" decoding="async" width="1200" height="1800"><figcaption class="mono"><span>Catch</span><span></span></figcaption></figure>
+          <figure style="--r:1.5"><img src="assets/photos/thumbs/baily_08.jpg" data-full="assets/photos/baily_08.jpg" alt="Shepherd dog lying in the dark" loading="lazy" decoding="async" width="1800" height="1200"><figcaption class="mono"><span>Rest</span><span></span></figcaption></figure>
       </div>
       <div class="group mono series" id="automotive"><span>Automotive</span><span>6</span></div>
-      <div class="photos">
-        <div class="row">
-          <figure style="--r:1.25"><img src="assets/photos/polo_01.jpg" alt="Light trails around a white car at night" loading="lazy" width="1800" height="1440"><figcaption class="mono"><span>Light painting</span><span></span></figcaption></figure>
-          <figure style="--r:0.6667"><img src="assets/photos/polo_13.jpg" alt="Racing stripes on a car roof, close-up" loading="lazy" width="1200" height="1800"><figcaption class="mono"><span>Stripes</span><span></span></figcaption></figure>
-          <figure style="--r:1.25"><img src="assets/photos/polo_18.jpg" alt="White car with headlights on in the dark" loading="lazy" width="1800" height="1440"><figcaption class="mono"><span>Headlights</span><span></span></figcaption></figure>
-        </div>
-        <div class="row">
-          <figure style="--r:1.5"><img src="assets/photos/polo_07.jpg" alt="Car headlights glowing in darkness" loading="lazy" width="1800" height="1200"><figcaption class="mono"><span>Night</span><span></span></figcaption></figure>
-          <figure style="--r:1.5"><img src="assets/photos/polo_09.jpg" alt="Car under a starry sky on a dark field" loading="lazy" width="1800" height="1200"><figcaption class="mono"><span>Stars</span><span></span></figcaption></figure>
-          <figure style="--r:0.6667"><img src="assets/photos/polo_14.jpg" alt="Car on a country road at sunset" loading="lazy" width="1200" height="1800"><figcaption class="mono"><span>Road</span><span></span></figcaption></figure>
-        </div>
+      <div class="grid">
+          <figure style="--r:1.25"><img src="assets/photos/thumbs/polo_01.jpg" data-full="assets/photos/polo_01.jpg" alt="Light trails around a white car at night" loading="lazy" decoding="async" width="1800" height="1440"><figcaption class="mono"><span>Light painting</span><span></span></figcaption></figure>
+          <figure style="--r:0.6667"><img src="assets/photos/thumbs/polo_13.jpg" data-full="assets/photos/polo_13.jpg" alt="Racing stripes on a car roof, close-up" loading="lazy" decoding="async" width="1200" height="1800"><figcaption class="mono"><span>Stripes</span><span></span></figcaption></figure>
+          <figure style="--r:1.25"><img src="assets/photos/thumbs/polo_18.jpg" data-full="assets/photos/polo_18.jpg" alt="White car with headlights on in the dark" loading="lazy" decoding="async" width="1800" height="1440"><figcaption class="mono"><span>Headlights</span><span></span></figcaption></figure>
+          <figure style="--r:1.5"><img src="assets/photos/thumbs/polo_07.jpg" data-full="assets/photos/polo_07.jpg" alt="Car headlights glowing in darkness" loading="lazy" decoding="async" width="1800" height="1200"><figcaption class="mono"><span>Night</span><span></span></figcaption></figure>
+          <figure style="--r:1.5"><img src="assets/photos/thumbs/polo_09.jpg" data-full="assets/photos/polo_09.jpg" alt="Car under a starry sky on a dark field" loading="lazy" decoding="async" width="1800" height="1200"><figcaption class="mono"><span>Stars</span><span></span></figcaption></figure>
+          <figure style="--r:0.6667"><img src="assets/photos/thumbs/polo_14.jpg" data-full="assets/photos/polo_14.jpg" alt="Car on a country road at sunset" loading="lazy" decoding="async" width="1200" height="1800"><figcaption class="mono"><span>Road</span><span></span></figcaption></figure>
       </div>
     </section>
 
     <footer class="mono">
       <span>© 2026 Lukas Netz</span>
+      <nav class="foot-icons" aria-label="Sections"><a href="projects.html" title="Projects" aria-label="Projects"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 7L2.5 12l5 5"/><path d="M16.5 7l5 5-5 5"/><path d="M14 4.5l-4 15"/></svg></a><a href="research.html" title="Research" aria-label="Research"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 13.5H5l3.5 6.5L13.5 4h8"/><path d="M14.5 10l5 6"/><path d="M19.5 10l-5 6"/></svg></a><a href="photography.html" title="Photography" aria-label="Photography"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><g transform="translate(12 12) scale(.9) translate(-12 -12)" stroke-width="1.95"><path d="M12.697 3.5h-1.394c-.715 0-1.072 0-1.392.112a2 2 0 0 0-.545.292c-.271.204-.47.501-.866 1.096c-.203.305-.502.753-.621.879a2 2 0 0 1-1.106.591c-.17.03-.353.03-.72.03c-.98 0-1.47 0-1.87.113a3 3 0 0 0-2.07 2.07C2 9.083 2 9.573 2 10.553V14.5c0 2.828 0 4.243.879 5.121S5.172 20.5 8 20.5h8c2.829 0 4.243 0 5.122-.879C22 18.743 22 17.328 22 14.5v-3.946c0-.98 0-1.47-.113-1.871a3 3 0 0 0-2.07-2.07c-.4-.113-.89-.113-1.87-.113c-.366 0-.55 0-.72-.03a2 2 0 0 1-1.105-.591c-.12-.126-.419-.574-.622-.879c-.396-.595-.594-.892-.865-1.096a2 2 0 0 0-.545-.292c-.32-.112-.678-.112-1.393-.112"/><path d="M16 13a4 4 0 1 1-8 0a4 4 0 0 1 8 0"/><path d="M19.125 9.5H19m.25 0a.25.25 0 1 1-.5 0a.25.25 0 0 1 .5 0Z"/></g></svg></a></nav>
       <a href="#top">↑ top</a>
     </footer>
   </main>
 </div>
-<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo"><img alt=""><div class="cap mono"></div></div>
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo">
+  <canvas aria-hidden="true"></canvas>
+  <img alt="">
+  <div class="cap mono">
+    <span class="nav"><button type="button" class="prev" aria-label="Previous photo">←</button><span class="count"></span><button type="button" class="next" aria-label="Next photo">→</button></span>
+    <span class="title" aria-live="polite"></span>
+    <button type="button" class="close">close ×</button>
+  </div>
+</div>
 <script src="assets/site.js"></script>
 </body>
 </html>

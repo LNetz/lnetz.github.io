@@ -43,8 +43,6 @@ SOCIAL = [
 def shell(lang, file, title, desc, body, scripts=""):
     L = lambda x: x[lang] if isinstance(x, dict) else x
     A = "../" if lang == "de" else ""                 # path back to the shared assets
-    other = "de" if lang == "en" else "en"
-    other_href = (f"de/{file}" if lang == "en" else f"../{file}")
     en_url, de_url = (file, f"de/{file}") if lang == "en" else (f"../{file}", file)
 
     nav = NL.join(
@@ -53,6 +51,7 @@ def shell(lang, file, title, desc, body, scripts=""):
         for f, n, t in PAGES)
     social = NL.join(f'      <a href="{u}" target="_blank" rel="noopener">{name} ↗</a>' for name, u in SOCIAL)
     full_title = "Lukas Netz" if file == "index.html" else f"{L(title)} — Lukas Netz"
+    foot_icons = "".join(f'<a href="{f}" title="{L(t)}" aria-label="{L(t)}">{ICONS[i]}</a>' for f, i, t in QUICK)
     langs = (f'<a href="{"" if lang == "en" else "../"}{file}" hreflang="en" lang="en"{" aria-current=\"true\"" if lang == "en" else ""}>EN</a>'
              f'<a href="{"de/" if lang == "en" else ""}{file}" hreflang="de" lang="de"{" aria-current=\"true\"" if lang == "de" else ""}>DE</a>')
 
@@ -71,16 +70,23 @@ def shell(lang, file, title, desc, body, scripts=""):
   <link rel="alternate" hreflang="de" href="{de_url}">
   <link rel="icon" href="{A}assets/favicon.svg" type="image/svg+xml">
   <script>
-    // Theme from localStorage, applied before first paint (no flash).
-    // Re-applied on pageshow so back/forward (bfcache) pages pick up a newer choice.
+    // Theme preference in localStorage: "light" (default), "dark" or "auto" (follows the OS).
+    // Applied before first paint (no flash); re-applied on pageshow (back/forward cache)
+    // and whenever the OS switches while "auto" is chosen.
     (function () {{
+      var os = matchMedia("(prefers-color-scheme: dark)");
       function apply() {{
-        var t = null;
-        try {{ t = localStorage.getItem("theme"); }} catch (_) {{}}
-        document.documentElement.dataset.theme = t === "dark" ? "dark" : "light";
+        var p = null;
+        try {{ p = localStorage.getItem("theme"); }} catch (_) {{}}
+        if (p !== "dark" && p !== "auto") p = "light";
+        var root = document.documentElement;
+        root.dataset.themePref = p;
+        root.dataset.theme = p === "auto" ? (os.matches ? "dark" : "light") : p;
       }}
+      window.applyTheme = apply;
       apply();
       addEventListener("pageshow", apply);
+      os.addEventListener("change", apply);
     }})();
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -92,26 +98,34 @@ def shell(lang, file, title, desc, body, scripts=""):
 <div class="backdrop" aria-hidden="true"></div>
 <div class="frame">
 
-  <!-- ============ index column (identical on every page) ============ -->
-  <aside class="index">
-    <div>
-      <a class="name" href="index.html">Lukas Netz</a>
-      <div class="role">Dr. rer. nat.<br>{L(T("IT Specialist", "IT-Spezialist"))}<br>mgm technology partners</div>
+  <!-- ============ index column (identical on every page) ============
+       Desktop: sticky left column.  ≤ 900px: sticky top bar; the menu
+       (pages, profiles, language, theme) opens as a full-screen sheet. -->
+  <aside class="index" id="index">
+    <div class="bar">
+      <div class="who">
+        <a class="name" href="index.html">Lukas Netz</a>
+        <span class="here mono" aria-hidden="true">{L(title)}</span>
+        <div class="role">Dr. rer. nat.<br>{L(T("IT Specialist", "IT-Spezialist"))}<br>mgm technology partners</div>
+      </div>
+      <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">{L(T("menu", "Menü"))}</button>
     </div>
 
-    <nav aria-label="{L(T("Pages", "Seiten"))}">
-      <ol class="mono">
+    <div class="menu" id="menu">
+      <nav aria-label="{L(T("Pages", "Seiten"))}">
+        <ol class="mono">
 {nav}
-      </ol>
-    </nav>
+        </ol>
+      </nav>
 
-    <div class="contact mono">
+      <div class="contact mono">
 {social}
-    </div>
+      </div>
 
-    <div class="prefs mono">
-      <div class="lang" aria-label="{L(T("Language", "Sprache"))}">{langs}</div>
-      <button class="theme-toggle" type="button" id="theme" aria-label="{L(T("Toggle dark mode", "Dunkelmodus umschalten"))}">◐ <span>{L(T("dark mode", "Dunkelmodus"))}</span></button>
+      <div class="prefs mono">
+        <div class="lang" aria-label="{L(T("Language", "Sprache"))}">{langs}</div>
+        <button class="theme-toggle" type="button" id="theme">◐ <span>{L(T("light", "hell"))}</span></button>
+      </div>
     </div>
   </aside>
 
@@ -120,6 +134,7 @@ def shell(lang, file, title, desc, body, scripts=""):
 {body}
     <footer class="mono">
       <span>© 2026 Lukas Netz</span>
+      <nav class="foot-icons" aria-label="{L(T("Sections", "Bereiche"))}">{foot_icons}</nav>
       <a href="#top">↑ {L(T("top", "nach oben"))}</a>
     </footer>
   </main>
@@ -147,7 +162,12 @@ def page_head(n, title, right, lead, extra="", count_id=False):
 
 
 def banner(A, src, alt, w, h):
-    return f'    <figure class="banner"><img src="{A}assets/photos/{src}" alt="{alt}" width="{w}" height="{h}"></figure>\n'
+    """Panorama hero; phones get a taller 4:3 crop (same name with a -m suffix)."""
+    mobile = src.replace(".jpg", "-m.jpg")
+    return (f'    <figure class="banner"><picture>'
+            f'<source media="(max-width: 600px)" srcset="{A}assets/photos/{mobile}" width="1200" height="900">'
+            f'<img src="{A}assets/photos/{src}" alt="{alt}" width="{w}" height="{h}">'
+            f'</picture></figure>\n')
 
 
 def link(label, url):
@@ -192,6 +212,26 @@ def row(label, title, text, role="", links=()):
 # 00 About
 # =====================================================================
 
+# Line icons on a 24px grid, round caps, stroke = currentColor (works in both themes).
+_SVG = '<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">{}</svg>'
+ICONS = {
+    # </>  — software projects
+    # optically matched to the other two (~19x15 of the 24 grid): compact brackets, air around the slash
+    "code": _SVG.format('<path d="M7.5 7L2.5 12l5 5"/><path d="M16.5 7l5 5-5 5"/><path d="M14 4.5l-4 15"/>'),
+    # √x  — research
+    "sqrt": _SVG.format('<path d="M2.5 13.5H5l3.5 6.5L13.5 4h8"/><path d="M14.5 10l5 6"/><path d="M19.5 10l-5 6"/>'),
+    # camera (Camera01) — photography
+    # scaled to 90% (stroke compensated): its closed body otherwise reads as the largest of the three
+    "camera": _SVG.format('<g transform="translate(12 12) scale(.9) translate(-12 -12)" stroke-width="1.95"><path d="M12.697 3.5h-1.394c-.715 0-1.072 0-1.392.112a2 2 0 0 0-.545.292c-.271.204-.47.501-.866 1.096c-.203.305-.502.753-.621.879a2 2 0 0 1-1.106.591c-.17.03-.353.03-.72.03c-.98 0-1.47 0-1.87.113a3 3 0 0 0-2.07 2.07C2 9.083 2 9.573 2 10.553V14.5c0 2.828 0 4.243.879 5.121S5.172 20.5 8 20.5h8c2.829 0 4.243 0 5.122-.879C22 18.743 22 17.328 22 14.5v-3.946c0-.98 0-1.47-.113-1.871a3 3 0 0 0-2.07-2.07c-.4-.113-.89-.113-1.87-.113c-.366 0-.55 0-.72-.03a2 2 0 0 1-1.105-.591c-.12-.126-.419-.574-.622-.879c-.396-.595-.594-.892-.865-1.096a2 2 0 0 0-.545-.292c-.32-.112-.678-.112-1.393-.112"/>'
+                          '<path d="M16 13a4 4 0 1 1-8 0a4 4 0 0 1 8 0"/><path d="M19.125 9.5H19m.25 0a.25.25 0 1 1-.5 0a.25.25 0 0 1 .5 0Z"/></g>'),
+}
+
+
+QUICK = [("projects.html", "code", T("Projects", "Projekte")),
+         ("research.html", "sqrt", T("Research", "Forschung")),
+         ("photography.html", "camera", T("Photography", "Fotografie"))]
+
+
 def about(lang):
     L = lambda x: x[lang]
     A = "../" if lang == "de" else ""
@@ -215,8 +255,14 @@ def about(lang):
         L(T("I build software that builds software. My work sits between <em>model-driven engineering</em> and <em>large language models</em>: generators, DSLs and agentic tooling that turn models and intent into full-size, maintainable applications.",
             "Ich baue Software, die Software baut. Meine Arbeit liegt zwischen <em>modellgetriebener Softwareentwicklung</em> und <em>großen Sprachmodellen</em>: Generatoren, DSLs und agentische Werkzeuge, die aus Modellen und Absichten vollwertige, wartbare Anwendungen machen.")),
         facts)
+    quick = NL.join(
+        f'        <a href="{href}" title="{L(label)}" aria-label="{L(label)}">{ICONS[icon]}</a>'
+        for href, icon, label in QUICK)
     return f'''
 {head}    <section>
+      <nav class="quick" aria-label="{L(T("Sections", "Bereiche"))}">
+{quick}
+      </nav>
       <div class="bio">
 {NL.join(f"        <p>{L(p)}</p>" for p in bio)}
       </div>
@@ -364,7 +410,7 @@ def research(lang):
             L(T("The international Workshop on Artificial Intelligence and Model-Driven Engineering, held with the ACM/IEEE MODELS conference since 2019. It is the forum for both directions of the integration: AI techniques that make modeling and model management smarter, and MDE concepts — DSLs, metamodels, transformations — that make AI systems easier to build and to trust. I co-organized its 8th edition at MODELS 2026 in Málaga, together with Dominik Bork (TU Wien) and Boqi Chen (University of Ottawa).",
                 "Der internationale Workshop zu Künstlicher Intelligenz und modellgetriebener Softwareentwicklung, seit 2019 Teil der ACM/IEEE-Konferenz MODELS. Er ist das Forum für beide Richtungen der Integration: KI-Techniken, die Modellierung und Modellmanagement intelligenter machen, und MDE-Konzepte — DSLs, Metamodelle, Transformationen —, die KI-Systeme leichter baubar und vertrauenswürdiger machen. Die 8. Ausgabe auf der MODELS 2026 in Málaga habe ich gemeinsam mit Dominik Bork (TU Wien) und Boqi Chen (University of Ottawa) organisiert.")),
             L(T("Co-organizer", "Co-Organisator")), [("mde-intelligence.github.io", "https://mde-intelligence.github.io/")]),
-        row("2024 —", L(T("AI4RSE working groups", "Arbeitskreise AI4RSE")),
+        row("2024 — 2026", L(T("AI4RSE working groups", "Arbeitskreise AI4RSE")),
             L(T("Spokesperson of the working groups on AI for research software engineering in the German Informatics Society (GI) and in de-RSE, the German association for research software engineering.",
                 "Sprecher der Arbeitskreise zu KI für Research Software Engineering in der Gesellschaft für Informatik (GI) und bei de-RSE, dem deutschen Verein für Research Software Engineering.")),
             L(T("Spokesperson", "Sprecher"))),
@@ -372,7 +418,7 @@ def research(lang):
             L(T("Program committee member of the workshop on AI in research software engineering.",
                 "Mitglied im Programmkomitee des Workshops zu KI im Research Software Engineering.")),
             L(T("Program committee", "Programmkomitee"))),
-        row("2023 —", "LLM-Café",
+        row("2023 — 2026", "LLM-Café",
             L(T("A recurring discussion panel on large language models at the computer science centre of RWTH Aachen.",
                 "Ein regelmäßiges Diskussionspanel zu großen Sprachmodellen im Informatikzentrum der RWTH Aachen.")),
             L(T("Organizer", "Organisator"))),
@@ -432,68 +478,105 @@ def research(lang):
 # 03 Photography
 # =====================================================================
 
-def P(f, r, w, h, alt, title, exif=""):
-    return dict(f=f, r=r, w=w, h=h, alt=alt, title=title, exif=exif)
+def P(f, w, h, alt, title, exif=""):
+    """One photo. The grid uses assets/photos/thumbs/<f>.jpg, the lightbox the full file."""
+    return dict(f=f, r=round(w / h, 4), w=w, h=h, alt=alt, title=title, exif=exif)
 
 
-def X(f, r, alt, title=T("", "")):          # portfolio images: 1800px long edge, no EXIF
+def X(f, r, alt, title=T("", "")):          # older portfolio images: 1800px long edge
     w, h = (1800, round(1800 / r)) if r >= 1 else (round(1800 * r), 1800)
-    return P(f, r, w, h, alt, title)
+    return P(f, w, h, alt, title)
 
 
-SERIES = [  # (anchor, name, note, rows)
+AERIAL = T(", aerial", ", Luftbild")
+
+
+def A_(en, de):                               # title of an aerial photo
+    return T(en + AERIAL["en"], de + AERIAL["de"])
+
+
+SERIES = [  # (anchor, name, note, photos)
     ("selected", T("Selected", "Auswahl"), "2019 — 2025", [
-        [P("p07", 1.778, 2000, 1125, T("Aerial view of a coastal road curving above rocks and surf", "Luftbild einer Küstenstraße über Felsen und Brandung"), T("Coast road, aerial", "Küstenstraße, Luftbild"), "f/1.7 · 1/730 · 2023"),
-         P("p02", 0.6665, 1333, 2000, T("Bride standing in a tall arched palace window, black and white", "Braut in einem hohen Bogenfenster eines Palasts, schwarzweiß"), T("Window", "Fenster"))],
-        [P("p03", 1.5, 2000, 1333, T("Dog running towards the camera with leaves in its mouth", "Hund rennt mit Laub im Maul auf die Kamera zu"), T("Retrieve", "Apport"), "85mm · f/1.4 · 2024"),
-         P("p05", 0.6665, 1333, 2000, T("Silhouette of a wedding couple holding hands", "Silhouette eines Hochzeitspaars, Hand in Hand"), T("Silhouette", "Silhouette"), "24mm · f/2.8"),
-         P("p04", 1.5, 2000, 1333, T("Woman embracing a dark horse against a blue sky", "Frau umarmt ein dunkles Pferd vor blauem Himmel"), T("Trust", "Vertrauen"), "135mm · f/2.8 · 2023")],
-        [P("p08", 1.4205, 2000, 1408, T("City lights at night seen from above", "Lichter einer Stadt bei Nacht von oben"), T("City at night, aerial", "Stadt bei Nacht, Luftbild"), "1/5 · ISO 1270 · 2025"),
-         P("p01", 1.5, 2000, 1333, T("Black and white portrait with skull face paint", "Schwarzweiß-Porträt mit Totenkopf-Schminke"), T("Portrait", "Porträt"))],
-        [P("p10", 1.5, 2000, 1333, T("Alpine valley with winding roads under dramatic clouds", "Alpental mit Serpentinen unter dramatischen Wolken"), T("Alps", "Alpen"), "26mm · f/11 · 2019"),
-         P("p06", 1.778, 2000, 1125, T("Wet dog shaking off water in the sun", "Nasser Hund schüttelt sich in der Sonne"), T("Shake", "Schütteln"), "24mm · 1/4000 · 2025")],
-        [P("p11", 1.5, 2000, 1333, T("Couple embracing in an autumn forest", "Paar umarmt sich im Herbstwald"), T("Autumn", "Herbst"), "85mm · f/2 · 2019"),
-         P("p09", 1.5, 2000, 1333, T("Wedding couple playfully posing in sand dunes", "Hochzeitspaar posiert verspielt in den Dünen"), T("Dunes", "Dünen"), "24mm · f/4 · 2019")],
+        P("p07", 2000, 1125, T("Aerial view of a coastal road curving above rocks and surf", "Luftbild einer Küstenstraße über Felsen und Brandung"), T("Coast road, aerial", "Küstenstraße, Luftbild"), "f/1.7 · 1/730 · 2023"),
+        P("p02", 1333, 2000, T("Bride standing in a tall arched palace window, black and white", "Braut in einem hohen Bogenfenster eines Palasts, schwarzweiß"), T("Window", "Fenster")),
+        P("p03", 2000, 1333, T("Dog running towards the camera with leaves in its mouth", "Hund rennt mit Laub im Maul auf die Kamera zu"), T("Retrieve", "Apport"), "85mm · f/1.4 · 2024"),
+        P("p05", 1333, 2000, T("Silhouette of a wedding couple holding hands", "Silhouette eines Hochzeitspaars, Hand in Hand"), T("Silhouette", "Silhouette"), "24mm · f/2.8"),
+        P("p08", 2000, 1408, T("City lights at night seen from above", "Lichter einer Stadt bei Nacht von oben"), T("City at night, aerial", "Stadt bei Nacht, Luftbild"), "1/5 · ISO 1270 · 2025"),
+        P("p01", 2000, 1333, T("Black and white portrait with skull face paint", "Schwarzweiß-Porträt mit Totenkopf-Schminke"), T("Portrait", "Porträt")),
+        P("p10", 2000, 1333, T("Alpine valley with winding roads under dramatic clouds", "Alpental mit Serpentinen unter dramatischen Wolken"), T("Alps", "Alpen"), "26mm · f/11 · 2019"),
+        P("p06", 2000, 1125, T("Wet dog shaking off water in the sun", "Nasser Hund schüttelt sich in der Sonne"), T("Shake", "Schütteln"), "24mm · 1/4000 · 2025"),
+        P("p11", 2000, 1333, T("Couple embracing in an autumn forest", "Paar umarmt sich im Herbstwald"), T("Autumn", "Herbst"), "85mm · f/2 · 2019"),
+        P("p09", 2000, 1333, T("Wedding couple playfully posing in sand dunes", "Hochzeitspaar posiert verspielt in den Dünen"), T("Dunes", "Dünen"), "24mm · f/4 · 2019"),
     ]),
     ("landscape", T("Landscape", "Landschaft"), "", [
-        [X("printhno_04", 0.8, T("Rock tower in the Dolomites under heavy clouds", "Felsturm in den Dolomiten unter schweren Wolken"), T("Dolomites", "Dolomiten")),
-         X("printhno_05", 1.25, T("Jagged Dolomite peaks at dusk", "Zackige Dolomitengipfel in der Dämmerung"), T("Dolomites", "Dolomiten")),
-         X("printhno_07", 1.25, T("Dolomite massif above a scree slope", "Dolomitenmassiv über einem Geröllhang"), T("Dolomites", "Dolomiten"))],
-        [X("printhno_02", 1.5, T("Alpine valley with layered mountain ridges", "Alpental mit gestaffelten Bergrücken"), T("Valley", "Tal")),
-         X("printhno_03", 1.5, T("Snow-capped peak above dark ridges and clouds", "Schneebedeckter Gipfel über dunklen Graten und Wolken"), T("Peaks", "Gipfel"))],
-        [X("printhno_10", 1.5, T("Vineyard rows seen from above", "Rebzeilen eines Weinbergs von oben"), T("Vineyard, aerial", "Weinberg, Luftbild")),
-         X("printhno_12", 1.5, T("Wooden jetty on a calm misty lake", "Holzsteg an einem ruhigen, nebligen See"), T("Jetty", "Steg"))],
-        [X("printhno_08", 2.6277, T("Tree-lined canal with calm water", "Von Bäumen gesäumter Kanal mit ruhigem Wasser"), T("Canal du Midi, France", "Canal du Midi, Frankreich"))],
+        P("land_18", 2400, 873, T("Panorama of a wide river bend under a low sun", "Panorama einer weiten Flussschleife bei tiefer Sonne"), T("River bend, panorama", "Flussschleife, Panorama")),
+        P("land_07", 1800, 1012, T("Bridges linking small islands across the sea, seen from above", "Brücken verbinden kleine Inseln im Meer, von oben"), A_("Island bridges", "Inselbrücken")),
+        P("land_13", 1800, 1012, T("Glowing lava veins in black rock, seen from above", "Glühende Lavaadern in schwarzem Gestein, von oben"), A_("Lava", "Lava")),
+        P("land_15", 1800, 1013, T("Crevassed glacier surface seen from above", "Zerklüftete Gletscheroberfläche von oben"), A_("Glacier", "Gletscher")),
+        P("land_17", 1800, 1012, T("River cutting through a moss-green canyon, seen from above", "Fluss in einer moosgrünen Schlucht, von oben"), A_("Canyon", "Schlucht")),
+        P("land_16", 1800, 1012, T("Road winding through moss-covered hills, seen from above", "Straße durch moosbedeckte Hügel, von oben"), A_("Road through moss", "Straße durchs Moos")),
+        P("land_14", 1800, 1012, T("Waterfall plunging into a gorge, seen from above", "Wasserfall stürzt in eine Schlucht, von oben"), A_("Waterfall", "Wasserfall")),
+        P("land_11", 1800, 1012, T("Steam rising from a crater in red earth, seen from above", "Dampf steigt aus einem Krater in roter Erde, von oben"), A_("Crater", "Krater")),
+        P("land_12", 1800, 1013, T("Dark rocks in white surf, seen from above", "Dunkle Felsen in weißer Brandung, von oben"), A_("Rocks in surf", "Felsen in der Brandung")),
+        P("land_00", 1800, 1012, T("Turquoise sea breaking on rocks, seen from above", "Türkisfarbenes Meer bricht an Felsen, von oben"), A_("Surf", "Brandung")),
+        P("land_10", 1800, 1013, T("Small boat drawing a wake across turquoise water, seen from above", "Kleines Boot zieht eine Spur durch türkisfarbenes Wasser, von oben"), A_("Boat", "Boot")),
+        P("land_08", 1800, 1012, T("Turquoise river winding through dense forest, seen from above", "Türkisfarbener Fluss durch dichten Wald, von oben"), A_("River", "Fluss")),
+        P("land_09", 2400, 655, T("Panorama of a city at night from the air", "Nachtpanorama einer Stadt aus der Luft"), T("City at night, panorama", "Stadt bei Nacht, Panorama")),
+        P("land_04", 1800, 1200, T("Mountain wrapped in clouds, black and white", "Berg in Wolken, schwarzweiß"), T("Clouds", "Wolken")),
+        P("land_02", 1800, 1011, T("Layered forested hills at dusk", "Gestaffelte bewaldete Hügel in der Dämmerung"), T("Dusk", "Dämmerung")),
+        P("land_03", 1800, 1011, T("Path through a tall green forest", "Weg durch einen hohen grünen Wald"), T("Forest", "Wald")),
+        P("land_06", 1800, 1013, T("Lone walker on a backlit shore below mountains", "Einzelner Spaziergänger am Ufer im Gegenlicht unter Bergen"), T("Shore", "Ufer")),
+        P("land_05", 1800, 1013, T("City skyline across the water under streaked clouds", "Skyline einer Stadt über dem Wasser unter Schleierwolken"), T("Skyline", "Skyline")),
+        P("land_01", 1200, 1800, T("Woman in white walking down a long red-pillared corridor", "Frau in Weiß in einem langen Säulengang mit roten Säulen"), T("Corridor", "Säulengang")),
+        X("printhno_04", 0.8, T("Rock tower in the Dolomites under heavy clouds", "Felsturm in den Dolomiten unter schweren Wolken"), T("Dolomites", "Dolomiten")),
+        X("printhno_05", 1.25, T("Jagged Dolomite peaks at dusk", "Zackige Dolomitengipfel in der Dämmerung"), T("Dolomites", "Dolomiten")),
+        X("printhno_07", 1.25, T("Dolomite massif above a scree slope", "Dolomitenmassiv über einem Geröllhang"), T("Dolomites", "Dolomiten")),
+        X("printhno_02", 1.5, T("Alpine valley with layered mountain ridges", "Alpental mit gestaffelten Bergrücken"), T("Valley", "Tal")),
+        X("printhno_03", 1.5, T("Snow-capped peak above dark ridges and clouds", "Schneebedeckter Gipfel über dunklen Graten und Wolken"), T("Peaks", "Gipfel")),
+        X("printhno_10", 1.5, T("Vineyard rows seen from above", "Rebzeilen eines Weinbergs von oben"), T("Vineyard, aerial", "Weinberg, Luftbild")),
+        X("printhno_12", 1.5, T("Wooden jetty on a calm misty lake", "Holzsteg an einem ruhigen, nebligen See"), T("Jetty", "Steg")),
+        X("printhno_08", 2.6277, T("Tree-lined canal with calm water", "Von Bäumen gesäumter Kanal mit ruhigem Wasser"), T("Canal du Midi, France", "Canal du Midi, Frankreich")),
     ]),
     ("people", T("People", "Menschen"), "", [
-        [X("portfolio_07", 1.25, T("Woman with curly hair in low-key studio light", "Frau mit Locken im Low-Key-Studiolicht"), T("Studio", "Studio")),
-         X("portfolio_13", 0.6667, T("Smiling woman in black and white", "Lächelnde Frau in Schwarzweiß"), T("Light", "Licht")),
-         X("portfolio_33", 0.6667, T("Black and white portrait of a woman with long hair", "Schwarzweiß-Porträt einer Frau mit langen Haaren"), T("Portrait", "Porträt"))],
-        [X("portfolio_16", 1.5, T("Smiling elderly woman, black and white close-up", "Lächelnde ältere Frau, Schwarzweiß-Nahaufnahme"), T("Laugh lines", "Lachfalten")),
-         X("portfolio_34", 1.5, T("Close portrait of a woman against a dark background", "Nahes Porträt einer Frau vor dunklem Hintergrund"), T("Gaze", "Blick"))],
-        [X("portfolio_09", 0.6667, T("Rider and horse jumping in the dark", "Reiterin und Pferd beim Sprung im Dunkeln"), T("Jump", "Sprung")),
-         X("portfolio_15", 0.6667, T("Basketball player mid-dunk, black and white", "Basketballspieler beim Dunk, schwarzweiß"), T("Dunk", "Dunk")),
-         X("portfolio_25", 0.6667, T("Athlete throwing a ball in backlight", "Sportler wirft einen Ball im Gegenlicht"), T("Throw", "Wurf")),
-         X("portfolio_60", 0.6667, T("Low-key black and white profile with hair falling forward", "Low-Key-Profil in Schwarzweiß mit nach vorn fallendem Haar"), T("Low key", "Low Key"))],
-        [X("portfolio_14", 1.5, T("Street scene with silhouettes against the sun", "Straßenszene mit Silhouetten im Gegenlicht"), T("Street", "Straße")),
-         X("portfolio_48", 1.5, T("Woman lying on a dark surface, black and white", "Frau liegt auf dunklem Untergrund, schwarzweiß"), T("Rest", "Ruhe")),
-         X("portfolio_59", 0.6667, T("Woman covering her face with her hands in warm light", "Frau verbirgt das Gesicht in den Händen, warmes Licht"), T("Shy", "Scheu"))],
+        P("peop_06", 1012, 1800, T("A baby's hand holding an adult's finger, black and white", "Babyhand hält einen Finger, schwarzweiß"), T("Hold", "Halt")),
+        P("peop_00", 1800, 1205, T("Woman under water with floating red hair", "Frau unter Wasser mit schwebenden roten Haaren"), T("Under water", "Unter Wasser")),
+        P("peop_02", 1800, 1013, T("Two faces head to toe with playing-card face paint, black and white", "Zwei Gesichter gegenläufig mit Spielkarten-Schminke, schwarzweiß"), T("Cards", "Karten")),
+        P("peop_01", 1200, 1800, T("Young woman hugging a tabby cat, black and white", "Junge Frau umarmt eine getigerte Katze, schwarzweiß"), T("Cat", "Katze")),
+        P("peop_03", 1800, 1200, T("Person standing on a rocky summit above mountain ranges", "Person auf einem felsigen Gipfel über Bergketten"), T("Summit", "Gipfel")),
+        P("peop_04", 1800, 1200, T("Smiling woman, black and white portrait", "Lächelnde Frau, Schwarzweiß-Porträt"), T("Smile", "Lächeln")),
+        P("peop_05", 1200, 1800, T("Fine-art nude study of a torso, black and white", "Aktstudie eines Torsos, schwarzweiß"), T("Form", "Form")),
+        X("portfolio_07", 1.25, T("Woman with curly hair in low-key studio light", "Frau mit Locken im Low-Key-Studiolicht"), T("Studio", "Studio")),
+        X("portfolio_13", 0.6667, T("Smiling woman in black and white", "Lächelnde Frau in Schwarzweiß"), T("Light", "Licht")),
+        X("portfolio_16", 1.5, T("Smiling elderly woman, black and white close-up", "Lächelnde ältere Frau, Schwarzweiß-Nahaufnahme"), T("Laugh lines", "Lachfalten")),
+        X("portfolio_09", 0.6667, T("Rider and horse jumping in the dark", "Reiterin und Pferd beim Sprung im Dunkeln"), T("Jump", "Sprung")),
+        X("portfolio_15", 0.6667, T("Basketball player mid-dunk, black and white", "Basketballspieler beim Dunk, schwarzweiß"), T("Dunk", "Dunk")),
+        X("portfolio_25", 0.6667, T("Athlete throwing a ball in backlight", "Sportler wirft einen Ball im Gegenlicht"), T("Throw", "Wurf")),
+        X("portfolio_60", 0.6667, T("Low-key black and white profile with hair falling forward", "Low-Key-Profil in Schwarzweiß mit nach vorn fallendem Haar"), T("Low key", "Low Key")),
+        X("portfolio_14", 1.5, T("Street scene with silhouettes against the sun", "Straßenszene mit Silhouetten im Gegenlicht"), T("Street", "Straße")),
+        X("portfolio_48", 1.5, T("Woman lying on a dark surface, black and white", "Frau liegt auf dunklem Untergrund, schwarzweiß"), T("Rest", "Ruhe")),
+        X("portfolio_59", 0.6667, T("Woman covering her face with her hands in warm light", "Frau verbirgt das Gesicht in den Händen, warmes Licht"), T("Shy", "Scheu")),
     ]),
     ("animals", T("Animals", "Tiere"), "", [
-        [X("baily_00", 1.25, T("Dog splashing through water", "Hund springt durchs Wasser"), T("Splash", "Spritzer")),
-         X("baily_02", 0.8, T("Border collie sitting in golden grass", "Border Collie sitzt im goldenen Gras"), T("Golden hour", "Goldene Stunde")),
-         X("baily_13", 0.8, T("Dog with closed eyes on white background", "Hund mit geschlossenen Augen vor weißem Hintergrund"), T("Calm", "Gelassen"))],
-        [X("baily_06", 0.6667, T("Shepherd dog in low-key light", "Schäferhund im Low-Key-Licht"), T("Low key", "Low Key")),
-         X("baily_11", 0.6667, T("Border collie catching a ball on white", "Border Collie fängt einen Ball, weißer Hintergrund"), T("Catch", "Fang")),
-         X("baily_08", 1.5, T("Shepherd dog lying in the dark", "Schäferhund liegt im Dunkeln"), T("Rest", "Ruhe"))],
+        P("p04", 2000, 1333, T("Woman embracing a dark horse against a blue sky", "Frau umarmt ein dunkles Pferd vor blauem Himmel"), T("Trust", "Vertrauen"), "135mm · f/2.8 · 2023"),
+        P("anim_02", 1800, 1200, T("White horse's mane in low-key light", "Mähne eines Schimmels im Low-Key-Licht"), T("Mane", "Mähne")),
+        P("anim_01", 1200, 1800, T("Horse grazing, seen from below against the sky", "Grasendes Pferd von unten vor dem Himmel"), T("Grazing", "Grasen")),
+        P("anim_04", 1800, 1201, T("Horse rolling in the sand of a dark arena", "Pferd wälzt sich im Sand einer dunklen Halle"), T("Roll", "Wälzen")),
+        P("anim_00", 1620, 1080, T("Girl hugging a horse's neck, black and white", "Mädchen umarmt den Hals eines Pferdes, schwarzweiß"), T("Embrace", "Umarmung")),
+        P("anim_03", 1800, 1200, T("Rider leading a horse through a dark stable", "Reiter führt ein Pferd durch einen dunklen Stall"), T("Stable", "Stall")),
+        X("baily_00", 1.25, T("Dog splashing through water", "Hund springt durchs Wasser"), T("Splash", "Spritzer")),
+        X("baily_02", 0.8, T("Border collie sitting in golden grass", "Border Collie sitzt im goldenen Gras"), T("Golden hour", "Goldene Stunde")),
+        X("baily_13", 0.8, T("Dog with closed eyes on white background", "Hund mit geschlossenen Augen vor weißem Hintergrund"), T("Calm", "Gelassen")),
+        X("baily_06", 0.6667, T("Shepherd dog in low-key light", "Schäferhund im Low-Key-Licht"), T("Low key", "Low Key")),
+        X("baily_11", 0.6667, T("Border collie catching a ball on white", "Border Collie fängt einen Ball, weißer Hintergrund"), T("Catch", "Fang")),
+        X("baily_08", 1.5, T("Shepherd dog lying in the dark", "Schäferhund liegt im Dunkeln"), T("Rest", "Ruhe")),
     ]),
     ("automotive", T("Automotive", "Automobil"), "", [
-        [X("polo_01", 1.25, T("Light trails around a white car at night", "Lichtspuren um ein weißes Auto bei Nacht"), T("Light painting", "Lichtmalerei")),
-         X("polo_13", 0.6667, T("Racing stripes on a car roof, close-up", "Rennstreifen auf einem Autodach, Nahaufnahme"), T("Stripes", "Streifen")),
-         X("polo_18", 1.25, T("White car with headlights on in the dark", "Weißes Auto mit eingeschalteten Scheinwerfern im Dunkeln"), T("Headlights", "Scheinwerfer"))],
-        [X("polo_07", 1.5, T("Car headlights glowing in darkness", "Leuchtende Autoscheinwerfer in der Dunkelheit"), T("Night", "Nacht")),
-         X("polo_09", 1.5, T("Car under a starry sky on a dark field", "Auto unter Sternenhimmel auf einem dunklen Feld"), T("Stars", "Sterne")),
-         X("polo_14", 0.6667, T("Car on a country road at sunset", "Auto auf einer Landstraße bei Sonnenuntergang"), T("Road", "Landstraße"))],
+        X("polo_01", 1.25, T("Light trails around a white car at night", "Lichtspuren um ein weißes Auto bei Nacht"), T("Light painting", "Lichtmalerei")),
+        X("polo_13", 0.6667, T("Racing stripes on a car roof, close-up", "Rennstreifen auf einem Autodach, Nahaufnahme"), T("Stripes", "Streifen")),
+        X("polo_18", 1.25, T("White car with headlights on in the dark", "Weißes Auto mit eingeschalteten Scheinwerfern im Dunkeln"), T("Headlights", "Scheinwerfer")),
+        X("polo_07", 1.5, T("Car headlights glowing in darkness", "Leuchtende Autoscheinwerfer in der Dunkelheit"), T("Night", "Nacht")),
+        X("polo_09", 1.5, T("Car under a starry sky on a dark field", "Auto unter Sternenhimmel auf einem dunklen Feld"), T("Stars", "Sterne")),
+        X("polo_14", 0.6667, T("Car on a country road at sunset", "Auto auf einer Landstraße bei Sonnenuntergang"), T("Road", "Landstraße")),
     ]),
 ]
 
@@ -502,18 +585,20 @@ def photography(lang):
     L = lambda x: x[lang] if isinstance(x, dict) else x
     A = "../" if lang == "de" else ""
 
+    # compact justified grid: each tile grows in proportion to its aspect ratio (--r),
+    # thumbnails in the grid, full-size file for the lightbox (data-full);
+    # captions are visually hidden in the grid and shown in the lightbox
     def fig(p):
-        return (f'          <figure style="--r:{p["r"]}"><img src="{A}assets/photos/{p["f"]}.jpg" alt="{L(p["alt"])}" loading="lazy" '
+        return (f'          <figure style="--r:{p["r"]}"><img src="{A}assets/photos/thumbs/{p["f"]}.jpg" '
+                f'data-full="{A}assets/photos/{p["f"]}.jpg" alt="{L(p["alt"])}" loading="lazy" decoding="async" '
                 f'width="{p["w"]}" height="{p["h"]}"><figcaption class="mono"><span>{L(p["title"])}</span><span>{p["exif"]}</span></figcaption></figure>')
 
-    def series(anchor, name, note, rows):
-        body = NL.join('        <div class="row">' + NL + NL.join(fig(p) for p in r) + NL + "        </div>" for r in rows)
-        n = sum(len(r) for r in rows)
-        right = (note + " · " if note else "") + str(n)
+    def series(anchor, name, note, photos):
+        right = (note + " · " if note else "") + str(len(photos))
         return (f'      <div class="group mono series" id="{anchor}"><span>{L(name)}</span><span>{right}</span></div>' + NL +
-                '      <div class="photos">' + NL + body + NL + '      </div>')
+                '      <div class="grid">' + NL + NL.join(fig(p) for p in photos) + NL + '      </div>')
 
-    n = sum(len(r) for _, _, _, rows in SERIES for r in rows)
+    n = sum(len(photos) for *_, photos in SERIES)
     nav = "".join(f'<a href="#{a}">{L(name).lower()}</a>' for a, name, _, _ in SERIES)
     extra = f'''
       <div class="bio">
@@ -557,7 +642,18 @@ def main():
         os.makedirs(out, exist_ok=True)
         A = "../" if lang == "de" else ""
         pub_js = f'<script src="{A}assets/pubs.js"></script>\n'
-        lightbox = '<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo"><img alt=""><div class="cap mono"></div></div>\n'
+        L = lambda x: x[lang]
+        # canvas = WebGL noise-dissolve between photos (site.js); img = the resting photo
+        lightbox = f'''<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="{L(T("Photo", "Foto"))}">
+  <canvas aria-hidden="true"></canvas>
+  <img alt="">
+  <div class="cap mono">
+    <span class="nav"><button type="button" class="prev" aria-label="{L(T("Previous photo", "Vorheriges Foto"))}">←</button><span class="count"></span><button type="button" class="next" aria-label="{L(T("Next photo", "Nächstes Foto"))}">→</button></span>
+    <span class="title" aria-live="polite"></span>
+    <button type="button" class="close">{L(T("close", "schließen"))} ×</button>
+  </div>
+</div>
+'''
         pages = {
             "index.html": (T("About", "Über mich"), about(lang), ""),
             "projects.html": (T("Projects", "Projekte"), projects(lang), ""),
