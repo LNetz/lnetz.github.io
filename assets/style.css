@@ -342,6 +342,7 @@ section > .group:first-child { padding-top: 0; }
   touch-action: pan-y;
 }
 .lightbox.open { display: block; }
+.lightbox img, .lightbox canvas { user-select: none; -webkit-user-select: none; -webkit-user-drag: none; }
 .lightbox img,
 .lightbox canvas {
   position: absolute;

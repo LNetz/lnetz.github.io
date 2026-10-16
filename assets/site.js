@@ -105,11 +105,11 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
 })();
 
 // ---- photo lightbox with a noise-dissolve between photos ----
-// Moving to the next/previous photo dissolves the outgoing frame through an fbm
-// noise field (WebGL). The threshold is biased by the luminance of the incoming
-// photo, so its bright areas burn through first; both frames drift slightly
-// against each other. Adapted from the "Morph Gallery" shader, but photos are
-// shown whole (contain, letterboxed in the page colour) instead of cropped.
+// Moving to the next/previous photo sweeps a dissolve front across the frame (WebGL):
+// from the right when moving forward, from the left when moving back. An fbm noise
+// field frays the front into tatters and both frames drift slightly sideways against
+// each other. Adapted from the "Morph Gallery" shader, but photos are shown whole
+// (contain, letterboxed in the page colour) instead of cropped.
 // Falls back to a short cross-fade without WebGL (or for file:// previews, where
 // images can't be uploaded as textures), and to an instant swap when the OS asks
 // for reduced motion.
@@ -188,15 +188,15 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
     void main() {
       float adjusted = u_progress * (1.0 + 2.0 * u_edge) - u_edge;
       vec2 nuv = (uv - 0.5) * u_res / min(u_res.x, u_res.y);   // round noise in any canvas shape
-      float n = fbm(nuv * u_scale + vec2(0.0, u_progress * u_dir)) * 0.5 + 0.5;
-      // bright areas of the incoming photo burn through first; letterbox areas get a
-      // neutral grey so the noise (not the page colour) decides how they tear
-      vec4 incoming = photo(u_to, uv, u_toAspect);
-      float lum = incoming.a > 0.5 ? length(incoming.rgb) : 0.866;
-      n = smoothstep(0.0, 2.0, lum + n);
-      float mixF = 1.0 - smoothstep(adjusted - u_edge, adjusted + u_edge, n);
-      vec4 a = photo(u_from, uv + vec2(0.0, n * u_progress * u_drift * u_dir), u_fromAspect);
-      vec4 b = photo(u_to, uv + vec2(0.0, n * (1.0 - u_progress) * -0.5 * u_drift * u_dir), u_toAspect);
+      float n = fbm(nuv * u_scale + vec2(u_progress * u_dir, 0.0)) * 0.5 + 0.5;
+      // side to side: the dissolve front sweeps across the frame — from the right when moving
+      // forward, from the left when moving back — and the noise frays its edge into tatters
+      float sweep = u_dir > 0.0 ? 1.0 - uv.x : uv.x;
+      float t = sweep * 0.65 + n * 0.35;
+      float mixF = 1.0 - smoothstep(adjusted - u_edge, adjusted + u_edge, t);
+      // horizontal drift: the outgoing photo slides away, the incoming one settles in
+      vec4 a = photo(u_from, uv + vec2(n * u_progress * u_drift * u_dir, 0.0), u_fromAspect);
+      vec4 b = photo(u_to, uv + vec2(n * (1.0 - u_progress) * -0.5 * u_drift * u_dir, 0.0), u_toAspect);
       gl_FragColor = vec4(mix(a.rgb, b.rgb, mixF), 1.0);
     }`;
 
@@ -247,14 +247,15 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
   };
 
   const ease = t => t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2;    // cubic in-out: calm start/end, visible middle
+  const easeOut = t => 1 - (1 - t) ** 3;                                   // for finishing a swipe already in motion
   const pageColour = () => (getComputedStyle(lb).backgroundColor.match(/[\d.]+/g) || [247, 247, 245]).slice(0, 3).map(v => v / 255);
 
-  const morph = (fromIm, toIm, dir) => new Promise((resolve, reject) => {
-    let tFrom, tTo;
-    try {
-      tFrom = texture(fromIm);
-      tTo = texture(toIm);
-    } catch (e) { reject(e); return; }
+  // Uploads both photos and sets up the shader; returns draw(progress 0..1) and dispose().
+  // Used by timed transitions (morph) and by the finger-driven swipe alike. Throws on
+  // tainted images (file:// previews) — callers fall back to a cross-fade.
+  const prepare = (fromIm, toIm, dir) => {
+    const tFrom = texture(fromIm);
+    const tTo = texture(toIm);
     lb.classList.add("morphing");                       // canvas visible, resting <img> hidden
     const dpr = Math.min(devicePixelRatio || 1, 2);
     canvas.width = Math.round(canvas.clientWidth * dpr);
@@ -269,18 +270,29 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
     gl.uniform1f(U.scale, 3.5);
     gl.uniform1f(U.dir, dir);
     gl.uniform1f(U.edge, 0.15);
-    gl.uniform1f(U.drift, 0.25);
+    gl.uniform1f(U.drift, 0.15);
+    const draw = p => { gl.uniform1f(U.progress, p); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); };
+    draw(0);
+    return { draw, dispose: () => { gl.deleteTexture(tFrom); gl.deleteTexture(tTo); } };
+  };
+
+  // animate a prepared transition from progress p0 to p1 (eased), resolves when done
+  const run = (h, p0, p1, ms, fn = ease) => new Promise(resolve => {
     let start = null;                                   // first frame's timestamp, same clock as `now`
     const frame = now => {
       if (start === null) start = now;
-      const p = ease(Math.min((now - start) / DURATION, 1));
-      gl.uniform1f(U.progress, p);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-      if (p < 1) requestAnimationFrame(frame);
-      else { gl.deleteTexture(tFrom); gl.deleteTexture(tTo); resolve(); }
+      const k = Math.min((now - start) / Math.max(ms, 1), 1);
+      h.draw(p0 + (p1 - p0) * fn(k));
+      if (k < 1) requestAnimationFrame(frame); else resolve();
     };
     requestAnimationFrame(frame);
   });
+
+  const morph = async (fromIm, toIm, dir) => {
+    const h = prepare(fromIm, toIm, dir);
+    await run(h, 0, 1, DURATION);
+    h.dispose();
+  };
 
   const fade = async src => {                          // fallback transition
     img.style.opacity = "0";
@@ -293,9 +305,15 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
   // ---------- loading: thumbnail first, full size as soon as it is there ----------
   const thumbOf = n => figs[n].querySelector("img").currentSrc || figs[n].querySelector("img").src;
   const cache = new Map();                              // src -> Promise<HTMLImageElement>
+  const ready = new Map();                              // src -> decoded image, for instant (sync) use
   const get = src => {
-    if (!cache.has(src)) cache.set(src, load(src).catch(e => { cache.delete(src); throw e; }));
+    if (!cache.has(src)) cache.set(src, load(src).then(im => { ready.set(src, im); return im; })
+                                                 .catch(e => { cache.delete(src); throw e; }));
     return cache.get(src);
+  };
+  const thumbReady = n => {                             // the grid tile, if it has finished loading
+    const t = figs[n].querySelector("img");
+    return t.complete && t.naturalWidth ? t : null;
   };
   const within = (p, ms) => Promise.race([p.catch(() => null), new Promise(r => setTimeout(() => r(null), ms))]);
   const sharpen = n => get(srcOf(n)).then(() => {   // swap the thumbnail for the full photo once loaded
@@ -472,15 +490,71 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
     toggleFs();
   }));
 
-  // swipe on touch screens; a plain tap/click on the backdrop or photo closes
-  let sx = null, swiped = false;
-  lb.addEventListener("pointerdown", e => { sx = e.clientX; swiped = false; });
-  lb.addEventListener("pointerup", e => {
+  // Swipe. With WebGL the transition follows the finger (or a dragged mouse): the dissolve front
+  // moves as far as you pull. Releasing past a third of the way, or with a quick flick, completes
+  // it; otherwise it springs back. Without WebGL (or with reduced motion) a swipe simply moves on.
+  // A plain tap/click on the backdrop or photo closes (see the click handler below).
+  let sx = null, swiped = false, drag = null, trail = [];   // trail: recent [time, x] for the flick speed
+  // the browser's own image drag-and-drop would take over the gesture (pointercancel)
+  img.draggable = false;
+  lb.addEventListener("dragstart", e => e.preventDefault());
+  lb.addEventListener("pointerdown", e => {
+    if (e.target.closest(".cap") || busy) return;
+    sx = e.clientX; swiped = false; drag = null; trail = [[e.timeStamp, e.clientX]];
+  });
+  lb.addEventListener("pointermove", e => {
+    if (sx === null) return;
+    const dx = e.clientX - sx, now = e.timeStamp;            // input time, not processing time
+    trail.push([now, e.clientX]);
+    while (trail.length > 2 && now - trail[0][0] > 100) trail.shift();   // keep ~the last 100 ms
+    if (!drag) {
+      if (Math.abs(dx) < 10 || busy || reduced.matches || !initGL()) return;
+      const dir = dx < 0 ? 1 : -1, n = wrap(i + dir);
+      const toIm = ready.get(srcOf(n)) || thumbReady(n);
+      if (!toIm) return;                                // nothing decoded yet: plain swipe on release
+      try {
+        drag = { dir, n, src: ready.has(srcOf(n)) ? srcOf(n) : thumbOf(n), h: prepare(img, toIm, dir), p: 0 };
+      } catch (_) { glFailed = true; return; }           // e.g. file:// — plain swipes from now on
+      busy = true;
+      clearTimeout(timer);
+      try { lb.setPointerCapture(e.pointerId); } catch (_) {}
+    }
+    drag.p = Math.max(0, Math.min(1, (-dx * drag.dir) / (canvas.clientWidth * 0.75)));
+    drag.h.draw(drag.p);
+  });
+  const release = async e => {
     if (sx === null) return;
     const dx = e.clientX - sx;
+    const [t0, x0] = trail[0], dt = e.timeStamp - t0;
     sx = null;
-    if (Math.abs(dx) > 48) { swiped = true; dx < 0 ? next() : prev(); }
-  });
+    if (!drag) {
+      if (e.type === "pointerup" && Math.abs(dx) > 48) { swiped = true; dx < 0 ? next() : prev(); }
+      return;
+    }
+    swiped = true;
+    const d = drag;
+    drag = null;
+    const speed = (-(e.clientX - x0) * d.dir) / Math.max(dt, 1);   // px/ms over the last ~100 ms
+    if (e.type === "pointerup" && (d.p > 0.33 || (speed > 0.5 && d.p > 0.05))) {
+      await run(d.h, d.p, 1, 120 + DURATION * 0.55 * (1 - d.p), easeOut);
+      i = d.n;
+      caption(i);
+      img.src = d.src;
+      await img.decode().catch(() => {});
+      lb.classList.remove("morphing");
+      d.h.dispose();
+      if (d.src !== srcOf(i)) sharpen(i);
+      preload(i);
+    } else {                                            // not far enough: spring back
+      await run(d.h, d.p, 0, 220 + 320 * d.p, easeOut);
+      lb.classList.remove("morphing");
+      d.h.dispose();
+    }
+    busy = false;
+    if (queued) { const [q, qd] = queued; queued = null; go(q, qd); } else schedule();
+  };
+  lb.addEventListener("pointerup", release);
+  lb.addEventListener("pointercancel", release);
   lb.addEventListener("click", e => {
     if (swiped) { swiped = false; return; }
     if (e.target.closest(".cap")) return;
