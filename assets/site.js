@@ -105,7 +105,9 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
 })();
 
 // ---- photo lightbox with a noise-dissolve between photos ----
-// Moving to the next/previous photo sweeps a dissolve front across the frame (WebGL),
+// Two moods share one shader (WebGL). Keys, buttons and the slideshow use "ink": a few drops
+// land and bloom outward like ink in water — much changes at once, then it slowly fills in, with
+// a soft, slightly darker wet edge (watercolour). A swipe instead sweeps a front across the frame,
 // from the right going forward, from the left going back. Contours of the incoming photo
 // switch first, then its areas of similar brightness switch as a whole; a little static
 // noise frays the front. The order is fixed per pixel, so nothing ripples or wobbles.
@@ -125,7 +127,8 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   const DURATION = 1400;          // ms of dissolve
   // dissolve order weights: side-to-side sweep, brightness areas, contours, static noise
-  const TUNE = { scale: 5.0, edge: 0.08, wSweep: 0.75, wShape: 0.55, wEdge: 0.22, wNoise: 0.12, bands: 4.0, kEdge: 2.4 };
+  const INK_DURATION = 2400;      // ms of the ink-drop transition (fast start, slow fill)
+  const TUNE = { scale: 5.0, edge: 0.08, inkEdge: 0.11, wSweep: 0.75, wShape: 0.55, wEdge: 0.22, wNoise: 0.12, bands: 4.0, kEdge: 2.4 };
   let i = -1, opener = null, busy = false, queued = null;
 
   const srcOf = n => { const im = figs[n].querySelector("img"); return im.dataset.full ? new URL(im.dataset.full, location.href).href : im.src; };   // full size, not the grid thumbnail
@@ -150,7 +153,8 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
     #endif
     uniform sampler2D u_from, u_to;
     uniform float u_progress, u_fromAspect, u_toAspect, u_scale, u_dir, u_edge;
-    uniform float u_wSweep, u_wShape, u_wEdge, u_wNoise, u_bands, u_kEdge;
+    uniform float u_wSweep, u_wShape, u_wEdge, u_wNoise, u_bands, u_kEdge, u_ink;
+    uniform vec2 u_seed;
     uniform vec2 u_res;
     uniform vec3 u_bg;
     varying vec2 uv;
@@ -201,33 +205,58 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
       //   edge  — contours of the incoming photo switch first (Sobel on a 3x3 neighbourhood)
       //   shape — then whole areas of similar brightness switch together, brightest first
       //   noise — a little static fbm so the front frays instead of cutting
-      vec2 d = 2.5 / u_res;
+      // contours: Sobel at ~1 px spacing, only clear edges pass, so they come in as fine lines
+      vec2 d = 1.0 / u_res;
       float l00 = lumTo(uv + vec2(-d.x, -d.y)), l10 = lumTo(uv + vec2(0.0, -d.y)), l20 = lumTo(uv + vec2(d.x, -d.y));
       float l01 = lumTo(uv + vec2(-d.x, 0.0)),  l11 = lumTo(uv),                   l21 = lumTo(uv + vec2(d.x, 0.0));
       float l02 = lumTo(uv + vec2(-d.x, d.y)),  l12 = lumTo(uv + vec2(0.0, d.y)),  l22 = lumTo(uv + vec2(d.x, d.y));
       float gx = (l20 + 2.0 * l21 + l22) - (l00 + 2.0 * l01 + l02);
       float gy = (l02 + 2.0 * l12 + l22) - (l00 + 2.0 * l10 + l20);
-      float edge = clamp(length(vec2(gx, gy)) * u_kEdge, 0.0, 1.0);
+      float edge = smoothstep(0.35, 0.85, length(vec2(gx, gy)) * u_kEdge);
       // the border between photo and letterbox is not a contour of the photo
       vec2 s = u_res.x / u_res.y > u_toAspect ? vec2((u_res.x / u_res.y) / u_toAspect, 1.0) : vec2(1.0, u_toAspect / (u_res.x / u_res.y));
-      vec2 tq = (uv - 0.5) * s + 0.5, m = min(tq, 1.0 - tq) / (d * s);
+      vec2 tq = (uv - 0.5) * s + 0.5, m = min(tq, 1.0 - tq) / (4.0 * d * s);
       edge *= step(1.5, min(m.x, m.y));
-      float mean = (l00 + l10 + l20 + l01 + l11 + l21 + l02 + l12 + l22) / 9.0;
-      float region = floor(mean * u_bands + 0.5) / u_bands;            // flat areas switch as one
+      // areas: brightness over a wider neighbourhood, in bands, so flat areas switch as one
+      vec2 D = 5.0 / u_res;
+      float mean = (lumTo(uv) * 2.0 + lumTo(uv + vec2(D.x, 0.0)) + lumTo(uv - vec2(D.x, 0.0))
+                  + lumTo(uv + vec2(0.0, D.y)) + lumTo(uv - vec2(0.0, D.y))) / 6.0;
+      float region = floor(mean * u_bands + 0.5) / u_bands;
 
       vec2 nuv = (uv - 0.5) * u_res / min(u_res.x, u_res.y);         // round noise in any canvas shape
       float n = fbm(nuv * u_scale) * 0.5 + 0.5;                       // static: no ripple
+      float shapeT = u_wShape * (1.0 - region) - u_wEdge * edge + u_wNoise * (n - 0.5);
+
+      // swipe: a front from the side the finger comes from
       float sweep = u_dir > 0.0 ? 1.0 - uv.x : uv.x;
-
-      float t = u_wSweep * sweep + u_wShape * (1.0 - region) - u_wEdge * edge + u_wNoise * (n - 0.5);
+      float tSwipe = u_wSweep * sweep + shapeT;
       float lo = -u_wEdge - 0.5 * u_wNoise, hi = u_wSweep + u_wShape + 0.5 * u_wNoise;
-      t = (t - lo) / (hi - lo);
+      tSwipe = (tSwipe - lo) / (hi - lo);
 
+      // ink: a few drops land and bloom outward through water — distance to the nearest drop,
+      // warped by low-frequency noise into tendrils; later drops start a little later
+      float ink = 10.0;
+      vec2 asp = vec2(u_res.x / min(u_res.x, u_res.y), u_res.y / min(u_res.x, u_res.y));
+      float warp = fbm(nuv * 1.6 + u_seed * 7.0) * 0.32 + fbm(nuv * 4.5 - u_seed * 3.0) * 0.08;
+      for (int k = 0; k < 3; k++) {
+        float fk = float(k);
+        vec2 c = vec2(fract(sin(fk * 12.9898 + u_seed.x * 78.233) * 43758.5453),
+                      fract(sin(fk * 39.3468 + u_seed.y * 11.135) * 24634.6345));
+        c = 0.15 + 0.7 * c;
+        ink = min(ink, length((uv - c) * asp) + warp + fk * 0.18);
+      }
+      float tInk = clamp((ink * 1.05 + shapeT * 0.45) / 1.15, 0.0, 1.0);
+
+      float t = mix(tSwipe, tInk, u_ink);
       float adjusted = u_progress * (1.0 + 2.0 * u_edge) - u_edge;
       float mixF = 1.0 - smoothstep(adjusted - u_edge, adjusted + u_edge, t);
       vec4 a = photo(u_from, uv, u_fromAspect);
       vec4 b = photo(u_to, uv, u_toAspect);
-      gl_FragColor = vec4(mix(a.rgb, b.rgb, mixF), 1.0);
+      vec3 col = mix(a.rgb, b.rgb, mixF);
+      // watercolour: pigment pools at the wet edge — a soft, slightly darker rim on the front
+      float rim = smoothstep(0.0, 1.0, 1.0 - abs(mixF * 2.0 - 1.0));
+      col *= 1.0 - 0.16 * rim * u_ink * (0.6 + 0.4 * n);
+      gl_FragColor = vec4(col, 1.0);
     }`;
 
   let gl = null, glFailed = false, U = {};
@@ -254,7 +283,7 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
       const loc = gl.getAttribLocation(prog, "p");
       gl.enableVertexAttribArray(loc);
       gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-      for (const k of ["from", "to", "progress", "fromAspect", "toAspect", "scale", "dir", "edge", "res", "bg", "wSweep", "wShape", "wEdge", "wNoise", "bands", "kEdge"])
+      for (const k of ["from", "to", "progress", "fromAspect", "toAspect", "scale", "dir", "edge", "res", "bg", "wSweep", "wShape", "wEdge", "wNoise", "bands", "kEdge", "ink", "seed"])
         U[k] = gl.getUniformLocation(prog, "u_" + k);
       gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
       return true;
@@ -283,7 +312,7 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
   // Uploads both photos and sets up the shader; returns draw(progress 0..1) and dispose().
   // Used by timed transitions (morph) and by the finger-driven swipe alike. Throws on
   // tainted images (file:// previews) — callers fall back to a cross-fade.
-  const prepare = (fromIm, toIm, dir) => {
+  const prepare = (fromIm, toIm, dir, ink = false) => {
     const tFrom = texture(fromIm);
     const tTo = texture(toIm);
     lb.classList.add("morphing");                       // canvas visible, resting <img> hidden
@@ -300,7 +329,11 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
     // TUNE can be overridden from the console (window.LB_TUNE) to try variants
     const tune = Object.assign({}, TUNE, window.LB_TUNE || {});
     gl.uniform1f(U.dir, dir);
-    for (const k of ["scale", "edge", "wSweep", "wShape", "wEdge", "wNoise", "bands", "kEdge"]) gl.uniform1f(U[k], tune[k]);
+    for (const k of ["scale", "wSweep", "wShape", "wEdge", "wNoise", "bands", "kEdge"]) gl.uniform1f(U[k], tune[k]);
+    // ink mode (keys, buttons, slideshow): drops bloom out with a wider, softer wet edge
+    gl.uniform1f(U.ink, ink ? 1 : 0);
+    gl.uniform1f(U.edge, ink ? tune.inkEdge : tune.edge);
+    gl.uniform2f(U.seed, Math.random(), Math.random());       // new drop positions every time
     const draw = p => { gl.uniform1f(U.progress, p); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); };
     draw(0);
     return { draw, dispose: () => { gl.deleteTexture(tFrom); gl.deleteTexture(tTo); } };
@@ -318,9 +351,11 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
     requestAnimationFrame(frame);
   });
 
+  // ink in water: much changes at once, then it slowly fills in (exponential ease-out)
+  const easeInk = t => 1 - Math.pow(1 - t, 2.4);
   const morph = async (fromIm, toIm, dir) => {
-    const h = prepare(fromIm, toIm, dir);
-    await run(h, 0, 1, DURATION);
+    const h = prepare(fromIm, toIm, dir, true);
+    await run(h, 0, 1, INK_DURATION, easeInk);
     h.dispose();
   };
 
