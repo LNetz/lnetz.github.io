@@ -52,6 +52,9 @@ def shell(lang, file, title, desc, body, scripts=""):
     social = NL.join(f'      <a href="{u}" target="_blank" rel="noopener">{name} ↗</a>' for name, u in SOCIAL)
     full_title = "Lukas Netz" if file == "index.html" else f"{L(title)} — Lukas Netz"
     foot_icons = "".join(f'<a href="{f}" title="{L(t)}" aria-label="{L(t)}">{ICONS[i]}</a>' for f, i, t in QUICK)
+    # easter egg: Connect Four, not in the navigation — only this little diagonal of four dots
+    foot_icons += (f'<a class="egg" href="{A}vier-gewinnt/" title="{L(T("Connect Four", "Vier gewinnt"))}" '
+                   f'aria-label="{L(T("Connect Four", "Vier gewinnt"))}">{ICONS["four"]}</a>')
     langs = (f'<a href="{"" if lang == "en" else "../"}{file}" hreflang="en" lang="en"{" aria-current=\"true\"" if lang == "en" else ""}>EN</a>'
              f'<a href="{"de/" if lang == "en" else ""}{file}" hreflang="de" lang="de"{" aria-current=\"true\"" if lang == "de" else ""}>DE</a>')
 
@@ -238,6 +241,10 @@ def row(label, title, text, role="", links=()):
 # Line icons on a 24px grid, round caps, stroke = currentColor (works in both themes).
 _SVG = '<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">{}</svg>'
 ICONS = {
+    # four in a row — footer easter egg
+    "four": '<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">'
+            '<circle cx="4.5" cy="19.5" r="2.4"/><circle cx="9.5" cy="14.5" r="2.4"/>'
+            '<circle cx="14.5" cy="9.5" r="2.4"/><circle cx="19.5" cy="4.5" r="2.4"/></svg>',
     # </>  — software projects
     # optically matched to the other two (~19x15 of the 24 grid): compact brackets, air around the slash
     "code": _SVG.format('<path d="M7.5 7L2.5 12l5 5"/><path d="M16.5 7l5 5-5 5"/><path d="M14 4.5l-4 15"/>'),
