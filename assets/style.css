@@ -419,7 +419,7 @@ footer > a { justify-self: end; }
 .foot-icons a:hover { color: var(--accent); }
 .foot-icons svg { display: block; width: 16px; height: 16px; }
 .foot-icons .egg { margin-left: 6px; opacity: .55; }          /* easter egg: a little quieter */
-.foot-icons .egg svg { width: 12px; height: 12px; margin-top: 2px; }
+.foot-icons .egg svg { width: 17px; height: 17px; }
 .foot-icons .egg:hover { opacity: 1; }
 
 /* ---------- tablet landscape / small laptops: tighter frame ---------- */
