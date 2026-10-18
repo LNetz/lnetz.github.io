@@ -332,8 +332,9 @@ section > .group:first-child { padding-top: 0; }
   clip: rect(0 0 0 0); white-space: nowrap;
 }
 
-/* lightbox: the resting <img> and the transition <canvas> occupy exactly the same
-   box and both letterbox ("contain"), so swapping between them never jumps */
+/* lightbox: the transition <canvas> covers the whole window and draws each photo exactly where
+   the resting <img> shows it, so swapping between them never jumps. Photos that match the
+   screen's orientation fill it (.fill, cropped); the rest sit whole inside the margins. */
 .lightbox {
   --lb-top: 40px; --lb-side: 40px; --lb-bottom: 72px;
   position: fixed; inset: 0; z-index: 30;
@@ -351,6 +352,19 @@ section > .group:first-child { padding-top: 0; }
   object-fit: contain; display: block;
   transition: opacity .18s ease;
 }
+.lightbox canvas,
+.lightbox.fill img { left: 0; top: 0; width: 100%; height: 100%; }
+.lightbox.fill img { object-fit: cover; }
+/* a filling photo runs under the caption: a soft shade keeps it legible */
+.lightbox::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 140px;
+  background: linear-gradient(to top, rgba(0,0,0,.5), rgba(0,0,0,0));
+  pointer-events: none; opacity: 0; transition: opacity .5s ease;
+}
+.lightbox.fill::after { opacity: 1; }
+.lightbox.fill .cap { --ink-2: #eeeeea; --ink-3: #c8c8c2; z-index: 1; }
+.lightbox.fill .cap button:hover { color: #fff; }
+.lightbox.fill.idle::after { opacity: 0; }
 .lightbox canvas { display: none; }
 .lightbox.morphing canvas { display: block; }
 .lightbox.morphing img { visibility: hidden; }

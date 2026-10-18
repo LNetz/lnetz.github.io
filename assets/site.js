@@ -111,8 +111,9 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
 // from the right going forward, from the left going back. Contours of the incoming photo
 // switch first, then its areas of similar brightness switch as a whole; a little static
 // noise frays the front. The order is fixed per pixel, so nothing ripples or wobbles.
-// Adapted from the "Morph Gallery" shader, but photos are shown whole
-// (contain, letterboxed in the page colour) instead of cropped.
+// Adapted from the "Morph Gallery" shader. Photos whose orientation matches the screen (and
+// that aren't panoramas) fill it, cropped like "cover"; the rest are shown whole ("contain",
+// letterboxed in the page colour inside the margins).
 // Falls back to a short cross-fade without WebGL (or for file:// previews, where
 // images can't be uploaded as textures), and to an instant swap when the OS asks
 // for reduced motion.
@@ -128,7 +129,8 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
   const DURATION = 1400;          // ms of dissolve
   // dissolve order weights: side-to-side sweep, brightness areas, contours, static noise
   const INK_DURATION = 1700;      // ms of the ink-drop transition (fast start, slow fill)
-  const TUNE = { scale: 5.0, edge: 0.08, inkEdge: 0.11, wSweep: 0.75, wShape: 0.55, wEdge: 0.22, wNoise: 0.12, bands: 4.0, kEdge: 2.4 };
+  // lines: contours of the incoming photo fade in faintly (lineAlpha) well ahead of the front (lead)
+  const TUNE = { scale: 5.0, edge: 0.08, inkEdge: 0.11, wSweep: 0.75, wShape: 0.55, wEdge: 0.06, wNoise: 0.12, bands: 4.0, kEdge: 2.4, lead: 0.42, lineAlpha: 0.42 };
   let i = -1, opener = null, busy = false, queued = null;
 
   const srcOf = n => { const im = figs[n].querySelector("img"); return im.dataset.full ? new URL(im.dataset.full, location.href).href : im.src; };   // full size, not the grid thumbnail
@@ -153,7 +155,9 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
     #endif
     uniform sampler2D u_from, u_to;
     uniform float u_progress, u_fromAspect, u_toAspect, u_scale, u_dir, u_edge;
-    uniform float u_wSweep, u_wShape, u_wEdge, u_wNoise, u_bands, u_kEdge, u_ink;
+    uniform float u_wSweep, u_wShape, u_wEdge, u_wNoise, u_bands, u_kEdge, u_ink, u_lead, u_lineAlpha;
+    uniform vec4 u_fromBox, u_toBox;       // where each photo sits on the canvas (uv: x0, y0, x1, y1)
+    uniform float u_fromCover, u_toCover;  // 1 = fill its box (crop), 0 = whole photo (letterbox)
     uniform vec2 u_seed;
     uniform vec2 u_res;
     uniform vec3 u_bg;
@@ -185,17 +189,21 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
       for (int k = 0; k < 5; k++) { s += a * snoise(v); v *= 2.0; a *= 0.5; }
       return s;
     }
-    // "contain": the whole photo, letterboxed in the page colour
-    vec4 photo(sampler2D tex, vec2 q, float imgAspect) {
-      float ca = u_res.x / u_res.y;
-      vec2 s = ca > imgAspect ? vec2(ca / imgAspect, 1.0) : vec2(1.0, imgAspect / ca);
-      vec2 t = (q - 0.5) * s + 0.5;
+    // canvas position -> texture position, "contain" or "cover" inside the photo's box
+    vec2 place(vec2 q, float imgAspect, vec4 box, float cover) {
+      vec2 size = box.zw - box.xy;
+      float ba = (u_res.x * size.x) / (u_res.y * size.y);
+      vec2 s = (ba > imgAspect) == (cover < 0.5) ? vec2(ba / imgAspect, 1.0) : vec2(1.0, imgAspect / ba);
+      return ((q - box.xy) / size - 0.5) * s + 0.5;
+    }
+    vec4 photo(sampler2D tex, vec2 q, float imgAspect, vec4 box, float cover) {
+      vec2 t = place(q, imgAspect, box, cover);
       if (t.x < 0.0 || t.y < 0.0 || t.x > 1.0 || t.y > 1.0) return vec4(u_bg, 0.0);   // alpha 0 = letterbox
       return vec4(texture2D(tex, t).rgb, 1.0);
     }
     // luminance of the incoming photo at q; letterbox areas read as black, so they switch last
     float lumTo(vec2 q) {
-      vec4 c = photo(u_to, q, u_toAspect);
+      vec4 c = photo(u_to, q, u_toAspect, u_toBox, u_toCover);
       return c.a > 0.5 ? dot(c.rgb, vec3(0.299, 0.587, 0.114)) : 0.0;
     }
     void main() {
@@ -214,8 +222,8 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
       float gy = (l02 + 2.0 * l12 + l22) - (l00 + 2.0 * l10 + l20);
       float edge = smoothstep(0.35, 0.85, length(vec2(gx, gy)) * u_kEdge);
       // the border between photo and letterbox is not a contour of the photo
-      vec2 s = u_res.x / u_res.y > u_toAspect ? vec2((u_res.x / u_res.y) / u_toAspect, 1.0) : vec2(1.0, u_toAspect / (u_res.x / u_res.y));
-      vec2 tq = (uv - 0.5) * s + 0.5, m = min(tq, 1.0 - tq) / (4.0 * d * s);
+      vec2 tq = place(uv, u_toAspect, u_toBox, u_toCover);
+      vec2 m = min(tq, 1.0 - tq) / (4.0 * abs(place(uv + d, u_toAspect, u_toBox, u_toCover) - tq));
       edge *= step(1.5, min(m.x, m.y));
       // areas: brightness over a wider neighbourhood, in bands, so flat areas switch as one
       vec2 D = 5.0 / u_res;
@@ -250,8 +258,11 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
       float t = mix(tSwipe, tInk, u_ink);
       float adjusted = u_progress * (1.0 + 2.0 * u_edge) - u_edge;
       float mixF = 1.0 - smoothstep(adjusted - u_edge, adjusted + u_edge, t);
-      vec4 a = photo(u_from, uv, u_fromAspect);
-      vec4 b = photo(u_to, uv, u_toAspect);
+      // lines: faint contours of the incoming photo show up long before the front reaches them
+      float ahead = 1.0 - smoothstep(adjusted - u_edge, adjusted + u_edge + u_lead, t);
+      mixF = max(mixF, edge * u_lineAlpha * ahead);
+      vec4 a = photo(u_from, uv, u_fromAspect, u_fromBox, u_fromCover);
+      vec4 b = photo(u_to, uv, u_toAspect, u_toBox, u_toCover);
       vec3 col = mix(a.rgb, b.rgb, mixF);
       // watercolour: pigment pools at the wet edge — a soft, slightly darker rim on the front
       float rim = smoothstep(0.0, 1.0, 1.0 - abs(mixF * 2.0 - 1.0));
@@ -283,7 +294,7 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
       const loc = gl.getAttribLocation(prog, "p");
       gl.enableVertexAttribArray(loc);
       gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-      for (const k of ["from", "to", "progress", "fromAspect", "toAspect", "scale", "dir", "edge", "res", "bg", "wSweep", "wShape", "wEdge", "wNoise", "bands", "kEdge", "ink", "seed"])
+      for (const k of ["from", "to", "progress", "fromAspect", "toAspect", "scale", "dir", "edge", "res", "bg", "wSweep", "wShape", "wEdge", "wNoise", "bands", "kEdge", "ink", "seed", "lead", "lineAlpha", "fromBox", "toBox", "fromCover", "toCover"])
         U[k] = gl.getUniformLocation(prog, "u_" + k);
       gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
       return true;
@@ -309,6 +320,25 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
   const easeOut = t => 1 - (1 - t) ** 3;                                   // for finishing a swipe already in motion
   const pageColour = () => (getComputedStyle(lb).backgroundColor.match(/[\d.]+/g) || [247, 247, 245]).slice(0, 3).map(v => v / 255);
 
+  // A photo fills the screen when its orientation matches the screen's and it isn't a panorama
+  // (or a tall strip); squares and the rest are shown whole within the margins.
+  const fills = im => {
+    const a = im.naturalWidth / im.naturalHeight, v = innerWidth / innerHeight;
+    if (!a || a > 2.1 || a < 1 / 2.1) return false;
+    return v >= 1 ? a > 1.15 : a < 0.87;
+  };
+  // the photo's box on the (full-window) canvas in GL uv, y up: all of it, or inside the margins
+  const box = im => {
+    if (fills(im)) return [0, 0, 1, 1];
+    const cs = getComputedStyle(lb), px = k => parseFloat(cs.getPropertyValue(k)) || 0;
+    const W = canvas.clientWidth, H = canvas.clientHeight;
+    return [px("--lb-side") / W, px("--lb-bottom") / H, 1 - px("--lb-side") / W, 1 - px("--lb-top") / H];
+  };
+  // the resting <img> follows the photo it shows
+  const fit = () => lb.classList.toggle("fill", !!img.naturalWidth && fills(img));
+  img.addEventListener("load", fit);
+  addEventListener("resize", fit);
+
   // Uploads both photos and sets up the shader; returns draw(progress 0..1) and dispose().
   // Used by timed transitions (morph) and by the finger-driven swipe alike. Throws on
   // tainted images (file:// previews) — callers fall back to a cross-fade.
@@ -329,7 +359,9 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
     // TUNE can be overridden from the console (window.LB_TUNE) to try variants
     const tune = Object.assign({}, TUNE, window.LB_TUNE || {});
     gl.uniform1f(U.dir, dir);
-    for (const k of ["scale", "wSweep", "wShape", "wEdge", "wNoise", "bands", "kEdge"]) gl.uniform1f(U[k], tune[k]);
+    for (const k of ["scale", "wSweep", "wShape", "wEdge", "wNoise", "bands", "kEdge", "lead", "lineAlpha"]) gl.uniform1f(U[k], tune[k]);
+    gl.uniform4f(U.fromBox, ...box(fromIm)); gl.uniform1f(U.fromCover, fills(fromIm) ? 1 : 0);
+    gl.uniform4f(U.toBox, ...box(toIm)); gl.uniform1f(U.toCover, fills(toIm) ? 1 : 0);
     // ink mode (keys, buttons, slideshow): drops bloom out with a wider, softer wet edge
     gl.uniform1f(U.ink, ink ? 1 : 0);
     gl.uniform1f(U.edge, ink ? tune.inkEdge : tune.edge);
@@ -355,6 +387,7 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
   const easeInk = t => 1 - Math.pow(1 - t, 2.4);
   const morph = async (fromIm, toIm, dir) => {
     const h = prepare(fromIm, toIm, dir, true);
+    lb.classList.toggle("fill", fills(toIm));           // caption shade follows the incoming photo
     await run(h, 0, 1, INK_DURATION, easeInk);
     h.dispose();
   };
@@ -430,6 +463,7 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
         await morph(img, to, dir);
         img.src = src;
         await img.decode().catch(() => {});
+        fit();
         lb.classList.remove("morphing");
       } else {
         await fade(src);
@@ -606,6 +640,7 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
       caption(i);
       img.src = d.src;
       await img.decode().catch(() => {});
+      fit();
       lb.classList.remove("morphing");
       d.h.dispose();
       if (d.src !== srcOf(i)) sharpen(i);
