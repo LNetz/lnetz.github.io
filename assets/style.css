@@ -430,7 +430,8 @@ section > .pubs li:has(.mini) { grid-template-columns: 120px minmax(0, 1fr) 168p
 }
 .map-wrap.fs { position: fixed; inset: 0; z-index: 40; }
 .map-wrap:fullscreen .map, .map-wrap.fs .map { flex: 1; height: auto; min-height: 0; border-bottom: 0; }
-.map-wrap:fullscreen .map-note, .map-wrap.fs .map-note { display: none; }
+.map-wrap:fullscreen .map-note, .map-wrap.fs .map-note,
+.map-wrap:fullscreen .map-lead, .map-wrap.fs .map-lead { display: none; }   /* full screen: legend and map only */
 .map-note .ico { width: 17px; height: 10px; vertical-align: -1px; fill: none; stroke: currentColor; stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; }
 .map-note .ico .f { fill: currentColor; stroke: none; }
 .map-note summary { cursor: pointer; list-style: none; color: var(--ink-3); }

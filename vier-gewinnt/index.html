@@ -240,6 +240,52 @@
     color: var(--ivory-dim); text-decoration: none;
   }
   .home:hover{ color: var(--ember); }
+  /* opened as an overlay on the website: the overlay has its own close button */
+  .embedded .home{ display: none; }
+  /* in the overlay the board floats over the (blurred) website: no backdrop, no title */
+  .embedded, .embedded body{ background: transparent; }
+  .embedded .vignette, .embedded .masthead h1, .embedded .masthead .sub{ display: none; }
+  .embedded .controls{ top: 52px; }
+  .embedded{
+    --s-bg: #f7f7f5; --s-ink: #141414; --s-ink-2: #4d4d49; --s-ink-3: #70706b; --s-rule: #e2e2dd; --s-accent: #2f4bff;
+    --s-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace; --s-sans: "IBM Plex Sans", system-ui, sans-serif;
+  }
+  .embedded body{ color: var(--s-ink); font-family: var(--s-sans); }
+  .embedded button{
+    font-family: var(--s-mono); font-weight: 400; font-size: 11px; letter-spacing: 0; text-transform: lowercase;
+    color: var(--s-ink-2); background: none; border: 0; border-radius: 0; padding: 6px 0;
+  }
+  .embedded button:hover{ color: var(--s-accent); background: none; border: 0; }
+  .embedded button.primary, .embedded button.primary:hover{ color: var(--s-accent); background: none; }
+  .embedded .controls{ gap: 20px; }
+  .embedded .difficulty{ border: 0; gap: 16px; overflow: visible; }
+  .embedded .difficulty button + button{ border-left: 0; }
+  .embedded .difficulty button{ color: var(--s-ink-3); padding: 6px 0; }
+  .embedded .difficulty button.active{ color: var(--s-accent); background: none; }
+  .embedded .difficulty button:hover:not(.active){ color: var(--s-ink); background: none; }
+  .embedded .status .turn{ font-family: var(--s-mono); font-size: 13px; letter-spacing: 0; text-transform: lowercase; color: var(--s-ink); gap: 10px; }
+  .embedded .status .dot{ width: 9px; height: 9px; background: var(--s-accent); box-shadow: none; }
+  .embedded .status.cpu .dot{ background: var(--s-bg); box-shadow: inset 0 0 0 1px var(--s-ink-3); }   /* the machine plays the light discs */
+  .embedded .status .hint{ font-family: var(--s-mono); font-size: 11px; letter-spacing: 0; color: var(--s-ink-3); }
+  .embedded kbd{ font-family: var(--s-mono); font-weight: 400; border-color: var(--s-rule); color: var(--s-ink-2); border-radius: 2px; }
+  .embedded .board-aside{ background: var(--s-bg); border-left: 1px solid var(--s-rule); color: var(--s-ink); }
+  .embedded .board-aside h2{ font-family: var(--s-sans); font-weight: 500; font-size: 15px; letter-spacing: 0; text-transform: lowercase; color: var(--s-ink); }
+  .embedded .lb-list li{ border-bottom: 1px dashed var(--s-rule); }
+  .embedded .lb-list li.fresh{ background: color-mix(in srgb, var(--s-accent) 8%, transparent); }
+  .embedded .lb-list .rank, .embedded .lb-list .pts{ font-family: var(--s-mono); font-size: 13px; color: var(--s-ink-2); }
+  .embedded .lb-list li:first-child .rank{ color: var(--s-accent); }
+  .embedded .lb-list .who{ font-weight: 500; font-size: 14px; }
+  .embedded .lb-list .meta, .embedded .lb-empty{ font-family: var(--s-mono); color: var(--s-ink-3); }
+  .embedded .finale{ background: radial-gradient(ellipse 70% 55% at 50% 46%, color-mix(in srgb, var(--s-bg) 88%, transparent), color-mix(in srgb, var(--s-bg) 40%, transparent) 70%, transparent); }
+  .embedded .finale .verdict{ font-family: var(--s-sans); font-weight: 300; letter-spacing: -0.01em; text-transform: lowercase; color: var(--s-accent); text-shadow: none; font-size: clamp(48px, 8vw, 110px); }
+  .embedded .finale.loss .verdict{ color: var(--s-ink); text-shadow: none; }
+  .embedded .finale.draw .verdict{ color: var(--s-ink-3); }
+  .embedded .finale .detail{ font-family: var(--s-mono); font-weight: 400; font-size: 12px; letter-spacing: 0; text-transform: lowercase; color: var(--s-ink-2); }
+  .embedded .finale .scoreline{ font-family: var(--s-mono); font-size: 18px; letter-spacing: 0; color: var(--s-ink); }
+  .embedded .finale input{ font-family: var(--s-mono); font-weight: 400; font-size: 13px; letter-spacing: 0; color: var(--s-ink); background: transparent; border: 0; border-bottom: 1px solid var(--s-ink-3); border-radius: 0; padding: 8px 2px; }
+  .embedded .finale input:focus{ border-color: var(--s-accent); }
+  .embedded .finale .again{ padding: 8px 0; font-size: 12px; }                  /* room for the overlay's close button */
+  @media (max-width: 640px){ .embedded .controls{ top: auto; } .embedded .masthead{ top: calc(40px + env(safe-area-inset-top)); } }
 
   @media (max-width: 640px){
     .masthead .sub{ display:none; }
@@ -259,6 +305,18 @@
 </style>
 </head>
 <body>
+<script>
+  // inside the website overlay (footer gamepad): Esc and the way back close the overlay instead
+  window.EMBEDDED = window.self !== window.top;
+  if (window.EMBEDDED) {
+    document.documentElement.classList.add("embedded");
+    const l = document.createElement("link");             // the website's typefaces
+    l.rel = "stylesheet";
+    l.href = "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap";
+    document.head.appendChild(l);
+  }
+  window.closeOverlay = () => { try { parent.postMessage({ type: "game:close" }, location.origin); } catch (_) {} };
+</script>
 
 <canvas id="stage"></canvas>
 <div class="vignette"></div>
@@ -577,7 +635,8 @@ function vibrate(pattern) { if (navigator.vibrate) navigator.vibrate(pattern); }
 ============================================================ */
 const canvas = document.getElementById('stage');
 const COARSE = matchMedia('(pointer: coarse)').matches;   // phones / tablets: lighter rendering
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: !!window.EMBEDDED });
+if (window.EMBEDDED) renderer.setClearColor(0x000000, 0);   // transparent: the website shows through
 renderer.setPixelRatio(Math.min(devicePixelRatio, COARSE ? 1.5 : 2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -586,8 +645,10 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color('#16100a');
-scene.fog = new THREE.Fog('#16100a', 16, 34);
+if (!window.EMBEDDED) {                                    // the dark arena (not in the website overlay)
+  scene.background = new THREE.Color('#16100a');
+  scene.fog = new THREE.Fog('#16100a', 16, 34);
+}
 
 const camera = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.1, 60);
 const CAM_BASE = new THREE.Vector3(0, 1.0, 12.4);
@@ -600,8 +661,7 @@ function fitCamera() {
   const need = halfW / (tanV * camera.aspect);
   CAM_BASE.z = Math.max(12.4, need);
   const extra = CAM_BASE.z - 12.4;
-  scene.fog.near = 16 + extra;
-  scene.fog.far = 34 + extra;
+  if (scene.fog) { scene.fog.near = 16 + extra; scene.fog.far = 34 + extra; }
   camera.far = 60 + extra;
   camera.updateProjectionMatrix();
 }
@@ -612,7 +672,7 @@ camera.lookAt(0, 0.1, 0);
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
 const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.55, 0.65, 0.78);
-composer.addPass(bloom);
+if (!window.EMBEDDED) composer.addPass(bloom);              // bloom would turn the transparent backdrop opaque
 composer.addPass(new OutputPass());
 
 /* Lights: warm key spot, low amber fill, cool rim for depth */
@@ -641,6 +701,7 @@ const floor = new THREE.Mesh(new THREE.CircleGeometry(22, 64), floorMat);
 floor.rotation.x = -Math.PI / 2;
 floor.position.y = FLOOR_Y;
 floor.receiveShadow = true;
+if (window.EMBEDDED) floor.visible = false;               // the board floats over the website
 scene.add(floor);
 
 /* Board hierarchy: tiltGroup (mouse parallax) > rollGroup (flip) > frame + discs */
@@ -750,7 +811,7 @@ const garnetMat = new THREE.MeshStandardMaterial({
   color: '#c03a2c', metalness: 0.4, roughness: 0.4,
   emissive: '#6a160c', emissiveIntensity: 0.55
 });
-const goldRimMat = brassMat;
+const goldRimMat = window.EMBEDDED ? brassMat.clone() : brassMat;   // own colour in the overlay
 const garnetRimMat = new THREE.MeshStandardMaterial({ color: '#5e1813', metalness: 0.7, roughness: 0.35 });
 
 const discGeo = new THREE.CylinderGeometry(DISC_R, DISC_R, DISC_T, 48);
@@ -833,8 +894,10 @@ const points = new THREE.Points(pGeo, new THREE.PointsMaterial({
   blending: THREE.AdditiveBlending, depthWrite: false
 }));
 scene.add(points);
+if (window.EMBEDDED) points.visible = false;               // no floating embers over the website
 
-function spawnBurst(worldPos, count, { speed = 5, color = new THREE.Color('#ffba56'), spread = 1, up = 2.5 } = {}) {
+const BURST = { hot: '#ffba56', spark: '#fff3dc', ember: '#b3501e', dust: '#b07a3a', win: '#ffd27a', loss: '#d4452e' };   // retinted in the website overlay
+function spawnBurst(worldPos, count, { speed = 5, color = new THREE.Color(BURST.hot), spread = 1, up = 2.5 } = {}) {
   for (let n = 0; n < count; n++) {
     const i = pCursor; pCursor = (pCursor + 1) % MAXP;
     pPos[i * 3] = worldPos.x; pPos[i * 3 + 1] = worldPos.y; pPos[i * 3 + 2] = worldPos.z;
@@ -915,7 +978,7 @@ function impactFX(worldPos, v) {
   impactRing.quaternion.copy(rollGroup.getWorldQuaternion(new THREE.Quaternion()));
   impactRing.visible = true;
   ringT = 0; ringPower = 1;
-  flash.color.set('#ffba56');
+  flash.color.set(BURST.hot);
   flash.position.copy(worldPos).z += 1.2;
   flash.intensity = 6 + k * 16;
   flashT = 0;
@@ -924,8 +987,8 @@ function impactFX(worldPos, v) {
   vibrate(Math.round(15 + k * 45));
   // hard landings detonate
   if (k > 0.62) {
-    spawnBurst(worldPos, Math.round(26 * k), { speed: 9 * k, up: 4.5, color: new THREE.Color('#fff3dc') });
-    spawnBurst(worldPos, Math.round(16 * k), { speed: 4, up: 2, color: new THREE.Color('#b3501e') });
+    spawnBurst(worldPos, Math.round(26 * k), { speed: 9 * k, up: 4.5, color: new THREE.Color(BURST.spark) });
+    spawnBurst(worldPos, Math.round(16 * k), { speed: 4, up: 2, color: new THREE.Color(BURST.ember) });
     ringPower = 1 + k * 0.6;
     sfx.boom(k * 0.8);
   }
@@ -933,9 +996,9 @@ function impactFX(worldPos, v) {
 
 /* Full detonation: layered fireball, shockwave, flash, boom, shake */
 function explode(worldPos, power = 1, color = '#ffba56') {
-  spawnBurst(worldPos, Math.round(36 * power), { speed: 6 + 6 * power, up: 4 + 3 * power, color: new THREE.Color('#fff3dc') });
+  spawnBurst(worldPos, Math.round(36 * power), { speed: 6 + 6 * power, up: 4 + 3 * power, color: new THREE.Color(BURST.spark) });
   spawnBurst(worldPos, Math.round(28 * power), { speed: 3.5 + 4 * power, up: 2.5, color: new THREE.Color(color) });
-  spawnBurst(worldPos, Math.round(18 * power), { speed: 2.2, up: 1.6, color: new THREE.Color('#b3501e') });
+  spawnBurst(worldPos, Math.round(18 * power), { speed: 2.2, up: 1.6, color: new THREE.Color(BURST.ember) });
   impactRing.position.copy(worldPos);
   impactRing.position.z += 0.45;
   impactRing.quaternion.copy(rollGroup.getWorldQuaternion(new THREE.Quaternion()));
@@ -1056,7 +1119,7 @@ function endRound(winner, line) {
     // the winning line detonates disc by disc
     winDiscs.forEach((p, i) => {
       setTimeout(() => {
-        explode(p.mesh.getWorldPosition(new THREE.Vector3()), 1.2, '#ffd27a');
+        explode(p.mesh.getWorldPosition(new THREE.Vector3()), 1.2, BURST.win);
       }, 250 + i * 230);
     });
   } else if (winner === AI) {
@@ -1067,7 +1130,7 @@ function endRound(winner, line) {
     vibrate([200]);
     winDiscs.forEach((p, i) => {
       setTimeout(() => {
-        explode(p.mesh.getWorldPosition(new THREE.Vector3()), 0.8, '#d4452e');
+        explode(p.mesh.getWorldPosition(new THREE.Vector3()), 0.8, BURST.loss);
       }, 250 + i * 230);
     });
   } else {
@@ -1221,7 +1284,7 @@ function updateFallers(dt) {
       f.bounces++;
       if (f.bounces <= 3 && Math.abs(f.vel.y) > 1) {
         sfx.clack(Math.min(1, Math.abs(f.vel.y) / 6));
-        spawnBurst(f.mesh.position, 3, { speed: 1.5, up: 1.2, color: new THREE.Color('#b07a3a') });
+        spawnBurst(f.mesh.position, 3, { speed: 1.5, up: 1.2, color: new THREE.Color(BURST.dust) });
       }
     }
     f.fade += dt;
@@ -1351,8 +1414,45 @@ function tryDrop(col) {
 addEventListener('keydown', e => {
   if (e.key >= '1' && e.key <= '7') { ensureAudio(); tryDrop(+e.key - 1); }
   if (e.key === 'r' || e.key === 'R') restartFlip();
-  if (e.key === 'Escape') lbPanel.classList.remove('open');
+  if (e.key === 'Escape') {
+    if (lbPanel.classList.contains('open')) lbPanel.classList.remove('open');
+    else if (window.EMBEDDED) window.closeOverlay();
+  }
 });
+
+/* Website overlay: the website's colours (light or dark) on board, discs, lights and effects */
+const KEY_BASE = key.intensity, FRONT_BASE = front.intensity;
+function sitePalette() {
+  let cs, theme;
+  try { cs = parent.getComputedStyle(parent.document.documentElement); theme = parent.document.documentElement.dataset.theme; }
+  catch (_) { return; }
+  const v = n => cs.getPropertyValue(n).trim();
+  for (const n of ['--bg', '--ink', '--ink-2', '--ink-3', '--rule', '--accent']) document.documentElement.style.setProperty('--s-' + n.slice(2), v(n));
+  const dark = theme === 'dark';
+  const ink = new THREE.Color(v('--ink')), ink3 = new THREE.Color(v('--ink-3')), bg = new THREE.Color(v('--bg'));
+  // the board is dark in both themes; my discs blue, the machine's nearly white — apart in hue and in brightness
+  const board = dark ? bg.clone().lerp(ink, 0.03) : ink.clone();      // the strong key light brightens it a lot
+  const blue = new THREE.Color('#2f4bff'), acc = dark ? blue.clone().lerp(new THREE.Color('#8c9bff'), 0.35) : blue;
+  const white = new THREE.Color(dark ? '#e8e8e4' : '#f4f4f0');
+  frameMat.color.copy(board); frameMat.metalness = 0.15; frameMat.roughness = 0.55;
+  brassMat.color.copy(ink3); brassMat.metalness = 0.5; brassMat.roughness = 0.35;
+  goldMat.color.copy(acc); goldMat.emissive.copy(acc).multiplyScalar(0.22); goldMat.metalness = 0.25; goldMat.roughness = 0.35;
+  goldRimMat.color.copy(acc).multiplyScalar(0.75); goldRimMat.metalness = 0.4;
+  garnetMat.color.copy(white); garnetMat.emissive.setRGB(0, 0, 0); garnetMat.metalness = 0.1; garnetMat.roughness = 0.45;
+  garnetRimMat.color.copy(white).multiplyScalar(0.8);
+  for (const m of [ghostMat, beamMat, winBeamMat, ringMat]) m.color.copy(acc);
+  flash.color.copy(acc);
+  key.color.set('#ffffff'); front.color.set('#ffffff'); rim.color.set('#ffffff');
+  fill.color.set(dark ? '#4a4a47' : '#ffffff'); fill.groundColor.set(dark ? '#0c0c0b' : '#8a8a86');
+  key.intensity = KEY_BASE * (dark ? 0.55 : 1); front.intensity = FRONT_BASE * (dark ? 0.5 : 1);
+  BURST.hot = '#' + acc.getHexString(); BURST.spark = '#ffffff'; BURST.ember = BURST.hot; BURST.dust = '#' + ink3.getHexString();
+  BURST.win = BURST.hot; BURST.loss = '#' + white.getHexString();
+}
+if (window.EMBEDDED) {
+  embers.visible = false;
+  sitePalette();
+  try { new parent.MutationObserver(sitePalette).observe(parent.document.documentElement, { attributes: true, attributeFilter: ['data-theme'] }); } catch (_) {}
+}
 
 /* Status helper */
 const statusEl = document.getElementById('status');
