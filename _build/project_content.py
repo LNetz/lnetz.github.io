@@ -390,7 +390,6 @@ PROJECTS = [
         links=[(T("project", "Projekt"), "https://www.se-rwth.de/projects/MaCoCo/"),
                (T("controlling chair", "Lehrstuhl Controlling"), "https://www.controlling.rwth-aachen.de/cms/controlling/forschung/forschungsprojekte/laufende-projekte/~mgaz/macoco-lehrstuhlcontrolling/"),
                (T("android app", "Android-App"), "https://play.google.com/store/apps/details?id=macoco.stundenzettel.timetracker&amp;hl=de")],
-        hero=("macoco-hero.webp", 1600, 1313, T("MaCoCo on a desktop computer: the overview of a research account with its budget, spending and remaining budget", "MaCoCo auf einem Desktop-Rechner: die Übersicht eines Forschungskontos mit Budget, Ausgaben und Restbudget")),
         media=video("2AibynH6Bm0", "macoco-video.jpg", T("MaCoCo image film", "MaCoCo-Imagefilm"),
                     T("<b>MaCoCo image film</b> — what the cockpit does for a chair, in a few minutes.",
                       "<b>MaCoCo-Imagefilm</b> — was das Cockpit für einen Lehrstuhl leistet, in wenigen Minuten.")),
@@ -573,7 +572,6 @@ PROJECTS = [
         facts=[(ROLE, T("Co-creator", "Mitbegründer")), (T("Based on", "Basis"), "MontiCore"),
                (T("Used in", "Eingesetzt in"), T("5 domains", "5 Domänen")), (T("Output", "Ausgabe"), "Java · TypeScript · HTML")],
         links=[("MontiCore", "https://monticore.github.io/monticore/")],
-        hero=("montigem-hero.webp", 1600, 1155, T("Illustration of MontiGem: a MaCoCo class diagram and the IDE in the background, the generator in front — class diagrams and GUI models go through the DS and UI generators and become backend, database and frontend, extended by handwritten code", "Illustration von MontiGem: ein MaCoCo-Klassendiagramm und die IDE im Hintergrund, davor der Generator — Klassendiagramme und GUI-Modelle durchlaufen DS- und UI-Generator und werden zu Backend, Datenbank und Frontend, erweitert um handgeschriebenen Code")),
         media=montigem_diagram,
         chapters=[
             (T("The idea", "Die Idee"), T(

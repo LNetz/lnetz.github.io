@@ -97,10 +97,6 @@ def page(lang, idx):
     </header>
 '''
     media = p["media"](lang, A) if p.get("media") else ""
-    if p.get("hero"):                     # a large cut-out picture above the visual
-        src, w, h, alt = p["hero"]
-        media = (f'    <figure class="hero"><img src="{A}assets/projects/{src}" alt="{L(alt)}" width="{w}" height="{h}"></figure>\n'
-                 + media)
     chapters = NL.join(
         f'''        <li>
           <h2>{L(label)}</h2>
