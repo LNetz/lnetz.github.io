@@ -103,10 +103,13 @@
         <div><dt>i10-index</dt><dd>17</dd></div>
       </dl>
       <p class="facts-note mono"><a href="https://scholar.google.com/citations?user=5mVkoWsAAAAJ&amp;hl=en" target="_blank" rel="noopener">Google Scholar ↗</a> · as of 10 / 2026</p>
+      <nav class="chapters mono" aria-label="Chapters">
+        <a href="#topics">Topics</a><a href="#community">Community</a><a href="#talks">Talks</a><a href="#citation-map">Citation map</a><a href="#publications">Publications</a>
+      </nav>
     </header>
     <figure class="banner"><picture><source media="(max-width: 600px)" srcset="assets/photos/banner-lecture-m.jpg" width="1200" height="900"><img src="assets/photos/banner-lecture.jpg" alt="Lukas Netz lecturing in a large RWTH Aachen lecture hall" width="1659" height="532"></picture><figcaption class="mono">Guest lecture, Software Engineering course · RWTH Aachen · 12 / 2024</figcaption></figure>
     <section>
-      <div class="group mono">Topics</div>
+      <div class="group mono" id="topics">Topics</div>
       <div class="themes">
         <div><h4>LLMs for modeling</h4><p>Model synthesis in DSLs, grammar masking for syntactically valid output, how LLMs corrupt and repair textual models.</p></div>
         <div><h4>Model-driven engineering</h4><p>Generators and DSLs that stay maintainable when the model evolves.</p></div>
@@ -114,7 +117,7 @@
         <div><h4>Information systems</h4><p>From model-driven prototype to full-size enterprise application — and retrofitting generation into existing systems.</p></div>
       </div>
 
-      <div class="group mono">Community</div>
+      <div class="group mono" id="community">Community</div>
       <ul class="rows">
         <li>
           <div class="mono faint">2026</div>
@@ -155,7 +158,7 @@
         </li>
       </ul>
 
-      <div class="group mono">Invited talks</div>
+      <div class="group mono" id="talks">Invited talks</div>
       <ul class="rows tight">
         <li>
           <div class="mono faint">12 / 2025</div>
@@ -208,7 +211,49 @@
         </li>
       </ul>
 
-      <div class="group mono">Publications</div>
+      <div class="group mono" id="citation-map">Citation map</div>
+      <div class="map-wrap" id="map-wrap" data-src="assets/citations.js" data-src-in="assets/citedby.js">
+      <p class="map-lead" data-lead="out">My papers, the work they cite and — fainter — what that work builds on. <em>Colour</em> is the topic, a <em>ring</em> marks work from RWTH Software Engineering, size follows citations.</p>
+      <p class="map-lead" data-lead="in" hidden>The other way round: who cites my papers and — fainter — who cites those. <em>Colour</em> is the topic, a <em>ring</em> marks work from RWTH Software Engineering, size follows citations. Data: OpenAlex, which knows fewer citations than Google Scholar.</p>
+      <div class="map-legend mono">
+        <div class="filters" role="group" aria-label="Topics">
+          <button type="button" data-topic="llm" aria-pressed="true" style="--c:#3b5bff;--c2:#8c9bff"><i></i><span>LLMs</span></button>
+          <button type="button" data-topic="mde" aria-pressed="true" style="--c:#0f9488;--c2:#3cc7b8"><i></i><span>model-driven engineering</span></button>
+          <button type="button" data-topic="eis" aria-pressed="true" style="--c:#8b5cf6;--c2:#b49cff"><i></i><span>information systems</span></button>
+          <button type="button" data-topic="twin" aria-pressed="true" style="--c:#e07a1f;--c2:#f2a25c"><i></i><span>digital twins &amp; systems</span></button>
+          <button type="button" data-topic="a11y" aria-pressed="true" style="--c:#d6336c;--c2:#f0729b"><i></i><span>accessibility</span></button>
+          <button type="button" data-topic="ga" aria-pressed="true" style="--c:#6f9a1f;--c2:#a6cf55"><i></i><span>control &amp; optimization</span></button>
+          <button type="button" data-topic="other" aria-pressed="true" style="--c:#a3a39d;--c2:#6d6d68"><i></i><span>other</span></button>
+        </div>
+        <div class="filters">
+          <button type="button" data-dir="out" aria-pressed="true">cites →</button>
+          <button type="button" data-dir="in" aria-pressed="false">← cited by</button>
+          <span class="sep" aria-hidden="true">·</span>
+          <button type="button" data-view="2" aria-pressed="false">2D</button>
+          <button type="button" data-view="3" aria-pressed="true">3D</button>
+          <button type="button" class="ring-key own" data-only="own" aria-pressed="false"><i></i><span>my papers</span></button>
+          <button type="button" class="ring-key" data-only="se" aria-pressed="false"><i></i><span>SE RWTH</span></button>
+          <button type="button" data-hop2 aria-pressed="true">2nd hop</button>
+          <button type="button" data-zoom="in" aria-label="Zoom in">+</button>
+          <button type="button" data-zoom="out" aria-label="Zoom out">−</button>
+          <button type="button" data-fit>fit</button>
+          <button type="button" data-fs aria-pressed="false"><span>⤢</span> full screen</button>
+        </div>
+      </div>
+      <div class="map" id="map">
+        <canvas aria-label="Citation graph" role="img"></canvas>
+        <div class="map-tip" hidden></div>
+        <button type="button" class="map-pause mono" hidden>❚❚</button>
+      </div>
+      <details class="mono faint map-note">
+        <summary>How to read and use the map</summary>
+        <p>Hover or tap a paper for details, click to pin it. Drag to turn (3D) or move (2D) the map; zoom with + −, Ctrl + scroll or a pinch; double-click to fit. My papers / SE RWTH in the legend show only those.</p>
+        <p>In the card — cites: <svg class="ico" viewBox="0 0 17 10" aria-hidden="true"><rect x="1" y="1" width="6" height="8" rx="0.5"/><path d="M9 5h6.5M12.5 2l3 3-3 3"/></svg> cites, <svg class="ico" viewBox="0 0 17 10" aria-hidden="true"><rect x="1" y="1" width="6" height="8" rx="0.5"/><path d="M16 5H9.5M12.5 2l-3 3 3 3"/></svg> cited by (GS Google Scholar, OA OpenAlex), <svg class="ico" viewBox="0 0 17 10" aria-hidden="true"><circle cx="4" cy="5" r="1.8" class="f"/><circle cx="4" cy="5" r="3.4"/><path d="M9 5h6.5M12.5 2l3 3-3 3"/></svg> cited by my papers, <svg class="ico" viewBox="0 0 17 10" aria-hidden="true"><circle cx="4" cy="5" r="2" class="f"/><path d="M9 5h6.5M12.5 2l3 3-3 3"/></svg> cited by first-hop papers. Cited by: <svg class="ico" viewBox="0 0 17 10" aria-hidden="true"><path d="M1 5h6.5M4.5 2l3 3-3 3"/><circle cx="13" cy="5" r="1.8" class="f"/><circle cx="13" cy="5" r="3.4"/></svg> cites my papers, <svg class="ico" viewBox="0 0 17 10" aria-hidden="true"><path d="M1 5h6.5M4.5 2l3 3-3 3"/><circle cx="13" cy="5" r="2" class="f"/></svg> cites first-hop works.</p>
+        <p>Data: the papers' own reference lists, OpenAlex and Crossref. Cites, second hop: works cited by at least three first-hop works. Cited by, second hop: every work citing a first-hop work.</p>
+      </details>
+      </div>
+
+      <div class="group mono" id="publications">Publications</div>
       <div class="filters mono" role="group" aria-label="Filter publications">
         <button type="button" data-f="all" aria-pressed="true">all</button>
         <button type="button" data-f="llm" aria-pressed="false">llm</button>
@@ -230,6 +275,8 @@
   </main>
 </div>
 <script src="assets/pubs.js"></script>
+<script src="assets/pubs-mini.js"></script>
+<script src="assets/graph-view.js"></script>
 <script src="assets/site.js"></script>
 </body>
 </html>

@@ -214,6 +214,9 @@ section > .group:first-child { padding-top: 0; }
 .chapters a:hover { color: var(--accent); }
 .group[id] { scroll-margin-top: 24px; }
 @media (max-width: 900px) { .group[id] { scroll-margin-top: 72px; } }
+.group.split { display: flex; justify-content: space-between; gap: 16px; }
+.group.split a { color: var(--ink-3); }
+.group.split a:hover { color: var(--accent); }
 
 /* ---------- projects: spec rows (logo · text · meta) ---------- */
 
@@ -308,6 +311,25 @@ section > .group:first-child { padding-top: 0; }
 .pubs .plinks a { color: var(--ink-3); }
 .pubs .plinks a:first-child { color: var(--ink-2); }
 .pubs .plinks a:hover { color: var(--accent); }
+/* mini graph: who cites the paper (left) · the paper · what it cites (right) */
+.pubs li:has(.mini) { grid-template-columns: 76px minmax(0, 1fr) 168px; }
+section > .pubs li:has(.mini) { grid-template-columns: 120px minmax(0, 1fr) 168px; }
+.pubs .mini { display: grid; grid-template-columns: 1fr 1fr; align-content: start; color: var(--ink-3); font-size: 10px; padding-top: 2px; }
+.pubs .mini svg { grid-column: 1 / -1; display: block; overflow: visible; }
+.pubs .mini span:last-child { text-align: right; }
+.mini line.l { stroke: var(--ink-3); stroke-width: .5; opacity: .35; }
+.mini line.lo { stroke: var(--accent); stroke-width: .7; opacity: .6; }
+.mini .me { fill: var(--ink-2); }
+.mini .ring { fill: none; stroke: var(--ink-2); stroke-width: .8; }
+.mini .own { fill: var(--accent); }
+.mini .none { fill: var(--ink-3); font-size: 9px; }
+.mini .tl { fill: #3b5bff; } .mini .tm { fill: #0f9488; } .mini .te { fill: #8b5cf6; } .mini .tt { fill: #e07a1f; }
+.mini .ta { fill: #d6336c; } .mini .tg { fill: #6f9a1f; } .mini .to { fill: #a3a39d; }
+:root[data-theme="dark"] .mini .tl { fill: #8c9bff; } :root[data-theme="dark"] .mini .tm { fill: #3cc7b8; }
+:root[data-theme="dark"] .mini .te { fill: #b49cff; } :root[data-theme="dark"] .mini .tt { fill: #f2a25c; }
+:root[data-theme="dark"] .mini .ta { fill: #f0729b; } :root[data-theme="dark"] .mini .tg { fill: #a6cf55; }
+:root[data-theme="dark"] .mini .to { fill: #6d6d68; }
+@media (max-width: 600px) { .pubs li:has(.mini), section > .pubs li:has(.mini) { grid-template-columns: 1fr; } .pubs .mini { margin-top: 6px; width: 168px; } }
 
 /* ---------- photography: banner, series, justified rows (no cropping) ---------- */
 
@@ -339,6 +361,86 @@ section > .group:first-child { padding-top: 0; }
   position: absolute; width: 1px; height: 1px; overflow: hidden;
   clip: rect(0 0 0 0); white-space: nowrap;
 }
+
+/* ---------- research map (citation graph on a canvas, assets/graph-view.js) ---------- */
+
+.map-legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 24px; }
+.map-legend .filters { gap: 6px 16px; }
+.map-legend button { display: inline-flex; align-items: center; gap: 6px; }
+.map-legend button[aria-pressed="false"] { color: var(--ink-3); opacity: .5; }
+.map-legend [data-topic][aria-pressed="true"] { color: var(--ink-2); }
+.map-legend i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); display: inline-block; }
+:root[data-theme="dark"] .map-legend i { background: var(--c2); }
+.map-legend .ring-key { color: var(--ink-2); }
+.map-legend .ring-key:hover { color: var(--ink); }
+.map-legend .ring-key[aria-pressed="true"] { color: var(--accent); opacity: 1; }
+.map-legend .ring-key[aria-pressed="false"] { opacity: 1; }
+.map-legend .ring-key i { background: none; box-shadow: 0 0 0 1px var(--ink-3); width: 7px; height: 7px; }
+.map-legend .ring-key.own i { background: var(--ink-3); box-shadow: 0 0 0 1px var(--bg), 0 0 0 2px var(--ink-2); }
+.map {
+  position: relative; height: min(76vh, 760px); min-height: 420px;
+  border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+  overflow: hidden; touch-action: pan-y;      /* vertical swipes still scroll the page */
+}
+.map canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; }
+.map canvas:active { cursor: grabbing; }
+.map-tip {
+  position: absolute; left: 0; top: 0; max-width: 340px;
+  background: var(--bg); border: 1px solid var(--rule); padding: 10px 12px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.08); pointer-events: none;
+  font-size: var(--fs-s); line-height: 1.5;
+}
+.map-tip.pinned { pointer-events: auto; cursor: grab; padding-right: 28px; touch-action: none; user-select: none; }
+.map-tip.pinned.dragging { cursor: grabbing; box-shadow: 0 10px 32px rgba(0,0,0,.14); }
+.map-tip .tip-x {
+  position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; padding: 0;
+  background: none; border: 0; cursor: pointer; color: var(--ink-3); font-size: 15px; line-height: 1;
+}
+.map-tip .tip-x:hover { color: var(--ink); }
+.map-tip .kind { color: var(--ink-3); display: flex; align-items: center; gap: 6px; }
+.map-tip .kind i { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+.map-tip .t { color: var(--ink); font-size: var(--fs); margin: 4px 0 2px; }
+.map-tip .a { color: var(--ink-2); }
+.map-tip .m { color: var(--ink-3); }
+.map-tip .links { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; }
+.map-tip .links a { color: var(--accent); }
+.map-tip .links a:hover { text-decoration: underline; }
+.map-tip .stats { display: flex; flex-wrap: wrap; gap: 2px 16px; color: var(--ink-2); margin-top: 4px; }
+.map-tip .stats span { display: inline-flex; align-items: center; gap: 5px; }
+.map-tip .stats svg { width: 17px; height: 10px; fill: none; stroke: var(--ink-3); stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; }
+.map-tip .stats svg .f { fill: var(--ink-3); stroke: none; }
+.map-tip .stats small { font-size: 9px; color: var(--ink-3); margin-left: 1px; letter-spacing: .04em; }
+.map-tip .hint { color: var(--ink-3); margin-top: 4px; font-style: italic; }
+.map-pause {
+  position: absolute; right: 10px; bottom: 10px; width: 28px; height: 28px;
+  display: grid; place-items: center; padding: 0;
+  background: var(--bg); border: 1px solid var(--rule); border-radius: 50%;
+  color: var(--ink-3); font-size: 10px; cursor: pointer;
+}
+.map-pause:hover { color: var(--ink); border-color: var(--ink-3); }
+.map-pause[hidden] { display: none; }
+.map-legend .sep { color: var(--ink-3); }
+.map-lead[hidden] { display: none; }
+.map-lead { max-width: 600px; color: var(--ink-2); margin: 10px 0 4px; }
+.map-lead em { font-style: normal; color: var(--accent); }
+.map-legend [data-fs] span { display: inline-block; }
+/* full screen: legend on top, the map takes the rest */
+.map-wrap:fullscreen, .map-wrap.fs {
+  background: var(--bg); padding: 12px 20px 16px; display: flex; flex-direction: column;
+}
+.map-wrap.fs { position: fixed; inset: 0; z-index: 40; }
+.map-wrap:fullscreen .map, .map-wrap.fs .map { flex: 1; height: auto; min-height: 0; border-bottom: 0; }
+.map-wrap:fullscreen .map-note, .map-wrap.fs .map-note { display: none; }
+.map-note .ico { width: 17px; height: 10px; vertical-align: -1px; fill: none; stroke: currentColor; stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; }
+.map-note .ico .f { fill: currentColor; stroke: none; }
+.map-note summary { cursor: pointer; list-style: none; color: var(--ink-3); }
+.map-note summary::-webkit-details-marker { display: none; }
+.map-note summary::before { content: "+"; display: inline-block; width: 14px; }
+.map-note[open] summary::before { content: "−"; }
+.map-note summary:hover { color: var(--ink); }
+.map-note p { margin-top: 6px; }
+.map-note { margin-top: 10px; font-size: var(--fs-s); max-width: 640px; }
+@media (max-width: 600px) { .map { height: min(118vw, 72vh); } .map-tip { max-width: calc(100% - 16px); } }
 
 /* lightbox: the transition <canvas> covers the whole window and draws each photo exactly where
    the resting <img> shows it, so swapping between them never jumps. Photos that match the

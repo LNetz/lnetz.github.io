@@ -103,10 +103,13 @@
         <div><dt>i10-index</dt><dd>17</dd></div>
       </dl>
       <p class="facts-note mono"><a href="https://scholar.google.com/citations?user=5mVkoWsAAAAJ&amp;hl=en" target="_blank" rel="noopener">Google Scholar ↗</a> · Stand 10 / 2026</p>
+      <nav class="chapters mono" aria-label="Kapitel">
+        <a href="#topics">Themen</a><a href="#community">Community</a><a href="#talks">Vorträge</a><a href="#citation-map">Zitationskarte</a><a href="#publications">Publikationen</a>
+      </nav>
     </header>
     <figure class="banner"><picture><source media="(max-width: 600px)" srcset="../assets/photos/banner-lecture-m.jpg" width="1200" height="900"><img src="../assets/photos/banner-lecture.jpg" alt="Lukas Netz bei einer Vorlesung in einem großen Hörsaal der RWTH Aachen" width="1659" height="532"></picture><figcaption class="mono">Gastvortrag, Vorlesung Softwaretechnik · RWTH Aachen · 12 / 2024</figcaption></figure>
     <section>
-      <div class="group mono">Themen</div>
+      <div class="group mono" id="topics">Themen</div>
       <div class="themes">
         <div><h4>LLMs für die Modellierung</h4><p>Modellsynthese in DSLs, Grammar Masking für syntaktisch valide Ausgaben, wie LLMs textuelle Modelle beschädigen und reparieren.</p></div>
         <div><h4>Modellgetriebene Entwicklung</h4><p>Generatoren und DSLs, die wartbar bleiben, wenn sich das Modell weiterentwickelt.</p></div>
@@ -114,7 +117,7 @@
         <div><h4>Informationssysteme</h4><p>Vom modellgetriebenen Prototyp zur vollwertigen Unternehmensanwendung — und die nachträgliche Einführung von Generierung in bestehende Systeme.</p></div>
       </div>
 
-      <div class="group mono">Community</div>
+      <div class="group mono" id="community">Community</div>
       <ul class="rows">
         <li>
           <div class="mono faint">2026</div>
@@ -155,7 +158,7 @@
         </li>
       </ul>
 
-      <div class="group mono">Eingeladene Vorträge</div>
+      <div class="group mono" id="talks">Eingeladene Vorträge</div>
       <ul class="rows tight">
         <li>
           <div class="mono faint">12 / 2025</div>
@@ -208,7 +211,49 @@
         </li>
       </ul>
 
-      <div class="group mono">Publikationen</div>
+      <div class="group mono" id="citation-map">Zitationskarte</div>
+      <div class="map-wrap" id="map-wrap" data-src="../assets/citations.js" data-src-in="../assets/citedby.js">
+      <p class="map-lead" data-lead="out">Meine Paper, die Arbeiten, die sie zitieren, und — blasser — worauf diese aufbauen. Die <em>Farbe</em> zeigt das Thema, ein <em>Ring</em> markiert Arbeiten der Software Engineering RWTH, die Größe folgt den Zitationen.</p>
+      <p class="map-lead" data-lead="in" hidden>Andersherum: wer meine Paper zitiert und — blasser — wer diese zitiert. Die <em>Farbe</em> zeigt das Thema, ein <em>Ring</em> markiert Arbeiten der Software Engineering RWTH, die Größe folgt den Zitationen. Daten: OpenAlex, das weniger Zitationen kennt als Google Scholar.</p>
+      <div class="map-legend mono">
+        <div class="filters" role="group" aria-label="Themen">
+          <button type="button" data-topic="llm" aria-pressed="true" style="--c:#3b5bff;--c2:#8c9bff"><i></i><span>LLMs</span></button>
+          <button type="button" data-topic="mde" aria-pressed="true" style="--c:#0f9488;--c2:#3cc7b8"><i></i><span>modellgetriebene Entwicklung</span></button>
+          <button type="button" data-topic="eis" aria-pressed="true" style="--c:#8b5cf6;--c2:#b49cff"><i></i><span>Informationssysteme</span></button>
+          <button type="button" data-topic="twin" aria-pressed="true" style="--c:#e07a1f;--c2:#f2a25c"><i></i><span>digitale Zwillinge &amp; Systeme</span></button>
+          <button type="button" data-topic="a11y" aria-pressed="true" style="--c:#d6336c;--c2:#f0729b"><i></i><span>Barrierefreiheit</span></button>
+          <button type="button" data-topic="ga" aria-pressed="true" style="--c:#6f9a1f;--c2:#a6cf55"><i></i><span>Regelung &amp; Optimierung</span></button>
+          <button type="button" data-topic="other" aria-pressed="true" style="--c:#a3a39d;--c2:#6d6d68"><i></i><span>sonstige</span></button>
+        </div>
+        <div class="filters">
+          <button type="button" data-dir="out" aria-pressed="true">zitiert →</button>
+          <button type="button" data-dir="in" aria-pressed="false">← zitiert von</button>
+          <span class="sep" aria-hidden="true">·</span>
+          <button type="button" data-view="2" aria-pressed="false">2D</button>
+          <button type="button" data-view="3" aria-pressed="true">3D</button>
+          <button type="button" class="ring-key own" data-only="own" aria-pressed="false"><i></i><span>meine Paper</span></button>
+          <button type="button" class="ring-key" data-only="se" aria-pressed="false"><i></i><span>SE RWTH</span></button>
+          <button type="button" data-hop2 aria-pressed="true">2. Hop</button>
+          <button type="button" data-zoom="in" aria-label="Vergrößern">+</button>
+          <button type="button" data-zoom="out" aria-label="Verkleinern">−</button>
+          <button type="button" data-fit>einpassen</button>
+          <button type="button" data-fs aria-pressed="false"><span>⤢</span> Vollbild</button>
+        </div>
+      </div>
+      <div class="map" id="map">
+        <canvas aria-label="Zitationsgraph" role="img"></canvas>
+        <div class="map-tip" hidden></div>
+        <button type="button" class="map-pause mono" hidden>❚❚</button>
+      </div>
+      <details class="mono faint map-note">
+        <summary>Bedienung und Symbole</summary>
+        <p>Paper antippen oder überfahren für Details, Klick hält sie fest. Ziehen dreht (3D) oder verschiebt (2D) die Karte; Zoom mit + −, Strg + Scrollen oder Zoomgeste; Doppelklick passt ein. Meine Paper / SE RWTH in der Legende zeigen nur diese.</p>
+        <p>In der Karte — zitiert: <svg class="ico" viewBox="0 0 17 10" aria-hidden="true"><rect x="1" y="1" width="6" height="8" rx="0.5"/><path d="M9 5h6.5M12.5 2l3 3-3 3"/></svg> zitiert, <svg class="ico" viewBox="0 0 17 10" aria-hidden="true"><rect x="1" y="1" width="6" height="8" rx="0.5"/><path d="M16 5H9.5M12.5 2l-3 3 3 3"/></svg> zitiert von (GS Google Scholar, OA OpenAlex), <svg class="ico" viewBox="0 0 17 10" aria-hidden="true"><circle cx="4" cy="5" r="1.8" class="f"/><circle cx="4" cy="5" r="3.4"/><path d="M9 5h6.5M12.5 2l3 3-3 3"/></svg> von meinen Papern zitiert, <svg class="ico" viewBox="0 0 17 10" aria-hidden="true"><circle cx="4" cy="5" r="2" class="f"/><path d="M9 5h6.5M12.5 2l3 3-3 3"/></svg> von Arbeiten des 1. Hops zitiert. Zitiert von: <svg class="ico" viewBox="0 0 17 10" aria-hidden="true"><path d="M1 5h6.5M4.5 2l3 3-3 3"/><circle cx="13" cy="5" r="1.8" class="f"/><circle cx="13" cy="5" r="3.4"/></svg> zitiert meine Paper, <svg class="ico" viewBox="0 0 17 10" aria-hidden="true"><path d="M1 5h6.5M4.5 2l3 3-3 3"/><circle cx="13" cy="5" r="2" class="f"/></svg> zitiert Arbeiten des 1. Hops.</p>
+        <p>Daten: die Literaturverzeichnisse der Paper, OpenAlex und Crossref. Zitiert, 2. Hop: Arbeiten, die von mindestens drei Arbeiten des ersten Hops zitiert werden. Zitiert von, 2. Hop: alle Arbeiten, die eine Arbeit des ersten Hops zitieren.</p>
+      </details>
+      </div>
+
+      <div class="group mono" id="publications">Publikationen</div>
       <div class="filters mono" role="group" aria-label="Publikationen filtern">
         <button type="button" data-f="all" aria-pressed="true">alle</button>
         <button type="button" data-f="llm" aria-pressed="false">llm</button>
@@ -230,6 +275,8 @@
   </main>
 </div>
 <script src="../assets/pubs.js"></script>
+<script src="../assets/pubs-mini.js"></script>
+<script src="../assets/graph-view.js"></script>
 <script src="../assets/site.js"></script>
 </body>
 </html>

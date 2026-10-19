@@ -543,38 +543,122 @@ def research(lang):
     filters = [("all", T("all", "alle")), ("llm", T("llm", "llm")), ("mde", T("mde", "mde")),
                ("twin", T("digital twins", "digitale Zwillinge")), ("eis", T("information systems", "Informationssysteme")),
                ("a11y", T("accessibility", "Barrierefreiheit")), ("ga", T("genetic algorithms", "genetische Algorithmen"))]
+    # chapter markers: the page has grown long
+    chapters = f'''
+      <nav class="chapters mono" aria-label="{L(T("Chapters", "Kapitel"))}">
+        <a href="#topics">{L(T("Topics", "Themen"))}</a><a href="#community">Community</a><a href="#talks">{L(T("Talks", "Vorträge"))}</a><a href="#citation-map">{L(T("Citation map", "Zitationskarte"))}</a><a href="#publications">{L(T("Publications", "Publikationen"))}</a>
+      </nav>'''
     head = page_head("02", L(T("Research", "Forschung")), "",
         L(T("I research how <em>large language models</em> and <em>model-driven engineering</em> can make each other better: LLMs that write valid models, and models that keep LLM output in check.",
             "Ich erforsche, wie <em>große Sprachmodelle</em> und <em>modellgetriebene Softwareentwicklung</em> sich gegenseitig besser machen: LLMs, die valide Modelle schreiben, und Modelle, die LLM-Ausgaben im Zaum halten.")),
-        METRICS[lang], count_id=True, top=page_icon("sqrt"))
+        METRICS[lang] + chapters, count_id=True, top=page_icon("sqrt"))
     pic = banner(A, "banner-lecture.jpg", L(T("Lukas Netz lecturing in a large RWTH Aachen lecture hall",
                                               "Lukas Netz bei einer Vorlesung in einem großen Hörsaal der RWTH Aachen")), 1659, 532,
                  L(T("Guest lecture, Software Engineering course · RWTH Aachen · 12 / 2024",
                      "Gastvortrag, Vorlesung Softwaretechnik · RWTH Aachen · 12 / 2024")))
     return f'''
 {head}{pic}    <section>
-      <div class="group mono">{L(T("Topics", "Themen"))}</div>
+      <div class="group mono" id="topics">{L(T("Topics", "Themen"))}</div>
       <div class="themes">
 {NL.join(f"        <div><h4>{L(t)[0]}</h4><p>{L(t)[1]}</p></div>" for t in themes)}
       </div>
 
-      <div class="group mono">Community</div>
+      <div class="group mono" id="community">Community</div>
       <ul class="rows">
 {NL.join(community)}
       </ul>
 
-      <div class="group mono">{L(T("Invited talks", "Eingeladene Vorträge"))}</div>
+      <div class="group mono" id="talks">{L(T("Invited talks", "Eingeladene Vorträge"))}</div>
       <ul class="rows tight">
 {NL.join(talks)}
       </ul>
 
-      <div class="group mono">{L(T("Publications", "Publikationen"))}</div>
+      <div class="group mono" id="citation-map">{L(T("Citation map", "Zitationskarte"))}</div>
+{map_block(lang)}
+      <div class="group mono" id="publications">{L(T("Publications", "Publikationen"))}</div>
       <div class="filters mono" role="group" aria-label="{L(T("Filter publications", "Publikationen filtern"))}">
 {NL.join(f'        <button type="button" data-f="{k}" aria-pressed="{"true" if k == "all" else "false"}">{L(v)}</button>' for k, v in filters)}
       </div>
 
       <div id="pubs"></div>
     </section>
+'''
+
+
+# 02 Research: map of references (citation graph, drawn by assets/graph-view.js; its data,
+# assets/citations.js, is only loaded once the map comes near the screen)
+
+MAP_TOPICS = [  # key, label, light colour, dark colour (same as graph-view.js)
+    ("llm", T("LLMs", "LLMs"), "#3b5bff", "#8c9bff"),
+    ("mde", T("model-driven engineering", "modellgetriebene Entwicklung"), "#0f9488", "#3cc7b8"),
+    ("eis", T("information systems", "Informationssysteme"), "#8b5cf6", "#b49cff"),
+    ("twin", T("digital twins &amp; systems", "digitale Zwillinge &amp; Systeme"), "#e07a1f", "#f2a25c"),
+    ("a11y", T("accessibility", "Barrierefreiheit"), "#d6336c", "#f0729b"),
+    ("ga", T("control &amp; optimization", "Regelung &amp; Optimierung"), "#6f9a1f", "#a6cf55"),
+    ("other", T("other", "sonstige"), "#a3a39d", "#6d6d68"),
+]
+
+
+MAP_ICON = {   # overlay symbols, same drawing as in assets/graph-view.js
+    "out": '<rect x="1" y="1" width="6" height="8" rx="0.5"/><path d="M9 5h6.5M12.5 2l3 3-3 3"/>',
+    "in": '<rect x="1" y="1" width="6" height="8" rx="0.5"/><path d="M16 5H9.5M12.5 2l-3 3 3 3"/>',
+    "mine": '<circle cx="4" cy="5" r="1.8" class="f"/><circle cx="4" cy="5" r="3.4"/><path d="M9 5h6.5M12.5 2l3 3-3 3"/>',
+    "hop": '<circle cx="4" cy="5" r="2" class="f"/><path d="M9 5h6.5M12.5 2l3 3-3 3"/>',
+    "tomine": '<path d="M1 5h6.5M4.5 2l3 3-3 3"/><circle cx="13" cy="5" r="1.8" class="f"/><circle cx="13" cy="5" r="3.4"/>',
+    "tohop": '<path d="M1 5h6.5M4.5 2l3 3-3 3"/><circle cx="13" cy="5" r="2" class="f"/>',
+}
+
+
+def map_icon(k):
+    return f'<svg class="ico" viewBox="0 0 17 10" aria-hidden="true">{MAP_ICON[k]}</svg>'
+
+
+def map_block(lang):
+    L = lambda x: x[lang]
+    I = map_icon
+    legend = NL.join(
+        f'          <button type="button" data-topic="{k}" aria-pressed="true" style="--c:{c};--c2:{c2}"><i></i><span>{L(t)}</span></button>'
+        for k, t, c, c2 in MAP_TOPICS)
+    A = "../" if lang == "de" else ""
+    return f'''      <div class="map-wrap" id="map-wrap" data-src="{A}assets/citations.js" data-src-in="{A}assets/citedby.js">
+      <p class="map-lead" data-lead="out">{L(T("My papers, the work they cite and — fainter — what that work builds on. <em>Colour</em> is the topic, a <em>ring</em> marks work from RWTH Software Engineering, size follows citations.",
+                               "Meine Paper, die Arbeiten, die sie zitieren, und — blasser — worauf diese aufbauen. Die <em>Farbe</em> zeigt das Thema, ein <em>Ring</em> markiert Arbeiten der Software Engineering RWTH, die Größe folgt den Zitationen."))}</p>
+      <p class="map-lead" data-lead="in" hidden>{L(T("The other way round: who cites my papers and — fainter — who cites those. <em>Colour</em> is the topic, a <em>ring</em> marks work from RWTH Software Engineering, size follows citations. Data: OpenAlex, which knows fewer citations than Google Scholar.",
+                               "Andersherum: wer meine Paper zitiert und — blasser — wer diese zitiert. Die <em>Farbe</em> zeigt das Thema, ein <em>Ring</em> markiert Arbeiten der Software Engineering RWTH, die Größe folgt den Zitationen. Daten: OpenAlex, das weniger Zitationen kennt als Google Scholar."))}</p>
+      <div class="map-legend mono">
+        <div class="filters" role="group" aria-label="{L(T("Topics", "Themen"))}">
+{legend}
+        </div>
+        <div class="filters">
+          <button type="button" data-dir="out" aria-pressed="true">{L(T("cites", "zitiert"))} →</button>
+          <button type="button" data-dir="in" aria-pressed="false">← {L(T("cited by", "zitiert von"))}</button>
+          <span class="sep" aria-hidden="true">·</span>
+          <button type="button" data-view="2" aria-pressed="false">2D</button>
+          <button type="button" data-view="3" aria-pressed="true">3D</button>
+          <button type="button" class="ring-key own" data-only="own" aria-pressed="false"><i></i><span>{L(T("my papers", "meine Paper"))}</span></button>
+          <button type="button" class="ring-key" data-only="se" aria-pressed="false"><i></i><span>SE RWTH</span></button>
+          <button type="button" data-hop2 aria-pressed="true">{L(T("2nd hop", "2. Hop"))}</button>
+          <button type="button" data-zoom="in" aria-label="{L(T("Zoom in", "Vergrößern"))}">+</button>
+          <button type="button" data-zoom="out" aria-label="{L(T("Zoom out", "Verkleinern"))}">−</button>
+          <button type="button" data-fit>{L(T("fit", "einpassen"))}</button>
+          <button type="button" data-fs aria-pressed="false"><span>⤢</span> {L(T("full screen", "Vollbild"))}</button>
+        </div>
+      </div>
+      <div class="map" id="map">
+        <canvas aria-label="{L(T("Citation graph", "Zitationsgraph"))}" role="img"></canvas>
+        <div class="map-tip" hidden></div>
+        <button type="button" class="map-pause mono" hidden>❚❚</button>
+      </div>
+      <details class="mono faint map-note">
+        <summary>{L(T("How to read and use the map", "Bedienung und Symbole"))}</summary>
+        <p>{L(T("Hover or tap a paper for details, click to pin it. Drag to turn (3D) or move (2D) the map; zoom with + −, Ctrl + scroll or a pinch; double-click to fit. My papers / SE RWTH in the legend show only those.",
+                "Paper antippen oder überfahren für Details, Klick hält sie fest. Ziehen dreht (3D) oder verschiebt (2D) die Karte; Zoom mit + −, Strg + Scrollen oder Zoomgeste; Doppelklick passt ein. Meine Paper / SE RWTH in der Legende zeigen nur diese."))}</p>
+        <p>{L(T("In the card — cites: " + I("out") + " cites, " + I("in") + " cited by (GS Google Scholar, OA OpenAlex), " + I("mine") + " cited by my papers, " + I("hop") + " cited by first-hop papers. Cited by: " + I("tomine") + " cites my papers, " + I("tohop") + " cites first-hop works.",
+                "In der Karte — zitiert: " + I("out") + " zitiert, " + I("in") + " zitiert von (GS Google Scholar, OA OpenAlex), " + I("mine") + " von meinen Papern zitiert, " + I("hop") + " von Arbeiten des 1. Hops zitiert. Zitiert von: " + I("tomine") + " zitiert meine Paper, " + I("tohop") + " zitiert Arbeiten des 1. Hops."))}</p>
+        <p>{L(T("Data: the papers' own reference lists, OpenAlex and Crossref. Cites, second hop: works cited by at least three first-hop works. Cited by, second hop: every work citing a first-hop work.",
+                "Daten: die Literaturverzeichnisse der Paper, OpenAlex und Crossref. Zitiert, 2. Hop: Arbeiten, die von mindestens drei Arbeiten des ersten Hops zitiert werden. Zitiert von, 2. Hop: alle Arbeiten, die eine Arbeit des ersten Hops zitieren."))}</p>
+      </details>
+      </div>
 '''
 
 
@@ -769,8 +853,8 @@ DESC = {
                        "Softwareprojekte von Lukas Netz: ESACA, MaCoCo, MontiGem, das Golden UML Model Set und mehr."),
     "research.html": T("Research and publications of Lukas Netz on model-driven engineering and large language models.",
                        "Forschung und Publikationen von Lukas Netz zu modellgetriebener Softwareentwicklung und großen Sprachmodellen."),
-    "photography.html": T("Photography by Lukas Netz — landscapes, people, animals and cars.",
-                          "Fotografie von Lukas Netz — Landschaften, Menschen, Tiere und Autos."),
+    "photography.html": T("Photography by Lukas Netz — landscapes, people and animals.",
+                          "Fotografie von Lukas Netz — Landschaften, Menschen und Tiere."),
 }
 
 
@@ -800,7 +884,7 @@ def main():
         pages = {
             "index.html": (T("About", "Über mich"), about(lang), ""),
             "projects.html": (T("Projects", "Projekte"), projects(lang), ""),
-            "research.html": (T("Research", "Forschung"), research(lang), pub_js),
+            "research.html": (T("Research", "Forschung"), research(lang), pub_js + f'<script src="{A}assets/pubs-mini.js"></script>\n<script src="{A}assets/graph-view.js"></script>\n'),
             "photography.html": (T("Photography", "Fotografie"), photography(lang), lightbox),
         }
         for file, (title, body, scripts) in pages.items():

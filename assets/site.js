@@ -5,11 +5,13 @@ const I18N = {
   en: { theme: { light: "light", dark: "dark", auto: "auto" }, themeLabel: "Theme: ", themeHint: " — click to change",
         pubs: "publications", open: "Open photo: ",
         slideshow: "slideshow", pause: "pause", fs: "full screen", exitFs: "exit full screen",
-        flags: { Article: "Article", Dissertation: "Dissertation", MastersThesis: "Master’s thesis", BachelorsThesis: "Bachelor’s thesis" } },
+        flags: { Article: "Article", Dissertation: "Dissertation", MastersThesis: "Master’s thesis", BachelorsThesis: "Bachelor’s thesis" },
+        miniTitle: (i, o) => `cited by ${i} works (OpenAlex) · cites ${o} works · blue: my own papers · click: show in the citation map` },
   de: { theme: { light: "hell", dark: "dunkel", auto: "auto" }, themeLabel: "Darstellung: ", themeHint: " — klicken zum Wechseln",
         pubs: "Publikationen", open: "Foto öffnen: ",
         slideshow: "Diashow", pause: "Pause", fs: "Vollbild", exitFs: "Vollbild beenden",
-        flags: { Article: "Artikel", Dissertation: "Dissertation", MastersThesis: "Masterarbeit", BachelorsThesis: "Bachelorarbeit" } },
+        flags: { Article: "Artikel", Dissertation: "Dissertation", MastersThesis: "Masterarbeit", BachelorsThesis: "Bachelorarbeit" },
+        miniTitle: (i, o) => `zitiert von ${i} Arbeiten (OpenAlex) · zitiert ${o} Arbeiten · blau: eigene Paper · Klick: in der Zitationskarte zeigen` },
 };
 const UI = I18N[document.documentElement.lang] || I18N.en;
 
@@ -73,6 +75,34 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
     return out.join("");
   };
 
+  // mini graph per paper (assets/pubs-mini.js): what cites it fans in from the left, what it cites fans
+  // out to the right; dots coloured by topic like the citation map, my own papers in the accent colour
+  const MINI = window.PUBS_MINI || {};
+  const mini = key => {
+    const m = MINI[key];
+    if (!m) return "";
+    const W = 168, H = 34, cx = W / 2, cy = H / 2;
+    const side = (topics, own, dir) => {              // dir -1: left (cited by), +1: right (cites)
+      const dots = [...own.map(() => "own"), ...topics];
+      if (!dots.length) return `<text x="${cx + dir * 30}" y="${cy + 3}" text-anchor="middle" class="none">—</text>`;
+      const rows = dots.length > 90 ? 8 : 5, cols = Math.ceil(dots.length / rows), dx = Math.min(6.5, 56 / cols);
+      let lines = "", pts = "";
+      dots.forEach((t, k) => {
+        const c = Math.floor(k / rows), r = k % rows;
+        const x = cx + dir * (24 + c * dx), y = 3.5 + r * ((H - 7) / (rows - 1));
+        lines += `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" class="${t === "own" ? "lo" : "l"}"/>`;
+        pts += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${t === "own" ? 2.1 : 1.5}" class="${t === "own" ? "own" : "t" + t}"/>`;
+      });
+      return lines + pts;
+    };
+    const nIn = m.c.length + m.co.length, nOut = m.r.length + m.ro.length;
+    if (!nIn && !nOut) return "";
+    return `<div class="mini mono" role="button" tabindex="0" data-key="${key}" title="${UI.miniTitle(nIn, nOut)}">
+            <svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true">${side(m.c, m.co, -1)}${side(m.r, m.ro, 1)}<circle cx="${cx}" cy="${cy}" r="3.4" class="me"/><circle cx="${cx}" cy="${cy}" r="5.6" class="ring"/></svg>
+            <span>← ${nIn}</span><span>${nOut} →</span>
+          </div>`;
+  };
+
   root.innerHTML = years.map(y => `
     <div class="year">
       <div class="y mono">${y}</div>
@@ -84,20 +114,31 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
             <div class="a">${me(p.authors)}</div>
             <div class="v mono">${esc(p.venue)}</div>
             <div class="plinks mono">${links(p)}</div>
-          </div>
+          </div>${mini(p.key)}
         </li>`).join("")}
       </ol>
     </div>`).join("");
 
+  // a click on the mini graph opens the citation map on that paper: the left half in "cited by",
+  // the right half in "cites"
+  const jump = (el, inn) => {
+    document.getElementById("citation-map")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.dispatchEvent(new CustomEvent("map:focus", { detail: { key: el.dataset.key, inn } }));
+  };
+  root.querySelectorAll(".mini").forEach(el => {
+    el.addEventListener("click", e => { const r = el.getBoundingClientRect(); jump(el, e.clientX < r.left + r.width / 2); });
+    el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); jump(el, false); } });
+  });
+
   const count = document.getElementById("pub-count");
   if (count) count.textContent = `${PUBS.length} ${UI.pubs}`;
 
-  document.querySelectorAll(".filters button").forEach(btn => {
+  document.querySelectorAll(".filters button[data-f]").forEach(btn => {
     const f = btn.dataset.f;
     const n = f === "all" ? PUBS.length : PUBS.filter(p => p.tags.includes(f)).length;
     btn.insertAdjacentHTML("beforeend", `<span class="n">${n}</span>`);
     btn.addEventListener("click", () => {
-      document.querySelectorAll(".filters button").forEach(b => b.setAttribute("aria-pressed", b === btn));
+      document.querySelectorAll(".filters button[data-f]").forEach(b => b.setAttribute("aria-pressed", b === btn));
       root.querySelectorAll("li").forEach(li => li.hidden = f !== "all" && !li.dataset.tags.split(" ").includes(f));
       root.querySelectorAll(".year").forEach(y => y.classList.toggle("empty", !y.querySelector("li:not([hidden])")));
     });
