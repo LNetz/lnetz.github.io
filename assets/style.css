@@ -711,7 +711,7 @@ section > .pubs li { grid-template-columns: 120px minmax(0, 1fr); gap: 24px; }
 .golden figcaption a:hover { color: var(--accent); }
 
 /* the project list links to these pages */
-.spec h3 a.int::after { content: "→"; }
+.spec h3 a.int::after { content: none; }
 .spec .links a.more { color: var(--accent); }
 .spec .links a.more:hover { color: var(--ink); }
 
