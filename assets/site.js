@@ -753,3 +753,35 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
   addEventListener("scroll", sync, { passive: true });
   sync();
 })();
+
+// ---- project lifeline: scrolls sideways (wheel, drag, arrow keys) and starts at today ----
+// The vertical wheel moves the rail until it reaches an end; then the page scrolls on.
+(() => {
+  document.querySelectorAll(".lifeline").forEach(el => {
+    el.scrollLeft = el.scrollWidth;
+    el.addEventListener("wheel", e => {
+      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;          // trackpads scroll sideways natively
+      const max = el.scrollWidth - el.clientWidth;
+      if ((e.deltaY < 0 && el.scrollLeft <= 0) || (e.deltaY > 0 && el.scrollLeft >= max - 1)) return;
+      e.preventDefault();
+      el.scrollLeft = Math.max(0, Math.min(max, el.scrollLeft + e.deltaY));
+    }, { passive: false });
+    let x0 = null, s0 = 0, moved = false;                             // drag with the mouse
+    el.addEventListener("pointerdown", e => {
+      if (e.pointerType !== "mouse" || e.button !== 0) return;
+      x0 = e.clientX; s0 = el.scrollLeft; moved = false;
+    });
+    addEventListener("pointermove", e => {
+      if (x0 === null) return;
+      if (!moved && Math.abs(e.clientX - x0) > 4) { moved = true; el.classList.add("drag"); }
+      if (moved) el.scrollLeft = s0 - (e.clientX - x0);
+    });
+    addEventListener("pointerup", () => { x0 = null; el.classList.remove("drag"); });
+    el.addEventListener("click", e => { if (moved) { e.preventDefault(); moved = false; } }, true);
+    el.addEventListener("keydown", e => {
+      if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+      e.preventDefault();
+      el.scrollBy({ left: e.key === "ArrowRight" ? 240 : -240, behavior: "smooth" });
+    });
+  });
+})();
