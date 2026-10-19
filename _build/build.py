@@ -10,6 +10,7 @@ Publications live in assets/pubs.js; shared behaviour in assets/site.js.
 """
 import os
 
+import ai4se
 import project_pages
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -231,10 +232,11 @@ def spec(A, when, name, what, tags, meta, links=(), href=None, logo=None, mark=N
         </li>'''
 
 
-def row(label, title, text, role="", links=()):
+def row(label, title, text, role="", links=(), anchor=None):
     r = f' <span class="mono faint role">{role}</span>' if role else ""
     l = f'\n            <div class="links mono">{"".join(link(a, b) for a, b in links)}</div>' if links else ""
-    return f'''        <li>
+    a = f' id="{anchor}"' if anchor else ""                # jump target (e.g. from the project timeline)
+    return f'''        <li{a}>
           <div class="mono faint">{label}</div>
           <div>
             <h3>{title}{r}</h3>
@@ -388,7 +390,7 @@ def projects(lang):
           logo="smt-rat.png", page="smt-rat"),
     ]
     # honourable mentions: projects I contributed to, without a page of their own
-    R = lambda label, title, text, role, links=(): row(L(label), L(title), L(text), L(role), [(L(a), b) for a, b in links])
+    R = lambda label, title, text, role, links=(), anchor=None: row(L(label), L(title), L(text), L(role), [(L(a), b) for a, b in links], anchor)
     CONTRIB = T("Contributor", "Mitarbeit")
     further = [
         R(T("Automotive", "Automobil"), "KIMBA",
@@ -414,7 +416,7 @@ def projects(lang):
         R(T("Teaching", "Lehre"), T("Blended Learning video project", "Blended-Learning-Videoprojekt"),
           T("Short films from the Blended Learning Initiative of RWTH’s computer science department, showing how technology changed everyday life — letter vs. text message, paper map vs. GPS, library vs. Wikipedia. With the Learning Technologies Research Group.",
             "Kurzfilme aus der Blended-Learning-Initiative der Informatik der RWTH, die zeigen, wie Technik den Alltag verändert hat — Brief vs. SMS, Straßenkarte vs. GPS, Bibliothek vs. Wikipedia. Mit dem Lehr- und Forschungsgebiet Learning Technologies."),
-          T("Team member", "Team"), [("learntech.rwth-aachen.de", "https://learntech.rwth-aachen.de/go/id/morb/lidx/1")]),
+          T("Team member", "Team"), [("learntech.rwth-aachen.de", "https://learntech.rwth-aachen.de/go/id/morb/lidx/1")], anchor="p-blended"),
     ]
     gpts = [
         S("GPT", "SysML v2 Model Creator",
@@ -439,14 +441,12 @@ def projects(lang):
     head = page_head("01", L(T("Projects", "Projekte")), L(T(f"{n} entries", f"{n} Einträge")),
         L(T("Software I have built or led — from generator frameworks and production information systems to <em>agentic coding</em> platforms.",
             "Software, die ich gebaut oder geleitet habe — von Generator-Frameworks und produktiven Informationssystemen bis zu Plattformen für <em>agentisches Programmieren</em>.")),
-        chapters, top=page_icon("code"))
-    pic = banner(A, "banner-abstract.jpg", L(T("Abstract illustration: a glowing flower of fine light lines between blue and orange, surrounded by fragments of code and blurred lights",
-                                               "Abstrakte Illustration: eine leuchtende Blüte aus feinen Lichtlinien zwischen Blau und Orange, umgeben von Code-Fragmenten und unscharfen Lichtern")), 1024, 328,
+        chapters + project_pages.timeline(lang, A), top=page_icon("code"))
+    pic = banner(A, "banner-abstract.jpg", L(T("Abstract illustration: a blue spiral and waves of orange light among grids, small panels and fragments of code",
+                                               "Abstrakte Illustration: eine blaue Spirale und Wellen aus orangem Licht zwischen Rastern, kleinen Flächen und Code-Fragmenten")), 1024, 328,
                  L(T("AI-generated image: AI-based MDE", "KI-generiertes Bild: KI-basierte MDE")))
     return f'''
 {head}{pic}    <section>
-      <div class="group mono">{L(T("Timeline", "Zeitleiste"))}</div>
-{project_pages.timeline(lang, A)}
       <div class="group mono" id="industry">{L(T("Industry", "Industrie"))} · mgm technology partners</div>
       <ul class="spec">
 {esaca}
@@ -565,6 +565,11 @@ def research(lang):
       <div class="themes">
 {NL.join(f"        <div><h4>{L(t)[0]}</h4><p>{L(t)[1]}</p></div>" for t in themes)}
       </div>
+
+      <div class="group mono" id="articles">{L(T("Article", "Artikel"))}</div>
+      <ul class="rows">
+{row("2024 — 2026", f'<a class="int" href="{ai4se.FILE}">AI-driven Software Engineering →</a>', L(T("What generative AI is, how a language model arrives at its answer — and how LLMs can write models that a generator turns into running software. From neurons and transformers to grammar masking, embeddings and RAG.", "Was generative KI ist, wie ein Sprachmodell zu seiner Antwort kommt — und wie LLMs Modelle schreiben können, aus denen ein Generator lauffähige Software macht. Vom Neuron und Transformer bis zu Grammar Masking, Embeddings und RAG.")))}
+      </ul>
 
       <div class="group mono" id="community">Community</div>
       <ul class="rows">
@@ -895,6 +900,11 @@ def main():
             with open(os.path.join(out, file), "w", encoding="utf8", newline="\n") as fh:
                 fh.write(html)
             print(f"wrote {os.path.join(sub, file) if sub else file}  ({len(html)} bytes)")
+        # the AI4SE article (ai4se.py)
+        file, title, desc, body = ai4se.page(lang)
+        html = shell(lang, file, title, desc, body)
+        with open(os.path.join(out, file), "w", encoding="utf8", newline="\n") as fh:
+            fh.write(html)
         # one deeper page per project (project_pages.py, content in project_content.py)
         for i in range(len(project_pages.PROJECTS)):
             file, title, desc, body, scripts = project_pages.page(lang, i)

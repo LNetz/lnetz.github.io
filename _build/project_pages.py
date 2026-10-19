@@ -61,53 +61,76 @@ def pub_list(lang, keys):
     return NL.join(items)
 
 
-# Lifeline on the project list: a horizontal, sideways-scrolling year rail. Years with a project
-# start get a wide column with the project (icon, name, years, one line); empty years stay narrow.
+# Lifeline on the project list: a flat, sideways-scrolling year rail. Each project is a title at its
+# start year, followed by a thin line to its end (running projects: to today) — no line when only
+# one year is known. Projects that ran at the same time get their own row. Titles link to the list.
 SPANS = {"geneial": (2012, 2016), "smt-rat": (2015, 2015), "macoco": (2018, None), "add": (2018, 2022),
          "montigem": (2018, 2024), "ford": (2020, 2022), "epha": (2024, None), "golden-uml": (2025, 2025),
-         "se-chatty": (2025, 2025), "esaca": (2025, None)}
-LINES = {
-    "geneial": T("C++ library for genetic algorithms", "C++-Bibliothek für genetische Algorithmen"),
-    "smt-rat": T("Interval propagation in an SMT solver", "Intervall-Propagation in einem SMT-Solver"),
-    "macoco": T("Controlling cockpit for university chairs", "Controlling-Cockpit für Lehrstühle"),
-    "add": T("Digital-twin cockpits for wind turbines", "Digital-Twin-Cockpits für Windkraftanlagen"),
-    "montigem": T("Generator for web information systems", "Generator für Web-Informationssysteme"),
-    "ford": T("Tool tracking with Ford", "Werkzeugverfolgung mit Ford"),
-    "epha": T("Online display of dissertations", "Online-Auslage von Dissertationen"),
-    "golden-uml": T("Curated UML benchmark dataset", "Kuratierter UML-Benchmark-Datensatz"),
-    "se-chatty": T("Teaching assistant on lecture material", "Lehrassistent auf Vorlesungsmaterial"),
-    "esaca": T("Sovereign agentic coding, on-prem", "Souveränes agentisches Coding, on-prem"),
-}
-TL_FROM, TL_NOW = 2012, 2026
+         "se-chatty": (2025, 2025), "esaca": (2026, None)}
+# further involvement without a page of its own: (start, end, name), row #p-<slug> in "Further involvement"
+OTHER = {"blended": (2015, 2018, T("Blended Learning", "Blended Learning"))}
+# Degrees on the same rail: a mono label and an accent dot on the rail, linking to the thesis
+# in the publication list of the research page (#pub-<key>, site.js).
+DEGREES = [
+    (2015, T("B.Sc. Computer Science", "B.Sc. Informatik"), "Net15"),
+    (2017, T("M.Sc. Computer Science", "M.Sc. Informatik"), "Net17"),
+    (2024, T("PhD · Dr. rer. nat.", "Promotion · Dr. rer. nat."), "Net24"),
+]
+TL_FROM, TL_NOW, TL_TODAY = 2010, 2026, 2026.8      # TL_TODAY: where "now" ends on the rail (Oct 2026)
+TL_PAD, TL_W, TL_W_HAS = 24, 76, 230                # px: left padding, empty year, year with a start
+TL_TOP, TL_ROW = 46, 26                             # px: first row, row pitch (must match style.css)
 
 
 def timeline(lang, A):
-    """Each project sits under its start year and links to its row in the list (#p-<slug>).
-    The upper row counts the projects running that year. Scrolling: assets/site.js (lifeline)."""
+    """Scrolling behaviour: assets/site.js (lifeline)."""
     L = lambda x: x[lang] if isinstance(x, dict) else x
     by = {p["slug"]: p for p in PROJECTS}
-    cols = []
-    for k, year in enumerate(range(TL_FROM, TL_NOW + 1)):
-        starts = [s for s, (y0, _) in SPANS.items() if y0 == year]
-        active = sum(1 for y0, y1 in SPANS.values() if y0 <= year <= (y1 or TL_NOW))
-        items = []
-        for slug in starts:
-            p, (y0, y1) = by[slug], SPANS[slug]
-            icon = (f'<img src="{A}assets/logos/{p["logo"]}" alt="" width="22" height="22">' if p.get("logo")
-                    else f'<b class="mono">{p["mark"]}</b>')
-            when = f'{y0}' + ("" if y1 == y0 else f' — {y1 if y1 else L(T("today", "heute"))}')
-            items.append(f'<li><a href="#p-{slug}"><span class="ico">{icon}</span><span class="nm">{L(p["name"])}</span></a>'
-                         f'<span class="when mono">{when}</span><span class="ln">{L(LINES[slug])}</span></li>')
-        ev = f'<ul class="ll-ev">{"".join(items)}</ul>' if items else ""
-        cols.append(f'          <div class="ll-col{" has" if items else ""}{" now" if year == TL_NOW else ""}" style="--i:{k}">'
-                    f'<span class="ll-n mono">{active or ""}</span><span class="ll-y">{year}</span><i class="ll-tick"></i>{ev}</div>')
-    return f'''      <div class="lifeline" tabindex="0" role="region" aria-label="{L(T("Timeline of my projects, scrolls sideways", "Zeitleiste meiner Projekte, seitlich scrollbar"))}">
-        <div class="ll-track">
-          <div class="ll-head mono" aria-hidden="true"><span>{L(T("Active", "Aktiv"))}</span><span>{L(T("Years", "Jahre"))}</span></div>
-{NL.join(cols)}
+    starts = {y0 for y0, _ in SPANS.values()} | {y for y, _, _ in DEGREES} | {y0 for y0, _, _ in OTHER.values()}
+    widths = {y: TL_W_HAS if y in starts else TL_W for y in range(TL_FROM, TL_NOW + 1)}
+    def X(t):                                        # rail position of a (fractional) year
+        y, f, x = int(t), t - int(t), TL_PAD
+        for k in range(TL_FROM, min(y, TL_NOW + 1)):
+            x += widths[k]
+        return x + f * widths.get(y, TL_W)
+    cols = NL.join(f'          <div class="ll-col{" has" if y in starts else ""}{" now" if y == TL_NOW else ""}" style="--i:{k}">'
+                   f'<span class="ll-y">{y}</span><i class="ll-tick"></i></div>'
+                   for k, y in enumerate(range(TL_FROM, TL_NOW + 1)))
+    entries = [(y0, y1, slug, L(by[slug]["name"]), None) for slug, (y0, y1) in SPANS.items()]
+    entries += [(y0, y1, slug, L(name), None) for slug, (y0, y1, name) in OTHER.items()]
+    entries += [(y, y, None, L(label), f"research.html#pub-{key}") for y, label, key in DEGREES]
+    rows, runs, dots = [], [], []                    # rows: px up to which each row is taken
+    for y0, y1, slug, name, url in sorted(entries, key=lambda e: (e[0], e[2] is None, -(e[1] or TL_NOW))):
+        point = y1 == y0                             # only one year known: title, no line
+        x0 = X(y0)
+        x1 = x0 + len(name) * 7.2 + 8 if point else X(y1 + 1 if y1 else TL_TODAY)
+        taken = max(x1, x0 + len(name) * 7.2 + 12)   # the title may be longer than the line
+        r = next((i for i, until in enumerate(rows) if until + 10 <= x0), None)
+        if r is None:
+            rows.append(taken); r = len(rows) - 1
+        else:
+            rows[r] = taken
+        top = TL_TOP + r * TL_ROW
+        if url:                                      # a degree
+            dots.append(f'          <i class="ll-dot" style="left:{x0:.0f}px"></i>')
+            runs.append(f'          <a class="ll-p point deg mono" href="{url}" title="{name} · {y0} · RWTH Aachen" '
+                        f'style="left:{x0:.0f}px;top:{top}px;--len:0px;--i:{y0 - TL_FROM}"><span>{name}</span></a>')
+            continue
+        when = f'{y0}' + ("" if y1 == y0 else f' — {y1 if y1 else L(T("today", "heute"))}')
+        runs.append(f'          <a class="ll-p{" open" if not y1 else ""}{" point" if point else ""}" href="#p-{slug}" title="{name} · {when}" '
+                    f'style="left:{x0:.0f}px;top:{TL_TOP + r * TL_ROW}px;--len:{x1 - x0:.0f}px;--i:{y0 - TL_FROM}"><span>{name}</span></a>')
+    height = TL_TOP + len(rows) * TL_ROW
+    # .lifeline scrolls; its edges fade out where there is more to see
+    return f'''
+      <div class="ll-wrap">
+        <div class="lifeline" tabindex="0" role="region" aria-label="{L(T("Timeline of my projects, scrolls sideways", "Zeitleiste meiner Projekte, seitlich scrollbar"))}">
+          <div class="ll-track" style="height:{height}px">
+{cols}
+{NL.join(dots)}
+{NL.join(runs)}
+          </div>
         </div>
-      </div>
-'''
+      </div>'''
+
 
 
 def video(lang, A, yt, thumb, title, caption):

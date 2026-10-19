@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI-driven Software Engineering — Lukas Netz</title>
+  <meta name="description" content="KI-getriebene Softwareentwicklung: wie LLMs funktionieren und wie sie Modelle schreiben, aus denen Generatoren Software machen — ein Artikel von Lukas Netz.">
+  <meta property="og:title" content="AI-driven Software Engineering — Lukas Netz">
+  <meta property="og:description" content="KI-getriebene Softwareentwicklung: wie LLMs funktionieren und wie sie Modelle schreiben, aus denen Generatoren Software machen — ein Artikel von Lukas Netz.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="de_DE">
+  <link rel="alternate" hreflang="en" href="../research-ai4se.html">
+  <link rel="alternate" hreflang="de" href="research-ai4se.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <script>
+    // Theme preference in localStorage: "light" (default), "dark" or "auto" (follows the OS).
+    // Applied before first paint (no flash); re-applied on pageshow (back/forward cache)
+    // and whenever the OS switches while "auto" is chosen.
+    (function () {
+      var os = matchMedia("(prefers-color-scheme: dark)");
+      function apply() {
+        var p = null;
+        try { p = localStorage.getItem("theme"); } catch (_) {}
+        if (p !== "dark" && p !== "auto") p = "light";
+        var root = document.documentElement;
+        root.dataset.themePref = p;
+        root.dataset.theme = p === "auto" ? (os.matches ? "dark" : "light") : p;
+      }
+      window.applyTheme = apply;
+      apply();
+      // build-up animation (style.css, .anim) unless the OS asks for reduced motion;
+      // the index column only builds up on the first page of a visit (.returning afterwards)
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) document.documentElement.classList.add("anim");
+      try {
+        if (sessionStorage.getItem("seen")) document.documentElement.classList.add("returning");
+        sessionStorage.setItem("seen", "1");
+      } catch (_) {}
+      addEventListener("pageshow", apply);
+      os.addEventListener("change", apply);
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body id="top">
+<div class="backdrop" aria-hidden="true"></div>
+<div class="frame">
+
+  <!-- ============ index column (identical on every page) ============
+       Desktop: sticky left column.  ≤ 900px: sticky top bar; the menu
+       (pages, profiles, language, theme) opens as a full-screen sheet. -->
+  <aside class="index" id="index">
+    <div class="bar">
+      <div class="who">
+        <a class="name" href="index.html">Lukas Netz</a>
+        <span class="here mono" aria-hidden="true">AI-driven Software Engineering</span>
+        <div class="role">Dr. rer. nat.<br>IT-Spezialist<br>mgm technology partners</div>
+      </div>
+      <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">Menü</button>
+    </div>
+
+    <div class="menu" id="menu">
+      <nav aria-label="Seiten">
+        <ol class="mono">
+        <li><a href="index.html"><span>00</span><span>Über mich</span></a></li>
+        <li><a href="projects.html"><span>01</span><span>Projekte</span></a></li>
+        <li><a href="research.html" class="active" aria-current="page"><span>02</span><span>Forschung</span></a></li>
+        <li><a href="photography.html"><span>03</span><span>Fotografie</span></a></li>
+        </ol>
+      </nav>
+
+      <div class="contact mono">
+      <a href="https://www.linkedin.com/in/lukas-netz/" target="_blank" rel="noopener">LinkedIn ↗</a>
+      <a href="https://scholar.google.com/citations?user=5mVkoWsAAAAJ&amp;hl=en" target="_blank" rel="noopener">Google Scholar ↗</a>
+      <a href="https://www.researchgate.net/profile/Lukas-Netz" target="_blank" rel="noopener">ResearchGate ↗</a>
+      <a href="https://orcid.org/0000-0003-2013-2919" target="_blank" rel="noopener">ORCID ↗</a>
+      <a href="https://dblp.org/pid/170/5042.html" target="_blank" rel="noopener">dblp ↗</a>
+      <a href="https://github.com/LNetz" target="_blank" rel="noopener">GitHub ↗</a>
+      </div>
+
+      <div class="prefs mono">
+        <div class="lang" aria-label="Sprache"><a href="../research-ai4se.html" hreflang="en" lang="en">EN</a><a href="research-ai4se.html" hreflang="de" lang="de" aria-current="true">DE</a></div>
+        <button class="theme-toggle" type="button" id="theme">◐ <span>hell</span></button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ content ============ -->
+  <main>
+
+    <header class="page proj">
+      <a class="back mono" href="research.html">← Forschung</a>
+      <div class="section-head">
+        <h1><span class="mono">02</span>AI-driven Software Engineering</h1>
+        <span class="mono faint">Artikel · 2024, überarbeitet 2026</span>
+      </div>
+      <p class="lead">Was ist diese „neue“ KI, wie funktioniert sie — und wo hilft sie beim Bauen von Software wirklich? Eine Einführung vom Neuron bis zu <em>Sprachmodellen, die Modelle schreiben</em>.</p>
+      <nav class="chapters mono" aria-label="Kapitel"><a href="#terms">KI ist ein Sammelbegriff</a><a href="#neural">Wie ein neuronales Netz entscheidet</a><a href="#genai">Generative KI</a><a href="#se">KI in der Softwareentwicklung</a><a href="#models">Sprachmodelle, die Modelle schreiben</a><a href="#mde">Vom Satz zur Anwendung</a><a href="#embeddings">Weitere Anwendungen: Anforderungen und semantische Suche</a><a href="#hallucinations">Halluzinationen</a><a href="#summary">Kurz gesagt</a></nav>
+    </header>
+    <article class="article">
+      <section class="art-sec"><p>Künstliche Intelligenz ist kein neues Thema. Schon 1950 stellt Alan Turing in seinem Aufsatz <i>Computing Machinery and Intelligence</i> <a class="cite" href="#ref-1">[1]</a> den später nach ihm benannten Turing-Test vor. Kein Jahrzehnt später folgen die ersten neuronalen Netze <a class="cite" href="#ref-2">[2]</a>.</p>
+<blockquote class="epigraph"><p>I propose to consider the question, “Can machines think?”</p><footer class="mono">Alan M. Turing · Computing Machinery and Intelligence, 1950</footer></blockquote>
+<p>Es dauert wiederum einige Jahrzehnte, bis 2017 die Grundlagen für große Sprachmodelle (Large Language Models, LLMs) gelegt werden <a class="cite" href="#ref-3">[3]</a>. Weil sie natürliche Sprache so gut verarbeiten, sind LLMs sehr vielseitig einsetzbar. Man muss weder KI-Spezialist noch Informatiker sein, um mit ihnen zu arbeiten: Ein LLM stellt kaum Anforderungen an die Eingabe und erfasst ihre Bedeutung erstaunlich gut.</p><figure class="chat"><div class="turn"><span class="who mono">Nutzer</span><div class="msg">Warum können Gespenster so schlecht lügen?</div></div><div class="turn ai"><span class="who mono">ChatGPT</span><div class="msg">Weil sie leicht zu durchschauen sind!</div></div><figcaption class="mono">GPT-4 · April 2024</figcaption></figure><p>Daraus ergeben sich zwei Fragen: Was genau ist diese „neue“ KI — und wo können wir sie in der Softwareentwicklung produktiv einsetzen?</p></section>
+      <section class="art-sec"><h2 id="terms">KI ist ein Sammelbegriff</h2><p>„Künstliche Intelligenz“ ist ein sehr allgemeiner und unscharf definierter Überbegriff. Neben neuronalen Netzen werden auch einfache Entscheidungsbäume gern als KI bezeichnet. Machine Learning grenzt das auf Algorithmen ein, die aus Daten lernen; Deep Learning auf solche, die neuronale Netze nutzen; generative KI auf Systeme, die neue Inhalte erzeugen. Große Sprachmodelle sind der innerste Kreis — und um den geht es in diesem Artikel.</p><figure class="media art-fig"><div class="dia-scroll"><svg class="dia" viewBox="0 0 860 324" role="img" aria-label="Künstliche Intelligenz als Sammelbegriff: Machine Learning, Deep Learning, generative KI und LLMs ineinander geschachtelt"><rect x="12" y="12" width="300" height="300" rx="22" style="fill:var(--accent);fill-opacity:0.06;stroke:var(--accent);stroke-opacity:.35"/><text x="162.0" y="36" text-anchor="middle" class="t">Künstliche Intelligenz</text><path class="ln" d="M232.0 32H340"/><circle cx="340" cy="32" r="2" class="dot"/><text x="352" y="36">Forschung an intelligenten Maschinen, die wie</text><text x="352" y="51" class="s">Menschen handeln und reagieren</text><rect x="34" y="58" width="256" height="254" rx="20" style="fill:var(--accent);fill-opacity:0.11;stroke:var(--accent);stroke-opacity:.35"/><text x="162.0" y="82" text-anchor="middle" class="t">Machine learning</text><path class="ln" d="M232.0 78H340"/><circle cx="340" cy="78" r="2" class="dot"/><text x="352" y="82">statistische Algorithmen, die aus Daten lernen und</text><text x="352" y="97" class="s">auf Ungesehenes verallgemeinern</text><rect x="56" y="104" width="212" height="208" rx="18" style="fill:var(--accent);fill-opacity:0.16;stroke:var(--accent);stroke-opacity:.35"/><text x="162.0" y="128" text-anchor="middle" class="t">Deep learning</text><path class="ln" d="M232.0 124H340"/><circle cx="340" cy="124" r="2" class="dot"/><text x="352" y="128">Machine Learning mit neuronalen Netzen, die</text><text x="352" y="143" class="s">komplexe Muster erkennen</text><rect x="78" y="150" width="168" height="162" rx="16" style="fill:var(--accent);fill-opacity:0.21000000000000002;stroke:var(--accent);stroke-opacity:.35"/><text x="162.0" y="174" text-anchor="middle" class="t">Generative KI</text><path class="ln" d="M232.0 170H340"/><circle cx="340" cy="170" r="2" class="dot"/><text x="352" y="174">KI, die aus gelernten Mustern neue Inhalte erzeugt</text><rect x="100" y="196" width="124" height="116" rx="14" style="fill:var(--accent);fill-opacity:0.26;stroke:var(--accent);stroke-opacity:.35"/><text x="162.0" y="220" text-anchor="middle" class="t">LLMs</text><path class="ln" d="M232.0 216H340"/><circle cx="340" cy="216" r="2" class="dot"/><text x="352" y="220">große Sprachmodelle: verarbeiten und erzeugen</text><text x="352" y="235" class="s">menschenähnlichen Text</text><circle cx="124" cy="270" r="27" class="box hl"/><text x="124" y="274" text-anchor="middle" class="s" style="font-size:9px">ChatGPT</text><circle cx="190" cy="270" r="27" class="box"/><text x="190" y="274" text-anchor="middle" class="s" style="font-size:9px">Copilot</text></svg></div><figcaption class="mono">KI ist ein Sammelbegriff. Gemeint ist heute meist der innerste Teil: große Sprachmodelle wie ChatGPT oder Copilot.</figcaption></figure></section>
+      <section class="art-sec"><h2 id="neural">Wie ein neuronales Netz entscheidet</h2><p>Die Grundlage jedes LLMs ist ein neuronales Netz. Am einfachsten sieht man die Idee an einem Bild: Ist das ein Hund oder eine Katze? Das Netz sieht keinen Hund, nur Pixelwerte. Jeder Pixel ist eine Eingabe; jede Eingabe ist über ein Gewicht mit Neuronen verbunden; jedes Neuron summiert seine gewichteten Eingaben und gibt das Ergebnis über eine Aktivierungsfunktion an die nächste Schicht weiter. Am Ende konkurrieren zwei Ausgabeneuronen — „Hund“ und „Katze“. Beim Training werden die Gewichte über viele Beispiele so angepasst, bis das richtige Neuron gewinnt.</p><figure class="media art-fig"><div class="dia-scroll"><svg class="dia" viewBox="0 0 860 380" role="img" aria-label="Ein Hundefoto wird zu Pixeln; die Pixelwerte speisen ein kleines neuronales Netz, dessen Ausgabeneuron für Hund aufleuchtet. Darunter: Ein einzelnes Neuron bildet eine gewichtete Summe seiner Eingaben und gibt sie durch eine Aktivierungsfunktion weiter.">
+  <defs><marker id="nna" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9" fill="none" stroke="currentColor" stroke-width="1.4"/></marker><marker id="nnaa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9" fill="none" style="stroke:var(--accent)" stroke-width="1.4"/></marker></defs>
+  <image href="../assets/ai4se/dog.jpg" x="0" y="40" width="120" height="120"/>
+  <image href="../assets/ai4se/dog-pixels.png" x="140" y="40" width="120" height="120" style="image-rendering:pixelated"/>
+  <text x="60" y="180" text-anchor="middle" class="s">Foto</text>
+  <text x="200" y="180" text-anchor="middle" class="s">16 × 16 Pixel</text>
+  <path class="ln" d="M262 100H288" marker-end="url(#nna)"/>
+  <path class="ln" style="opacity:.35" d="M300 60L400 80"/><path class="ln" style="opacity:.35" d="M300 60L400 125"/><path class="ln" style="opacity:.35" d="M300 60L400 170"/><path class="ln" style="opacity:.35" d="M300 60L400 215"/><path class="ln" style="opacity:.35" d="M300 100L400 80"/><path class="ln" style="opacity:.35" d="M300 100L400 125"/><path class="ln" style="opacity:.35" d="M300 100L400 170"/><path class="ln" style="opacity:.35" d="M300 100L400 215"/><path class="ln" style="opacity:.35" d="M300 140L400 80"/><path class="ln" style="opacity:.35" d="M300 140L400 125"/><path class="ln" style="opacity:.35" d="M300 140L400 170"/><path class="ln" style="opacity:.35" d="M300 140L400 215"/><path class="ln" style="opacity:.35" d="M300 180L400 80"/><path class="ln" style="opacity:.35" d="M300 180L400 125"/><path class="ln" style="opacity:.35" d="M300 180L400 170"/><path class="ln" style="opacity:.35" d="M300 180L400 215"/><path class="ln" style="opacity:.35" d="M300 220L400 80"/><path class="ln" style="opacity:.35" d="M300 220L400 125"/><path class="ln" style="opacity:.35" d="M300 220L400 170"/><path class="ln" style="opacity:.35" d="M300 220L400 215"/><path class="ln" style="opacity:.35" d="M400 80L500 118"/><path class="ln" style="opacity:.35" d="M400 80L500 178"/><path class="ln" style="opacity:.35" d="M400 125L500 118"/><path class="ln" style="opacity:.35" d="M400 125L500 178"/><path class="ln" style="opacity:.35" d="M400 170L500 118"/><path class="ln" style="opacity:.35" d="M400 170L500 178"/><path class="ln" style="opacity:.35" d="M400 215L500 118"/><path class="ln" style="opacity:.35" d="M400 215L500 178"/><circle cx="300" cy="60" r="7" class="box"/><circle cx="300" cy="100" r="7" class="box"/><circle cx="300" cy="140" r="7" class="box"/><circle cx="300" cy="180" r="7" class="box"/><circle cx="300" cy="220" r="7" class="box"/><circle cx="400" cy="80" r="9" class="box"/><circle cx="400" cy="125" r="9" class="box"/><circle cx="400" cy="170" r="9" class="box"/><circle cx="400" cy="215" r="9" class="box"/><circle cx="500" cy="118" r="10" class="box hl"/><circle cx="500" cy="178" r="10" class="box"/><text x="522" y="122" class="t" style="fill:var(--accent)">Hund</text><text x="522" y="182" class="t">Katze</text><text x="300" y="250" text-anchor="middle" class="s">Pixel</text><text x="400" y="250" text-anchor="middle" class="s">Neuronen</text><text x="500" y="250" text-anchor="middle" class="s">Ausgabe</text>
+  <rect class="zone line" x="540" y="270" width="300" height="104" rx="4"/>
+  <text x="552" y="262" class="s">EIN NEURON</text>
+  <text x="560" y="290" class="s">x1</text><path class="ln" d="M576 286H600"/><circle cx="612" cy="286" r="11" class="box"/><text x="612" y="290" text-anchor="middle" class="s">w1</text><path class="ln" d="M623 286L682 326"/><text x="560" y="316" class="s">x2</text><path class="ln" d="M576 312H600"/><circle cx="612" cy="312" r="11" class="box"/><text x="612" y="316" text-anchor="middle" class="s">w2</text><path class="ln" d="M623 312L682 326"/><text x="560" y="342" class="s">x3</text><path class="ln" d="M576 338H600"/><circle cx="612" cy="338" r="11" class="box"/><text x="612" y="342" text-anchor="middle" class="s">w3</text><path class="ln" d="M623 338L682 326"/><text x="560" y="368" class="s">x4</text><path class="ln" d="M576 364H600"/><circle cx="612" cy="364" r="11" class="box"/><text x="612" y="368" text-anchor="middle" class="s">w4</text><path class="ln" d="M623 364L682 326"/><circle cx="700" cy="326" r="18" class="box hl"/><text x="700" y="331" text-anchor="middle" class="t">Σ</text><path class="ln" d="M718 326H744" marker-end="url(#nna)"/><rect x="748" y="308" width="36" height="36" rx="3" class="box"/><text x="766" y="331" text-anchor="middle" class="t">φ</text><path class="ln" d="M784 326H812" marker-end="url(#nna)"/><text x="700" y="368" text-anchor="middle" class="s">gewichtete Summe</text><text x="766" y="300" text-anchor="middle" class="s">Aktivierung</text>
+</svg></div><figcaption class="mono">Ein neuronales Netz sieht Zahlen, keine Hunde: Jeder Pixel ist eine Eingabe, jede Verbindung ein Gewicht. Jedes Neuron summiert seine gewichteten Eingaben und gibt das Ergebnis über eine Aktivierungsfunktion weiter. Training passt die Gewichte so lange an, bis bei Hunden „Hund“ gewinnt.</figcaption></figure><p>Zum Vergleich: Der Fadenwurm <i>C. elegans</i> kommt mit 302 Neuronen und rund 7.000 synaptischen Verbindungen aus. Aktuelle LLMs haben Parameter in der Größenordnung von einer Billion.</p></section>
+      <section class="art-sec"><h2 id="genai">Generative KI</h2><p>Generative KI meint Systeme, die darauf trainiert sind, Inhalte zu erzeugen, die von menschlichen kaum zu unterscheiden sind — Texte, Bilder, Musik und sogar Code. Beispiele sind GPT-4 (Generative Pretrained Transformer) für Text, DALL-E für Bilder und Codex für die Programmierung. Sie alle beruhen auf der Transformer-Architektur.</p>
+<p>Zwei Aspekte sind ausschlaggebend. Erstens wird das neuronale Netz so auf Texten trainiert, dass es nicht nur die Position der Wörter erfasst, sondern auch ihren Bezug zueinander. Dadurch kann ein GPT Bezüge auflösen — auch implizite:</p><figure class="chat"><div class="turn"><span class="who mono">Nutzer</span><div class="msg">Es gibt ein Auto und eine Kutsche. Sie ist blau. Welche Farbe hat das Auto?</div></div><div class="turn ai"><span class="who mono">ChatGPT</span><div class="msg">Die Information „sie ist blau“ bezieht sich auf eines der beiden Objekte. Da „sie“ typischerweise für weibliche Substantive verwendet wird, würde ich nach dem Genus der beiden Nomen schauen … nur „die Kutsche“ ist weiblich. Daher würde ich interpretieren, dass die Kutsche blau ist — die Farbe des Autos wurde nicht angegeben.</div></div><figcaption class="mono">GPT-4 · April 2024, gekürzt</figcaption></figure><figure class="media art-fig"><div class="dia-scroll"><svg class="dia" viewBox="0 0 900 300" role="img" aria-label="Vereinfachter Transformer-Decoder: Embeddings mit Positionskodierung durchlaufen Attention- und Feed-Forward-Schichten, N-mal wiederholt; eine lineare Schicht und Softmax liefern Wahrscheinlichkeiten für das nächste Token"><defs><marker id="tra" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9" fill="none" stroke="currentColor" stroke-width="1.4"/></marker><marker id="traa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9" fill="none" style="stroke:var(--accent)" stroke-width="1.4"/></marker></defs><rect class="box" x="110" y="20" width="250" height="40" rx="3"/><text x="235.0" y="44.0" text-anchor="middle" class="t">Linear · Softmax</text><path class="ln dash" d="M370 40H400"/><text x="410" y="44">eine Wahrscheinlichkeit für jedes mögliche nächste Token</text><path class="ln" d="M235 76V62" marker-end="url(#tra)"/><rect class="box" x="110" y="78" width="250" height="40" rx="3"/><text x="235.0" y="102.0" text-anchor="middle" class="t">Feed forward</text><path class="ln dash" d="M370 98H400"/><text x="410" y="102">ein einfaches neuronales Netz pro Token</text><path class="ln" d="M235 134V120" marker-end="url(#tra)"/><rect class="box hl" x="110" y="136" width="250" height="40" rx="3"/><text x="235.0" y="160.0" text-anchor="middle" class="t">Masked multi-head attention</text><path class="ln dash" d="M370 156H400"/><text x="410" y="160">wie die Tokens zueinander in Beziehung stehen</text><path class="ln" d="M235 192V178" marker-end="url(#tra)"/><rect class="box" x="110" y="194" width="250" height="40" rx="3"/><text x="235.0" y="218.0" text-anchor="middle" class="t">+ Positionskodierung</text><path class="ln dash" d="M370 214H400"/><text x="410" y="218">wo im Text jedes Token steht</text><path class="ln" d="M235 250V236" marker-end="url(#tra)"/><rect class="box" x="110" y="252" width="250" height="40" rx="3"/><text x="235.0" y="276.0" text-anchor="middle" class="t">Output-Embedding</text><path class="ln dash" d="M370 272H400"/><text x="410" y="276">der bisherige Text als Token-Vektoren</text><rect class="zone line" x="96" y="70" width="278" height="114" rx="4"/><text x="86" y="124" text-anchor="end" class="t">× N</text><text x="86" y="140" text-anchor="end" class="s">Schichten</text><text x="86" y="154" text-anchor="end" class="s">Llama 3.1: 126</text></svg></div><figcaption class="mono">Der Kern eines GPT, von unten nach oben gelesen. Attention war 2017 der entscheidende Schritt: Jedes Token kann auf jedes frühere Token schauen und abwägen, wie wichtig es ist.</figcaption></figure><p>Um eine Antwort zu erzeugen, gibt ein GPT nur das wahrscheinlichste nächste Wort aus — genauer: das nächste Textelement, ein <i>Token</i> — und wiederholt das für seine eigene Ausgabe, bis die Antwort fertig ist:</p><figure class="media art-fig"><div class="dia-scroll"><svg class="dia" viewBox="0 0 860 230" role="img" aria-label="Der Prompt geht in das Modell, das für jedes mögliche nächste Token eine Wahrscheinlichkeit liefert; das wahrscheinlichste, Paris, wird gezogen und angehängt">
+  <defs><marker id="nta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9" fill="none" stroke="currentColor" stroke-width="1.4"/></marker><marker id="ntaa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9" fill="none" style="stroke:var(--accent)" stroke-width="1.4"/></marker></defs>
+  <rect class="box" x="0" y="40" width="326" height="150" rx="3"/>
+  <text x="14" y="32" class="s">INPUT PROMPT</text>
+  <text x="14" y="80">System: Du bist ein hilfreicher Chatbot!</text><text x="14" y="112">Nutzer: Was ist die Hauptstadt von Frankreich?</text><text x="14" y="144">Assistent: Die Hauptstadt ist <tspan style="fill:var(--accent)">▌</tspan></text>
+  <path class="ln" d="M326 115H338" marker-end="url(#nta)"/>
+  <rect class="box hl" x="342" y="85" width="120" height="60" rx="3"/><text x="402.0" y="111.0" text-anchor="middle" class="t">GPT</text><text x="402.0" y="128.0" text-anchor="middle" class="s">Transformer</text>
+  <path class="ln" d="M462 115H500" marker-end="url(#nta)"/>
+  <text x="572" y="40" class="s">WAHRSCHEINLICHKEIT DES NÄCHSTEN TOKENS</text>
+  <text x="560" y="78" text-anchor="end" class="t">Paris</text><rect x="572" y="66" width="178" height="14" rx="2" style="fill:var(--accent);opacity:1"/><text x="758" y="78" class="s">0.81</text><text x="560" y="108" text-anchor="end" class="">Lyon</text><rect x="572" y="96" width="15" height="14" rx="2" style="fill:var(--ink-3);opacity:0.45"/><text x="595" y="108" class="s">0.07</text><text x="560" y="138" text-anchor="end" class="">Toulouse</text><rect x="572" y="126" width="9" height="14" rx="2" style="fill:var(--ink-3);opacity:0.45"/><text x="589" y="138" class="s">0.04</text><text x="560" y="168" text-anchor="end" class="">die</text><rect x="572" y="156" width="7" height="14" rx="2" style="fill:var(--ink-3);opacity:0.45"/><text x="587" y="168" class="s">0.03</text><text x="560" y="198" text-anchor="end" class="">Berlin</text><rect x="572" y="186" width="3" height="14" rx="2" style="fill:var(--ink-3);opacity:0.45"/><text x="583" y="198" class="s">0.01</text>
+  <path class="ln hl dash" d="M560 60V30H150V36" marker-end="url(#ntaa)"/>
+  <text x="356" y="24" class="s a">gezogen und angehängt — dann die nächste Runde</text>
+</svg></div><figcaption class="mono">Ein LLM antwortet Token für Token: Es berechnet für jedes mögliche nächste Token eine Wahrscheinlichkeit, eines wird gezogen und angehängt, und der ganze Text geht erneut hinein — bis ein End-Token gezogen wird. Die „Temperatur“ bestimmt, wie weit die Wahl vom wahrscheinlichsten Token abweichen darf.</figcaption></figure><p>Der zweite Aspekt ist der schiere Umfang des Trainings. LLMs werden auf enormen Datenmengen trainiert und verarbeiten die Nuancen menschlicher Sprache deshalb sehr gut. Eingaben dürfen grammatikalisch ungenau, voller Rechtschreibfehler und umgangssprachlich sein — das Modell kennt all das aus seinen Trainingsdaten.</p><figure class="chat"><div class="turn"><span class="who mono">Nutzer</span><div class="msg">Überführe den folgenden Satz in korrekte Rechtschreibung und Grammatik: „Modelgetibene Softwär Enticklunk ein sehr spannendes Thema ist!!“</div></div><div class="turn ai"><span class="who mono">GPT-4</span><div class="msg">„Modellgetriebene Softwareentwicklung ist ein sehr spannendes Thema!“</div></div><figcaption class="mono">GPT-4 · April 2024</figcaption></figure><p>GPTs sind also ein mächtiges Werkzeug, um natürliche Sprache zu verarbeiten. Weil sie aber auf neuronalen Netzen beruhen, sind sie weder transparent — man kann nicht nachvollziehen, wie eine Ausgabe zustande kam — noch deterministisch: Derselbe Prompt kann zweimal unterschiedliche Ergebnisse liefern.</p></section>
+      <section class="art-sec"><h2 id="se">KI in der Softwareentwicklung</h2><p>Softwareentwicklung ist eine komplexe Disziplin mit vielen Einstiegshürden: Programmierkenntnisse, Erfahrung in der Systemmodellierung, Domänenwissen und viel Abstimmung zwischen den Stakeholdern der zu entwickelnden Plattform. Generative KI kann uns schon heute Teile dieser Arbeit abnehmen und die Entwicklung beschleunigen <a class="cite" href="#ref-4">[4]</a>. Assistenten wie GitHub Copilot unterstützen Programmierer beim Schreiben von Teilen des Quellcodes. Deutlich weniger Ansätze befassen sich mit der Modellierung und Generierung ganzer Systeme.</p>
+<p>Generative Methoden können aus textuellen Modellen Systeme oder Teile davon erzeugen: Ein Generator liest ein Modell und erzeugt daraus Quellcode. Je nachdem, wofür der Code gedacht ist, passen unterschiedliche Modellierungssprachen — Klassendiagramme für Datenstrukturen, Sequenzdiagramme für Abläufe.</p></section>
+      <section class="art-sec"><h2 id="models">Sprachmodelle, die Modelle schreiben</h2><p>Gute Modelle zu definieren erfordert Vorwissen: über Modellierungskonzepte, über die Syntax der Modellierungssprache und über den Anwendungsfall. LLMs können vor allem bei den ersten beiden helfen. Mit Prompt Engineering können wir einem LLM eine Modellierungssprache beibringen <a class="cite" href="research.html#pub-BDMN+24">[BDMN+24]</a> <a class="cite" href="research.html#pub-NMR24">[NMR24]</a> — mit einer Kombination aus Few-Shot-Learning <a class="cite" href="#ref-5">[5]</a>, Retrieval-Augmented Generation <a class="cite" href="#ref-6">[6]</a> und Instruktionen, die natürlichsprachliche Eingaben in ein textuelles Modell in der Sprache unserer Wahl übersetzen.</p><figure class="chat"><div class="turn"><span class="who mono">Nutzer</span><div class="msg">Erzeuge mir ein einfaches Modell einer Hundehütte</div></div><div class="turn ai"><span class="who mono">CD4A Model Creator</span><div class="msg"><pre><code>classdiagram HundehüttenModell {
+  class Hundehütte {
+    String standort;
+    double breite;
+    double länge;
+    double höhe;
+  }
+  class Hund {
+    String name;
+    String rasse;
+    int alter;
+  }
+  association [1] Hundehütte -> (bewohner) Hund [*];
+}</code></pre></div></div><figcaption class="mono">CD4A Model Creator</figcaption></figure><p>Probieren Sie die Assistenten selbst aus:</p><ul class="tries"><li><a href="https://chatgpt.com/g/g-sRnmDgQvW-cd4a-class-diagram-creator" target="_blank" rel="noopener">CD4A Model Creator ↗</a><span class="mono faint">Klassendiagramme in CD4A</span></li><li><a href="https://chatgpt.com/g/g-3DkGCDlNM-sysml-v2-model-creator" target="_blank" rel="noopener">SysML v2 Model Creator ↗</a><span class="mono faint">SysML-v2-Modelle</span></li><li><a href="https://chatgpt.com/g/g-Pgayc5wzx-monticore-expert" target="_blank" rel="noopener">MontiCore Expert ↗</a><span class="mono faint">Fragen zu MontiCore</span></li></ul><p>LLMs, die auf eine Modellierungssprache angepasst sind, können mehr als neue Modelle erstellen: Sie können bestehende Modelle anpassen oder ein Modell aus einem Bild extrahieren. Ein am Whiteboard skizziertes Modell lässt sich fotografieren und in die passende Syntax überführen.</p><p>Verlässlich wird das erst durch das, was <i>nach</i> dem LLM passiert. Ein Parser prüft jedes Modell; ein ungültiges geht mit der Fehlermeldung zurück:</p><figure class="media art-fig"><div class="dia-scroll"><svg class="dia" viewBox="0 0 860 210" role="img" aria-label="Pipeline: Freitext des Nutzers wird mit Beispielen erweitert (Few-Shot), das LLM schreibt ein textuelles Modell, ein Parser nimmt es an oder schickt es zurück">
+  <defs><marker id="fma" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9" fill="none" stroke="currentColor" stroke-width="1.4"/></marker><marker id="fmaa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9" fill="none" style="stroke:var(--accent)" stroke-width="1.4"/></marker></defs>
+  <rect class="box" x="0" y="50" width="170" height="70" rx="3"/>
+  <text x="12" y="72" class="s">FREITEXT</text>
+  <text x="12" y="94">„Entwirf ein Bücherei-</text><text x="12" y="110">verwaltungssystem“</text>
+  <path class="ln" d="M170 85H206" marker-end="url(#fma)"/>
+  <rect class="box" x="210" y="60" width="110" height="50" rx="3"/><text x="265.0" y="81.0" text-anchor="middle" class="t">Few-shot</text><text x="265.0" y="98.0" text-anchor="middle" class="s">+ Beispiele</text>
+  <rect class="box" x="210" y="146" width="110" height="44" rx="3"/><text x="265.0" y="164.0" text-anchor="middle" class="t">Beispiele</text><text x="265.0" y="181.0" text-anchor="middle" class="s">(q, a)ᵢ</text>
+  <path class="ln" d="M265 146V114" marker-end="url(#fma)"/>
+  <path class="ln" d="M320 85H356" marker-end="url(#fma)"/>
+  <rect class="box hl" x="360" y="60" width="110" height="50" rx="3"/><text x="415.0" y="81.0" text-anchor="middle" class="t">LLM</text><text x="415.0" y="98.0" text-anchor="middle" class="s">schreibt es</text>
+  <path class="ln" d="M470 85H506" marker-end="url(#fma)"/>
+  <rect class="box" x="510" y="60" width="120" height="50" rx="3"/><text x="570.0" y="81.0" text-anchor="middle" class="t">Textuelles Modell</text><text x="570.0" y="98.0" text-anchor="middle" class="s">CD4A · SysML v2</text>
+  <path class="ln" d="M630 85H666" marker-end="url(#fma)"/>
+  <rect class="box" x="670" y="60" width="100" height="50" rx="3"/><text x="720.0" y="81.0" text-anchor="middle" class="t">Parser</text><text x="720.0" y="98.0" text-anchor="middle" class="s">gültig?</text>
+  <path class="ln hl" d="M770 85H806" marker-end="url(#fmaa)"/><text x="814" y="90" class="t" style="fill:var(--accent)">✓</text>
+  <path class="ln dash" d="M720 110V140H415V114" marker-end="url(#fma)"/>
+  <text x="566" y="156" text-anchor="middle" class="s">✗ ungültig: neuer Versuch, mit der Fehlermeldung des Parsers</text>
+</svg></div><figcaption class="mono">Aus Freitext wird ein Modell in einer Modellierungssprache. Few-Shot-Beispiele bringen dem LLM die Sprache bei; ein Parser — nicht das LLM — entscheidet, ob das Ergebnis verwendbar ist.</figcaption></figure><p>Noch besser ist es, ungültige Modelle gar nicht erst entstehen zu lassen. Beim Grammar Masking filtert die Grammatik der Modellierungssprache die Token-Kandidaten des LLMs, während es schreibt <a class="cite" href="research.html#pub-NRR24">[NRR24]</a>:</p><figure class="media art-fig"><div class="dia-scroll"><svg class="dia" viewBox="0 0 860 206" role="img" aria-label="Grammar Masking: Das LLM schlägt eine Verteilung über nächste Tokens vor; Tokens, die die Grammatik der Modellierungssprache an dieser Stelle nicht erlaubt, werden vor der Wahl entfernt">
+  <defs><marker id="gma" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9" fill="none" stroke="currentColor" stroke-width="1.4"/></marker><marker id="gmaa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9" fill="none" style="stroke:var(--accent)" stroke-width="1.4"/></marker></defs>
+  <rect class="box hl" x="0" y="50" width="130" height="50" rx="3"/><text x="65.0" y="71.0" text-anchor="middle" class="t">LLM</text><text x="65.0" y="88.0" text-anchor="middle" class="s">Open Source</text>
+  <path class="ln" d="M130 75H236" marker-end="url(#gma)"/>
+  <text x="300" y="30" class="s">KANDIDATEN FÜR DAS NÄCHSTE TOKEN</text>
+  <text x="420" y="58" text-anchor="end" style="font-family:var(--mono)" class="">class</text><rect x="430" y="47" width="88" height="13" rx="2" style="fill:var(--accent);opacity:0.9"/><text x="420" y="84" text-anchor="end" style="font-family:var(--mono)" class="">{</text><rect x="430" y="73" width="57" height="13" rx="2" style="fill:var(--accent);opacity:0.9"/><text x="420" y="110" text-anchor="end" style="font-family:var(--mono)" class="">abstract</text><rect x="430" y="99" width="31" height="13" rx="2" style="fill:var(--accent);opacity:0.9"/><text x="420" y="136" text-anchor="end" style="font-family:var(--mono)" class="s">&amp;&amp;</text><rect x="430" y="125" width="52" height="13" rx="2" style="fill:var(--ink-3);opacity:0.25"/><path class="ln" style="opacity:.7" d="M410 131H492"/><text x="420" y="162" text-anchor="end" style="font-family:var(--mono)" class="s">&lt;!--</text><rect x="430" y="151" width="31" height="13" rx="2" style="fill:var(--ink-3);opacity:0.25"/><path class="ln" style="opacity:.7" d="M396 157H471"/>
+  <rect class="box" x="0" y="140" width="130" height="44" rx="3"/><text x="65.0" y="158.0" text-anchor="middle" class="t">Grammatik</text><text x="65.0" y="175.0" text-anchor="middle" class="s">CD4A</text>
+  <path class="ln hl" d="M130 162H330V186" />
+  <text x="340" y="190" class="s a">filtert, was hier nicht gültig sein kann</text>
+  <path class="ln" d="M720 75H756" marker-end="url(#gma)"/>
+  <rect class="box" x="760" y="50" width="100" height="50" rx="3"/><text x="810.0" y="71.0" text-anchor="middle" class="t">Modell</text><text x="810.0" y="88.0" text-anchor="middle" class="s">parst immer</text>
+</svg></div><figcaption class="mono">Constrained Decoding: Bevor ein Token gewählt wird, entfernt die Grammatik der Modellierungssprache jeden Kandidaten, der das Modell ungültig machen würde. Das LLM kann dann nur noch Modelle schreiben, die parsen.</figcaption></figure><figure class="media art-fig"><div class="tbl-wrap"><table class="tbl mono"><tr><th>Modell</th><th class="n">ohne</th><th class="n">mit Masking</th><th class="n">Zeit pro Modell</th></tr><tr><td>Llama 3 8B · 4-bit</td><td class="n">42,0 %</td><td class="n hl">92,6 %</td><td class="n faint">5,7 s → 74,1 s</td></tr><tr><td>Phi-3 Mini · 4-bit</td><td class="n">36,6 %</td><td class="n hl">87,0 %</td><td class="n faint">4,6 s → 138,3 s</td></tr><tr><td>Gemma 7B · 4-bit</td><td class="n">0,3 %</td><td class="n hl">93,0 %</td><td class="n faint">2,5 s → 54,2 s</td></tr><tr><td>Mistral 7B · 3-bit</td><td class="n">21,0 %</td><td class="n hl">92,4 %</td><td class="n faint">4,9 s → 73,6 s</td></tr></table></div><figcaption class="mono">Anteil der erzeugten Klassendiagramme, die parsen, für rund 1.000 Modellierungsaufgaben aus einer Klausur im dritten Semester. Zum Vergleich GPT-4o ohne Masking: 76 % (100 Aufgaben). Gültigkeit kostet Zeit. <a class="cite" href="research.html#pub-NRR24">[NRR24]</a></figcaption></figure><p>Kleine, lokal laufende offene Modelle liefern dann in mehr als neun von zehn Fällen gültige Modelle — statt zwischen fast nie und vier von zehn Mal. Der Preis ist die Laufzeit.</p></section>
+      <section class="art-sec"><h2 id="mde">Vom Satz zur Anwendung</h2><p>Zusammen mit modellgetriebener Softwareentwicklung reicht das bis zum Ende: Nutzer beschreiben ihre Domäne informell, ein LLM leitet daraus Klassendiagramme ab, und ein Generator wie <a href="projects-montigem.html">MontiGem</a> macht daraus ein vollständiges Informationssystem <a class="cite" href="research.html#pub-NMR24">[NMR24]</a> <a class="cite" href="research.html#pub-Net24">[Net24]</a>.</p><figure class="media art-fig"><div class="dia-scroll"><svg class="dia" viewBox="0 0 860 190" role="img" aria-label="AI-Driven MDE: Aus einer informellen Domänenbeschreibung wird per Few-Shot-Prompting und LLM ein Klassendiagramm; ein deterministischer Generator macht daraus eine vollständige Anwendung">
+  <defs><marker id="ama" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9" fill="none" stroke="currentColor" stroke-width="1.4"/></marker><marker id="amaa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9" fill="none" style="stroke:var(--accent)" stroke-width="1.4"/></marker></defs>
+  <rect class="zone" x="140" y="30" width="250" height="110" rx="4"/><text x="152" y="22" class="s a">AI-DRIVEN</text>
+  <rect class="zone" x="530" y="30" width="330" height="110" rx="4"/><text x="542" y="22" class="s">DETERMINISTISCHES MDE</text>
+  <rect class="box" x="0" y="60" width="116" height="50" rx="3"/><text x="58.0" y="81.0" text-anchor="middle" class="t">Beschreibung</text><text x="58.0" y="98.0" text-anchor="middle" class="s">informell</text>
+  <path class="ln" d="M116 85H156" marker-end="url(#ama)"/>
+  <rect class="box" x="160" y="60" width="90" height="50" rx="3"/><text x="205.0" y="89.0" text-anchor="middle" class="t">Few-shot</text>
+  <path class="ln" d="M250 85H270" marker-end="url(#ama)"/>
+  <rect class="box hl" x="274" y="60" width="100" height="50" rx="3"/><text x="324.0" y="89.0" text-anchor="middle" class="t">LLM</text>
+  <path class="ln hl" d="M374 85H412" marker-end="url(#amaa)"/>
+  <rect class="box hl" x="416" y="55" width="100" height="60" rx="3"/><text x="466.0" y="81.0" text-anchor="middle" class="t">Modell</text><text x="466.0" y="98.0" text-anchor="middle" class="s">Klassendiagramm</text>
+  <path class="ln" d="M516 85H556" marker-end="url(#ama)"/>
+  <rect class="box" x="560" y="60" width="120" height="50" rx="3"/><text x="620.0" y="81.0" text-anchor="middle" class="t">Generator</text><text x="620.0" y="98.0" text-anchor="middle" class="s">MontiGem</text>
+  <path class="ln" d="M680 85H716" marker-end="url(#ama)"/>
+  <rect class="box" x="720" y="60" width="124" height="50" rx="3"/><text x="782.0" y="81.0" text-anchor="middle" class="t">Anwendung</text><text x="782.0" y="98.0" text-anchor="middle" class="s">Web-App</text>
+  <text x="466" y="160" text-anchor="middle" class="s">das Modell lässt sich lesen, prüfen und ändern</text>
+</svg></div><figcaption class="mono">Das LLM macht nur, was es gut kann — Sprache in ein Modell übersetzen. Alles nach dem Modell ist deterministischer, getesteter Generator-Code. Das Modell dazwischen ist die Stelle, an der Menschen prüfen können, was die KI verstanden hat.</figcaption></figure></section>
+      <section class="art-sec"><h2 id="embeddings">Weitere Anwendungen: Anforderungen und semantische Suche</h2><p>Modelle helfen weit über die Generierung von Software-Artefakten hinaus. Anforderungen lassen sich aus natürlicher Sprache in eine formale, vom Computer analysierbare Sprache übersetzen; dort gefundene Widersprüche und Redundanzen kann ein LLM wieder in natürliche Sprache zurückübersetzen.</p><p>Auch große Spezifikationssammlungen können LLMs erfassen. Weil sie ihre Eingaben in semantische Vektoren übersetzen — <i>Embeddings</i> —, erkennen sie Ähnlichkeiten zwischen Wörtern und Texten:</p><figure class="media art-fig"><div class="dia-scroll"><svg class="dia" viewBox="0 0 860 300" role="img" aria-label="Wörter als Vektoren auf zwei Achsen, Geschlecht und Königlichkeit: King, Queen, Man, Woman; Princess liegt nahe bei Queen">
+  <defs><marker id="ema" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9" fill="none" stroke="currentColor" stroke-width="1.4"/></marker><marker id="emaa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9" fill="none" style="stroke:var(--accent)" stroke-width="1.4"/></marker></defs>
+  <text x="10" y="50" class="t">King</text><text x="120" y="50" style="font-family:var(--mono)">[ +1.0, +1.0 ]</text><text x="10" y="90" class="t">Queen</text><text x="120" y="90" style="font-family:var(--mono)">[ -1.0, +1.0 ]</text><text x="10" y="130" class="t">Man</text><text x="120" y="130" style="font-family:var(--mono)">[ +1.0, -1.0 ]</text><text x="10" y="170" class="t">Woman</text><text x="120" y="170" style="font-family:var(--mono)">[ -1.0, -1.0 ]</text><text x="10" y="210" class="t" style="fill:var(--accent)">Princess</text><text x="120" y="210" style="font-family:var(--mono)">[ -1.1, +1.2 ]</text>
+  <path class="ln" d="M390 150H730"/><path class="ln" d="M560 290V10"/>
+  <text x="732" y="142" text-anchor="end" class="s">Geschlecht</text>
+  <text x="568" y="22" class="s">Königlichkeit</text>
+  <path class="ln " d="M560 150L655 55" marker-end="url(#ema)"/><path class="ln " d="M560 150L465 55" marker-end="url(#ema)"/><path class="ln " d="M560 150L655 245" marker-end="url(#ema)"/><path class="ln " d="M560 150L465 245" marker-end="url(#ema)"/><path class="ln hl" d="M560 150L456 36" marker-end="url(#emaa)"/><text x="667" y="49" text-anchor="start" class="t">King</text><text x="453" y="73" text-anchor="end" class="t">Queen</text><text x="667" y="261" text-anchor="start" class="t">Man</text><text x="453" y="261" text-anchor="end" class="t">Woman</text><text x="444" y="28" text-anchor="end" class="t" style="fill:var(--accent)">Princess</text>
+  <ellipse cx="460" cy="45" rx="58" ry="26" style="fill:none;stroke:var(--accent);stroke-dasharray:3 4;opacity:.7"/>
+  <text x="394" y="49" text-anchor="end" class="s a">ähnlich</text>
+</svg></div><figcaption class="mono">Embeddings machen aus Wörtern und Texten Vektoren. Hier genügen zwei Dimensionen: „Princess“ landet direkt neben „Queen“. Echte Modelle nutzen Tausende Dimensionen — OpenAIs text-embedding-3 hat 3.072 —, aber die Idee bleibt: ähnliche Bedeutung, benachbarte Vektoren.</figcaption></figure><p>Das ermöglicht eine semantische Suche in Wissensdatenbanken: Nutzer umschreiben ihr Problem und erhalten passende Inhalte, ohne wissen zu müssen, nach welchen Begriffen sie suchen müssten. Zusammen mit einem LLM ergibt das Retrieval-Augmented Generation:</p><figure class="media art-fig"><div class="dia-scroll"><svg class="dia" viewBox="0 0 860 220" role="img" aria-label="RAG: Die Frage wird eingebettet, mit eingebetteten Einträgen einer Wissensbasis verglichen, und die ähnlichsten Ausschnitte gehen zusammen mit der Frage an das LLM">
+  <defs><marker id="rga" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9" fill="none" stroke="currentColor" stroke-width="1.4"/></marker><marker id="rgaa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9" fill="none" style="stroke:var(--accent)" stroke-width="1.4"/></marker></defs>
+  <rect class="box" x="0" y="30" width="130" height="50" rx="3"/><text x="65.0" y="51.0" text-anchor="middle" class="t">Frage</text><text x="65.0" y="68.0" text-anchor="middle" class="s">vom Nutzer</text><text x="0" y="22" class="s a">01</text>
+  <path class="ln" d="M130 55H186" marker-end="url(#rga)"/>
+  <rect class="box" x="190" y="30" width="130" height="50" rx="3"/><text x="255.0" y="51.0" text-anchor="middle" class="t">Embedding</text><text x="255.0" y="68.0" text-anchor="middle" class="s">Frage → Vektor</text><text x="190" y="22" class="s a">02</text>
+  <path class="ln" d="M255 80V126" marker-end="url(#rga)"/>
+  <rect class="box" x="190" y="130" width="130" height="60" rx="3"/><text x="255.0" y="156.0" text-anchor="middle" class="t">Wissensbasis</text><text x="255.0" y="173.0" text-anchor="middle" class="s">eingebettete Dokumente</text><text x="190" y="210" class="s a">03</text>
+  <path class="ln" d="M320 160H376" marker-end="url(#rga)"/>
+  <rect class="box" x="380" y="130" width="130" height="60" rx="3"/><text x="445.0" y="156.0" text-anchor="middle" class="t">Ausschnitte</text><text x="445.0" y="173.0" text-anchor="middle" class="s">nächste Vektoren</text><text x="380" y="210" class="s a">04</text>
+  <path class="ln" d="M445 130V82" marker-end="url(#rga)"/>
+  <path class="ln" d="M320 55H426" />
+  <rect class="box" x="380" y="30" width="130" height="50" rx="3"/><text x="445.0" y="51.0" text-anchor="middle" class="t">Prompt</text><text x="445.0" y="68.0" text-anchor="middle" class="s">Frage + Ausschnitte</text>
+  <path class="ln" d="M510 55H566" marker-end="url(#rga)"/>
+  <rect class="box hl" x="570" y="30" width="120" height="50" rx="3"/><text x="630.0" y="51.0" text-anchor="middle" class="t">LLM</text><text x="630.0" y="68.0" text-anchor="middle" class="s">antwortet</text><text x="570" y="22" class="s a">05</text>
+  <path class="ln hl" d="M690 55H736" marker-end="url(#rgaa)"/>
+  <rect class="box" x="740" y="30" width="120" height="50" rx="3"/><text x="800.0" y="51.0" text-anchor="middle" class="t">Antwort</text><text x="800.0" y="68.0" text-anchor="middle" class="s">mit Quellen</text>
+</svg></div><figcaption class="mono">Retrieval-Augmented Generation lässt ein LLM aus Wissen antworten, auf das es nie trainiert wurde — Vorlesungsmaterial, Spezifikationen, Publikationen. Die Suche ist semantisch: Nutzer beschreiben ihr Problem und finden die passende Stelle, ohne ihre Begriffe zu kennen. So funktioniert SE-Chatty.</figcaption></figure></section>
+      <section class="art-sec"><h2 id="hallucinations">Halluzinationen</h2><p>LLMs beruhen auf einem stochastischen Modell. Ein LLM gibt deshalb nicht zwingend die korrekte Antwort, sondern die plausibelste. Solange die gefragte Information innerhalb der Trainingsdaten liegt, ist die plausibelste Antwort oft auch die richtige; je weiter man sich aber außerhalb der Trainingsdaten bewegt, desto wahrscheinlicher präsentiert das LLM eine falsche Antwort sehr plausibel.</p>
+<p>Halluzinationen sind schwer zu erkennen, weil sie sich kaum von korrekten Aussagen unterscheiden: Sie passen immer gut in den Kontext der Frage und enthalten selten offensichtliche Fehler. Das folgende Beispiel zeigt einen Fehler, den ein Mensch sofort sieht — das Modell nicht. Nichts an der Antwort verrät ihre Unsicherheit.</p><figure class="chat"><div class="turn"><span class="who mono">Nutzer</span><div class="msg">Erstelle ein Bild mit genau 17 blauen Punkten.</div></div><div class="turn ai"><span class="who mono">GPT-4</span><div class="msg">Hier ist das Bild mit genau 17 blauen Punkten auf weißem Hintergrund.<img class="chat-img" src="../assets/ai4se/dots.webp" alt="Generiertes Bild mit deutlich mehr als 17 blauen Punkten" width="260" height="260" loading="lazy"></div></div><div class="turn"><span class="who mono">Nutzer</span><div class="msg">Wie viele blaue Punkte sind in dem Bild?</div></div><div class="turn ai"><span class="who mono">GPT-4</span><div class="msg">Das Bild enthält genau 17 blaue Punkte auf weißem Hintergrund.</div></div><figcaption class="mono">GPT-4 · April 2024</figcaption></figure><p>Genauso brüchig ist das Schlussfolgern. „Alice hat 5 Schwestern und 3 Brüder. Wie viele Schwestern hat ein Bruder von Alice?“ — aktuelle Modelle beantworteten das nur in einem Bruchteil der Fälle richtig <a class="cite" href="#ref-7">[7]</a>. LLMs imitieren Sprache sehr gut, haben aber selbst kein Konzept von Logik. Werkzeuge schließen einen Teil der Lücke: Code-Interpreter, Function Calls, APIs.</p><p>Das ist das stärkste Argument dafür, LLMs <i>Modelle</i> erzeugen zu lassen: Ein generiertes Modell lässt sich analysieren und prüfen, und damit lassen sich viele Fehlerquellen ausschließen, bevor auch nur eine Zeile Code existiert <a class="cite" href="research.html#pub-NKR+25">[NKR+25]</a>.</p></section>
+      <section class="art-sec"><h2 id="summary">Kurz gesagt</h2><p>KI kann einen Entwickler noch nicht ersetzen; sie ist am besten als Werkzeug zu verstehen, das den Entwicklungsprozess beschleunigt. Alles, was sie erzeugt, braucht Prüfung und Validierung — blind einsetzen lässt sie sich nicht. Wo KI auf Modelle trifft, wird diese Prüfung möglich: Das Modell ist die Stelle, an der aus Sprache etwas wird, das eine Maschine verifizieren kann.</p></section>
+      <section class="art-sec art-refs">
+        <h2 id="literature">Literatur</h2>
+        <ol class="refs mono"><li id="ref-1">A. M. Turing: Computing Machinery and Intelligence. Mind 59(236), 433–460 (1950).</li><li id="ref-2">F. Rosenblatt: The perceptron: a probabilistic model for information storage and organization in the brain. Psychological Review 65(6), 386–408 (1958).</li><li id="ref-3">A. Vaswani et al.: Attention is all you need. Advances in Neural Information Processing Systems 30 (2017).</li><li id="ref-4">S. Barke, M. B. James, N. Polikarpova: Grounded Copilot: How programmers interact with code-generating models. arXiv:2206.15000 (2022).</li><li id="ref-5">T. Brown et al.: Language models are few-shot learners. Advances in Neural Information Processing Systems 33, 1877–1901 (2020).</li><li id="ref-6">G. Izacard et al.: Few-shot learning with retrieval augmented language models. arXiv:2208.03299 (2022).</li><li id="ref-7">M. Nezhurina, L. Cipolina-Kun, M. Cherti, J. Jitsev: Alice in Wonderland: Simple tasks showing complete reasoning breakdown in state-of-the-art large language models. arXiv:2406.02061 (2024).</li></ol>
+        <div class="group mono">Eigene Arbeiten zum Thema</div>
+        <ol class="pubs">
+        <li id="NMR24">
+          <span class="key mono">NMR24</span>
+          <div>
+            <div class="t">From Natural Language to Web Applications: Using Large Language Models for Model-Driven Software Engineering</div>
+            <div class="a"><b>L. Netz</b>, J. Michael, B. Rumpe</div>
+            <div class="v mono">Modellierung 2024, pp. 179–195</div>
+            <div class="plinks mono"><a href="https://www.se-rwth.de/publications/From-Natural-Language-to-Web-Applications-Using-Large-Language-Models-for-Model-Driven-Software-Engineering.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.18420/modellierung2024_018" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>
+        <li id="BDMN+24">
+          <span class="key mono">BDMN+24</span>
+          <div>
+            <div class="t">Combining Retrieval-Augmented Generation and Few-Shot Learning for Model Synthesis of Uncommon DSLs</div>
+            <div class="a">N. Baumann, J. S. Diaz, J. Michael, <b>L. Netz</b>, H. Nqiri, J. Reimer, B. Rumpe</div>
+            <div class="v mono">Modellierung 2024 Workshopband, pp. 1–15</div>
+            <div class="plinks mono"><a href="https://www.se-rwth.de/publications/Combining-Retrieval-Augmented-Generation-and-Few-Shot-Learning-for-Model-Synthesis-of-Uncommon-DSLs.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.18420/modellierung2024-ws-007" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>
+        <li id="NRR24">
+          <span class="key mono">NRR24</span>
+          <div>
+            <div class="t">Using Grammar Masking to Ensure Syntactic Validity in LLM-based Modeling Tasks</div>
+            <div class="a"><b>L. Netz</b>, J. Reimer, B. Rumpe</div>
+            <div class="v mono">MDE Intelligence, MODELS Companion ’24, pp. 570–577</div>
+            <div class="plinks mono"><a href="https://www.se-rwth.de/publications/Using-Grammar-Masking-to-Ensure-Syntactic-Validity-in-LLM-based-Modeling-Tasks.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.1145/3652620.3687805" target="_blank" rel="noopener">doi ↗</a><a href="https://arxiv.org/abs/2407.06146" target="_blank" rel="noopener">arXiv ↗</a></div>
+          </div>
+        </li>
+        <li id="Net24">
+          <span class="key mono">Net24</span>
+          <div>
+            <div class="t">Model-Driven Method for the Development of Full-Size Web-Based Information Systems<span class="flag mono">Dissertation</span></div>
+            <div class="a"><b>L. Netz</b></div>
+            <div class="v mono">Aachener Informatik-Berichte SE, Vol. 55, Shaker Verlag</div>
+            <div class="plinks mono"><a href="https://www.se-rwth.de/phdtheses/Diss-Netz-Model-Driven-Method-for-the-Development-of-Full-Size-Web-Based-Information-Systems.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.2370/9783844098334" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>
+        <li id="NKR+25">
+          <span class="key mono">NKR+25</span>
+          <div>
+            <div class="t">Unintended Changes: How LLMs Corrupt and Correct Textual Models</div>
+            <div class="a"><b>L. Netz</b>, F. Kampe, J. Reimer, B. Rumpe</div>
+            <div class="v mono">MODELS-C 2025, pp. 636–645</div>
+            <div class="plinks mono"><a href="https://www.se-rwth.de/publications/Unintended-Changes-How-LLMs-Corrupt-and-Correct-Textual-Models.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.1109/MODELS-C68889.2025.00087" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>
+        </ol>
+      </section>
+    </article>
+
+    <footer class="mono">
+      <span>© 2026 Lukas Netz.</span>
+      <nav class="foot-icons" aria-label="Bereiche"><a href="projects.html" title="Projekte" aria-label="Projekte"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 7L2.5 12l5 5"/><path d="M16.5 7l5 5-5 5"/><path d="M14 4.5l-4 15"/></svg></a><a href="research.html" title="Forschung" aria-label="Forschung"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 13.5H5l3.5 6.5L13.5 4h8"/><path d="M14.5 10l5 6"/><path d="M19.5 10l-5 6"/></svg></a><a href="photography.html" title="Fotografie" aria-label="Fotografie"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><g transform="translate(12 12) scale(.9) translate(-12 -12)" stroke-width="1.95"><path d="M12.697 3.5h-1.394c-.715 0-1.072 0-1.392.112a2 2 0 0 0-.545.292c-.271.204-.47.501-.866 1.096c-.203.305-.502.753-.621.879a2 2 0 0 1-1.106.591c-.17.03-.353.03-.72.03c-.98 0-1.47 0-1.87.113a3 3 0 0 0-2.07 2.07C2 9.083 2 9.573 2 10.553V14.5c0 2.828 0 4.243.879 5.121S5.172 20.5 8 20.5h8c2.829 0 4.243 0 5.122-.879C22 18.743 22 17.328 22 14.5v-3.946c0-.98 0-1.47-.113-1.871a3 3 0 0 0-2.07-2.07c-.4-.113-.89-.113-1.87-.113c-.366 0-.55 0-.72-.03a2 2 0 0 1-1.105-.591c-.12-.126-.419-.574-.622-.879c-.396-.595-.594-.892-.865-1.096a2 2 0 0 0-.545-.292c-.32-.112-.678-.112-1.393-.112"/><path d="M16 13a4 4 0 1 1-8 0a4 4 0 0 1 8 0"/><path d="M19.125 9.5H19m.25 0a.25.25 0 1 1-.5 0a.25.25 0 0 1 .5 0Z"/></g></svg></a><a class="egg" href="../vier-gewinnt/" title="Spielen" aria-label="Spielen"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7.5h10a4.5 4.5 0 0 1 4.5 4.5v1.8a3.2 3.2 0 0 1-5.8 1.9l-1.2-1.7h-5l-1.2 1.7a3.2 3.2 0 0 1-5.8-1.9V12A4.5 4.5 0 0 1 7 7.5z"/><path d="M7.5 10v3.5M5.75 11.75h3.5"/><path d="M15.5 10.75h.01M17.5 12.75h.01" stroke-width="2.4"/></svg></a></nav>
+      <a href="#top">↑ nach oben</a>
+    </footer>
+  </main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

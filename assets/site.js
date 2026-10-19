@@ -107,7 +107,7 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
     <div class="year">
       <div class="y mono">${y}</div>
       <ol class="pubs">${pubs.filter(p => p.year === y).map(p => `
-        <li data-tags="${p.tags.join(" ")}">
+        <li id="pub-${p.key}" data-tags="${p.tags.join(" ")}">
           <span class="key mono">${p.key}</span>
           <div>
             <div class="t">${esc(p.title)}${p.flag ? `<span class="flag mono">${UI.flags[p.flag] || p.flag}</span>` : ""}</div>
@@ -118,6 +118,14 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
         </li>`).join("")}
       </ol>
     </div>`).join("");
+
+  // the list is built here, after the browser looked for #pub-<key>: jump to it now
+  const target = location.hash.startsWith("#pub-") && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+  if (target) {                                   // instantly, and once more when images etc. have settled
+    const go = () => target.scrollIntoView({ block: "center", behavior: "instant" });
+    requestAnimationFrame(go);
+    addEventListener("load", () => setTimeout(go, 50), { once: true });
+  }
 
   // a click on the mini graph opens the citation map on that paper: the left half in "cited by",
   // the right half in "cites"
@@ -754,11 +762,53 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
   sync();
 })();
 
-// ---- project lifeline: scrolls sideways (wheel, drag, arrow keys) and starts at today ----
-// The vertical wheel moves the rail until it reaches an end; then the page scrolls on.
+// ---- project lifeline: scrolls sideways (wheel, drag, arrow keys) ----
+// When it comes into view it starts at the left and glides over to today (stops as soon as
+// the visitor takes over; reduced motion: straight to today). The vertical wheel moves the
+// rail until it reaches an end; then the page scrolls on.
 (() => {
   document.querySelectorAll(".lifeline").forEach(el => {
-    el.scrollLeft = el.scrollWidth;
+    // edges fade only where there is more to scroll
+    const FADE = 56;
+    // a title whose start has scrolled out of view stays at the left edge while its line is visible
+    const runs = [...el.querySelectorAll(".ll-p")].map(a => ({ a, s: a.querySelector("span") }));
+    const sync = () => {
+      const max = el.scrollWidth - el.clientWidth;
+      el.style.setProperty("--fl", `${Math.min(FADE, el.scrollLeft)}px`);
+      el.style.setProperty("--fr", `${Math.min(FADE, max - el.scrollLeft)}px`);
+      for (const { a, s } of runs) {
+        const len = parseFloat(a.style.getPropertyValue("--len")) || 0;
+        const shift = Math.max(0, Math.min(el.scrollLeft + FADE * 0.7 - a.offsetLeft, len - s.offsetWidth - 6));
+        s.style.transform = shift ? `translateX(${shift}px)` : "";
+      }
+    };
+    el.addEventListener("scroll", sync, { passive: true });
+    addEventListener("resize", sync);
+    let glide = 0, touched = false;
+    const stop = () => { touched = true; cancelAnimationFrame(glide); glide = 0; };
+    const toToday = () => {
+      if (touched) return;
+      const max = el.scrollWidth - el.clientWidth;
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) { el.scrollLeft = max; return; }
+      const from = el.scrollLeft, t0 = performance.now(), dur = Math.min(2600, 900 + max * 0.9);
+      let frames = 0;                                                  // safety net: never more than 600 frames
+      const step = now => {
+        const k = ++frames > 600 ? 1 : Math.min(1, (now - t0) / dur), e = k < .5 ? 4 * k * k * k : 1 - (-2 * k + 2) ** 3 / 2;
+        el.scrollLeft = from + (max - from) * e;
+        glide = k < 1 ? requestAnimationFrame(step) : 0;
+      };
+      glide = requestAnimationFrame(step);
+    };
+    el.scrollLeft = 0; sync();
+    if ("IntersectionObserver" in window) {
+      const io = new IntersectionObserver(([e]) => {
+        if (!e.isIntersecting) return;
+        io.disconnect();
+        setTimeout(toToday, 500);                                       // after the rail has drawn in
+      }, { threshold: 0.6 });
+      io.observe(el);
+    } else el.scrollLeft = el.scrollWidth;
+    ["wheel", "pointerdown", "keydown", "touchstart"].forEach(t => el.addEventListener(t, stop, { passive: true }));
     el.addEventListener("wheel", e => {
       if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;          // trackpads scroll sideways natively
       const max = el.scrollWidth - el.clientWidth;
@@ -784,4 +834,47 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
       el.scrollBy({ left: e.key === "ArrowRight" ? 240 : -240, behavior: "smooth" });
     });
   });
+})();
+
+// Footer gamepad: Connect Four opens as an overlay over the current page (like the photo lightbox)
+// instead of leaving it. Loaded on first use; closing keeps the game, so reopening continues it.
+// Ctrl/⌘/middle click still opens the game as a page of its own.
+(() => {
+  const egg = document.querySelector(".foot-icons .egg");
+  if (!egg) return;
+  const de = document.documentElement.lang === "de";
+  let box = null, frame = null, opener = null;
+  const close = () => {
+    if (!box || !box.classList.contains("open")) return;
+    box.classList.remove("open");
+    document.body.style.overflow = "";
+    if (opener) opener.focus();
+  };
+  const open = () => {
+    opener = document.activeElement;
+    if (!box) {
+      box = document.createElement("div");
+      box.className = "game-overlay";
+      box.setAttribute("role", "dialog");
+      box.setAttribute("aria-modal", "true");
+      box.setAttribute("aria-label", egg.getAttribute("aria-label") || "Game");
+      box.innerHTML = `<div class="game-frame"><iframe title="${egg.getAttribute("aria-label") || "Game"}" src="${egg.href}" allow="fullscreen; autoplay"></iframe></div>
+        <button type="button" class="game-x mono">${de ? "schließen" : "close"} ×</button>`;
+      document.body.appendChild(box);
+      frame = box.querySelector("iframe");
+      box.querySelector(".game-x").addEventListener("click", close);
+      box.addEventListener("click", e => { if (e.target === box) close(); });   // click beside the game
+    }
+    box.classList.add("open");
+    document.body.style.overflow = "hidden";
+    setTimeout(() => frame.focus(), 60);                // keys (1–7, R) go straight to the game
+  };
+  egg.addEventListener("click", e => {
+    if (e.button || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    open();
+  });
+  addEventListener("keydown", e => { if (e.key === "Escape") close(); });
+  // Esc inside the game (it has the focus) arrives as a message
+  addEventListener("message", e => { if (e.origin === location.origin && e.data && e.data.type === "game:close") close(); });
 })();

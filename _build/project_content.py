@@ -346,7 +346,7 @@ std::cout &lt;&lt; *algorithm-&gt;getHighestFitnessChromosome() &lt;&lt; std::en
 
 PROJECTS = [
     dict(
-        slug="esaca", name="ESACA", when=T("since 2025", "seit 2025"), logo="esaca.png",
+        slug="esaca", name="ESACA", when=T("since 2026", "seit 2026"), logo="esaca.png",
         desc=T("ESACA — a sovereign, on-premises platform for agentic coding in regulated organisations.",
                "ESACA — eine souveräne On-Premises-Plattform für agentisches Programmieren in regulierten Organisationen."),
         lead=T("AI coding agents are fast — and they read code, run commands and send data wherever they like. ESACA lets <em>regulated organisations</em> use them anyway: inside their own data centre, under their own rules.",
