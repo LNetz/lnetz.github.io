@@ -61,6 +61,50 @@ def pub_list(lang, keys):
     return NL.join(items)
 
 
+# Timeline on the project list: when each project ran (end None = still running).
+SPANS = {"geneial": (2012, 2016), "smt-rat": (2015, 2015), "macoco": (2018, None), "add": (2018, 2022),
+         "montigem": (2018, 2024), "ford": (2020, 2022), "epha": (2024, None), "golden-uml": (2025, 2025),
+         "se-chatty": (2025, 2025), "esaca": (2025, None)}
+TL_FROM, TL_TO = 2012, 2027                       # axis: Jan 2012 … Jan 2027 ("now" ends there)
+
+
+def timeline(lang, A):
+    """Project icons on a year axis; a thin line shows how long each ran. Each links to its row
+    in the list below (#p-<slug>). Lanes are packed greedily; a label sits right of its icon,
+    or left of it when the right edge is too close."""
+    L = lambda x: x[lang] if isinstance(x, dict) else x
+    by = {p["slug"]: p for p in PROJECTS}
+    span = TL_TO - TL_FROM
+    X = lambda y: (y - TL_FROM) / span * 100       # year → % of the rail
+    PX = 720 / span                                # px per year at the rail's minimum width
+    items = sorted(SPANS.items(), key=lambda kv: (kv[1][0], -(kv[1][1] or TL_TO)))
+    lanes, out = [], []                            # lanes: occupied-until year per lane
+    for slug, (y0, y1) in items:
+        p, end = by[slug], (y1 + 1 if y1 else TL_TO)
+        name = L(p["name"])
+        label = (len(name) * 6.8 + 44) / PX        # icon + label width in years
+        flip = y0 + label > TL_TO                  # label left of the icon near the right edge
+        a, b = (y0 - label + 0.6, max(end, y0 + 0.6)) if flip else (y0, max(end, y0 + label))
+        lane = next((i for i, until in enumerate(lanes) if until + 0.25 <= a), None)
+        if lane is None:
+            lanes.append(b); lane = len(lanes) - 1
+        else:
+            lanes[lane] = b
+        icon = (f'<img src="{A}assets/logos/{p["logo"]}" alt="" width="26" height="26">' if p.get("logo")
+                else f'<b class="mono">{p["mark"]}</b>')
+        when = f'{y0}' + ("" if y1 == y0 else f' — {y1 if y1 else L(T("today", "heute"))}')
+        out.append(f'        <a class="tl{" flip" if flip else ""}" href="#p-{slug}" style="--x:{X(y0):.2f}%;--w:{X(end) - X(y0):.2f}%;--lane:{lane}" '
+                   f'title="{name} · {when}"><i class="bar"></i><span class="ico">{icon}</span><span class="nm mono">{name}</span></a>')
+    years = "".join(f'<span style="--x:{X(y):.2f}%">{y}</span>' for y in range(TL_FROM, TL_TO, 2))
+    return f'''      <div class="timeline" style="--lanes:{len(lanes)}">
+        <div class="tl-rail">
+{NL.join(out)}
+          <div class="tl-axis mono" aria-hidden="true">{years}</div>
+        </div>
+      </div>
+'''
+
+
 def video(lang, A, yt, thumb, title, caption):
     """Click-to-load YouTube facade (assets/project.js); a plain link without JS."""
     L = lambda x: x[lang] if isinstance(x, dict) else x

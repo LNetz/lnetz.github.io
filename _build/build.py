@@ -220,7 +220,8 @@ def spec(A, when, name, what, tags, meta, links=(), href=None, logo=None, mark=N
         badge = f'<span class="logo"><img src="{A}assets/logos/{logo}" alt="" width="48" height="48"></span>'
     else:
         badge = f'<span class="logo mark mono" aria-hidden="true">{mark}</span>' if mark else ''
-    return f'''        <li>
+    li = f' id="p-{more[0][len("projects-"):-len(".html")]}"' if more else ""   # jump target for the timeline
+    return f'''        <li{li}>
           <div class="side">{badge}<span class="mono faint">{when}</span></div>
           <div>
             <h3>{h}</h3>
@@ -444,6 +445,8 @@ def projects(lang):
                  L(T("AI-generated image: AI-based MDE", "KI-generiertes Bild: KI-basierte MDE")))
     return f'''
 {head}{pic}    <section>
+      <div class="group mono">{L(T("Timeline", "Zeitleiste"))}</div>
+{project_pages.timeline(lang, A)}
       <div class="group mono" id="industry">{L(T("Industry", "Industrie"))} · mgm technology partners</div>
       <ul class="spec">
 {esaca}
