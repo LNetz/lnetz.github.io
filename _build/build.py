@@ -270,6 +270,14 @@ QUICK = [("projects.html", "code", T("Projects", "Projekte")),
          ("photography.html", "camera", T("Photography", "Fotografie"))]
 
 
+# The quote above the About text (original wording, in both languages).
+EPIGRAPH = '''
+      <figure class="epigraph">
+        <blockquote>I propose to consider the question, “Can machines think?”</blockquote>
+        <figcaption class="mono">Alan M. Turing · Computing Machinery and Intelligence, 1950</figcaption>
+      </figure>'''
+
+
 def about(lang):
     L = lambda x: x[lang]
     A = "../" if lang == "de" else ""
@@ -292,7 +300,7 @@ def about(lang):
     head = page_head("00", L(T("About", "Über mich")), "",
         L(T("I build software that builds software. My work sits between <em>model-driven engineering</em> and <em>large language models</em>: generators, DSLs and agentic tooling that turn models and intent into full-size, maintainable applications.",
             "Ich baue Software, die Software baut. Meine Arbeit liegt zwischen <em>modellgetriebener Softwareentwicklung</em> und <em>großen Sprachmodellen</em>: Generatoren, DSLs und agentische Werkzeuge, die aus Modellen und Absichten vollwertige, wartbare Anwendungen machen.")),
-        facts)
+        facts, top=EPIGRAPH)
     return f'''
 {head}    <section>{quick_nav(lang)}
       <div class="bio">
@@ -393,7 +401,7 @@ def projects(lang):
         R(T("Privacy", "Datenschutz"), "InviDas",
           T("Interactive visual data spaces for sovereign privacy decisions: visualisations and gamification that help users of fitness wearables understand what their data reveals. BMBF-funded, with GI, Stiftung Digitale Chancen, Garmin and the universities of Bremen and Bamberg; the comparison platform was generated with MontiGem.",
             "Interaktive, visuelle Datenräume zur souveränen, datenschutzrechtlichen Entscheidungsfindung: Visualisierungen und Gamification, die Nutzer:innen von Fitness-Wearables zeigen, was ihre Daten preisgeben. BMBF-gefördert, mit GI, Stiftung Digitale Chancen, Garmin und den Universitäten Bremen und Bamberg; die Vergleichsplattform wurde mit MontiGem generiert."),
-          CONTRIB, [(T("project", "Projekt"), "https://www.se-rwth.de/projects/")]),
+          CONTRIB, [(T("project", "Projekt"), "https://www.iaw.rwth-aachen.de/cms/iaw/forschung/projekte/projekte/~zomrc/invidas/")]),
         R(T("Production", "Produktion"), "Internet of Production",
           T("DFG Cluster of Excellence at RWTH: digital twins and digital shadows that make data from production, development and use available across domains. My part was generated low-code platforms and cockpits for digital twins.",
             "DFG-Exzellenzcluster der RWTH: digitale Zwillinge und digitale Schatten, die Daten aus Produktion, Entwicklung und Nutzung domänenübergreifend verfügbar machen. Mein Teil waren generierte Low-Code-Plattformen und Cockpits für digitale Zwillinge."),
@@ -422,31 +430,36 @@ def projects(lang):
           [], ["CD4A"], href="https://chatgpt.com/g/g-sRnmDgQvW-cd4a-class-diagram-creator"),
     ]
     n = 1 + len(research) + len(gpts) + len(further)
+    # chapter markers, as on the research page
+    chapters = f'''
+      <nav class="chapters mono" aria-label="{L(T("Chapters", "Kapitel"))}">
+        <a href="#industry">{L(T("Industry", "Industrie"))}</a><a href="#research-software">{L(T("Research software", "Forschungssoftware"))}</a><a href="#assistants">{L(T("Assistants", "Assistenten"))}</a><a href="#further">{L(T("Further involvement", "Weitere Mitarbeit"))}</a>
+      </nav>'''
     head = page_head("01", L(T("Projects", "Projekte")), L(T(f"{n} entries", f"{n} Einträge")),
         L(T("Software I have built or led — from generator frameworks and production information systems to <em>agentic coding</em> platforms.",
             "Software, die ich gebaut oder geleitet habe — von Generator-Frameworks und produktiven Informationssystemen bis zu Plattformen für <em>agentisches Programmieren</em>.")),
-        top=page_icon("code"))
+        chapters, top=page_icon("code"))
     pic = banner(A, "banner-abstract.jpg", L(T("Abstract illustration: blue and orange waves of light and data with fragments of code floating over them",
                                                "Abstrakte Illustration: blaue und orange Wellen aus Licht und Daten, darüber schwebende Code-Fragmente")), 1659, 532,
                  L(T("AI-generated image: AI-based MDE", "KI-generiertes Bild: KI-basierte MDE")))
     return f'''
 {head}{pic}    <section>
-      <div class="group mono">{L(T("Industry", "Industrie"))} · mgm technology partners</div>
+      <div class="group mono" id="industry">{L(T("Industry", "Industrie"))} · mgm technology partners</div>
       <ul class="spec">
 {esaca}
       </ul>
 
-      <div class="group mono">{L(T("Research software", "Forschungssoftware"))} · RWTH Aachen</div>
+      <div class="group mono" id="research-software">{L(T("Research software", "Forschungssoftware"))} · RWTH Aachen</div>
       <ul class="spec">
 {NL.join(research)}
       </ul>
 
-      <div class="group mono">{L(T("Assistants", "Assistenten"))} · ChatGPT</div>
+      <div class="group mono" id="assistants">{L(T("Assistants", "Assistenten"))} · ChatGPT</div>
       <ul class="spec">
 {NL.join(gpts)}
       </ul>
 
-      <div class="group mono">{L(T("Further involvement", "Weitere Mitarbeit"))}</div>
+      <div class="group mono" id="further">{L(T("Further involvement", "Weitere Mitarbeit"))}</div>
       <ul class="rows">
 {NL.join(further)}
       </ul>

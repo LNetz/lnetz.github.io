@@ -694,3 +694,21 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
   }, { rootMargin: "0px 0px -6% 0px" });
   items.forEach(el => { el.classList.add("reveal"); io.observe(el); });
 })();
+
+// ---- back to top: a small round arrow bottom right, once the page has been scrolled down ----
+(() => {
+  if (!document.querySelector("footer")) return;
+  const a = document.createElement("a");
+  a.className = "to-top mono";
+  a.href = "#top";
+  a.textContent = "↑";
+  a.setAttribute("aria-label", document.documentElement.lang === "de" ? "nach oben" : "back to top");
+  document.body.append(a);
+  let on = false;
+  const sync = () => {
+    const show = scrollY > innerHeight * 0.9;
+    if (show !== on) { on = show; a.classList.toggle("on", on); }
+  };
+  addEventListener("scroll", sync, { passive: true });
+  sync();
+})();

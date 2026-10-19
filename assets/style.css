@@ -207,6 +207,13 @@ section > .group:first-child { padding-top: 0; }
 
 /* small mono label that opens a group inside a section */
 .group { padding: var(--space-group) 0 0; color: var(--ink-3); }
+/* chapter markers at the top of a long page (research) */
+.chapters { display: flex; flex-wrap: wrap; gap: 4px 20px; margin-top: 28px; font-size: var(--fs-s); }
+.chapters a { color: var(--ink-3); }
+.chapters a::before { content: "↓ "; color: var(--accent); }
+.chapters a:hover { color: var(--accent); }
+.group[id] { scroll-margin-top: 24px; }
+@media (max-width: 900px) { .group[id] { scroll-margin-top: 72px; } }
 
 /* ---------- projects: spec rows (logo · text · meta) ---------- */
 
@@ -731,3 +738,25 @@ section > .pubs li { grid-template-columns: 120px minmax(0, 1fr); gap: 24px; }
   .yt .play i { width: 44px; height: 44px; }
   .paper { padding: 10px; }
 }
+
+/* back to top (site.js): fades in bottom right once the page is scrolled down */
+.to-top {
+  position: fixed; right: 24px; bottom: 24px; z-index: 15;
+  width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 15px; color: var(--ink-2);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  border: 1px solid var(--rule);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  opacity: 0; transform: translateY(8px); pointer-events: none;
+  transition: opacity .3s, transform .3s, color .2s, border-color .2s;
+}
+.to-top.on { opacity: 1; transform: none; pointer-events: auto; }
+.to-top:hover { color: var(--accent); border-color: var(--accent); }
+body.menu-open .to-top, .lightbox.open ~ .to-top { display: none; }
+@media (max-width: 600px) { .to-top { right: 16px; bottom: 16px; width: 36px; height: 36px; } }
+
+/* About: a quote above the introduction */
+.epigraph { margin-top: 40px; max-width: 600px; padding-left: 18px; border-left: 1px solid var(--accent); }
+.epigraph blockquote { font-size: 15px; font-weight: 300; line-height: 1.5; color: var(--ink-2); }
+.epigraph figcaption { margin-top: 6px; color: var(--ink-3); }
+.anim .page .epigraph { animation: rise .7s var(--ease-out) .26s both; }
