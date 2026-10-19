@@ -159,6 +159,34 @@ def epha_diagram(lang, A):
                          "Die Auslage einer Arbeit, vom Promotionsbüro bis zum Dekanat — was früher Papierexemplare in einem Raum waren, ist jetzt eine Webanwendung."), lang)
 
 
+def smtrat_diagram(lang, A):
+    """The dependency problem: the same polynomial on x ∈ [0, 1], evaluated three ways."""
+    L = lambda x: x[lang]
+    X = lambda v: 260 + (v + 1) * 220                 # value → x coordinate (−1 … 1 → 260 … 700)
+    rows = [
+        ("x² − x", L(T("as written", "wie geschrieben")), -1, 1, "box", "[−1, 1]"),
+        ("x · (x − 1)", L(T("Horner scheme", "Horner-Schema")), -1, 0, "box hl", "[−1, 0]"),
+        (L(T("true range", "tatsächlich")), L(T("what we want", "das Ziel")), -0.25, 0, "zone", "[−¼, 0]"),
+    ]
+    out = []
+    for k, (f, sub, lo, hi, cls, lbl) in enumerate(rows):
+        y = 40 + k * 46
+        out.append(f'<text x="0" y="{y + 13}" class="t">{f}</text><text x="120" y="{y + 13}" class="s">{sub}</text>'
+                   f'<rect class="{cls}" x="{X(lo)}" y="{y}" width="{X(hi) - X(lo)}" height="18" rx="2"'
+                   f'{" style=\"fill:var(--accent);opacity:.35\"" if cls == "zone" else ""}/>'
+                   f'<text x="{X(hi) + 10}" y="{y + 13}" class="s">{lbl}</text>')
+    ticks = "".join(f'<path class="ln" d="M{X(v)} 172V178"/><text x="{X(v)}" y="194" text-anchor="middle" class="s">{t}</text>'
+                    for v, t in ((-1, "−1"), (-0.5, "−½"), (0, "0"), (0.5, "½"), (1, "1")))
+    svg = f'''<svg class="dia" viewBox="0 0 760 200" role="img" aria-label="{L(T("Interval evaluation of x squared minus x for x between 0 and 1: as written the result is minus 1 to 1, as a Horner scheme minus 1 to 0, the true range is minus a quarter to 0", "Intervallauswertung von x Quadrat minus x für x zwischen 0 und 1: wie geschrieben ergibt sich minus 1 bis 1, als Horner-Schema minus 1 bis 0, tatsächlich minus ein Viertel bis 0"))}">
+  <text x="0" y="16" class="s">{L(T("EVALUATED ON THE INTERVAL x ∈ [0, 1]", "AUSGEWERTET AUF DEM INTERVALL x ∈ [0, 1]"))}</text>
+  <path class="ln dash" d="M{X(0)} 30V172"/>
+  {"".join(out)}
+  <path class="ln" d="M{X(-1) - 10} 172H{X(1) + 10}"/>{ticks}
+</svg>'''
+    return figure(svg, T("<b>The dependency problem.</b> Interval arithmetic treats every occurrence of <i>x</i> as an independent value from [0, 1], so <i>x² − x</i> comes out as [−1, 1] — eight times wider than the true range. Rewritten as a Horner scheme, <i>x</i> appears less often and the result tightens to [−1, 0]. Tighter intervals let ICP cut away more of the search space in each step.",
+                         "<b>Das Abhängigkeitsproblem.</b> Intervallarithmetik behandelt jedes Vorkommen von <i>x</i> als unabhängigen Wert aus [0, 1], daher ergibt <i>x² − x</i> das Intervall [−1, 1] — achtmal breiter als der tatsächliche Wertebereich. Als Horner-Schema umgeschrieben kommt <i>x</i> seltener vor, und das Ergebnis schrumpft auf [−1, 0]. Engere Intervalle lassen ICP in jedem Schritt mehr vom Suchraum wegschneiden."), lang)
+
+
 def shot(lang, A, src, w, h, alt, caption):
     return f'''<figure class="media"><div class="paper"><img src="{A}assets/projects/{src}" alt="{alt[lang]}" width="{w}" height="{h}" loading="lazy"></div>
             <figcaption class="mono">{caption[lang]}</figcaption></figure>'''
@@ -600,6 +628,50 @@ PROJECTS = [
                 "<p>In my master’s thesis (2017) I used geneial for a different problem: placing the turbines of an offshore wind farm, rated by annual energy production, net present value and internal rate of return on the Horns Rev test cases. The question was whether turbine positions should be free continuous coordinates or points on a grid. The answer was clear: as long as the grid is fine enough, <b>discretised gene parameters converge faster and reach better results</b> in every test case.</p>",
                 "<p>In meiner Masterarbeit (2017) habe ich geneial für ein anderes Problem eingesetzt: die Platzierung der Turbinen eines Offshore-Windparks, bewertet nach Jahresenergieertrag, Kapitalwert und internem Zinsfuß an den Testfällen von Horns Rev. Die Frage war, ob Turbinenpositionen freie, kontinuierliche Koordinaten oder Punkte auf einem Raster sein sollten. Die Antwort war eindeutig: Solange das Raster fein genug ist, <b>konvergieren diskretisierte Genparameter schneller und erreichen bessere Ergebnisse</b> — in allen Testfällen.</p>")),
         ],
+        refs=[dict(
+            year=2017, flag=T("Master’s thesis", "Masterarbeit"),
+            title="Analysis on Discretization of Gene Parameters in Evolutionary Algorithms",
+            authors="L. Netz",
+            venue=T("RWTH Aachen, Theory of Hybrid Systems · examiners E. Ábrahám, C. Büsing · advisor P. Richter",
+                    "RWTH Aachen, Theorie der hybriden Systeme · Gutachterinnen E. Ábrahám, C. Büsing · Betreuer P. Richter"),
+            links=[("pdf", "https://ths.rwth-aachen.de/wp-content/uploads/sites/4/netz_master.pdf"),
+                   (T("THS theses", "THS-Abschlussarbeiten"), "https://ths.rwth-aachen.de/theses/")])],
         pubs=["NWN+15", "GJN+15a"],
+    ),
+    dict(
+        slug="smt-rat", name="SMT-RAT", when="2015", mark="SMT",
+        desc=T("SMT-RAT — a modular C++ toolbox for SMT solving over non-linear real arithmetic, and my bachelor’s thesis on its interval constraint propagation.",
+               "SMT-RAT — ein modularer C++-Werkzeugkasten für SMT-Solving über nichtlinearer reeller Arithmetik, und meine Bachelorarbeit zu seiner Intervall-Constraint-Propagation."),
+        lead=T("Does a set of polynomial inequalities over the real numbers have a solution? SMT-RAT answers questions like this from <em>modules</em> that can be combined into a solver — I worked on the one that narrows the search space with interval arithmetic.",
+               "Hat ein System polynomieller Ungleichungen über den reellen Zahlen eine Lösung? SMT-RAT beantwortet solche Fragen mit <em>Modulen</em>, die sich zu einem Solver kombinieren lassen — ich habe an dem gearbeitet, das den Suchraum mit Intervallarithmetik eingrenzt."),
+        facts=[(T("Type", "Art"), T("SMT solver toolbox · C++", "SMT-Solver-Baukasten · C++")), (T("Group", "Lehrstuhl"), T("Theory of Hybrid Systems, RWTH", "Theorie der hybriden Systeme, RWTH")),
+               (T("My part", "Mein Teil"), T("ICP module · bachelor’s thesis", "ICP-Modul · Bachelorarbeit"))],
+        links=[(T("documentation", "Dokumentation"), "https://ths-rwth.github.io/smtrat/"), ("github", "https://github.com/ths-rwth/smtrat"),
+               (T("bachelor’s thesis (pdf)", "Bachelorarbeit (pdf)"), "http://ths.rwth-aachen.de/wp-content/uploads/sites/4/teaching/theses/netz_bachelor.pdf")],
+        media=lambda lang, A: smtrat_diagram(lang, A),
+        chapters=[
+            (T("The problem", "Das Problem"), T(
+                "<p>Many questions in verification and engineering boil down to one: is there an assignment of real numbers that satisfies a Boolean combination of polynomial constraints? Can this hybrid system reach an unsafe state, does this rewrite system terminate, does this inequality hold? Such formulas of <b>non-linear real arithmetic</b> are decidable, but the complete methods are expensive — at least exponential in the worst case.</p>",
+                "<p>Viele Fragen aus Verifikation und Ingenieurwesen laufen auf eine hinaus: Gibt es eine Belegung mit reellen Zahlen, die eine boolesche Kombination polynomieller Bedingungen erfüllt? Kann dieses hybride System einen unsicheren Zustand erreichen, terminiert dieses Termersetzungssystem, gilt diese Ungleichung? Solche Formeln <b>nichtlinearer reeller Arithmetik</b> sind entscheidbar, aber die vollständigen Verfahren sind teuer — im schlimmsten Fall mindestens exponentiell.</p>")),
+            (T("SMT-RAT", "SMT-RAT"), T(
+                "<p>SMT solvers combine a fast SAT solver for the Boolean structure with theory solvers for the arithmetic. <b>SMT-RAT</b> (Satisfiability-Modulo-Theories Real Algebra Toolbox), developed at RWTH’s Theory of Hybrid Systems group, makes the theory part modular: each method — simplex, virtual substitution, interval constraint propagation, cylindrical algebraic decomposition and more — is a module, and a <i>strategy</i> chains modules into a solver. Cheap, incomplete methods go first and hand a smaller problem to the expensive, complete ones. The toolbox is open source, reads SMT-LIB 2 and builds on the CArL library for polynomials.</p>",
+                "<p>SMT-Solver kombinieren einen schnellen SAT-Solver für die boolesche Struktur mit Theorie-Solvern für die Arithmetik. <b>SMT-RAT</b> (Satisfiability-Modulo-Theories Real Algebra Toolbox), entwickelt am Lehr- und Forschungsgebiet Theorie der hybriden Systeme der RWTH, macht den Theorie-Teil modular: Jedes Verfahren — Simplex, virtuelle Substitution, Intervall-Constraint-Propagation, zylindrisch-algebraische Zerlegung und mehr — ist ein Modul, und eine <i>Strategie</i> verkettet Module zu einem Solver. Günstige, unvollständige Verfahren kommen zuerst und reichen ein kleineres Problem an die teuren, vollständigen weiter. Der Werkzeugkasten ist Open Source, liest SMT-LIB 2 und baut für Polynome auf der Bibliothek CArL auf.</p>")),
+            (T("Interval constraint propagation", "Intervall-Constraint-Propagation"), T(
+                "<p>Interval constraint propagation (ICP) works on boxes of intervals, one per variable. It uses each constraint to cut away parts of the box that cannot contain a solution — <i>contraction</i> — until the box is empty (unsatisfiable) or small enough to hand on. Its weak spot is interval arithmetic itself: it does not know that two occurrences of <code>x</code> are the same number. That <b>dependency problem</b> makes results wider than necessary (figure above), so ICP contracts less and needs more iterations.</p>",
+                "<p>Intervall-Constraint-Propagation (ICP) arbeitet auf Boxen aus Intervallen, eines pro Variable. Sie nutzt jede Bedingung, um Teile der Box wegzuschneiden, die keine Lösung enthalten können — <i>Kontraktion</i> —, bis die Box leer (unerfüllbar) oder klein genug zur Weitergabe ist. Ihre Schwachstelle ist die Intervallarithmetik selbst: Sie weiß nicht, dass zwei Vorkommen von <code>x</code> dieselbe Zahl sind. Dieses <b>Abhängigkeitsproblem</b> macht Ergebnisse breiter als nötig (Abbildung oben), sodass ICP weniger kontrahiert und mehr Iterationen braucht.</p>")),
+            (T("Bachelor’s thesis", "Bachelorarbeit"), lambda lang, A: T(
+                "<p>In my bachelor’s thesis (2015) I improved SMT-RAT’s ICP module in two ways. First, a new contraction method — interval <b>propagation</b> through the constraint — in addition to the existing Newton-based contraction. Second, a data structure for <b>multivariate Horner schemes</b>: polynomials are rewritten in nested form, which needs fewer operations and repeats variables less often, so the intervals stay tighter. Two heuristics choose the variable to factor out next — one fast, one aimed at the smallest over-approximation — and a simplification step compresses the result.</p>"
+                "<p>Evaluated on the standard SMT-LIB benchmark sets, the propagation clearly paid off: on <i>keymaera</i> (hybrid-systems verification) more instances were solved with fewer timeouts in little more than half the time, and on <i>hong</i> nearly twice as many test cases could be solved in the same time frame. The Horner schemes did make ICP more precise — up to 46&nbsp;% fewer contractions on some instances — but building them cost more time than the tighter intervals saved. An honest result that pointed to the next steps: choosing the heuristic per input, and evaluating polynomials from the perspective of a single variable.</p>",
+                "<p>In meiner Bachelorarbeit (2015) habe ich das ICP-Modul von SMT-RAT auf zwei Wegen verbessert. Erstens eine neue Kontraktionsmethode — <b>Propagation</b> von Intervallen durch die Bedingung — zusätzlich zur bestehenden, Newton-basierten Kontraktion. Zweitens eine Datenstruktur für <b>multivariate Horner-Schemata</b>: Polynome werden verschachtelt umgeschrieben, brauchen so weniger Operationen und wiederholen Variablen seltener, wodurch die Intervalle enger bleiben. Zwei Heuristiken wählen die nächste auszuklammernde Variable — eine schnelle, eine auf möglichst geringe Überapproximation ausgelegte —, und ein Vereinfachungsschritt komprimiert das Ergebnis.</p>"
+                "<p>Auf den üblichen SMT-LIB-Benchmarks hat sich die Propagation klar ausgezahlt: Auf <i>keymaera</i> (Verifikation hybrider Systeme) wurden mehr Instanzen mit weniger Timeouts in kaum mehr als der halben Zeit gelöst, und auf <i>hong</i> ließen sich im selben Zeitrahmen fast doppelt so viele Testfälle lösen. Die Horner-Schemata machten ICP zwar präziser — auf einzelnen Instanzen bis zu 46&nbsp;% weniger Kontraktionen —, ihr Aufbau kostete aber mehr Zeit, als die engeren Intervalle einsparten. Ein ehrliches Ergebnis, das die nächsten Schritte zeigte: die Heuristik je Eingabe wählen und Polynome aus der Sicht einer einzelnen Variable auswerten.</p>")[lang]),
+        ],
+        refs=[dict(
+            year=2015, flag=T("Bachelor’s thesis", "Bachelorarbeit"),
+            title="Using Horner Schemes to Improve the Efficiency and Precision of Interval Constraint Propagation",
+            authors="L. Netz",
+            venue=T("RWTH Aachen, Theory of Hybrid Systems · examiners E. Ábrahám, J. Giesl · advisors S. Schupp, F. Corzilius",
+                    "RWTH Aachen, Theorie der hybriden Systeme · Gutachter E. Ábrahám, J. Giesl · Betreuer S. Schupp, F. Corzilius"),
+            links=[("pdf", "http://ths.rwth-aachen.de/wp-content/uploads/sites/4/teaching/theses/netz_bachelor.pdf"),
+                   (T("THS theses", "THS-Abschlussarbeiten"), "https://ths.rwth-aachen.de/theses/")])],
     ),
 ]

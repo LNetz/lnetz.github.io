@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SMT-RAT — Lukas Netz</title>
+  <meta name="description" content="SMT-RAT — ein modularer C++-Werkzeugkasten für SMT-Solving über nichtlinearer reeller Arithmetik, und meine Bachelorarbeit zu seiner Intervall-Constraint-Propagation.">
+  <meta property="og:title" content="SMT-RAT — Lukas Netz">
+  <meta property="og:description" content="SMT-RAT — ein modularer C++-Werkzeugkasten für SMT-Solving über nichtlinearer reeller Arithmetik, und meine Bachelorarbeit zu seiner Intervall-Constraint-Propagation.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="de_DE">
+  <link rel="alternate" hreflang="en" href="../projects-smt-rat.html">
+  <link rel="alternate" hreflang="de" href="projects-smt-rat.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <script>
+    // Theme preference in localStorage: "light" (default), "dark" or "auto" (follows the OS).
+    // Applied before first paint (no flash); re-applied on pageshow (back/forward cache)
+    // and whenever the OS switches while "auto" is chosen.
+    (function () {
+      var os = matchMedia("(prefers-color-scheme: dark)");
+      function apply() {
+        var p = null;
+        try { p = localStorage.getItem("theme"); } catch (_) {}
+        if (p !== "dark" && p !== "auto") p = "light";
+        var root = document.documentElement;
+        root.dataset.themePref = p;
+        root.dataset.theme = p === "auto" ? (os.matches ? "dark" : "light") : p;
+      }
+      window.applyTheme = apply;
+      apply();
+      // build-up animation (style.css, .anim) unless the OS asks for reduced motion;
+      // the index column only builds up on the first page of a visit (.returning afterwards)
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) document.documentElement.classList.add("anim");
+      try {
+        if (sessionStorage.getItem("seen")) document.documentElement.classList.add("returning");
+        sessionStorage.setItem("seen", "1");
+      } catch (_) {}
+      addEventListener("pageshow", apply);
+      os.addEventListener("change", apply);
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body id="top">
+<div class="backdrop" aria-hidden="true"></div>
+<div class="frame">
+
+  <!-- ============ index column (identical on every page) ============
+       Desktop: sticky left column.  ≤ 900px: sticky top bar; the menu
+       (pages, profiles, language, theme) opens as a full-screen sheet. -->
+  <aside class="index" id="index">
+    <div class="bar">
+      <div class="who">
+        <a class="name" href="index.html">Lukas Netz</a>
+        <span class="here mono" aria-hidden="true">SMT-RAT</span>
+        <div class="role">Dr. rer. nat.<br>IT-Spezialist<br>mgm technology partners</div>
+      </div>
+      <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">Menü</button>
+    </div>
+
+    <div class="menu" id="menu">
+      <nav aria-label="Seiten">
+        <ol class="mono">
+        <li><a href="index.html"><span>00</span><span>Über mich</span></a></li>
+        <li><a href="projects.html" class="active" aria-current="page"><span>01</span><span>Projekte</span></a></li>
+        <li><a href="research.html"><span>02</span><span>Forschung</span></a></li>
+        <li><a href="photography.html"><span>03</span><span>Fotografie</span></a></li>
+        </ol>
+      </nav>
+
+      <div class="contact mono">
+      <a href="https://www.linkedin.com/in/lukas-netz/" target="_blank" rel="noopener">LinkedIn ↗</a>
+      <a href="https://scholar.google.com/citations?user=5mVkoWsAAAAJ&amp;hl=en" target="_blank" rel="noopener">Google Scholar ↗</a>
+      <a href="https://www.researchgate.net/profile/Lukas-Netz" target="_blank" rel="noopener">ResearchGate ↗</a>
+      <a href="https://orcid.org/0000-0003-2013-2919" target="_blank" rel="noopener">ORCID ↗</a>
+      <a href="https://dblp.org/pid/170/5042.html" target="_blank" rel="noopener">dblp ↗</a>
+      <a href="https://github.com/LNetz" target="_blank" rel="noopener">GitHub ↗</a>
+      </div>
+
+      <div class="prefs mono">
+        <div class="lang" aria-label="Sprache"><a href="../projects-smt-rat.html" hreflang="en" lang="en">EN</a><a href="projects-smt-rat.html" hreflang="de" lang="de" aria-current="true">DE</a></div>
+        <button class="theme-toggle" type="button" id="theme">◐ <span>hell</span></button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ content ============ -->
+  <main>
+
+    <header class="page proj">
+      <a class="back mono" href="projects.html">← alle Projekte</a>
+      <div class="section-head">
+        <h1><span class="mono">01</span>SMT-RAT</h1>
+        <span class="mono faint">2015</span>
+      </div>
+      <p class="lead">Hat ein System polynomieller Ungleichungen über den reellen Zahlen eine Lösung? SMT-RAT beantwortet solche Fragen mit <em>Modulen</em>, die sich zu einem Solver kombinieren lassen — ich habe an dem gearbeitet, das den Suchraum mit Intervallarithmetik eingrenzt.</p>
+      <dl class="facts mono"><div><dt>Art</dt><dd>SMT-Solver-Baukasten · C++</dd></div><div><dt>Lehrstuhl</dt><dd>Theorie der hybriden Systeme, RWTH</dd></div><div><dt>Mein Teil</dt><dd>ICP-Modul · Bachelorarbeit</dd></div></dl>
+      <div class="links-top mono"><a href="https://ths-rwth.github.io/smtrat/" target="_blank" rel="noopener">Dokumentation ↗</a><a href="https://github.com/ths-rwth/smtrat" target="_blank" rel="noopener">github ↗</a><a href="http://ths.rwth-aachen.de/wp-content/uploads/sites/4/teaching/theses/netz_bachelor.pdf" target="_blank" rel="noopener">Bachelorarbeit (pdf) ↗</a></div>
+    </header>
+    <figure class="media"><div class="dia-scroll"><svg class="dia" viewBox="0 0 760 200" role="img" aria-label="Intervallauswertung von x Quadrat minus x für x zwischen 0 und 1: wie geschrieben ergibt sich minus 1 bis 1, als Horner-Schema minus 1 bis 0, tatsächlich minus ein Viertel bis 0">
+  <text x="0" y="16" class="s">AUSGEWERTET AUF DEM INTERVALL x ∈ [0, 1]</text>
+  <path class="ln dash" d="M480 30V172"/>
+  <text x="0" y="53" class="t">x² − x</text><text x="120" y="53" class="s">wie geschrieben</text><rect class="box" x="260" y="40" width="440" height="18" rx="2"/><text x="710" y="53" class="s">[−1, 1]</text><text x="0" y="99" class="t">x · (x − 1)</text><text x="120" y="99" class="s">Horner-Schema</text><rect class="box hl" x="260" y="86" width="220" height="18" rx="2"/><text x="490" y="99" class="s">[−1, 0]</text><text x="0" y="145" class="t">tatsächlich</text><text x="120" y="145" class="s">das Ziel</text><rect class="zone" x="425.0" y="132" width="55.0" height="18" rx="2" style="fill:var(--accent);opacity:.35"/><text x="490" y="145" class="s">[−¼, 0]</text>
+  <path class="ln" d="M250 172H710"/><path class="ln" d="M260 172V178"/><text x="260" y="194" text-anchor="middle" class="s">−1</text><path class="ln" d="M370.0 172V178"/><text x="370.0" y="194" text-anchor="middle" class="s">−½</text><path class="ln" d="M480 172V178"/><text x="480" y="194" text-anchor="middle" class="s">0</text><path class="ln" d="M590.0 172V178"/><text x="590.0" y="194" text-anchor="middle" class="s">½</text><path class="ln" d="M700 172V178"/><text x="700" y="194" text-anchor="middle" class="s">1</text>
+</svg></div>
+      <figcaption class="mono"><b>Das Abhängigkeitsproblem.</b> Intervallarithmetik behandelt jedes Vorkommen von <i>x</i> als unabhängigen Wert aus [0, 1], daher ergibt <i>x² − x</i> das Intervall [−1, 1] — achtmal breiter als der tatsächliche Wertebereich. Als Horner-Schema umgeschrieben kommt <i>x</i> seltener vor, und das Ergebnis schrumpft auf [−1, 0]. Engere Intervalle lassen ICP in jedem Schritt mehr vom Suchraum wegschneiden.</figcaption>
+    </figure>
+    <section>
+      <ul class="story">
+        <li>
+          <h2>Das Problem</h2>
+          <div class="txt"><p>Viele Fragen aus Verifikation und Ingenieurwesen laufen auf eine hinaus: Gibt es eine Belegung mit reellen Zahlen, die eine boolesche Kombination polynomieller Bedingungen erfüllt? Kann dieses hybride System einen unsicheren Zustand erreichen, terminiert dieses Termersetzungssystem, gilt diese Ungleichung? Solche Formeln <b>nichtlinearer reeller Arithmetik</b> sind entscheidbar, aber die vollständigen Verfahren sind teuer — im schlimmsten Fall mindestens exponentiell.</p></div>
+        </li>
+        <li>
+          <h2>SMT-RAT</h2>
+          <div class="txt"><p>SMT-Solver kombinieren einen schnellen SAT-Solver für die boolesche Struktur mit Theorie-Solvern für die Arithmetik. <b>SMT-RAT</b> (Satisfiability-Modulo-Theories Real Algebra Toolbox), entwickelt am Lehr- und Forschungsgebiet Theorie der hybriden Systeme der RWTH, macht den Theorie-Teil modular: Jedes Verfahren — Simplex, virtuelle Substitution, Intervall-Constraint-Propagation, zylindrisch-algebraische Zerlegung und mehr — ist ein Modul, und eine <i>Strategie</i> verkettet Module zu einem Solver. Günstige, unvollständige Verfahren kommen zuerst und reichen ein kleineres Problem an die teuren, vollständigen weiter. Der Werkzeugkasten ist Open Source, liest SMT-LIB 2 und baut für Polynome auf der Bibliothek CArL auf.</p></div>
+        </li>
+        <li>
+          <h2>Intervall-Constraint-Propagation</h2>
+          <div class="txt"><p>Intervall-Constraint-Propagation (ICP) arbeitet auf Boxen aus Intervallen, eines pro Variable. Sie nutzt jede Bedingung, um Teile der Box wegzuschneiden, die keine Lösung enthalten können — <i>Kontraktion</i> —, bis die Box leer (unerfüllbar) oder klein genug zur Weitergabe ist. Ihre Schwachstelle ist die Intervallarithmetik selbst: Sie weiß nicht, dass zwei Vorkommen von <code>x</code> dieselbe Zahl sind. Dieses <b>Abhängigkeitsproblem</b> macht Ergebnisse breiter als nötig (Abbildung oben), sodass ICP weniger kontrahiert und mehr Iterationen braucht.</p></div>
+        </li>
+        <li>
+          <h2>Bachelorarbeit</h2>
+          <div class="txt"><p>In meiner Bachelorarbeit (2015) habe ich das ICP-Modul von SMT-RAT auf zwei Wegen verbessert. Erstens eine neue Kontraktionsmethode — <b>Propagation</b> von Intervallen durch die Bedingung — zusätzlich zur bestehenden, Newton-basierten Kontraktion. Zweitens eine Datenstruktur für <b>multivariate Horner-Schemata</b>: Polynome werden verschachtelt umgeschrieben, brauchen so weniger Operationen und wiederholen Variablen seltener, wodurch die Intervalle enger bleiben. Zwei Heuristiken wählen die nächste auszuklammernde Variable — eine schnelle, eine auf möglichst geringe Überapproximation ausgelegte —, und ein Vereinfachungsschritt komprimiert das Ergebnis.</p><p>Auf den üblichen SMT-LIB-Benchmarks hat sich die Propagation klar ausgezahlt: Auf <i>keymaera</i> (Verifikation hybrider Systeme) wurden mehr Instanzen mit weniger Timeouts in kaum mehr als der halben Zeit gelöst, und auf <i>hong</i> ließen sich im selben Zeitrahmen fast doppelt so viele Testfälle lösen. Die Horner-Schemata machten ICP zwar präziser — auf einzelnen Instanzen bis zu 46&nbsp;% weniger Kontraktionen —, ihr Aufbau kostete aber mehr Zeit, als die engeren Intervalle einsparten. Ein ehrliches Ergebnis, das die nächsten Schritte zeigte: die Heuristik je Eingabe wählen und Polynome aus der Sicht einer einzelnen Variable auswerten.</p></div>
+        </li>
+      </ul>
+
+      <div class="group mono">Publikationen &amp; Abschlussarbeiten · 1</div>
+      <ol class="pubs">
+        <li>
+          <span class="key mono">2015</span>
+          <div>
+            <div class="t">Using Horner Schemes to Improve the Efficiency and Precision of Interval Constraint Propagation<span class="flag mono">Bachelorarbeit</span></div>
+            <div class="a"><b>L. Netz</b></div>
+            <div class="v mono">RWTH Aachen, Theorie der hybriden Systeme · Gutachter E. Ábrahám, J. Giesl · Betreuer S. Schupp, F. Corzilius</div>
+            <div class="plinks mono"><a href="http://ths.rwth-aachen.de/wp-content/uploads/sites/4/teaching/theses/netz_bachelor.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://ths.rwth-aachen.de/theses/" target="_blank" rel="noopener">THS-Abschlussarbeiten ↗</a></div>
+          </div>
+        </li>
+
+      </ol>
+
+      <nav class="pager mono" aria-label="Weitere Projekte">
+        <a href="projects-geneial.html"><span>← vorheriges</span><b>geneial</b></a>
+        <a href="projects-esaca.html"><span>nächstes →</span><b>ESACA</b></a>
+      </nav>
+    </section>
+
+    <footer class="mono">
+      <span>© 2026 Lukas Netz.</span>
+      <nav class="foot-icons" aria-label="Bereiche"><a href="projects.html" title="Projekte" aria-label="Projekte"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 7L2.5 12l5 5"/><path d="M16.5 7l5 5-5 5"/><path d="M14 4.5l-4 15"/></svg></a><a href="research.html" title="Forschung" aria-label="Forschung"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 13.5H5l3.5 6.5L13.5 4h8"/><path d="M14.5 10l5 6"/><path d="M19.5 10l-5 6"/></svg></a><a href="photography.html" title="Fotografie" aria-label="Fotografie"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><g transform="translate(12 12) scale(.9) translate(-12 -12)" stroke-width="1.95"><path d="M12.697 3.5h-1.394c-.715 0-1.072 0-1.392.112a2 2 0 0 0-.545.292c-.271.204-.47.501-.866 1.096c-.203.305-.502.753-.621.879a2 2 0 0 1-1.106.591c-.17.03-.353.03-.72.03c-.98 0-1.47 0-1.87.113a3 3 0 0 0-2.07 2.07C2 9.083 2 9.573 2 10.553V14.5c0 2.828 0 4.243.879 5.121S5.172 20.5 8 20.5h8c2.829 0 4.243 0 5.122-.879C22 18.743 22 17.328 22 14.5v-3.946c0-.98 0-1.47-.113-1.871a3 3 0 0 0-2.07-2.07c-.4-.113-.89-.113-1.87-.113c-.366 0-.55 0-.72-.03a2 2 0 0 1-1.105-.591c-.12-.126-.419-.574-.622-.879c-.396-.595-.594-.892-.865-1.096a2 2 0 0 0-.545-.292c-.32-.112-.678-.112-1.393-.112"/><path d="M16 13a4 4 0 1 1-8 0a4 4 0 0 1 8 0"/><path d="M19.125 9.5H19m.25 0a.25.25 0 1 1-.5 0a.25.25 0 0 1 .5 0Z"/></g></svg></a><a class="egg" href="../vier-gewinnt/" title="Spielen" aria-label="Spielen"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7.5h10a4.5 4.5 0 0 1 4.5 4.5v1.8a3.2 3.2 0 0 1-5.8 1.9l-1.2-1.7h-5l-1.2 1.7a3.2 3.2 0 0 1-5.8-1.9V12A4.5 4.5 0 0 1 7 7.5z"/><path d="M7.5 10v3.5M5.75 11.75h3.5"/><path d="M15.5 10.75h.01M17.5 12.75h.01" stroke-width="2.4"/></svg></a></nav>
+      <a href="#top">↑ nach oben</a>
+    </footer>
+  </main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

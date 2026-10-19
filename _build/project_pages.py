@@ -38,7 +38,7 @@ def ext(label, url):
 
 
 def pub_list(lang, keys):
-    """Same markup as the publication list on the research page (site.js)."""
+    """Same markup as the publication list on the research page (site.js); the <li>s only."""
     flags = {"Article": T("Article", "Artikel"), "Dissertation": T("Dissertation", "Dissertation")}
     items = []
     for k in keys:
@@ -57,7 +57,24 @@ def pub_list(lang, keys):
             <div class="plinks mono">{"".join(links)}</div>
           </div>
         </li>''')
-    return '      <ol class="pubs">' + NL + NL.join(items) + NL + '      </ol>'
+    return NL.join(items)
+
+
+def ref_list(lang, refs):
+    """Theses and other works that are not in pubs.js, in the same markup as pub_list."""
+    items = []
+    for r in refs:
+        L = lambda x: x[lang] if isinstance(x, dict) else x
+        items.append(f'''        <li>
+          <span class="key mono">{r["year"]}</span>
+          <div>
+            <div class="t">{L(r["title"])}<span class="flag mono">{L(r["flag"])}</span></div>
+            <div class="a">{r["authors"].replace("L. Netz", "<b>L. Netz</b>")}</div>
+            <div class="v mono">{L(r["venue"])}</div>
+            <div class="plinks mono">{"".join(ext(L(a), b) for a, b in r["links"])}</div>
+          </div>
+        </li>''')
+    return NL.join(items)
 
 
 def video(lang, A, yt, thumb, title, caption):
@@ -102,10 +119,15 @@ def page(lang, idx):
           <div class="txt">{L(text) if not callable(text) else text(lang, A)}</div>
         </li>''' for label, text in p["chapters"])
     pubs = ""
-    if p.get("pubs"):
+    if p.get("pubs") or p.get("refs"):
+        n = len(p.get("pubs", ())) + len(p.get("refs", ()))
+        label = T("Publications &amp; theses", "Publikationen &amp; Abschlussarbeiten") if p.get("refs") else T("Publications", "Publikationen")
+        items = (ref_list(lang, p["refs"]) + NL if p.get("refs") else "") + (pub_list(lang, p["pubs"]) if p.get("pubs") else "")
         pubs = (f'''
-      <div class="group mono">{L(T("Publications", "Publikationen"))} · {len(p["pubs"])}</div>
-{pub_list(lang, p["pubs"])}
+      <div class="group mono">{L(label)} · {n}</div>
+      <ol class="pubs">
+{items}
+      </ol>
 ''')
     prev, nxt = PROJECTS[idx - 1], PROJECTS[(idx + 1) % len(PROJECTS)]
     pager = f'''
