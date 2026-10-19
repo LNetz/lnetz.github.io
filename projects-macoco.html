@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MaCoCo — Lukas Netz</title>
+  <meta name="description" content="MaCoCo — a management cockpit for controlling university chairs, largely generated from models. In production at RWTH Aachen.">
+  <meta property="og:title" content="MaCoCo — Lukas Netz">
+  <meta property="og:description" content="MaCoCo — a management cockpit for controlling university chairs, largely generated from models. In production at RWTH Aachen.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_US">
+  <link rel="alternate" hreflang="en" href="projects-macoco.html">
+  <link rel="alternate" hreflang="de" href="de/projects-macoco.html">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <script>
+    // Theme preference in localStorage: "light" (default), "dark" or "auto" (follows the OS).
+    // Applied before first paint (no flash); re-applied on pageshow (back/forward cache)
+    // and whenever the OS switches while "auto" is chosen.
+    (function () {
+      var os = matchMedia("(prefers-color-scheme: dark)");
+      function apply() {
+        var p = null;
+        try { p = localStorage.getItem("theme"); } catch (_) {}
+        if (p !== "dark" && p !== "auto") p = "light";
+        var root = document.documentElement;
+        root.dataset.themePref = p;
+        root.dataset.theme = p === "auto" ? (os.matches ? "dark" : "light") : p;
+      }
+      window.applyTheme = apply;
+      apply();
+      // build-up animation (style.css, .anim) unless the OS asks for reduced motion;
+      // the index column only builds up on the first page of a visit (.returning afterwards)
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) document.documentElement.classList.add("anim");
+      try {
+        if (sessionStorage.getItem("seen")) document.documentElement.classList.add("returning");
+        sessionStorage.setItem("seen", "1");
+      } catch (_) {}
+      addEventListener("pageshow", apply);
+      os.addEventListener("change", apply);
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body id="top">
+<div class="backdrop" aria-hidden="true"></div>
+<div class="frame">
+
+  <!-- ============ index column (identical on every page) ============
+       Desktop: sticky left column.  ≤ 900px: sticky top bar; the menu
+       (pages, profiles, language, theme) opens as a full-screen sheet. -->
+  <aside class="index" id="index">
+    <div class="bar">
+      <div class="who">
+        <a class="name" href="index.html">Lukas Netz</a>
+        <span class="here mono" aria-hidden="true">MaCoCo</span>
+        <div class="role">Dr. rer. nat.<br>IT Specialist<br>mgm technology partners</div>
+      </div>
+      <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">menu</button>
+    </div>
+
+    <div class="menu" id="menu">
+      <nav aria-label="Pages">
+        <ol class="mono">
+        <li><a href="index.html"><span>00</span><span>About</span></a></li>
+        <li><a href="projects.html" class="active" aria-current="page"><span>01</span><span>Projects</span></a></li>
+        <li><a href="research.html"><span>02</span><span>Research</span></a></li>
+        <li><a href="photography.html"><span>03</span><span>Photography</span></a></li>
+        </ol>
+      </nav>
+
+      <div class="contact mono">
+      <a href="https://www.linkedin.com/in/lukas-netz/" target="_blank" rel="noopener">LinkedIn ↗</a>
+      <a href="https://scholar.google.com/citations?user=5mVkoWsAAAAJ&amp;hl=en" target="_blank" rel="noopener">Google Scholar ↗</a>
+      <a href="https://www.researchgate.net/profile/Lukas-Netz" target="_blank" rel="noopener">ResearchGate ↗</a>
+      <a href="https://orcid.org/0000-0003-2013-2919" target="_blank" rel="noopener">ORCID ↗</a>
+      <a href="https://dblp.org/pid/170/5042.html" target="_blank" rel="noopener">dblp ↗</a>
+      <a href="https://github.com/LNetz" target="_blank" rel="noopener">GitHub ↗</a>
+      </div>
+
+      <div class="prefs mono">
+        <div class="lang" aria-label="Language"><a href="projects-macoco.html" hreflang="en" lang="en" aria-current="true">EN</a><a href="de/projects-macoco.html" hreflang="de" lang="de">DE</a></div>
+        <button class="theme-toggle" type="button" id="theme">◐ <span>light</span></button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ content ============ -->
+  <main>
+
+    <header class="page proj">
+      <a class="back mono" href="projects.html">← all projects</a>
+      <div class="section-head">
+        <h1><span class="mono">01</span>MaCoCo</h1>
+        <span class="mono faint">2018 — 2026</span>
+      </div>
+      <div class="proj-logo"><img src="assets/logos/macoco.png" alt="" width="48" height="48"></div>
+      <p class="lead">Every university chair manages real money — grants, contracts, staff paid from several projects — but the university’s ERP system is built for the central administration. MaCoCo gives the chairs <em>their own cockpit</em>, and most of its code was never written by hand.</p>
+      <dl class="facts mono wide"><div><dt>Role</dt><dd>Project lead</dd></div><div><dt>Partner</dt><dd>Chair of Management Accounting</dd></div><div><dt>Status</dt><dd>In production at RWTH</dd></div><div><dt>Generated</dt><dd>~ 3/4 of the code</dd></div></dl>
+      <div class="links-top mono"><a href="https://www.se-rwth.de/projects/MaCoCo/" target="_blank" rel="noopener">project ↗</a><a href="https://www.controlling.rwth-aachen.de/cms/controlling/forschung/forschungsprojekte/laufende-projekte/~mgaz/macoco-lehrstuhlcontrolling/" target="_blank" rel="noopener">controlling chair ↗</a><a href="https://play.google.com/store/apps/details?id=macoco.stundenzettel.timetracker&amp;hl=de" target="_blank" rel="noopener">android app ↗</a></div>
+    </header>
+    <figure class="media">
+      <a class="yt frame-16x9" href="https://youtu.be/2AibynH6Bm0" data-yt="2AibynH6Bm0" target="_blank" rel="noopener" aria-label="MaCoCo image film — play video">
+        <img src="assets/projects/macoco-video.jpg" alt="" width="1280" height="720" loading="lazy">
+        <span class="play mono"><i aria-hidden="true">▶</i>play video</span>
+      </a>
+      <figcaption class="mono"><b>MaCoCo image film</b> — what the cockpit does for a chair, in a few minutes. The video is loaded from YouTube only when you start it.</figcaption>
+    </figure>
+    <section>
+      <ul class="story">
+        <li>
+          <h2>The problem</h2>
+          <div class="txt"><p>When RWTH moved its administration to SAP, the system served the central offices well — but not the roughly 400 chairs and institutes that each run their own budgets. They need to know how much money is left on which grant, which contract is financed from which project, and whether the project’s time sheets are complete. Most kept this in spreadsheets or home-grown tools: error-prone, single-user and invisible to everyone else.</p></div>
+        </li>
+        <li>
+          <h2>The cockpit</h2>
+          <div class="txt"><ul class="pts"><li><b>Finances</b> — budgets, income and expenses across all accounts and projects, with planned spending and forecasts.</li><li><b>Staff</b> — master data, contracts and their financing; staff costs flow automatically into the projects that pay them.</li><li><b>Projects</b> — time sheets for funders that require them (with a companion Android app), staffing plans and org charts.</li></ul><figure class="media"><div class="paper"><img src="assets/projects/macoco-dashboard.jpg" alt="MaCoCo dashboard with a finance overview donut chart, a budget breakdown table and lists of accounts with high remaining budget or negative balance (demo data)" width="1600" height="1007" loading="lazy"></div>
+            <figcaption class="mono">The dashboard of a chair (demo data): budget, spending, planned spending and the accounts that need attention.</figcaption></figure></div>
+        </li>
+        <li>
+          <h2>Built from models</h2>
+          <div class="txt"><p>MaCoCo started in 2016 as a hand-written prototype. Step by step, generated code replaced it — first the data classes and persistence, then the commands, the validation from OCL constraints and finally the whole front end from GUI models. The generator that grew out of this work became <a href="projects-montigem.html">MontiGem</a>. Today the domain is described in class diagrams and GUI models; hand-written business logic is plugged in where it is needed, without ever being overwritten by the generator.</p><div class="stats"><div><b>~1.1 M</b><span>lines of code</span></div><div><b>74 %</b><span>of it generated</span></div><div><b>~150</b><span>domain classes</span></div><div><b>60</b><span>GUI models</span></div></div><p class="mono faint">Figures from my dissertation (2024).</p></div>
+        </li>
+        <li>
+          <h2>Agile, with its users</h2>
+          <div class="txt"><p>MaCoCo is developed in a Scrum-like cycle together with lead users from all faculties. A steering committee — data protection, staff councils, finance and HR administration, IT Center and deans — meets twice a year; users meet monthly. Critical fixes ship on demand, everything else every two to three months. Because the system is regenerated from models, even large changes to the domain stay affordable.</p></div>
+        </li>
+        <li>
+          <h2>In production</h2>
+          <div class="txt"><p>MaCoCo is hosted by the RWTH IT Center and connected to SAP; every chair gets its own database. It is used across the university every working day.</p><div class="stats"><div><b>200+</b><span>chairs &amp; institutes</span></div><div><b>~200</b><span>logins per working day</span></div><div><b>2016</b><span>in development since</span></div></div></div>
+        </li>
+      </ul>
+
+      <div class="group mono">Publications · 7</div>
+      <ol class="pubs">
+        <li>
+          <span class="key mono">2024</span>
+          <div>
+            <div class="t">Modeling Financial, Project and Staff Management: A Case Report from the MaCoCo Project</div>
+            <div class="a">A. Gerasimov, P. Letmathe, J. Michael, <b>L. Netz</b>, B. Rumpe</div>
+            <div class="v mono">EMISA Journal, Vol. 19</div>
+            <div class="plinks mono"><a href="https://www.se-rwth.de/publications/Modeling-Financial-Project-and-Staff-Management-A-Case-Report-from-the-MaCoCo-Project.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.18417/emisa.19.3" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>
+        <li>
+          <span class="key mono">2024</span>
+          <div>
+            <div class="t">Model-Driven Method for the Development of Full-Size Web-Based Information Systems<span class="flag mono">Dissertation</span></div>
+            <div class="a"><b>L. Netz</b></div>
+            <div class="v mono">Aachener Informatik-Berichte SE, Vol. 55, Shaker Verlag</div>
+            <div class="plinks mono"><a href="https://www.se-rwth.de/phdtheses/Diss-Netz-Model-Driven-Method-for-the-Development-of-Full-Size-Web-Based-Information-Systems.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.2370/9783844098334" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>
+        <li>
+          <span class="key mono">2021</span>
+          <div>
+            <div class="t">A Methodology for Retrofitting Generative Aspects in Existing Applications</div>
+            <div class="a">I. Drave, A. Gerasimov, J. Michael, <b>L. Netz</b>, B. Rumpe, S. Varga</div>
+            <div class="v mono">Journal of Object Technology, Vol. 20</div>
+            <div class="plinks mono"><a href="https://www.se-rwth.de/publications/A-Methodology-for-Retrofitting-Generative-Aspects-in-Existing-Applications.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.5381/jot.2021.20.2.a7" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>
+        <li>
+          <span class="key mono">2020</span>
+          <div>
+            <div class="t">Continuous Transition from Model-Driven Prototype to Full-Size Real-World Enterprise Information Systems</div>
+            <div class="a">A. Gerasimov, J. Michael, <b>L. Netz</b>, B. Rumpe, S. Varga</div>
+            <div class="v mono">AMCIS 2020, pp. 1–10</div>
+            <div class="plinks mono"><a href="https://www.se-rwth.de/publications/Continuous-Transition-from-Model-Driven-Prototype-to-Full-Size-Real-World-Enterprise-Information-Systems.pdf" target="_blank" rel="noopener">pdf ↗</a></div>
+          </div>
+        </li>
+        <li>
+          <span class="key mono">2020</span>
+          <div>
+            <div class="t">Enterprise Information Systems in Academia and Practice: Lessons Learned from a MBSE Project</div>
+            <div class="a">K. Adam, J. Michael, <b>L. Netz</b>, B. Rumpe, S. Varga</div>
+            <div class="v mono">40 Years EMISA, LNI P-304, pp. 59–66</div>
+            <div class="plinks mono"><a href="https://www.se-rwth.de/publications/Enterprise-Information-Systems-in-Academia-and-Practice-Lessons-learned-from-a-MBSE-Project.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.18154/rwth-2020-06175" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>
+        <li>
+          <span class="key mono">2020</span>
+          <div>
+            <div class="t">Generated Enterprise Information Systems: MDSE for Maintainable Co-Development of Frontend and Backend</div>
+            <div class="a">A. Gerasimov, P. Heuser, H. Ketteniß, P. Letmathe, J. Michael, <b>L. Netz</b>, B. Rumpe, S. Varga</div>
+            <div class="v mono">Modellierung 2020 Companion, pp. 22–30</div>
+            <div class="plinks mono"><a href="https://www.se-rwth.de/publications/Generated-Enterprise-Information-Systems-MDSE-for-Maintainable-Co-Development-of-Frontend-and-Backend.pdf" target="_blank" rel="noopener">pdf ↗</a></div>
+          </div>
+        </li>
+        <li>
+          <span class="key mono">2018</span>
+          <div>
+            <div class="t">Model-Based Generation of Enterprise Information Systems</div>
+            <div class="a">K. Adam, <b>L. Netz</b>, S. Varga, J. Michael, B. Rumpe, P. Heuser, P. Letmathe</div>
+            <div class="v mono">EMISA’18, CEUR Vol. 2097, pp. 75–79</div>
+            <div class="plinks mono"><a href="https://www.se-rwth.de/publications/Model-Based-Generation-of-Enterprise-Information-Systems.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.18154/rwth-2019-00745" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>
+      </ol>
+
+      <nav class="pager mono" aria-label="More projects">
+        <a href="projects-esaca.html"><span>← previous</span><b>ESACA</b></a>
+        <a href="projects-golden-uml.html"><span>next →</span><b>Golden UML Model Set</b></a>
+      </nav>
+    </section>
+
+    <footer class="mono">
+      <span>© 2026 Lukas Netz.</span>
+      <nav class="foot-icons" aria-label="Sections"><a href="projects.html" title="Projects" aria-label="Projects"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 7L2.5 12l5 5"/><path d="M16.5 7l5 5-5 5"/><path d="M14 4.5l-4 15"/></svg></a><a href="research.html" title="Research" aria-label="Research"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 13.5H5l3.5 6.5L13.5 4h8"/><path d="M14.5 10l5 6"/><path d="M19.5 10l-5 6"/></svg></a><a href="photography.html" title="Photography" aria-label="Photography"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><g transform="translate(12 12) scale(.9) translate(-12 -12)" stroke-width="1.95"><path d="M12.697 3.5h-1.394c-.715 0-1.072 0-1.392.112a2 2 0 0 0-.545.292c-.271.204-.47.501-.866 1.096c-.203.305-.502.753-.621.879a2 2 0 0 1-1.106.591c-.17.03-.353.03-.72.03c-.98 0-1.47 0-1.87.113a3 3 0 0 0-2.07 2.07C2 9.083 2 9.573 2 10.553V14.5c0 2.828 0 4.243.879 5.121S5.172 20.5 8 20.5h8c2.829 0 4.243 0 5.122-.879C22 18.743 22 17.328 22 14.5v-3.946c0-.98 0-1.47-.113-1.871a3 3 0 0 0-2.07-2.07c-.4-.113-.89-.113-1.87-.113c-.366 0-.55 0-.72-.03a2 2 0 0 1-1.105-.591c-.12-.126-.419-.574-.622-.879c-.396-.595-.594-.892-.865-1.096a2 2 0 0 0-.545-.292c-.32-.112-.678-.112-1.393-.112"/><path d="M16 13a4 4 0 1 1-8 0a4 4 0 0 1 8 0"/><path d="M19.125 9.5H19m.25 0a.25.25 0 1 1-.5 0a.25.25 0 0 1 .5 0Z"/></g></svg></a><a class="egg" href="vier-gewinnt/" title="Play" aria-label="Play"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7.5h10a4.5 4.5 0 0 1 4.5 4.5v1.8a3.2 3.2 0 0 1-5.8 1.9l-1.2-1.7h-5l-1.2 1.7a3.2 3.2 0 0 1-5.8-1.9V12A4.5 4.5 0 0 1 7 7.5z"/><path d="M7.5 10v3.5M5.75 11.75h3.5"/><path d="M15.5 10.75h.01M17.5 12.75h.01" stroke-width="2.4"/></svg></a></nav>
+      <a href="#top">↑ top</a>
+    </footer>
+  </main>
+</div>
+<script src="assets/project.js"></script>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>geneial — Lukas Netz</title>
+  <meta name="description" content="geneial — eine template-basierte C++11-Bibliothek für genetische Algorithmen, und meine darauf aufbauende Masterarbeit.">
+  <meta property="og:title" content="geneial — Lukas Netz">
+  <meta property="og:description" content="geneial — eine template-basierte C++11-Bibliothek für genetische Algorithmen, und meine darauf aufbauende Masterarbeit.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="de_DE">
+  <link rel="alternate" hreflang="en" href="../projects-geneial.html">
+  <link rel="alternate" hreflang="de" href="projects-geneial.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <script>
+    // Theme preference in localStorage: "light" (default), "dark" or "auto" (follows the OS).
+    // Applied before first paint (no flash); re-applied on pageshow (back/forward cache)
+    // and whenever the OS switches while "auto" is chosen.
+    (function () {
+      var os = matchMedia("(prefers-color-scheme: dark)");
+      function apply() {
+        var p = null;
+        try { p = localStorage.getItem("theme"); } catch (_) {}
+        if (p !== "dark" && p !== "auto") p = "light";
+        var root = document.documentElement;
+        root.dataset.themePref = p;
+        root.dataset.theme = p === "auto" ? (os.matches ? "dark" : "light") : p;
+      }
+      window.applyTheme = apply;
+      apply();
+      // build-up animation (style.css, .anim) unless the OS asks for reduced motion;
+      // the index column only builds up on the first page of a visit (.returning afterwards)
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) document.documentElement.classList.add("anim");
+      try {
+        if (sessionStorage.getItem("seen")) document.documentElement.classList.add("returning");
+        sessionStorage.setItem("seen", "1");
+      } catch (_) {}
+      addEventListener("pageshow", apply);
+      os.addEventListener("change", apply);
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body id="top">
+<div class="backdrop" aria-hidden="true"></div>
+<div class="frame">
+
+  <!-- ============ index column (identical on every page) ============
+       Desktop: sticky left column.  ≤ 900px: sticky top bar; the menu
+       (pages, profiles, language, theme) opens as a full-screen sheet. -->
+  <aside class="index" id="index">
+    <div class="bar">
+      <div class="who">
+        <a class="name" href="index.html">Lukas Netz</a>
+        <span class="here mono" aria-hidden="true">geneial</span>
+        <div class="role">Dr. rer. nat.<br>IT-Spezialist<br>mgm technology partners</div>
+      </div>
+      <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">Menü</button>
+    </div>
+
+    <div class="menu" id="menu">
+      <nav aria-label="Seiten">
+        <ol class="mono">
+        <li><a href="index.html"><span>00</span><span>Über mich</span></a></li>
+        <li><a href="projects.html" class="active" aria-current="page"><span>01</span><span>Projekte</span></a></li>
+        <li><a href="research.html"><span>02</span><span>Forschung</span></a></li>
+        <li><a href="photography.html"><span>03</span><span>Fotografie</span></a></li>
+        </ol>
+      </nav>
+
+      <div class="contact mono">
+      <a href="https://www.linkedin.com/in/lukas-netz/" target="_blank" rel="noopener">LinkedIn ↗</a>
+      <a href="https://scholar.google.com/citations?user=5mVkoWsAAAAJ&amp;hl=en" target="_blank" rel="noopener">Google Scholar ↗</a>
+      <a href="https://www.researchgate.net/profile/Lukas-Netz" target="_blank" rel="noopener">ResearchGate ↗</a>
+      <a href="https://orcid.org/0000-0003-2013-2919" target="_blank" rel="noopener">ORCID ↗</a>
+      <a href="https://dblp.org/pid/170/5042.html" target="_blank" rel="noopener">dblp ↗</a>
+      <a href="https://github.com/LNetz" target="_blank" rel="noopener">GitHub ↗</a>
+      </div>
+
+      <div class="prefs mono">
+        <div class="lang" aria-label="Sprache"><a href="../projects-geneial.html" hreflang="en" lang="en">EN</a><a href="projects-geneial.html" hreflang="de" lang="de" aria-current="true">DE</a></div>
+        <button class="theme-toggle" type="button" id="theme">◐ <span>hell</span></button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ content ============ -->
+  <main>
+
+    <header class="page proj">
+      <a class="back mono" href="projects.html">← alle Projekte</a>
+      <div class="section-head">
+        <h1><span class="mono">01</span>geneial</h1>
+        <span class="mono faint">2012 — 2017</span>
+      </div>
+      <div class="proj-logo"><img src="../assets/logos/geneial.png" alt="" width="48" height="48"></div>
+      <p class="lead">Manche Probleme sind zu groß, um sie exakt zu lösen — also lässt man Lösungen <em>evolvieren</em>. geneial ist eine C++-Bibliothek für genetische Algorithmen, in der jeder Schritt der Evolution ein austauschbarer Baustein ist.</p>
+      <dl class="facts mono"><div><dt>Art</dt><dd>C++11-Bibliothek</dd></div><div><dt>Lizenz</dt><dd>MIT</dd></div><div><dt>Autoren</dt><dd>Wolters · Netz · Nellen</dd></div></dl>
+      <div class="links-top mono"><a href="https://github.com/geneial/geneial" target="_blank" rel="noopener">github ↗</a><a href="https://ths.rwth-aachen.de/research/projects/oasys/" target="_blank" rel="noopener">OASys ↗</a><a href="https://ths.rwth-aachen.de/wp-content/uploads/sites/4/netz_master.pdf" target="_blank" rel="noopener">Masterarbeit (pdf) ↗</a></div>
+    </header>
+    <figure class="media">
+      <div class="cutout"><img src="../assets/projects/geneial-ea-loop.webp" alt="Kreisdiagramm einer Generation eines evolutionären Algorithmus: Abbruchkriterien, Selektion mit Elitismus, Kopplung, Crossover, Auswahl, Mutation und Auffüllen aus der Chromosomen-Fabrik" width="1400" height="1266" loading="lazy"></div>
+      <figcaption class="mono">Eine Generation eines evolutionären Algorithmus — jeder Kasten ist ein austauschbarer Operator in geneial. Abbildung 13 aus meiner Masterarbeit (2017).</figcaption>
+    </figure>
+    <section>
+      <ul class="story">
+        <li>
+          <h2>Die Idee</h2>
+          <div class="txt"><p>Ein genetischer Algorithmus ahmt die Evolution nach. Eine Population von Lösungskandidaten — Chromosomen — wird durch eine Fitnessfunktion bewertet; die besten werden ausgewählt, gepaart, rekombiniert und zufällig mutiert, und die nächste Generation entsteht aus den Nachkommen, einer Elite der alten Generation und einigen neuen Zufallskandidaten. Über viele Generationen wandert die Population so zu guten Lösungen, auch bei Problemen, die sich in vernünftiger Zeit nicht exakt lösen lassen.</p></div>
+        </li>
+        <li>
+          <h2>Woher es kommt</h2>
+          <div class="txt"><p>geneial entstand am Lehr- und Forschungsgebiet Theorie der hybriden Systeme der RWTH im Kontext des DFG-Projekts OASys — Online-Algorithmen zur optimalen Steuerung hybrider Antriebe. Dort diente es als Framework für eine auf genetischen Algorithmen basierende Steuerungsstrategie für das Energiemanagement von Plug-in-Hybridfahrzeugen: Wann soll der Verbrennungsmotor laufen, wann der Elektromotor?</p></div>
+        </li>
+        <li>
+          <h2>Die Bibliothek</h2>
+          <div class="txt"><p>geneial ist eine template-basierte C++11-Bibliothek. Jede Stufe des Kreislaufs aus der Abbildung oben — Abbruchkriterien, Selektion, Kopplung, Crossover, Auswahl, Mutation, Ersetzung — ist ein Operator mit eigenem Builder; eigene Chromosomentypen, Operatoren und Fitnessfunktionen lassen sich einstecken. Die Fitnessbewertung kann mehrfädig laufen, Observer und Bookkeeper machen Läufe auswertbar. Dazu gehören ein CMake-Build, Boost-Unit-Tests, Benchmarks, Doxygen-Dokumentation und CI. Ein minimaler Lauf:</p><pre><code>auto evaluator = std::make_shared&lt;DemoChromosomeEvaluator&gt;();
+
+ContinousMultiValueChromosomeFactory&lt;int,double&gt;::Builder factoryBuilder(evaluator);
+factoryBuilder.getSettings().setNum(20);
+factoryBuilder.getSettings().setRandomMin(20);
+factoryBuilder.getSettings().setRandomMax(130);
+
+auto algorithm = SteadyStateAlgorithm&lt;double&gt;::Builder()
+    .setChromosomeFactory(factoryBuilder.create()).create();
+algorithm-&gt;getPopulationSettings().setMaxChromosomes(100);
+algorithm-&gt;solve();
+
+std::cout &lt;&lt; *algorithm-&gt;getHighestFitnessChromosome() &lt;&lt; std::endl;</code></pre></div>
+        </li>
+        <li>
+          <h2>Masterarbeit</h2>
+          <div class="txt"><p>In meiner Masterarbeit (2017) habe ich geneial für ein anderes Problem eingesetzt: die Platzierung der Turbinen eines Offshore-Windparks, bewertet nach Jahresenergieertrag, Kapitalwert und internem Zinsfuß an den Testfällen von Horns Rev. Die Frage war, ob Turbinenpositionen freie, kontinuierliche Koordinaten oder Punkte auf einem Raster sein sollten. Die Antwort war eindeutig: Solange das Raster fein genug ist, <b>konvergieren diskretisierte Genparameter schneller und erreichen bessere Ergebnisse</b> — in allen Testfällen.</p></div>
+        </li>
+      </ul>
+
+      <div class="group mono">Publikationen · 2</div>
+      <ol class="pubs">
+        <li>
+          <span class="key mono">2015</span>
+          <div>
+            <div class="t">A Genetic Algorithm based Control Strategy for the Energy Management Problem in PHEVs</div>
+            <div class="a">J. Nellen, B. Wolters, <b>L. Netz</b>, S. Geulen, E. Ábrahám</div>
+            <div class="v mono">GCAI 2015, EPiC Series in Computing</div>
+            <div class="plinks mono"><a href="https://easychair.org/publications/open/6CD4" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.29007/md3x" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>
+        <li>
+          <span class="key mono">2015</span>
+          <div>
+            <div class="t">Learning-based Control Strategies for Hybrid Electric Vehicles</div>
+            <div class="a">S. Geulen, M. Joševski, J. Nellen, J. Fuchs, <b>L. Netz</b>, B. Wolters, D. Abel, E. Ábrahám, W. Unger</div>
+            <div class="v mono">IEEE Conference on Control Applications (CCA) 2015</div>
+            <div class="plinks mono"><a href="https://doi.org/10.1109/CCA.2015.7320858" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>
+      </ol>
+
+      <nav class="pager mono" aria-label="Weitere Projekte">
+        <a href="projects-montigem.html"><span>← vorheriges</span><b>MontiGem</b></a>
+        <a href="projects-esaca.html"><span>nächstes →</span><b>ESACA</b></a>
+      </nav>
+    </section>
+
+    <footer class="mono">
+      <span>© 2026 Lukas Netz.</span>
+      <nav class="foot-icons" aria-label="Bereiche"><a href="projects.html" title="Projekte" aria-label="Projekte"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 7L2.5 12l5 5"/><path d="M16.5 7l5 5-5 5"/><path d="M14 4.5l-4 15"/></svg></a><a href="research.html" title="Forschung" aria-label="Forschung"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 13.5H5l3.5 6.5L13.5 4h8"/><path d="M14.5 10l5 6"/><path d="M19.5 10l-5 6"/></svg></a><a href="photography.html" title="Fotografie" aria-label="Fotografie"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><g transform="translate(12 12) scale(.9) translate(-12 -12)" stroke-width="1.95"><path d="M12.697 3.5h-1.394c-.715 0-1.072 0-1.392.112a2 2 0 0 0-.545.292c-.271.204-.47.501-.866 1.096c-.203.305-.502.753-.621.879a2 2 0 0 1-1.106.591c-.17.03-.353.03-.72.03c-.98 0-1.47 0-1.87.113a3 3 0 0 0-2.07 2.07C2 9.083 2 9.573 2 10.553V14.5c0 2.828 0 4.243.879 5.121S5.172 20.5 8 20.5h8c2.829 0 4.243 0 5.122-.879C22 18.743 22 17.328 22 14.5v-3.946c0-.98 0-1.47-.113-1.871a3 3 0 0 0-2.07-2.07c-.4-.113-.89-.113-1.87-.113c-.366 0-.55 0-.72-.03a2 2 0 0 1-1.105-.591c-.12-.126-.419-.574-.622-.879c-.396-.595-.594-.892-.865-1.096a2 2 0 0 0-.545-.292c-.32-.112-.678-.112-1.393-.112"/><path d="M16 13a4 4 0 1 1-8 0a4 4 0 0 1 8 0"/><path d="M19.125 9.5H19m.25 0a.25.25 0 1 1-.5 0a.25.25 0 0 1 .5 0Z"/></g></svg></a><a class="egg" href="../vier-gewinnt/" title="Spielen" aria-label="Spielen"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7.5h10a4.5 4.5 0 0 1 4.5 4.5v1.8a3.2 3.2 0 0 1-5.8 1.9l-1.2-1.7h-5l-1.2 1.7a3.2 3.2 0 0 1-5.8-1.9V12A4.5 4.5 0 0 1 7 7.5z"/><path d="M7.5 10v3.5M5.75 11.75h3.5"/><path d="M15.5 10.75h.01M17.5 12.75h.01" stroke-width="2.4"/></svg></a></nav>
+      <a href="#top">↑ nach oben</a>
+    </footer>
+  </main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

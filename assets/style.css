@@ -592,3 +592,136 @@ footer > a { justify-self: end; }
 .anim.returning .index .prefs,
 .anim.returning .menu-toggle,
 .anim.returning .backdrop { animation: none; }
+
+/* =====================================================================
+   Project pages (projects-<name>.html): a story told top to bottom —
+   one visual, short chapters, the papers behind it, next project.
+   ===================================================================== */
+.back { display: inline-block; color: var(--ink-3); margin-bottom: 28px; }
+.back:hover { color: var(--accent); }
+.proj-logo { margin-top: 28px; width: 48px; height: 48px; }
+.proj-logo img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.anim .page .proj-logo { animation: rise .6s var(--ease-out) .26s both; }
+.page.proj { padding-bottom: 72px; }
+.page .facts.wide { grid-template-columns: repeat(4, auto); }
+.page .links-top { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 4px 18px; }
+.page .links-top a { color: var(--ink-2); }
+.page .links-top a:hover { color: var(--accent); }
+
+/* the visual: video facade, diagram or figure */
+.media { margin: 0 0 72px; }
+section > .pubs { border-top: 1px solid var(--rule); margin-top: 12px; }
+section > .pubs li { grid-template-columns: 120px minmax(0, 1fr); gap: 24px; }
+.media figcaption { margin-top: 12px; color: var(--ink-3); max-width: 640px; }
+.media figcaption b { font-weight: 500; color: var(--ink-2); }
+.media .frame-16x9, .media iframe {
+  display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; background: var(--tile);
+}
+.yt { position: relative; display: block; overflow: hidden; color: #fff; }
+.yt img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .6s var(--ease-out, ease), opacity .3s; }
+.yt::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.55), rgba(0,0,0,0) 55%); }
+.yt .play {
+  position: absolute; z-index: 1; left: 24px; bottom: 20px;
+  display: flex; align-items: center; gap: 12px;
+}
+.yt .play i {
+  width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center;
+  background: rgba(255,255,255,.92); color: #141414; font-style: normal; font-size: 16px; padding-left: 3px;
+  transition: background .2s, color .2s, transform .2s;
+}
+.yt:hover { color: #fff; }
+.yt:hover img { transform: scale(1.02); }
+.yt:hover .play i { background: var(--accent); color: #fff; transform: scale(1.06); }
+
+/* hand-drawn diagrams (inline SVG): follow the theme through currentColor and the tokens */
+.dia { display: block; width: 100%; height: auto; overflow: visible; color: var(--ink-2); }
+.dia text { font-family: var(--mono); font-size: 11px; fill: var(--ink-2); }
+.dia text.t { font-family: var(--sans); font-size: 13px; font-weight: 500; fill: var(--ink); }
+.dia text.s { fill: var(--ink-3); font-size: 10px; }
+.dia text.a { fill: var(--accent); }
+.dia .box { fill: var(--bg); stroke: var(--ink-3); stroke-width: 1; }
+.dia .box.hl { stroke: var(--accent); stroke-width: 1.5; }
+.dia .box.dashbox { stroke-dasharray: 3 4; }
+.dia .zone { fill: var(--tile); stroke: none; }
+.dia .zone.line { fill: none; stroke: var(--ink-3); stroke-dasharray: 3 4; }
+.dia .ln { fill: none; stroke: var(--ink-3); stroke-width: 1; }
+.dia .ln.hl { stroke: var(--accent); stroke-width: 1.5; }
+.dia .ln.dash { stroke-dasharray: 3 4; }
+.dia .dot { fill: var(--accent); }
+.dia-scroll { overflow-x: auto; }
+.dia-scroll .dia { min-width: 640px; }
+
+/* figures from papers / theses: always on white paper, so they read in the dark theme too */
+.paper { background: #fff; padding: 20px; border: 1px solid var(--rule); }
+.paper img, .paper svg { display: block; width: 100%; height: auto; }
+
+/* figures cut out of their white background: sit on the page; in the dark theme the
+   lightness flips (hue kept), so black labels turn light */
+.cutout img { display: block; width: 100%; max-width: 760px; height: auto; margin: 0 auto; }
+:root[data-theme="dark"] .cutout img { filter: invert(1) hue-rotate(180deg) saturate(1.2); }
+
+/* UML models from the model set (inlined PlantUML SVG), recoloured with the theme tokens */
+.uml svg { display: block; width: 100%; height: auto; }
+.uml rect[fill="#F1F1F1"] { fill: var(--bg); }
+.uml [style*="stroke:#181818"], .uml [style*="stroke:#000000"] { stroke: var(--ink-3) !important; }
+.uml [fill="#181818"] { fill: var(--ink-3); }
+.uml text { fill: var(--ink); font-family: var(--sans); }
+.uml ellipse { fill: var(--tile); }
+.uml path[fill="#000000"] { fill: var(--accent); }
+
+/* chapters: mono label left, text right (like the research rows) */
+.story { list-style: none; border-top: 1px solid var(--rule); }
+.story > li {
+  display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 24px;
+  padding: 22px 0 24px; border-bottom: 1px solid var(--rule);
+}
+.story h2 { font-family: var(--mono); font-size: var(--fs-s); font-weight: 400; color: var(--ink-3); padding-top: 2px; }
+.story .txt { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; min-width: 0; max-width: 580px; color: var(--ink-2); }
+.story .txt b { font-weight: 500; color: var(--ink); }
+.story .txt a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--ink-3); text-underline-offset: 2px; }
+.story .txt a:hover { color: var(--accent); }
+.story ul.pts { list-style: none; display: grid; gap: 6px; }
+.story ul.pts li { padding-left: 18px; position: relative; }
+.story ul.pts li::before { content: "—"; position: absolute; left: 0; color: var(--ink-3); }
+.story .txt .media { margin: 8px 0 4px; }
+.story .txt code { font-family: var(--mono); font-size: var(--fs-s); color: var(--ink); }
+.story pre {
+  font-family: var(--mono); font-size: var(--fs-s); line-height: 1.55; color: var(--ink);
+  background: var(--tile); padding: 16px 18px; overflow-x: auto; white-space: pre;
+}
+
+/* a row of key numbers */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px 32px; margin: 4px 0; }
+.stats div { border-top: 1px solid var(--ink); padding-top: 8px; }
+.stats b { display: block; font-size: 26px; font-weight: 300; letter-spacing: -0.02em; color: var(--ink); line-height: 1.2; }
+.stats span { font-family: var(--mono); font-size: var(--fs-s); color: var(--ink-3); }
+
+/* previous / next project */
+.pager { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; border-top: 1px solid var(--ink); padding-top: 14px; margin-top: 96px; }
+.pager a { display: grid; gap: 2px; }
+.pager a:last-child { text-align: right; }
+.pager span { color: var(--ink-3); }
+.pager b { font-weight: 500; font-family: var(--sans); font-size: var(--fs); }
+
+/* text in, model out: description next to its reference model */
+.golden .pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 32px; align-items: start; }
+.golden blockquote { border-left: 1px solid var(--accent); padding: 2px 0 2px 18px; }
+.golden blockquote p { margin-top: 10px; color: var(--ink-2); font-size: 14px; line-height: 1.65; }
+.golden figcaption a { color: var(--ink-2); margin-left: 6px; }
+.golden figcaption a:hover { color: var(--accent); }
+
+/* the project list links to these pages */
+.spec h3 a.int::after { content: "→"; }
+.spec .links a.more { color: var(--accent); }
+.spec .links a.more:hover { color: var(--ink); }
+
+@media (max-width: 1100px) { .story > li { grid-template-columns: 96px minmax(0, 1fr); } }
+@media (max-width: 600px) {
+  .story > li { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .page .facts.wide { grid-template-columns: 1fr 1fr; }
+  .golden .pair { grid-template-columns: 1fr; gap: 20px; }
+  section > .pubs li { grid-template-columns: 1fr; gap: 2px; }
+  .yt .play { left: 14px; bottom: 12px; }
+  .yt .play i { width: 44px; height: 44px; }
+  .paper { padding: 10px; }
+}

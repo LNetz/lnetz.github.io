@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agile Data Development — Lukas Netz</title>
+  <meta name="description" content="Agile Data Development — generierte Digital-Twin-Cockpits für das Parametermanagement in der Windkraftanlagenentwicklung.">
+  <meta property="og:title" content="Agile Data Development — Lukas Netz">
+  <meta property="og:description" content="Agile Data Development — generierte Digital-Twin-Cockpits für das Parametermanagement in der Windkraftanlagenentwicklung.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="de_DE">
+  <link rel="alternate" hreflang="en" href="../projects-add.html">
+  <link rel="alternate" hreflang="de" href="projects-add.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <script>
+    // Theme preference in localStorage: "light" (default), "dark" or "auto" (follows the OS).
+    // Applied before first paint (no flash); re-applied on pageshow (back/forward cache)
+    // and whenever the OS switches while "auto" is chosen.
+    (function () {
+      var os = matchMedia("(prefers-color-scheme: dark)");
+      function apply() {
+        var p = null;
+        try { p = localStorage.getItem("theme"); } catch (_) {}
+        if (p !== "dark" && p !== "auto") p = "light";
+        var root = document.documentElement;
+        root.dataset.themePref = p;
+        root.dataset.theme = p === "auto" ? (os.matches ? "dark" : "light") : p;
+      }
+      window.applyTheme = apply;
+      apply();
+      // build-up animation (style.css, .anim) unless the OS asks for reduced motion;
+      // the index column only builds up on the first page of a visit (.returning afterwards)
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) document.documentElement.classList.add("anim");
+      try {
+        if (sessionStorage.getItem("seen")) document.documentElement.classList.add("returning");
+        sessionStorage.setItem("seen", "1");
+      } catch (_) {}
+      addEventListener("pageshow", apply);
+      os.addEventListener("change", apply);
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body id="top">
+<div class="backdrop" aria-hidden="true"></div>
+<div class="frame">
+
+  <!-- ============ index column (identical on every page) ============
+       Desktop: sticky left column.  ≤ 900px: sticky top bar; the menu
+       (pages, profiles, language, theme) opens as a full-screen sheet. -->
+  <aside class="index" id="index">
+    <div class="bar">
+      <div class="who">
+        <a class="name" href="index.html">Lukas Netz</a>
+        <span class="here mono" aria-hidden="true">Agile Data Development</span>
+        <div class="role">Dr. rer. nat.<br>IT-Spezialist<br>mgm technology partners</div>
+      </div>
+      <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">Menü</button>
+    </div>
+
+    <div class="menu" id="menu">
+      <nav aria-label="Seiten">
+        <ol class="mono">
+        <li><a href="index.html"><span>00</span><span>Über mich</span></a></li>
+        <li><a href="projects.html" class="active" aria-current="page"><span>01</span><span>Projekte</span></a></li>
+        <li><a href="research.html"><span>02</span><span>Forschung</span></a></li>
+        <li><a href="photography.html"><span>03</span><span>Fotografie</span></a></li>
+        </ol>
+      </nav>
+
+      <div class="contact mono">
+      <a href="https://www.linkedin.com/in/lukas-netz/" target="_blank" rel="noopener">LinkedIn ↗</a>
+      <a href="https://scholar.google.com/citations?user=5mVkoWsAAAAJ&amp;hl=en" target="_blank" rel="noopener">Google Scholar ↗</a>
+      <a href="https://www.researchgate.net/profile/Lukas-Netz" target="_blank" rel="noopener">ResearchGate ↗</a>
+      <a href="https://orcid.org/0000-0003-2013-2919" target="_blank" rel="noopener">ORCID ↗</a>
+      <a href="https://dblp.org/pid/170/5042.html" target="_blank" rel="noopener">dblp ↗</a>
+      <a href="https://github.com/LNetz" target="_blank" rel="noopener">GitHub ↗</a>
+      </div>
+
+      <div class="prefs mono">
+        <div class="lang" aria-label="Sprache"><a href="../projects-add.html" hreflang="en" lang="en">EN</a><a href="projects-add.html" hreflang="de" lang="de" aria-current="true">DE</a></div>
+        <button class="theme-toggle" type="button" id="theme">◐ <span>hell</span></button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ content ============ -->
+  <main>
+
+    <header class="page proj">
+      <a class="back mono" href="projects.html">← alle Projekte</a>
+      <div class="section-head">
+        <h1><span class="mono">01</span>Agile Data Development</h1>
+        <span class="mono faint">2018 — 2022</span>
+      </div>
+      <p class="lead">Eine Windkraftanlage zu entwickeln heißt: Tausende Parameter, CAD-Dateien und Simulationsergebnisse wandern zwischen Spezialisten hin und her — oft per E-Mail. Wir haben dafür eine <em>zentrale Datenquelle</em> gebaut, generiert aus einem Modell, das der Kunde selbst ändern kann.</p>
+      <dl class="facts mono wide"><div><dt>Rolle</dt><dd>Leitende Entwicklung</dd></div><div><dt>Partner</dt><dd>WZL · MSE · Bewind</dd></div><div><dt>Förderung</dt><dd>Exzellenzcluster IoP</dd></div><div><dt>Gebaut mit</dt><dd>MontiGem · CD2GUI</dd></div></dl>
+    </header>
+    <figure class="media"><div class="paper"><img src="../assets/projects/add-cd2gui-page.jpg" alt="Generierte Detailseite einer Pitch-Konfiguration im Windkraft-Cockpit mit verknüpften und verfügbaren Sicherheitssystemen" width="1600" height="875" loading="lazy"></div>
+      <figcaption class="mono">Eine Seite, die niemand gezeichnet hat: die Detailansicht einer Pitch-Konfiguration, von CD2GUI direkt aus dem Klassendiagramm generiert (2021).</figcaption>
+    </figure>
+    <section>
+      <ul class="story">
+        <li>
+          <h2>Das Problem</h2>
+          <div class="txt"><p>In der Entwicklung einer Windkraftanlage arbeiten viele Disziplinen an derselben Maschine: Mechanik, Elektrik, Regelung, Simulation. Ihre Parameter hängen voneinander ab, und ein an einer Stelle geänderter Wert muss alle anderen erreichen. In der Praxis wanderte er als E-Mail-Anhang und Datei auf einzelnen Laptops — veraltete Werte schlichen sich ein, alte Simulationsergebnisse waren schwer wiederzufinden. Agile und plangetriebene Entwicklung mussten auf einer verlässlichen Datenbasis zusammenkommen.</p></div>
+        </li>
+        <li>
+          <h2>Das Cockpit</h2>
+          <div class="txt"><p>Das Ergebnis ist ein Web-Cockpit — ein digitaler Zwilling der Entwicklung, „as designed“ —, in dem Ingenieur:innen Parameter, CAD-Dateien und Simulationsergebnisse nachschlagen, bearbeiten, versionieren und freigeben. Änderungshistorie und Archiv, ein Freigabe-Lebenszyklus (Entwurf → Review → freigegeben → veraltet) mit der Prüfung, dass freigegebene Objekte nur auf freigegebene verweisen, und eine Diff-Ansicht machen jeden Wert nachvollziehbar. Eine Python-Bibliothek bindet die Engineering-Werkzeuge selbst an — Rhino, Ansys, SpaceClaim —, sodass sie die Daten über die API statt über lokale Dateien lesen und schreiben.</p></div>
+        </li>
+        <li>
+          <h2>Aus einem Klassendiagramm generiert</h2>
+          <div class="txt"><p>ADD war das erste echte Projekt für <b>CD2GUI</b>, eine Erweiterung von <a href="projects-montigem.html">MontiGem</a>, die die Oberfläche aus dem Klassendiagramm ableitet: für jede Klasse eine Navigations-, eine Übersichts- und eine Bearbeitungsseite. Die Ingenieur:innen hatten nach wenigen Tagen einen klickbaren Prototyp, und der Kunde konnte das Datenschema erweitern — es wuchs auf über 120 Klassen und 200 Beziehungen — und einfach neu generieren. Wo generische Seiten nicht reichten, kamen handgeschriebene GUI-Modelle und Diagramme hinzu, etwa die Ansichten von Simulationsergebnissen unten.</p><div class="stats"><div><b>120+</b><span>Klassen</span></div><div><b>200+</b><span>Beziehungen</span></div><div><b>3</b><span>generierte Seiten pro Klasse</span></div></div><figure class="media"><div class="paper"><img src="../assets/projects/add-simulation-charts.jpg" alt="Vier Diagramme simulierter Lasten Fx bis Mz: Polardiagramm, Tortendiagramm, Heatmap und 3D-Fläche" width="1118" height="751" loading="lazy"></div>
+            <figcaption class="mono">Simulationsergebnisse der Anlagenlasten, im Cockpit visualisiert.</figcaption></figure></div>
+        </li>
+      </ul>
+
+      <div class="group mono">Publikationen · 3</div>
+      <ol class="pubs">
+        <li>
+          <span class="key mono">2022</span>
+          <div>
+            <div class="t">Generating Digital Twin Cockpits for Parameter Management in the Engineering of Wind Turbines</div>
+            <div class="a">J. Michael, I. Nachmann, <b>L. Netz</b>, B. Rumpe, S. Stüber</div>
+            <div class="v mono">Modellierung 2022, pp. 33–48</div>
+            <div class="plinks mono"><a href="https://www.se-rwth.de/publications/Generating-Digital-Twin-Cockpits-for-Parameter-Management-in-the-Engineering-of-Wind-Turbines.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.18420/modellierung2022-012" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>
+        <li>
+          <span class="key mono">2024</span>
+          <div>
+            <div class="t">Lessons Learned from Applying Model-Driven Engineering in 5 Domains: The Success Story of the MontiGem Generator Framework</div>
+            <div class="a">C. Buschhaus, A. Gerasimov, J. C. Kirchhof, J. Michael, <b>L. Netz</b>, B. Rumpe, S. Stüber</div>
+            <div class="v mono">Science of Computer Programming, Vol. 232</div>
+            <div class="plinks mono"><a href="https://www.se-rwth.de/publications/Lessons-learned-from-applying-model-driven-engineering-in-5-domains-The-success-story-of-the-MontiGem-generator-framework.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.1016/j.scico.2023.103033" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>
+        <li>
+          <span class="key mono">2022</span>
+          <div>
+            <div class="t">Generating Customized Low-Code Development Platforms for Digital Twins</div>
+            <div class="a">M. Dalibor, M. Heithoff, J. Michael, <b>L. Netz</b>, J. Pfeiffer, B. Rumpe, S. Varga, A. Wortmann</div>
+            <div class="v mono">Journal of Computer Languages, Vol. 70</div>
+            <div class="plinks mono"><a href="https://www.se-rwth.de/publications/Generating-Customized-Low-Code-Development-Platforms-for-Digital-Twins.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.1016/j.cola.2022.101117" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>
+      </ol>
+
+      <nav class="pager mono" aria-label="Weitere Projekte">
+        <a href="projects-ford.html"><span>← vorheriges</span><b>Ford Pro Werkzeugverfolgung</b></a>
+        <a href="projects-montigem.html"><span>nächstes →</span><b>MontiGem</b></a>
+      </nav>
+    </section>
+
+    <footer class="mono">
+      <span>© 2026 Lukas Netz.</span>
+      <nav class="foot-icons" aria-label="Bereiche"><a href="projects.html" title="Projekte" aria-label="Projekte"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 7L2.5 12l5 5"/><path d="M16.5 7l5 5-5 5"/><path d="M14 4.5l-4 15"/></svg></a><a href="research.html" title="Forschung" aria-label="Forschung"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 13.5H5l3.5 6.5L13.5 4h8"/><path d="M14.5 10l5 6"/><path d="M19.5 10l-5 6"/></svg></a><a href="photography.html" title="Fotografie" aria-label="Fotografie"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><g transform="translate(12 12) scale(.9) translate(-12 -12)" stroke-width="1.95"><path d="M12.697 3.5h-1.394c-.715 0-1.072 0-1.392.112a2 2 0 0 0-.545.292c-.271.204-.47.501-.866 1.096c-.203.305-.502.753-.621.879a2 2 0 0 1-1.106.591c-.17.03-.353.03-.72.03c-.98 0-1.47 0-1.87.113a3 3 0 0 0-2.07 2.07C2 9.083 2 9.573 2 10.553V14.5c0 2.828 0 4.243.879 5.121S5.172 20.5 8 20.5h8c2.829 0 4.243 0 5.122-.879C22 18.743 22 17.328 22 14.5v-3.946c0-.98 0-1.47-.113-1.871a3 3 0 0 0-2.07-2.07c-.4-.113-.89-.113-1.87-.113c-.366 0-.55 0-.72-.03a2 2 0 0 1-1.105-.591c-.12-.126-.419-.574-.622-.879c-.396-.595-.594-.892-.865-1.096a2 2 0 0 0-.545-.292c-.32-.112-.678-.112-1.393-.112"/><path d="M16 13a4 4 0 1 1-8 0a4 4 0 0 1 8 0"/><path d="M19.125 9.5H19m.25 0a.25.25 0 1 1-.5 0a.25.25 0 0 1 .5 0Z"/></g></svg></a><a class="egg" href="../vier-gewinnt/" title="Spielen" aria-label="Spielen"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7.5h10a4.5 4.5 0 0 1 4.5 4.5v1.8a3.2 3.2 0 0 1-5.8 1.9l-1.2-1.7h-5l-1.2 1.7a3.2 3.2 0 0 1-5.8-1.9V12A4.5 4.5 0 0 1 7 7.5z"/><path d="M7.5 10v3.5M5.75 11.75h3.5"/><path d="M15.5 10.75h.01M17.5 12.75h.01" stroke-width="2.4"/></svg></a></nav>
+      <a href="#top">↑ nach oben</a>
+    </footer>
+  </main>
+</div>
+<script src="../assets/site.js"></script>
+</body>
+</html>

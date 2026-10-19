@@ -10,6 +10,8 @@ Publications live in assets/pubs.js; shared behaviour in assets/site.js.
 """
 import os
 
+import project_pages
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LANGS = {"en": "", "de": "de"}          # language -> output sub-folder
 NL = "\n"
@@ -46,7 +48,7 @@ def shell(lang, file, title, desc, body, scripts=""):
     en_url, de_url = (file, f"de/{file}") if lang == "en" else (f"../{file}", file)
 
     nav = NL.join(
-        f'        <li><a href="{f}"{" class=\"active\" aria-current=\"page\"" if f == file else ""}>'
+        f'        <li><a href="{f}"{" class=\"active\" aria-current=\"page\"" if file.split("-")[0].removesuffix(".html") == f.removesuffix(".html") else ""}>'
         f'<span>{n}</span><span>{L(t)}</span></a></li>'
         for f, n, t in PAGES)
     social = NL.join(f'      <a href="{u}" target="_blank" rel="noopener">{name} ↗</a>' for name, u in SOCIAL)
@@ -200,10 +202,15 @@ def link(label, url):
     return f'<a href="{url}" target="_blank" rel="noopener">{label} ↗</a>'
 
 
-def spec(A, when, name, what, tags, meta, links=(), href=None, logo=None, mark=None):
+def spec(A, when, name, what, tags, meta, links=(), href=None, logo=None, mark=None, more=None):
+    # more = the project's own page (projects-<slug>.html): the name links there, plus a "more" link
     h = f'<a href="{href}" target="_blank" rel="noopener">{name}</a>' if href else name
+    if more:
+        h = f'<a class="int" href="{more[0]}">{name}</a>'
     t = "".join(f"<span>{x}</span>" for x in tags)
     l = "".join(link(lbl, u) for lbl, u in links)
+    if more:
+        l = f'<a class="more" href="{more[0]}">{more[1]} →</a>' + l
     m = "".join(f"<div>{x}</div>" for x in meta)
     extra = ""
     if t: extra += f'\n            <div class="tags mono">{t}</div>'
@@ -303,7 +310,8 @@ def projects(lang):
     A = "../" if lang == "de" else ""
     S = lambda when, name, what, tags, meta, **kw: spec(
         A, L(when), L(name), L(what), [L(t) for t in tags], [L(m) for m in meta],
-        links=[(L(a), b) for a, b in kw.pop("links", ())], **kw)
+        links=[(L(a), b) for a, b in kw.pop("links", ())],
+        more=(f"projects-{kw.pop('page')}.html", L(T("more about the project", "mehr zum Projekt"))) if "page" in kw else None, **kw)
 
     PROD = T("In production", "Produktiv")
     IND = T("Industry partner", "Industriepartner")
@@ -314,7 +322,7 @@ def projects(lang):
         T("European Sovereign Agentic Coding Appliance — a standardised, on-premises platform that runs AI coding agents inside an organisation’s own data centre: sandboxed agents, versionable configuration, a shared hub, benchmarks on your own repositories and a guided ticket-to-reviewed-code workbench. Air-gapped capable, no external API calls.",
           "European Sovereign Agentic Coding Appliance — eine standardisierte On-Premises-Plattform, die KI-Coding-Agenten im eigenen Rechenzentrum betreibt: Agenten in der Sandbox, versionierbare Konfiguration, ein gemeinsamer Hub, Benchmarks auf den eigenen Repositories und eine geführte Workbench vom Ticket bis zum reviewten Code. Air-gapped-fähig, keine externen API-Aufrufe."),
         [T("Agentic coding", "Agentisches Coding"), "On-prem", T("Sovereign AI", "Souveräne KI")],
-        [T("Platform", "Plattform"), "mgm × Fsas"], links=[("esaca.eu", "https://esaca.eu")], logo="esaca.png")
+        [T("Platform", "Plattform"), "mgm × Fsas"], links=[("esaca.eu", "https://esaca.eu")], logo="esaca.png", page="esaca")
 
     research = [
         S("2018 — 2026", "MaCoCo",
@@ -324,44 +332,44 @@ def projects(lang):
           links=[(T("project", "Projekt"), "https://www.se-rwth.de/projects/MaCoCo/"),
                  (T("controlling chair", "Lehrstuhl Controlling"), "https://www.controlling.rwth-aachen.de/cms/controlling/forschung/forschungsprojekte/laufende-projekte/~mgaz/macoco-lehrstuhlcontrolling/"),
                  (T("android app", "Android-App"), "https://play.google.com/store/apps/details?id=macoco.stundenzettel.timetracker&amp;hl=de")],
-          logo="macoco.png"),
+          logo="macoco.png", page="macoco"),
         S("2025", "Golden UML Model Set",
           T("A community-curated dataset of UML models, each paired with a natural-language description of the modelled domain. Crawled model collections are full of invalid and placeholder models; this one is reviewed, searchable on a public web platform, and grows through a structured contribution and review process — a benchmark for UML research, education and LLM evaluation.",
             "Ein von der Community kuratierter Datensatz von UML-Modellen, jeweils mit einer natürlichsprachlichen Beschreibung der modellierten Domäne. Gecrawlte Modellsammlungen sind voller ungültiger Platzhalter-Modelle; dieser Datensatz ist geprüft, über eine öffentliche Webplattform durchsuchbar und wächst über einen strukturierten Beitrags- und Review-Prozess — ein Benchmark für UML-Forschung, Lehre und die Evaluation von LLMs."),
           [T("Dataset", "Datensatz"), "UML", "Benchmark", T("Web platform", "Webplattform")], [T("Dataset", "Datensatz"), T("Multi-university", "Mehrere Unis")],
           links=[(T("explore the dataset", "Datensatz erkunden"), "https://golden-uml-modelset.vercel.app/search"),
                  ("paper", "https://doi.org/10.1109/MODELS-C68889.2025.00012")],
-          logo="uml.png"),
+          logo="uml.png", page="golden-uml"),
         S("2025", "SE-Chatty",
           T("A teaching assistant for lecturers. Fed with scripts, books, slides and videos, it answers with lecture-specific depth, helps students train for exams with generated questionnaires, and shows lecturers which parts of the material are understood — and which aren’t.",
             "Ein Lehrassistent für Dozierende. Mit Skripten, Büchern, Folien und Videos gefüttert, antwortet er mit vorlesungsspezifischer Tiefe, hilft Studierenden mit generierten Fragebögen bei der Prüfungsvorbereitung und zeigt Dozierenden, welche Teile des Stoffs verstanden werden — und welche nicht."),
-          ["LLM", "RAG", T("Education", "Lehre")], [T("Tool", "Werkzeug"), "RWTH SE"], logo="se-chatty.png"),
+          ["LLM", "RAG", T("Education", "Lehre")], [T("Tool", "Werkzeug"), "RWTH SE"], logo="se-chatty.png", page="se-chatty"),
         S("2024 — 2026", "ePHA",
           T("Electronic dissertation and habilitation repository. A model-driven application generated with MontiGem that supports the publishing process for dissertations and habilitations at RWTH; <b>in production</b>.",
             "Elektronische Promotions- und Habilitationsauslage. Eine modellgetriebene, mit MontiGem generierte Anwendung, die den Veröffentlichungsprozess von Dissertationen und Habilitationen an der RWTH unterstützt; <b>produktiv im Einsatz</b>."),
           ["MontiGem", INFOSYS], [LEAD, PROD],
-          links=[("epha.rwth-aachen.de", "https://epha.rwth-aachen.de/")], logo="epha.png"),
+          links=[("epha.rwth-aachen.de", "https://epha.rwth-aachen.de/")], logo="epha.png", page="epha"),
         S("2020 — 2022", T("Ford Pro tool tracking", "Ford Pro Werkzeugverfolgung"),
           T("Pilot with the Ford Research &amp; Innovation Center Aachen: an integrated information system that tracks tools and machines across vans and job sites via Bluetooth, GPS and AI — reminders for tools left behind, theft alerts, a live map and search by vehicle or tool. The web application was generated from UML models with MontiGem and field-tested by three trade companies around Cologne.",
             "Pilotprojekt mit dem Ford Research &amp; Innovation Center Aachen: ein integriertes Informationssystem, das Werkzeuge und Maschinen über Transporter und Baustellen hinweg per Bluetooth, GPS und KI verfolgt — Erinnerung an vergessenes Werkzeug, Diebstahlwarnungen, Live-Karte und Suche nach Fahrzeug oder Werkzeug. Die Webanwendung wurde mit MontiGem aus UML-Modellen generiert und von drei Handwerksbetrieben im Raum Köln im Feld getestet."),
           ["MontiGem", "IoT", T("Industry", "Industrie")], [T("Technical lead", "Technische Leitung"), IND],
           links=[(T("Ford press release", "Ford-Pressemitteilung"), "https://media.ford.com/content/fordmedia/feu/en/news/2022/08/31/ford-pro-tool-tracking-tech-could-save-firms-1000s.html"),
                  (T("RWTH news", "RWTH-Meldung"), "https://www.se-rwth.de/projects/22.09.MontiGem.Ford.Press.Release/")],
-          mark="FORD"),
+          mark="FORD", page="ford"),
         S("2018 — 2022", "Agile Data Development",
           T("Model-driven tooling for a wind-turbine manufacturer (with WZL, MSE and Bewind): integrating agile and plan-driven development with data-based decision support, including generated digital-twin cockpits for parameter management in turbine engineering.",
             "Modellgetriebene Werkzeuge für einen Windkraftanlagenhersteller (mit WZL, MSE und Bewind): Verzahnung agiler und plangetriebener Entwicklung mit datenbasierter Entscheidungsunterstützung, inklusive generierter Digital-Twin-Cockpits für das Parametermanagement in der Anlagenentwicklung."),
-          ["MontiGem", T("Digital twin", "Digitaler Zwilling"), T("Industry", "Industrie")], [LEAD, IND], mark="ADD"),
+          ["MontiGem", T("Digital twin", "Digitaler Zwilling"), T("Industry", "Industrie")], [LEAD, IND], mark="ADD", page="add"),
         S("2018 — 2024", "MontiGem",
           T("Generator framework for enterprise information systems, built on the MontiCore language workbench. Class diagrams and GUI models in, a complete web application out — applied across five domains, from university controlling to digital-twin cockpits.",
             "Generator-Framework für betriebliche Informationssysteme auf Basis der MontiCore Language Workbench. Klassendiagramme und GUI-Modelle rein, eine vollständige Webanwendung raus — eingesetzt in fünf Domänen, vom Lehrstuhl-Controlling bis zu Digital-Twin-Cockpits."),
-          ["MontiCore", "Java", "TypeScript", T("Code generation", "Codegenerierung")], ["Framework", "RWTH SE"], logo="montigem.png"),
+          ["MontiCore", "Java", "TypeScript", T("Code generation", "Codegenerierung")], ["Framework", "RWTH SE"], logo="montigem.png", page="montigem"),
         S("2012 — 2016", "geneial",
           T("A template-based C++11 genetic-algorithm library, developed within the DFG project OASys (online algorithms for optimal control of hybrid propulsion systems). CMake build, Boost unit tests, benchmarks and Doxygen docs.",
             "Eine template-basierte C++11-Bibliothek für genetische Algorithmen, entstanden im DFG-Projekt OASys (Online-Algorithmen zur optimalen Steuerung hybrider Antriebe). CMake-Build, Boost-Unit-Tests, Benchmarks und Doxygen-Dokumentation."),
           ["C++11", T("Evolutionary algorithms", "Evolutionäre Algorithmen"), "MIT"], [T("Library", "Bibliothek"), T("Open source", "Open Source")],
           links=[("github", "https://github.com/geneial/geneial"), ("OASys", "https://ths.rwth-aachen.de/research/projects/oasys/")],
-          logo="geneial.png"),
+          logo="geneial.png", page="geneial"),
     ]
     gpts = [
         S("GPT", "SysML v2 Model Creator",
@@ -739,6 +747,13 @@ def main():
         }
         for file, (title, body, scripts) in pages.items():
             html = shell(lang, file, title, DESC[file], body, scripts)
+            with open(os.path.join(out, file), "w", encoding="utf8", newline="\n") as fh:
+                fh.write(html)
+            print(f"wrote {os.path.join(sub, file) if sub else file}  ({len(html)} bytes)")
+        # one deeper page per project (project_pages.py, content in project_content.py)
+        for i in range(len(project_pages.PROJECTS)):
+            file, title, desc, body, scripts = project_pages.page(lang, i)
+            html = shell(lang, file, title, desc, body, scripts)
             with open(os.path.join(out, file), "w", encoding="utf8", newline="\n") as fh:
                 fh.write(html)
             print(f"wrote {os.path.join(sub, file) if sub else file}  ({len(html)} bytes)")

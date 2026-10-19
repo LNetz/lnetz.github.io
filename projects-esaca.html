@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ESACA — Lukas Netz</title>
+  <meta name="description" content="ESACA — a sovereign, on-premises platform for agentic coding in regulated organisations.">
+  <meta property="og:title" content="ESACA — Lukas Netz">
+  <meta property="og:description" content="ESACA — a sovereign, on-premises platform for agentic coding in regulated organisations.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_US">
+  <link rel="alternate" hreflang="en" href="projects-esaca.html">
+  <link rel="alternate" hreflang="de" href="de/projects-esaca.html">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <script>
+    // Theme preference in localStorage: "light" (default), "dark" or "auto" (follows the OS).
+    // Applied before first paint (no flash); re-applied on pageshow (back/forward cache)
+    // and whenever the OS switches while "auto" is chosen.
+    (function () {
+      var os = matchMedia("(prefers-color-scheme: dark)");
+      function apply() {
+        var p = null;
+        try { p = localStorage.getItem("theme"); } catch (_) {}
+        if (p !== "dark" && p !== "auto") p = "light";
+        var root = document.documentElement;
+        root.dataset.themePref = p;
+        root.dataset.theme = p === "auto" ? (os.matches ? "dark" : "light") : p;
+      }
+      window.applyTheme = apply;
+      apply();
+      // build-up animation (style.css, .anim) unless the OS asks for reduced motion;
+      // the index column only builds up on the first page of a visit (.returning afterwards)
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) document.documentElement.classList.add("anim");
+      try {
+        if (sessionStorage.getItem("seen")) document.documentElement.classList.add("returning");
+        sessionStorage.setItem("seen", "1");
+      } catch (_) {}
+      addEventListener("pageshow", apply);
+      os.addEventListener("change", apply);
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body id="top">
+<div class="backdrop" aria-hidden="true"></div>
+<div class="frame">
+
+  <!-- ============ index column (identical on every page) ============
+       Desktop: sticky left column.  ≤ 900px: sticky top bar; the menu
+       (pages, profiles, language, theme) opens as a full-screen sheet. -->
+  <aside class="index" id="index">
+    <div class="bar">
+      <div class="who">
+        <a class="name" href="index.html">Lukas Netz</a>
+        <span class="here mono" aria-hidden="true">ESACA</span>
+        <div class="role">Dr. rer. nat.<br>IT Specialist<br>mgm technology partners</div>
+      </div>
+      <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">menu</button>
+    </div>
+
+    <div class="menu" id="menu">
+      <nav aria-label="Pages">
+        <ol class="mono">
+        <li><a href="index.html"><span>00</span><span>About</span></a></li>
+        <li><a href="projects.html" class="active" aria-current="page"><span>01</span><span>Projects</span></a></li>
+        <li><a href="research.html"><span>02</span><span>Research</span></a></li>
+        <li><a href="photography.html"><span>03</span><span>Photography</span></a></li>
+        </ol>
+      </nav>
+
+      <div class="contact mono">
+      <a href="https://www.linkedin.com/in/lukas-netz/" target="_blank" rel="noopener">LinkedIn ↗</a>
+      <a href="https://scholar.google.com/citations?user=5mVkoWsAAAAJ&amp;hl=en" target="_blank" rel="noopener">Google Scholar ↗</a>
+      <a href="https://www.researchgate.net/profile/Lukas-Netz" target="_blank" rel="noopener">ResearchGate ↗</a>
+      <a href="https://orcid.org/0000-0003-2013-2919" target="_blank" rel="noopener">ORCID ↗</a>
+      <a href="https://dblp.org/pid/170/5042.html" target="_blank" rel="noopener">dblp ↗</a>
+      <a href="https://github.com/LNetz" target="_blank" rel="noopener">GitHub ↗</a>
+      </div>
+
+      <div class="prefs mono">
+        <div class="lang" aria-label="Language"><a href="projects-esaca.html" hreflang="en" lang="en" aria-current="true">EN</a><a href="de/projects-esaca.html" hreflang="de" lang="de">DE</a></div>
+        <button class="theme-toggle" type="button" id="theme">◐ <span>light</span></button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ content ============ -->
+  <main>
+
+    <header class="page proj">
+      <a class="back mono" href="projects.html">← all projects</a>
+      <div class="section-head">
+        <h1><span class="mono">01</span>ESACA</h1>
+        <span class="mono faint">since 2025</span>
+      </div>
+      <div class="proj-logo"><img src="assets/logos/esaca.png" alt="" width="48" height="48"></div>
+      <p class="lead">AI coding agents are fast — and they read code, run commands and send data wherever they like. ESACA lets <em>regulated organisations</em> use them anyway: inside their own data centre, under their own rules.</p>
+      <dl class="facts mono"><div><dt>Organisation</dt><dd>mgm × Fsas Technologies</dd></div><div><dt>Runs</dt><dd>on-prem · air-gapped</dd></div><div><dt>Models</dt><dd>model-independent</dd></div></dl>
+      <div class="links-top mono"><a href="https://esaca.eu" target="_blank" rel="noopener">esaca.eu ↗</a></div>
+    </header>
+    <figure class="media"><div class="dia-scroll"><svg class="dia" viewBox="0 0 760 330" role="img" aria-label="ESACA architecture: everything runs inside the organisation’s own perimeter">
+  <defs><marker id="ea" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9" fill="none" stroke="currentColor" stroke-width="1.4"/></marker><marker id="eaa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9" fill="none" style="stroke:var(--accent)" stroke-width="1.4"/></marker></defs>
+  <rect class="zone line" x="1" y="1" width="598" height="326" rx="4"/>
+  <text x="16" y="22" class="s">YOUR DATA CENTRE · ON-PREM OR AIR-GAPPED</text>
+
+  <rect class="box" x="20" y="44" width="560" height="62" rx="3"/>
+  <text x="34" y="66" class="t">Workbench</text>
+  <text x="34" y="86" class="s">ticket → plan → agents → human review → merge request</text>
+
+  <rect class="zone" x="20" y="124" width="380" height="132" rx="3"/>
+  <text x="34" y="144" class="s">SANDBOX</text>
+  <rect class="box hl" x="34" y="156" width="160" height="84" rx="3"/>
+  <text x="48" y="178" class="t">Workspace</text>
+  <text x="48" y="198">coding agent</text>
+  <text x="48" y="214">+ repository</text>
+  <text x="48" y="230" class="s">sees placeholders only</text>
+  <rect class="box" x="226" y="156" width="160" height="84" rx="3"/>
+  <text x="240" y="178" class="t">Egress</text>
+  <text x="240" y="198">deny by default</text>
+  <text x="240" y="214">injects secrets</text>
+  <text x="240" y="230" class="s">every call logged</text>
+  <path class="ln hl" d="M194 198H222" marker-end="url(#eaa)"/>
+
+  <rect class="box" x="420" y="124" width="160" height="58" rx="3"/>
+  <text x="434" y="146" class="t">Sovereign model</text>
+  <text x="434" y="166" class="s">on own hardware</text>
+  <rect class="box" x="420" y="198" width="160" height="58" rx="3"/>
+  <text x="434" y="220" class="t">Git · artifacts</text>
+  <text x="434" y="240" class="s">internal services</text>
+  <path class="ln" d="M386 186L416 160" marker-end="url(#ea)"/>
+  <path class="ln" d="M386 214L416 226" marker-end="url(#ea)"/>
+  <path class="ln" d="M300 106V124" marker-end="url(#ea)"/>
+
+  <rect class="box" x="20" y="272" width="270" height="40" rx="3"/>
+  <text x="34" y="296"><tspan class="t" style="font-family:var(--sans);font-weight:500;fill:var(--ink)">Config</tspan>  one file, versioned</text>
+  <rect class="box" x="310" y="272" width="270" height="40" rx="3"/>
+  <text x="324" y="296"><tspan style="font-family:var(--sans);font-weight:500;fill:var(--ink)">Hub · Benchmark</tspan>  share · measure</text>
+
+  <path class="ln dash" d="M600 165H664"/>
+  <text x="626" y="161" class="a" style="font-size:16px">×</text>
+  <rect class="box" x="668" y="140" width="88" height="50" rx="25" style="stroke-dasharray:3 4"/>
+  <text x="712" y="161" text-anchor="middle" class="s">public</text>
+  <text x="712" y="176" text-anchor="middle" class="s">cloud APIs</text>
+</svg></div>
+      <figcaption class="mono">Agents, code, secrets and models stay inside the organisation’s perimeter. The agent works in a sandbox and only ever sees placeholder credentials; a second container decides — and logs — what may leave.</figcaption>
+    </figure>
+    <section>
+      <ul class="story">
+        <li>
+          <h2>The problem</h2>
+          <div class="txt"><p>Banks, utilities, public authorities and defence suppliers face the same dilemma. Agentic coding promises large productivity gains, but a cloud-based agent can send source code and secrets to a foreign provider, delete data or pull in a malicious extension — and it ties the organisation to one vendor’s model, prices and roadmap. Banning the tools only pushes teams into shadow IT, where nobody measures what the agents actually deliver.</p></div>
+        </li>
+        <li>
+          <h2>The idea</h2>
+          <div class="txt"><p>ESACA — the <b>European Sovereign Agentic Coding Appliance</b> — is a standardised system that brings coding agents into the organisation’s own perimeter: on-premises or fully air-gapped, with no data egress, no external API calls and no hidden telemetry. It is model-independent and favours sovereign models running on the customer’s own hardware. ESACA is an initiative of mgm technology partners and Fsas Technologies, a Fujitsu company.</p></div>
+        </li>
+        <li>
+          <h2>The building blocks</h2>
+          <div class="txt"><ul class="pts"><li><b>Sandbox</b> — the agent and the project run in one container, all outbound traffic goes through a second one. Access is deny-by-default, the agent only sees placeholder credentials, real secrets are injected on the way out, every decision is logged.</li><li><b>Configuration</b> — one versionable file describes the whole environment: access rules, agents, skills, plugins, tools and versions.</li><li><b>Hub</b> — proven configurations are shared and reused across projects.</li><li><b>Benchmark</b> — measures the complete system (agent + model + hardware) on the organisation’s own repositories, keeping hard metrics such as builds and tests apart from LLM-as-judge scores.</li><li><b>Workbench</b> — a guided path from ticket to plan to agents in isolated workspaces, ending in a mandatory human review before the normal merge process.</li></ul></div>
+        </li>
+        <li>
+          <h2>Who it is for</h2>
+          <div class="txt"><p>Critical infrastructure and utilities, the public sector, and regulated industries such as defence, legal and healthcare — organisations that work under NIS-2, BaFin, ISO 27001 and GDPR. The adoption path goes step by step, from assistants to agents, multi-agent workflows and finally AI-native development, with people staying in the decision seat.</p></div>
+        </li>
+      </ul>
+
+      <nav class="pager mono" aria-label="More projects">
+        <a href="projects-geneial.html"><span>← previous</span><b>geneial</b></a>
+        <a href="projects-macoco.html"><span>next →</span><b>MaCoCo</b></a>
+      </nav>
+    </section>
+
+    <footer class="mono">
+      <span>© 2026 Lukas Netz.</span>
+      <nav class="foot-icons" aria-label="Sections"><a href="projects.html" title="Projects" aria-label="Projects"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 7L2.5 12l5 5"/><path d="M16.5 7l5 5-5 5"/><path d="M14 4.5l-4 15"/></svg></a><a href="research.html" title="Research" aria-label="Research"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 13.5H5l3.5 6.5L13.5 4h8"/><path d="M14.5 10l5 6"/><path d="M19.5 10l-5 6"/></svg></a><a href="photography.html" title="Photography" aria-label="Photography"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><g transform="translate(12 12) scale(.9) translate(-12 -12)" stroke-width="1.95"><path d="M12.697 3.5h-1.394c-.715 0-1.072 0-1.392.112a2 2 0 0 0-.545.292c-.271.204-.47.501-.866 1.096c-.203.305-.502.753-.621.879a2 2 0 0 1-1.106.591c-.17.03-.353.03-.72.03c-.98 0-1.47 0-1.87.113a3 3 0 0 0-2.07 2.07C2 9.083 2 9.573 2 10.553V14.5c0 2.828 0 4.243.879 5.121S5.172 20.5 8 20.5h8c2.829 0 4.243 0 5.122-.879C22 18.743 22 17.328 22 14.5v-3.946c0-.98 0-1.47-.113-1.871a3 3 0 0 0-2.07-2.07c-.4-.113-.89-.113-1.87-.113c-.366 0-.55 0-.72-.03a2 2 0 0 1-1.105-.591c-.12-.126-.419-.574-.622-.879c-.396-.595-.594-.892-.865-1.096a2 2 0 0 0-.545-.292c-.32-.112-.678-.112-1.393-.112"/><path d="M16 13a4 4 0 1 1-8 0a4 4 0 0 1 8 0"/><path d="M19.125 9.5H19m.25 0a.25.25 0 1 1-.5 0a.25.25 0 0 1 .5 0Z"/></g></svg></a><a class="egg" href="vier-gewinnt/" title="Play" aria-label="Play"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7.5h10a4.5 4.5 0 0 1 4.5 4.5v1.8a3.2 3.2 0 0 1-5.8 1.9l-1.2-1.7h-5l-1.2 1.7a3.2 3.2 0 0 1-5.8-1.9V12A4.5 4.5 0 0 1 7 7.5z"/><path d="M7.5 10v3.5M5.75 11.75h3.5"/><path d="M15.5 10.75h.01M17.5 12.75h.01" stroke-width="2.4"/></svg></a></nav>
+      <a href="#top">↑ top</a>
+    </footer>
+  </main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
