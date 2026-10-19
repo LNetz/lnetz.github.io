@@ -306,6 +306,7 @@ section > .group:first-child { padding-top: 0; }
 
 .banner { margin-bottom: var(--space-section); overflow: hidden; }
 .banner img { display: block; width: 100%; height: auto; aspect-ratio: 2400 / 769; background: var(--tile); }
+.banner figcaption { margin-top: 10px; color: var(--ink-3); }
 
 .series { display: flex; justify-content: space-between; padding-top: 48px; scroll-margin-top: 24px; }
 

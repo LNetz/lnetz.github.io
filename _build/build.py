@@ -189,13 +189,14 @@ def page_icon(icon):
     return f'\n      <div class="page-icon" aria-hidden="true">{ICONS[icon]}</div>'
 
 
-def banner(A, src, alt, w, h):
+def banner(A, src, alt, w, h, caption=""):
     """Panorama hero; phones get a taller 4:3 crop (same name with a -m suffix)."""
     mobile = src.replace(".jpg", "-m.jpg")
+    cap = f'<figcaption class="mono">{caption}</figcaption>' if caption else ""
     return (f'    <figure class="banner"><picture>'
             f'<source media="(max-width: 600px)" srcset="{A}assets/photos/{mobile}" width="1200" height="900">'
             f'<img src="{A}assets/photos/{src}" alt="{alt}" width="{w}" height="{h}">'
-            f'</picture></figure>\n')
+            f'</picture>{cap}</figure>\n')
 
 
 def link(label, url):
@@ -397,7 +398,8 @@ def projects(lang):
             "Software, die ich gebaut oder geleitet habe — von Generator-Frameworks und produktiven Informationssystemen bis zu Plattformen für <em>agentisches Programmieren</em>.")),
         top=page_icon("code"))
     pic = banner(A, "banner-abstract.jpg", L(T("Abstract illustration: blue and orange waves of light and data with fragments of code floating over them",
-                                               "Abstrakte Illustration: blaue und orange Wellen aus Licht und Daten, darüber schwebende Code-Fragmente")), 1659, 532)
+                                               "Abstrakte Illustration: blaue und orange Wellen aus Licht und Daten, darüber schwebende Code-Fragmente")), 1659, 532,
+                 L(T("AI-generated image: AI-based MDE", "KI-generiertes Bild: KI-basierte MDE")))
     return f'''
 {head}{pic}    <section>
       <div class="group mono">{L(T("Industry", "Industrie"))} · mgm technology partners</div>
@@ -499,7 +501,9 @@ def research(lang):
             "Ich erforsche, wie <em>große Sprachmodelle</em> und <em>modellgetriebene Softwareentwicklung</em> sich gegenseitig besser machen: LLMs, die valide Modelle schreiben, und Modelle, die LLM-Ausgaben im Zaum halten.")),
         METRICS[lang], count_id=True, top=page_icon("sqrt"))
     pic = banner(A, "banner-lecture.jpg", L(T("Lukas Netz lecturing in a large RWTH Aachen lecture hall",
-                                              "Lukas Netz bei einer Vorlesung in einem großen Hörsaal der RWTH Aachen")), 1659, 532)
+                                              "Lukas Netz bei einer Vorlesung in einem großen Hörsaal der RWTH Aachen")), 1659, 532,
+                 L(T("Guest lecture, Software Engineering course · RWTH Aachen · 12 / 2024",
+                     "Gastvortrag, Vorlesung Softwaretechnik · RWTH Aachen · 12 / 2024")))
     return f'''
 {head}{pic}    <section>
       <div class="group mono">{L(T("Topics", "Themen"))}</div>
@@ -693,7 +697,8 @@ def photography(lang):
             "Die Fotografie hat mich vom ersten Moment an begeistert. Die Kamera ist eines der wenigen Werkzeuge, die es einem ermöglichen, nicht nur einen ganz bestimmten Blickwinkel auf die Welt zu zeigen, sondern auch <em>Erinnerungen und Emotionen</em> einzufangen und zu teilen.")),
         extra, top=page_icon("camera"))
     pic = banner(A, "about-dolomites.jpg", L(T("Lukas Netz with a camera, looking out over the Dolomites",
-                                               "Lukas Netz mit Kamera, Blick über die Dolomiten")), 2400, 769)
+                                               "Lukas Netz mit Kamera, Blick über die Dolomiten")), 2400, 769,
+                 L(T("Hiking the Alps · 2021", "Wandern in den Alpen · 2021")))
     return f'''
 {head}{pic}
     <section>
