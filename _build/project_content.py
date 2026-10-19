@@ -639,7 +639,7 @@ PROJECTS = [
         pubs=["NWN+15", "GJN+15a"],
     ),
     dict(
-        slug="smt-rat", name="SMT-RAT", when="2015", mark="SMT",
+        slug="smt-rat", name="SMT-RAT", when="2015", logo="smt-rat.png",
         desc=T("SMT-RAT — a modular C++ toolbox for SMT solving over non-linear real arithmetic, and my bachelor’s thesis on its interval constraint propagation.",
                "SMT-RAT — ein modularer C++-Werkzeugkasten für SMT-Solving über nichtlinearer reeller Arithmetik, und meine Bachelorarbeit zu seiner Intervall-Constraint-Propagation."),
         lead=T("Does a set of polynomial inequalities over the real numbers have a solution? SMT-RAT answers questions like this from <em>modules</em> that can be combined into a solver — I worked on the one that narrows the search space with interval arithmetic.",
