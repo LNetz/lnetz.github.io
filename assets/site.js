@@ -5,11 +5,11 @@ const I18N = {
   en: { theme: { light: "light", dark: "dark", auto: "auto" }, themeLabel: "Theme: ", themeHint: " — click to change",
         pubs: "publications", open: "Open photo: ",
         slideshow: "slideshow", pause: "pause", fs: "full screen", exitFs: "exit full screen",
-        flags: { Article: "Article", Dissertation: "Dissertation" } },
+        flags: { Article: "Article", Dissertation: "Dissertation", MastersThesis: "Master’s thesis", BachelorsThesis: "Bachelor’s thesis" } },
   de: { theme: { light: "hell", dark: "dunkel", auto: "auto" }, themeLabel: "Darstellung: ", themeHint: " — klicken zum Wechseln",
         pubs: "Publikationen", open: "Foto öffnen: ",
         slideshow: "Diashow", pause: "Pause", fs: "Vollbild", exitFs: "Vollbild beenden",
-        flags: { Article: "Artikel", Dissertation: "Dissertation" } },
+        flags: { Article: "Artikel", Dissertation: "Dissertation", MastersThesis: "Masterarbeit", BachelorsThesis: "Bachelorarbeit" } },
 };
 const UI = I18N[document.documentElement.lang] || I18N.en;
 
