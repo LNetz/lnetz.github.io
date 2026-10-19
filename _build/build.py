@@ -440,8 +440,8 @@ def projects(lang):
         L(T("Software I have built or led — from generator frameworks and production information systems to <em>agentic coding</em> platforms.",
             "Software, die ich gebaut oder geleitet habe — von Generator-Frameworks und produktiven Informationssystemen bis zu Plattformen für <em>agentisches Programmieren</em>.")),
         chapters, top=page_icon("code"))
-    pic = banner(A, "banner-abstract.jpg", L(T("Abstract illustration: blue and orange waves of light and data with fragments of code floating over them",
-                                               "Abstrakte Illustration: blaue und orange Wellen aus Licht und Daten, darüber schwebende Code-Fragmente")), 1659, 532,
+    pic = banner(A, "banner-abstract.jpg", L(T("Abstract illustration: a glowing flower of fine light lines between blue and orange, surrounded by fragments of code and blurred lights",
+                                               "Abstrakte Illustration: eine leuchtende Blüte aus feinen Lichtlinien zwischen Blau und Orange, umgeben von Code-Fragmenten und unscharfen Lichtern")), 1024, 328,
                  L(T("AI-generated image: AI-based MDE", "KI-generiertes Bild: KI-basierte MDE")))
     return f'''
 {head}{pic}    <section>
