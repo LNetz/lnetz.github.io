@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>geneial — Lukas Netz</title>
-  <meta name="description" content="geneial — eine template-basierte C++11-Bibliothek für genetische Algorithmen, und meine darauf aufbauende Masterarbeit.">
+  <meta name="description" content="geneial — eine template-basierte C++11-Bibliothek für genetische Algorithmen, und wie sie half, Offshore-Windparks anzuordnen.">
   <meta property="og:title" content="geneial — Lukas Netz">
-  <meta property="og:description" content="geneial — eine template-basierte C++11-Bibliothek für genetische Algorithmen, und meine darauf aufbauende Masterarbeit.">
+  <meta property="og:description" content="geneial — eine template-basierte C++11-Bibliothek für genetische Algorithmen, und wie sie half, Offshore-Windparks anzuordnen.">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="de_DE">
   <link rel="alternate" hreflang="en" href="../projects-geneial.html">
@@ -99,11 +99,11 @@
       <div class="proj-logo"><img src="../assets/logos/geneial.png" alt="" width="48" height="48"></div>
       <p class="lead">Manche Probleme sind zu groß, um sie exakt zu lösen — also lässt man Lösungen <em>evolvieren</em>. geneial ist eine C++-Bibliothek für genetische Algorithmen, in der jeder Schritt der Evolution ein austauschbarer Baustein ist.</p>
       <dl class="facts mono"><div><dt>Art</dt><dd>C++11-Bibliothek</dd></div><div><dt>Lizenz</dt><dd>MIT</dd></div><div><dt>Autoren</dt><dd>Wolters · Netz · Nellen</dd></div></dl>
-      <div class="links-top mono"><a href="https://github.com/geneial/geneial" target="_blank" rel="noopener">github ↗</a><a href="https://ths.rwth-aachen.de/research/projects/oasys/" target="_blank" rel="noopener">OASys ↗</a><a href="https://ths.rwth-aachen.de/wp-content/uploads/sites/4/netz_master.pdf" target="_blank" rel="noopener">Masterarbeit (pdf) ↗</a></div>
+      <div class="links-top mono"><a href="https://github.com/geneial/geneial" target="_blank" rel="noopener">github ↗</a><a href="https://ths.rwth-aachen.de/research/projects/oasys/" target="_blank" rel="noopener">OASys ↗</a></div>
     </header>
     <figure class="media">
       <div class="cutout"><img src="../assets/projects/geneial-ea-loop.webp" alt="Kreisdiagramm einer Generation eines evolutionären Algorithmus: Abbruchkriterien, Selektion mit Elitismus, Kopplung, Crossover, Auswahl, Mutation und Auffüllen aus der Chromosomen-Fabrik" width="1400" height="1266" loading="lazy"></div>
-      <figcaption class="mono">Eine Generation eines evolutionären Algorithmus — jeder Kasten ist ein austauschbarer Operator in geneial. Abbildung 13 aus meiner Masterarbeit (2017).</figcaption>
+      <figcaption class="mono">Eine Generation eines evolutionären Algorithmus — jeder Kasten ist ein austauschbarer Operator in geneial. Aus <a class="cite" href="#Net17">[Net17]</a>.</figcaption>
     </figure>
     <section>
       <ul class="story">
@@ -132,24 +132,24 @@ algorithm-&gt;solve();
 std::cout &lt;&lt; *algorithm-&gt;getHighestFitnessChromosome() &lt;&lt; std::endl;</code></pre></div>
         </li>
         <li>
-          <h2>Masterarbeit</h2>
-          <div class="txt"><p>In meiner Masterarbeit (2017) habe ich geneial für ein anderes Problem eingesetzt: die Platzierung der Turbinen eines Offshore-Windparks, bewertet nach Jahresenergieertrag, Kapitalwert und internem Zinsfuß an den Testfällen von Horns Rev. Die Frage war, ob Turbinenpositionen freie, kontinuierliche Koordinaten oder Punkte auf einem Raster sein sollten. Die Antwort war eindeutig: Solange das Raster fein genug ist, <b>konvergieren diskretisierte Genparameter schneller und erreichen bessere Ergebnisse</b> — in allen Testfällen.</p></div>
+          <h2>Windparks</h2>
+          <div class="txt"><p>Später habe ich geneial für ein anderes Problem eingesetzt <a class="cite" href="#Net17">[Net17]</a>: die Platzierung der Turbinen eines Offshore-Windparks, bewertet nach Jahresenergieertrag, Kapitalwert und internem Zinsfuß an den Testfällen von Horns Rev. Die Frage war, ob Turbinenpositionen freie, kontinuierliche Koordinaten oder Punkte auf einem Raster sein sollten. Die Antwort war eindeutig: Solange das Raster fein genug ist, <b>konvergieren diskretisierte Genparameter schneller und erreichen bessere Ergebnisse</b> — in allen Testfällen.</p></div>
         </li>
       </ul>
 
-      <div class="group mono">Publikationen &amp; Abschlussarbeiten · 3</div>
+      <div class="group mono">Publikationen · 3</div>
       <ol class="pubs">
-        <li>
-          <span class="key mono">2017</span>
+        <li id="Net17">
+          <span class="key mono">Net17</span>
           <div>
             <div class="t">Analysis on Discretization of Gene Parameters in Evolutionary Algorithms<span class="flag mono">Masterarbeit</span></div>
             <div class="a"><b>L. Netz</b></div>
-            <div class="v mono">RWTH Aachen, Theorie der hybriden Systeme · Gutachterinnen E. Ábrahám, C. Büsing · Betreuer P. Richter</div>
-            <div class="plinks mono"><a href="https://ths.rwth-aachen.de/wp-content/uploads/sites/4/netz_master.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://ths.rwth-aachen.de/theses/" target="_blank" rel="noopener">THS-Abschlussarbeiten ↗</a></div>
+            <div class="v mono">Master’s thesis, RWTH Aachen, Theory of Hybrid Systems</div>
+            <div class="plinks mono"><a href="https://ths.rwth-aachen.de/wp-content/uploads/sites/4/netz_master.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://ths.rwth-aachen.de/theses/" target="_blank" rel="noopener">theses ↗</a></div>
           </div>
         </li>
-        <li>
-          <span class="key mono">2015</span>
+        <li id="NWN+15">
+          <span class="key mono">NWN+15</span>
           <div>
             <div class="t">A Genetic Algorithm based Control Strategy for the Energy Management Problem in PHEVs</div>
             <div class="a">J. Nellen, B. Wolters, <b>L. Netz</b>, S. Geulen, E. Ábrahám</div>
@@ -157,8 +157,8 @@ std::cout &lt;&lt; *algorithm-&gt;getHighestFitnessChromosome() &lt;&lt; std::en
             <div class="plinks mono"><a href="https://easychair.org/publications/open/6CD4" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.29007/md3x" target="_blank" rel="noopener">doi ↗</a></div>
           </div>
         </li>
-        <li>
-          <span class="key mono">2015</span>
+        <li id="GJN+15a">
+          <span class="key mono">GJN+15a</span>
           <div>
             <div class="t">Learning-based Control Strategies for Hybrid Electric Vehicles</div>
             <div class="a">S. Geulen, M. Joševski, J. Nellen, J. Fuchs, <b>L. Netz</b>, B. Wolters, D. Abel, E. Ábrahám, W. Unger</div>

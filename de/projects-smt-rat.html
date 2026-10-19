@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SMT-RAT — Lukas Netz</title>
-  <meta name="description" content="SMT-RAT — ein modularer C++-Werkzeugkasten für SMT-Solving über nichtlinearer reeller Arithmetik, und meine Bachelorarbeit zu seiner Intervall-Constraint-Propagation.">
+  <meta name="description" content="SMT-RAT — ein modularer C++-Werkzeugkasten für SMT-Solving über nichtlinearer reeller Arithmetik, und meine Arbeit an seiner Intervall-Constraint-Propagation.">
   <meta property="og:title" content="SMT-RAT — Lukas Netz">
-  <meta property="og:description" content="SMT-RAT — ein modularer C++-Werkzeugkasten für SMT-Solving über nichtlinearer reeller Arithmetik, und meine Bachelorarbeit zu seiner Intervall-Constraint-Propagation.">
+  <meta property="og:description" content="SMT-RAT — ein modularer C++-Werkzeugkasten für SMT-Solving über nichtlinearer reeller Arithmetik, und meine Arbeit an seiner Intervall-Constraint-Propagation.">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="de_DE">
   <link rel="alternate" hreflang="en" href="../projects-smt-rat.html">
@@ -98,8 +98,8 @@
       </div>
       <div class="proj-logo"><img src="../assets/logos/smt-rat.png" alt="" width="48" height="48"></div>
       <p class="lead">Hat ein System polynomieller Ungleichungen über den reellen Zahlen eine Lösung? SMT-RAT beantwortet solche Fragen mit <em>Modulen</em>, die sich zu einem Solver kombinieren lassen — ich habe an dem gearbeitet, das den Suchraum mit Intervallarithmetik eingrenzt.</p>
-      <dl class="facts mono"><div><dt>Art</dt><dd>SMT-Solver-Baukasten · C++</dd></div><div><dt>Lehrstuhl</dt><dd>Theorie der hybriden Systeme, RWTH</dd></div><div><dt>Mein Teil</dt><dd>ICP-Modul · Bachelorarbeit</dd></div></dl>
-      <div class="links-top mono"><a href="https://ths-rwth.github.io/smtrat/" target="_blank" rel="noopener">Dokumentation ↗</a><a href="https://github.com/ths-rwth/smtrat" target="_blank" rel="noopener">github ↗</a><a href="http://ths.rwth-aachen.de/wp-content/uploads/sites/4/teaching/theses/netz_bachelor.pdf" target="_blank" rel="noopener">Bachelorarbeit (pdf) ↗</a></div>
+      <dl class="facts mono"><div><dt>Art</dt><dd>SMT-Solver-Baukasten · C++</dd></div><div><dt>Lehrstuhl</dt><dd>Theorie der hybriden Systeme, RWTH</dd></div><div><dt>Mein Teil</dt><dd>ICP-Modul</dd></div></dl>
+      <div class="links-top mono"><a href="https://ths-rwth.github.io/smtrat/" target="_blank" rel="noopener">Dokumentation ↗</a><a href="https://github.com/ths-rwth/smtrat" target="_blank" rel="noopener">github ↗</a></div>
     </header>
     <figure class="media"><div class="dia-scroll"><svg class="dia" viewBox="0 0 760 200" role="img" aria-label="Intervallauswertung von x Quadrat minus x für x zwischen 0 und 1: wie geschrieben ergibt sich minus 1 bis 1, als Horner-Schema minus 1 bis 0, tatsächlich minus ein Viertel bis 0">
   <text x="0" y="16" class="s">AUSGEWERTET AUF DEM INTERVALL x ∈ [0, 1]</text>
@@ -124,23 +124,22 @@
           <div class="txt"><p>Intervall-Constraint-Propagation (ICP) arbeitet auf Boxen aus Intervallen, eines pro Variable. Sie nutzt jede Bedingung, um Teile der Box wegzuschneiden, die keine Lösung enthalten können — <i>Kontraktion</i> —, bis die Box leer (unerfüllbar) oder klein genug zur Weitergabe ist. Ihre Schwachstelle ist die Intervallarithmetik selbst: Sie weiß nicht, dass zwei Vorkommen von <code>x</code> dieselbe Zahl sind. Dieses <b>Abhängigkeitsproblem</b> macht Ergebnisse breiter als nötig (Abbildung oben), sodass ICP weniger kontrahiert und mehr Iterationen braucht.</p></div>
         </li>
         <li>
-          <h2>Bachelorarbeit</h2>
-          <div class="txt"><p>In meiner Bachelorarbeit (2015) habe ich das ICP-Modul von SMT-RAT auf zwei Wegen verbessert. Erstens eine neue Kontraktionsmethode — <b>Propagation</b> von Intervallen durch die Bedingung — zusätzlich zur bestehenden, Newton-basierten Kontraktion. Zweitens eine Datenstruktur für <b>multivariate Horner-Schemata</b>: Polynome werden verschachtelt umgeschrieben, brauchen so weniger Operationen und wiederholen Variablen seltener, wodurch die Intervalle enger bleiben. Zwei Heuristiken wählen die nächste auszuklammernde Variable — eine schnelle, eine auf möglichst geringe Überapproximation ausgelegte —, und ein Vereinfachungsschritt komprimiert das Ergebnis.</p><p>Auf den üblichen SMT-LIB-Benchmarks hat sich die Propagation klar ausgezahlt: Auf <i>keymaera</i> (Verifikation hybrider Systeme) wurden mehr Instanzen mit weniger Timeouts in kaum mehr als der halben Zeit gelöst, und auf <i>hong</i> ließen sich im selben Zeitrahmen fast doppelt so viele Testfälle lösen. Die Horner-Schemata machten ICP zwar präziser — auf einzelnen Instanzen bis zu 46&nbsp;% weniger Kontraktionen —, ihr Aufbau kostete aber mehr Zeit, als die engeren Intervalle einsparten. Ein ehrliches Ergebnis, das die nächsten Schritte zeigte: die Heuristik je Eingabe wählen und Polynome aus der Sicht einer einzelnen Variable auswerten.</p></div>
+          <h2>Mein Beitrag</h2>
+          <div class="txt"><p>Ich habe das ICP-Modul von SMT-RAT auf zwei Wegen verbessert <a class="cite" href="#Net15">[Net15]</a>. Erstens eine neue Kontraktionsmethode — <b>Propagation</b> von Intervallen durch die Bedingung — zusätzlich zur bestehenden, Newton-basierten Kontraktion. Zweitens eine Datenstruktur für <b>multivariate Horner-Schemata</b>: Polynome werden verschachtelt umgeschrieben, brauchen so weniger Operationen und wiederholen Variablen seltener, wodurch die Intervalle enger bleiben. Zwei Heuristiken wählen die nächste auszuklammernde Variable — eine schnelle, eine auf möglichst geringe Überapproximation ausgelegte —, und ein Vereinfachungsschritt komprimiert das Ergebnis.</p><p>Auf den üblichen SMT-LIB-Benchmarks hat sich die Propagation klar ausgezahlt: Auf <i>keymaera</i> (Verifikation hybrider Systeme) wurden mehr Instanzen mit weniger Timeouts in kaum mehr als der halben Zeit gelöst, und auf <i>hong</i> ließen sich im selben Zeitrahmen fast doppelt so viele Testfälle lösen. Die Horner-Schemata machten ICP zwar präziser — auf einzelnen Instanzen bis zu 46&nbsp;% weniger Kontraktionen —, ihr Aufbau kostete aber mehr Zeit, als die engeren Intervalle einsparten. Ein ehrliches Ergebnis, das die nächsten Schritte zeigte: die Heuristik je Eingabe wählen und Polynome aus der Sicht einer einzelnen Variable auswerten.</p></div>
         </li>
       </ul>
 
-      <div class="group mono">Publikationen &amp; Abschlussarbeiten · 1</div>
+      <div class="group mono">Publikationen · 1</div>
       <ol class="pubs">
-        <li>
-          <span class="key mono">2015</span>
+        <li id="Net15">
+          <span class="key mono">Net15</span>
           <div>
             <div class="t">Using Horner Schemes to Improve the Efficiency and Precision of Interval Constraint Propagation<span class="flag mono">Bachelorarbeit</span></div>
             <div class="a"><b>L. Netz</b></div>
-            <div class="v mono">RWTH Aachen, Theorie der hybriden Systeme · Gutachter E. Ábrahám, J. Giesl · Betreuer S. Schupp, F. Corzilius</div>
-            <div class="plinks mono"><a href="http://ths.rwth-aachen.de/wp-content/uploads/sites/4/teaching/theses/netz_bachelor.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://ths.rwth-aachen.de/theses/" target="_blank" rel="noopener">THS-Abschlussarbeiten ↗</a></div>
+            <div class="v mono">Bachelor’s thesis, RWTH Aachen, Theory of Hybrid Systems</div>
+            <div class="plinks mono"><a href="http://ths.rwth-aachen.de/wp-content/uploads/sites/4/teaching/theses/netz_bachelor.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://ths.rwth-aachen.de/theses/" target="_blank" rel="noopener">theses ↗</a></div>
           </div>
         </li>
-
       </ol>
 
       <nav class="pager mono" aria-label="Weitere Projekte">

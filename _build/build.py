@@ -371,9 +371,9 @@ def projects(lang):
           links=[("github", "https://github.com/geneial/geneial"), ("OASys", "https://ths.rwth-aachen.de/research/projects/oasys/")],
           logo="geneial.png", page="geneial"),
         S("2015", "SMT-RAT",
-          T("A modular C++ toolbox for SMT solving over non-linear real arithmetic, developed at RWTH’s Theory of Hybrid Systems group. In my bachelor’s thesis I extended its interval-constraint-propagation module with a propagation contractor and multivariate Horner schemes.",
-            "Ein modularer C++-Werkzeugkasten für SMT-Solving über nichtlinearer reeller Arithmetik, entwickelt am Lehr- und Forschungsgebiet Theorie der hybriden Systeme der RWTH. In meiner Bachelorarbeit habe ich sein Modul für Intervall-Constraint-Propagation um einen Propagations-Kontraktor und multivariate Horner-Schemata erweitert."),
-          ["C++", "SMT", T("Interval arithmetic", "Intervallarithmetik")], [T("Bachelor’s thesis", "Bachelorarbeit"), T("Open source", "Open Source")],
+          T("A modular C++ toolbox for SMT solving over non-linear real arithmetic, developed at RWTH’s Theory of Hybrid Systems group. I extended its interval-constraint-propagation module with a propagation contractor and multivariate Horner schemes.",
+            "Ein modularer C++-Werkzeugkasten für SMT-Solving über nichtlinearer reeller Arithmetik, entwickelt am Lehr- und Forschungsgebiet Theorie der hybriden Systeme der RWTH. Ich habe sein Modul für Intervall-Constraint-Propagation um einen Propagations-Kontraktor und multivariate Horner-Schemata erweitert."),
+          ["C++", "SMT", T("Interval arithmetic", "Intervallarithmetik")], [T("Contributor", "Mitwirkung"), T("Open source", "Open Source")],
           links=[("github", "https://github.com/ths-rwth/smtrat"), (T("documentation", "Dokumentation"), "https://ths-rwth.github.io/smtrat/")],
           logo="smt-rat.png", page="smt-rat"),
     ]

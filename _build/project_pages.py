@@ -39,7 +39,8 @@ def ext(label, url):
 
 def pub_list(lang, keys):
     """Same markup as the publication list on the research page (site.js); the <li>s only."""
-    flags = {"Article": T("Article", "Artikel"), "Dissertation": T("Dissertation", "Dissertation")}
+    flags = {"Article": T("Article", "Artikel"), "Dissertation": T("Dissertation", "Dissertation"),
+             "MastersThesis": T("Master’s thesis", "Masterarbeit"), "BachelorsThesis": T("Bachelor’s thesis", "Bachelorarbeit")}
     items = []
     for k in keys:
         p = PUBS[k]
@@ -48,30 +49,13 @@ def pub_list(lang, keys):
         if p.get("doi"): links.append(ext("doi", "https://doi.org/" + p["doi"]))
         if p.get("url"): links.append(ext(p.get("urlLabel", "link"), p["url"]))
         flag = f'<span class="flag mono">{flags[p["flag"]][lang]}</span>' if p.get("flag") else ""
-        items.append(f'''        <li>
-          <span class="key mono">{p["year"]}</span>
+        items.append(f'''        <li id="{k}">
+          <span class="key mono">{k}</span>
           <div>
             <div class="t">{p["title"]}{flag}</div>
             <div class="a">{p["authors"].replace("L. Netz", "<b>L. Netz</b>")}</div>
             <div class="v mono">{p["venue"]}</div>
             <div class="plinks mono">{"".join(links)}</div>
-          </div>
-        </li>''')
-    return NL.join(items)
-
-
-def ref_list(lang, refs):
-    """Theses and other works that are not in pubs.js, in the same markup as pub_list."""
-    items = []
-    for r in refs:
-        L = lambda x: x[lang] if isinstance(x, dict) else x
-        items.append(f'''        <li>
-          <span class="key mono">{r["year"]}</span>
-          <div>
-            <div class="t">{L(r["title"])}<span class="flag mono">{L(r["flag"])}</span></div>
-            <div class="a">{r["authors"].replace("L. Netz", "<b>L. Netz</b>")}</div>
-            <div class="v mono">{L(r["venue"])}</div>
-            <div class="plinks mono">{"".join(ext(L(a), b) for a, b in r["links"])}</div>
           </div>
         </li>''')
     return NL.join(items)
@@ -113,20 +97,21 @@ def page(lang, idx):
     </header>
 '''
     media = p["media"](lang, A) if p.get("media") else ""
+    if p.get("hero"):                     # a large cut-out picture above the visual
+        src, w, h, alt = p["hero"]
+        media = (f'    <figure class="hero"><img src="{A}assets/projects/{src}" alt="{L(alt)}" width="{w}" height="{h}"></figure>\n'
+                 + media)
     chapters = NL.join(
         f'''        <li>
           <h2>{L(label)}</h2>
           <div class="txt">{L(text) if not callable(text) else text(lang, A)}</div>
         </li>''' for label, text in p["chapters"])
     pubs = ""
-    if p.get("pubs") or p.get("refs"):
-        n = len(p.get("pubs", ())) + len(p.get("refs", ()))
-        label = T("Publications &amp; theses", "Publikationen &amp; Abschlussarbeiten") if p.get("refs") else T("Publications", "Publikationen")
-        items = (ref_list(lang, p["refs"]) + NL if p.get("refs") else "") + (pub_list(lang, p["pubs"]) if p.get("pubs") else "")
+    if p.get("pubs"):
         pubs = (f'''
-      <div class="group mono">{L(label)} · {n}</div>
+      <div class="group mono">{L(T("Publications", "Publikationen"))} · {len(p["pubs"])}</div>
       <ol class="pubs">
-{items}
+{pub_list(lang, p["pubs"])}
       </ol>
 ''')
     prev, nxt = PROJECTS[idx - 1], PROJECTS[(idx + 1) % len(PROJECTS)]
