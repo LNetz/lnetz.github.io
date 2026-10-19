@@ -378,6 +378,35 @@ def projects(lang):
           links=[("github", "https://github.com/ths-rwth/smtrat"), (T("documentation", "Dokumentation"), "https://ths-rwth.github.io/smtrat/")],
           logo="smt-rat.png", page="smt-rat"),
     ]
+    # honourable mentions: projects I contributed to, without a page of their own
+    R = lambda label, title, text, role, links=(): row(L(label), L(title), L(text), L(role), [(L(a), b) for a, b in links])
+    CONTRIB = T("Contributor", "Mitarbeit")
+    further = [
+        R(T("Automotive", "Automobil"), "KIMBA",
+          T("AI for requirements engineering in safety-critical vehicle development: AI-based requirements management, automated MBSE system modelling and a digital shadow that keeps the AI components transparent and controllable. A BMWK-funded consortium of eleven partners led by BMW, 2024 — 2027.",
+            "KI für das Requirements Engineering in der sicherheitskritischen Fahrzeugentwicklung: KI-basiertes Anforderungsmanagement, automatisierte MBSE-Systemmodellierung und ein digitaler Schatten, der die KI-Komponenten transparent und kontrollierbar macht. Ein vom BMWK gefördertes Konsortium aus elf Partnern unter der Leitung von BMW, 2024 — 2027."),
+          CONTRIB, [("kimba-project.com", "https://www.kimba-project.com/")]),
+        R(T("Aviation", "Luftfahrt"), "AMoBaCoD",
+          T("Applied model-based co-development for zero-emission aircraft systems with AIRBUS: a distributed work environment for cooperative, SysML-based development, validated by building a scaled demonstrator aircraft together.",
+            "Angewandtes modellbasiertes Co-Development für emissionsfreie Flugzeugsysteme mit AIRBUS: eine verteilte Arbeitsumgebung für kooperative, SysML-basierte Entwicklung, validiert durch den gemeinsamen Bau eines skalierten Demonstrator-Flugzeugs."),
+          CONTRIB, [("paper", "https://doi.org/10.25967/630489")]),
+        R(T("Privacy", "Datenschutz"), "InviDas",
+          T("Interactive visual data spaces for sovereign privacy decisions: visualisations and gamification that help users of fitness wearables understand what their data reveals. BMBF-funded, with GI, Stiftung Digitale Chancen, Garmin and the universities of Bremen and Bamberg; the comparison platform was generated with MontiGem.",
+            "Interaktive, visuelle Datenräume zur souveränen, datenschutzrechtlichen Entscheidungsfindung: Visualisierungen und Gamification, die Nutzer:innen von Fitness-Wearables zeigen, was ihre Daten preisgeben. BMBF-gefördert, mit GI, Stiftung Digitale Chancen, Garmin und den Universitäten Bremen und Bamberg; die Vergleichsplattform wurde mit MontiGem generiert."),
+          CONTRIB, [(T("project", "Projekt"), "https://www.se-rwth.de/projects/")]),
+        R(T("Production", "Produktion"), "Internet of Production",
+          T("DFG Cluster of Excellence at RWTH: digital twins and digital shadows that make data from production, development and use available across domains. My part was generated low-code platforms and cockpits for digital twins.",
+            "DFG-Exzellenzcluster der RWTH: digitale Zwillinge und digitale Schatten, die Daten aus Produktion, Entwicklung und Nutzung domänenübergreifend verfügbar machen. Mein Teil waren generierte Low-Code-Plattformen und Cockpits für digitale Zwillinge."),
+          CONTRIB, [("iop.rwth-aachen.de", "https://www.iop.rwth-aachen.de/")]),
+        R(T("Teaching", "Lehre"), "RWTH Together University",
+          T("RWTH’s initiative for new forms of learning, teaching and examining — digital tools and AI in teaching, interdisciplinary student projects, a stronger link between presence and digital university. Funded by the Stiftung Innovation in der Hochschullehre.",
+            "Die Initiative der RWTH für neue Formen des Lernens, Lehrens und Prüfens — digitale Werkzeuge und KI in der Lehre, interdisziplinäre Studierendenprojekte, eine engere Verbindung von Präsenz- und Digitaluniversität. Gefördert von der Stiftung Innovation in der Hochschullehre."),
+          CONTRIB, [("rwth-aachen.de", "https://www.rwth-aachen.de/cms/root/studium/lehre/exzellente-lehre/~bppliy/rwth-together-university-lehren-lerne/")]),
+        R(T("Teaching", "Lehre"), T("Blended Learning video project", "Blended-Learning-Videoprojekt"),
+          T("Short films from the Blended Learning Initiative of RWTH’s computer science department, showing how technology changed everyday life — letter vs. text message, paper map vs. GPS, library vs. Wikipedia. With the Learning Technologies Research Group.",
+            "Kurzfilme aus der Blended-Learning-Initiative der Informatik der RWTH, die zeigen, wie Technik den Alltag verändert hat — Brief vs. SMS, Straßenkarte vs. GPS, Bibliothek vs. Wikipedia. Mit dem Lehr- und Forschungsgebiet Learning Technologies."),
+          T("Team member", "Team"), [("learntech.rwth-aachen.de", "https://learntech.rwth-aachen.de/go/id/morb/lidx/1")]),
+    ]
     gpts = [
         S("GPT", "SysML v2 Model Creator",
           T("Creates SysML v2 models from natural-language descriptions.",
@@ -392,7 +421,7 @@ def projects(lang):
             "Schreibt Klassendiagramme in CD4A, der Klassendiagrammsprache von MontiCore."),
           [], ["CD4A"], href="https://chatgpt.com/g/g-sRnmDgQvW-cd4a-class-diagram-creator"),
     ]
-    n = 1 + len(research) + len(gpts)
+    n = 1 + len(research) + len(gpts) + len(further)
     head = page_head("01", L(T("Projects", "Projekte")), L(T(f"{n} entries", f"{n} Einträge")),
         L(T("Software I have built or led — from generator frameworks and production information systems to <em>agentic coding</em> platforms.",
             "Software, die ich gebaut oder geleitet habe — von Generator-Frameworks und produktiven Informationssystemen bis zu Plattformen für <em>agentisches Programmieren</em>.")),
@@ -415,6 +444,11 @@ def projects(lang):
       <div class="group mono">{L(T("Assistants", "Assistenten"))} · ChatGPT</div>
       <ul class="spec">
 {NL.join(gpts)}
+      </ul>
+
+      <div class="group mono">{L(T("Further involvement", "Weitere Mitarbeit"))}</div>
+      <ul class="rows">
+{NL.join(further)}
       </ul>
     </section>
 '''
