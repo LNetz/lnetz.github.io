@@ -396,8 +396,8 @@ def projects(lang):
         L(T("Software I have built or led — from generator frameworks and production information systems to <em>agentic coding</em> platforms.",
             "Software, die ich gebaut oder geleitet habe — von Generator-Frameworks und produktiven Informationssystemen bis zu Plattformen für <em>agentisches Programmieren</em>.")),
         top=page_icon("code"))
-    pic = banner(A, "banner-factory.jpg", L(T("Model factory in the lab, with MontiCore-generated dashboards on three screens behind it",
-                                              "Modellfabrik im Labor, dahinter MontiCore-generierte Dashboards auf drei Bildschirmen")), 2400, 769)
+    pic = banner(A, "banner-abstract.jpg", L(T("Abstract illustration: blue and orange waves of light and data with fragments of code floating over them",
+                                               "Abstrakte Illustration: blaue und orange Wellen aus Licht und Daten, darüber schwebende Code-Fragmente")), 1659, 532)
     return f'''
 {head}{pic}    <section>
       <div class="group mono">{L(T("Industry", "Industrie"))} · mgm technology partners</div>
