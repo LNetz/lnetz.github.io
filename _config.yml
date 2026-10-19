@@ -1,0 +1,4 @@
+# GitHub Pages: the site is plain HTML; these notes for AI assistants are not part of it.
+exclude:
+  - AGENTS.md
+  - CLAUDE.md

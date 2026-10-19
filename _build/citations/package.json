@@ -1,0 +1,10 @@
+{
+  "name": "citation-map-pipeline",
+  "private": true,
+  "description": "Builds the citation map on the research page (assets/citations.js, citedby.js, pubs-mini.js). See README.md.",
+  "type": "module",
+  "dependencies": {
+    "d3-force-3d": "3.0.5",
+    "pdfjs-dist": "4.10.38"
+  }
+}

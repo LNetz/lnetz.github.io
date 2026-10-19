@@ -1,0 +1,6 @@
+{
+  "_note": "PDFs to use instead of the pdf link in assets/pubs.js (the se-rwth.de copies of these are scans or have broken fonts). Add a key here when a paper's PDF yields no references.",
+  "MNN+22": "https://dl.gi.de/server/api/core/bitstreams/f05daa0a-e57a-4c41-a64a-11c5e4424c0b/content",
+  "AMN+20a": "https://dl.gi.de/server/api/core/bitstreams/ff5d075f-ba3a-46c0-9780-f61530dfda4e/content",
+  "AMN+20b": "https://dl.gi.de/server/api/core/bitstreams/c4f9694b-5e57-4b2a-ab07-9da5942dbb6c/content"
+}

@@ -1,0 +1,9 @@
+node_modules/
+# large or re-fetchable intermediate data (a refresh fetches them anew)
+work/pdfs/
+work/hop1.json
+work/hop2_meta.json
+work/hop2_count.json
+work/oa_by_doi.json
+work/citing1.json
+work/citing2.json
