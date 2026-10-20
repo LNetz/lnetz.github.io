@@ -8,7 +8,9 @@ Every user-facing text is written as T("english", "deutsch").
 Publications live in assets/pubs.js; shared behaviour in assets/site.js.
 (GitHub Pages ignores folders starting with "_", so this script is not published.)
 """
+import hashlib
 import os
+import re
 
 import ai4se
 import project_pages
@@ -41,6 +43,28 @@ SOCIAL = [
     ("dblp", "https://dblp.org/pid/170/5042.html"),
     ("GitHub", "https://github.com/LNetz"),
 ]
+
+
+# Cache busting: GitHub Pages lets browsers keep every file for 10 minutes, each on its own clock,
+# so a fresh page could run an old site.js or open an old game. Every script, stylesheet and the
+# game link therefore carry a hash of their content (?v=…): a changed file gets a new URL.
+_HASHES = {}
+
+
+def _version(rel):
+    if rel not in _HASHES:
+        path = os.path.join(ROOT, rel)
+        _HASHES[rel] = hashlib.sha1(open(path, "rb").read()).hexdigest()[:8] if os.path.isfile(path) else None
+    return _HASHES[rel]
+
+
+def bust(html):
+    def asset(m):
+        v = _version(m.group(2))
+        return f'{m.group(1)}{m.group(2)}?v={v}"' if v else m.group(0)
+    html = re.sub(r'((?:src|href)="(?:\.\./)?)(assets/[\w./-]+\.(?:js|css))"', asset, html)
+    game = _version("vier-gewinnt/index.html")
+    return re.sub(r'(href="(?:\.\./)?)vier-gewinnt/"', lambda m: f'{m.group(1)}vier-gewinnt/?v={game}"', html)
 
 
 def shell(lang, file, title, desc, body, scripts=""):
@@ -276,8 +300,8 @@ QUICK = [("projects.html", "code", T("Projects", "Projekte")),
 # The quote above the About text (original wording, in both languages).
 EPIGRAPH = '''
       <figure class="epigraph">
-        <blockquote>I propose to consider the question, “Can machines think?”</blockquote>
-        <figcaption class="mono">Alan M. Turing · Computing Machinery and Intelligence, 1950</figcaption>
+        <blockquote>I propose to consider the question, <span class="nw">“Can machines think?”</span></blockquote>
+        <figcaption class="mono"><span>Alan M. Turing</span><span class="sep"> · </span><span>Computing Machinery and Intelligence, 1950</span></figcaption>
       </figure>'''
 
 
@@ -534,8 +558,8 @@ def research(lang):
     ]
     talks = [row(d, ten if lang == "en" else tde, ven if lang == "en" else vde) for d, ten, tde, ven, vde in TALKS]
     themes = [
-        T(("LLMs for modeling", "Model synthesis in DSLs, grammar masking for syntactically valid output, how LLMs corrupt and repair textual models."),
-          ("LLMs für die Modellierung", "Modellsynthese in DSLs, Grammar Masking für syntaktisch valide Ausgaben, wie LLMs textuelle Modelle beschädigen und reparieren.")),
+        T(("LLMs for modeling", "Model synthesis in DSLs, grammar masking for syntactically valid output, how LLMs corrupt and repair textual models. <a class=\"int\" href=\"research-ai4se.html\">An introduction →</a>"),
+          ("LLMs für die Modellierung", "Modellsynthese in DSLs, Grammar Masking für syntaktisch valide Ausgaben, wie LLMs textuelle Modelle beschädigen und reparieren. <a class=\"int\" href=\"research-ai4se.html\">Eine Einführung →</a>")),
         T(("Model-driven engineering", "Generators and DSLs that stay maintainable when the model evolves."),
           ("Modellgetriebene Entwicklung", "Generatoren und DSLs, die wartbar bleiben, wenn sich das Modell weiterentwickelt.")),
         T(("Low-code &amp; digital twins", "Generating customized low-code platforms and cockpits for digital twins."),
@@ -549,7 +573,7 @@ def research(lang):
     # chapter markers: the page has grown long
     chapters = f'''
       <nav class="chapters mono" aria-label="{L(T("Chapters", "Kapitel"))}">
-        <a href="#topics">{L(T("Topics", "Themen"))}</a><a href="#community">Community</a><a href="#talks">{L(T("Talks", "Vorträge"))}</a><a href="#citation-map">{L(T("Citation map", "Zitationskarte"))}</a><a href="#publications">{L(T("Publications", "Publikationen"))}</a>
+        <a href="#topics">{L(T("Topics", "Themen"))}</a><a href="#articles">{L(T("Article", "Artikel"))}</a><a href="#community">Community</a><a href="#talks">{L(T("Talks", "Vorträge"))}</a><a href="#citation-map">{L(T("Citation map", "Zitationskarte"))}</a><a href="#publications">{L(T("Publications", "Publikationen"))}</a>
       </nav>'''
     head = page_head("02", L(T("Research", "Forschung")), "",
         L(T("I research how <em>large language models</em> and <em>model-driven engineering</em> can make each other better: LLMs that write valid models, and models that keep LLM output in check.",
@@ -568,7 +592,7 @@ def research(lang):
 
       <div class="group mono" id="articles">{L(T("Article", "Artikel"))}</div>
       <ul class="rows">
-{row("2024 — 2026", f'<a class="int" href="{ai4se.FILE}">AI-driven Software Engineering →</a>', L(T("What generative AI is, how a language model arrives at its answer — and how LLMs can write models that a generator turns into running software. From neurons and transformers to grammar masking, embeddings and RAG.", "Was generative KI ist, wie ein Sprachmodell zu seiner Antwort kommt — und wie LLMs Modelle schreiben können, aus denen ein Generator lauffähige Software macht. Vom Neuron und Transformer bis zu Grammar Masking, Embeddings und RAG.")))}
+{row("2024 — 2026", f'<a class="int" href="{ai4se.FILE}">AI-driven Software Engineering →</a>', L(T("What generative AI is, how a language model arrives at its answer — and how LLMs can write models that a generator turns into running software. From neurons and transformers to embeddings, RAG, agents and harnesses — and grammar masking.", "Was generative KI ist, wie ein Sprachmodell zu seiner Antwort kommt — und wie LLMs Modelle schreiben können, aus denen ein Generator lauffähige Software macht. Vom Neuron und Transformer über Embeddings, RAG, Agenten und Harnesses bis zu Grammar Masking.")))}
       </ul>
 
       <div class="group mono" id="community">Community</div>
@@ -901,8 +925,8 @@ def main():
                 fh.write(html)
             print(f"wrote {os.path.join(sub, file) if sub else file}  ({len(html)} bytes)")
         # the AI4SE article (ai4se.py)
-        file, title, desc, body = ai4se.page(lang)
-        html = shell(lang, file, title, desc, body)
+        file, title, desc, body, scripts = ai4se.page(lang)
+        html = shell(lang, file, title, desc, body, scripts)
         with open(os.path.join(out, file), "w", encoding="utf8", newline="\n") as fh:
             fh.write(html)
         # one deeper page per project (project_pages.py, content in project_content.py)

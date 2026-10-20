@@ -23,17 +23,23 @@
   }, { rootMargin: "800px 0px" });
   io.observe(box);
 
-  // full screen: the native API where there is one, otherwise (iPhone) the box simply covers the window
+  // full screen: the native API where there is one, otherwise (iPhone) the box simply covers the window.
+  // Either way the box gets .full, so the CSS never depends on :fullscreen (unknown to some browsers).
   const fsBtn = box.querySelector("[data-fs]");
   const isFs = () => document.fullscreenElement === box || box.classList.contains("fs");
+  const label = fsBtn?.lastChild.textContent, exit = document.documentElement.lang === "de" ? " Vollbild beenden" : " exit full screen";
+  const sync = () => {
+    box.classList.toggle("full", isFs()); fsBtn?.setAttribute("aria-pressed", isFs());
+    if (fsBtn) { fsBtn.firstElementChild.textContent = isFs() ? "×" : "⤢"; fsBtn.lastChild.textContent = isFs() ? exit : label; }
+  };
   fsBtn?.addEventListener("click", () => {
     if (isFs()) { if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); box.classList.remove("fs"); }
-    else if (box.requestFullscreen && document.fullscreenEnabled) box.requestFullscreen().catch(() => box.classList.add("fs"));
+    else if (box.requestFullscreen && document.fullscreenEnabled) box.requestFullscreen().catch(() => { box.classList.add("fs"); sync(); });
     else box.classList.add("fs");
-    setTimeout(() => fsBtn.setAttribute("aria-pressed", isFs()), 60);
+    sync();
   });
-  document.addEventListener("fullscreenchange", () => fsBtn?.setAttribute("aria-pressed", isFs()));
-  addEventListener("keydown", e => { if (e.key === "Escape" && box.classList.contains("fs")) { box.classList.remove("fs"); fsBtn?.setAttribute("aria-pressed", false); } });
+  document.addEventListener("fullscreenchange", sync);
+  addEventListener("keydown", e => { if (e.key === "Escape" && box.classList.contains("fs")) { box.classList.remove("fs"); sync(); } });
 })();
 
 function initResearchMap(G, startIn) {

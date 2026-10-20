@@ -762,6 +762,20 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
   sync();
 })();
 
+// ---- wide diagrams (.dia-scroll): on phones they scroll sideways; the edges fade where there is more ----
+(() => {
+  document.querySelectorAll(".dia-scroll").forEach(el => {
+    const sync = () => {
+      const max = el.scrollWidth - el.clientWidth;
+      el.style.setProperty("--fl", `${Math.min(40, el.scrollLeft)}px`);
+      el.style.setProperty("--fr", `${Math.max(0, Math.min(40, max - el.scrollLeft))}px`);
+    };
+    el.addEventListener("scroll", sync, { passive: true });
+    addEventListener("resize", sync);
+    sync();
+  });
+})();
+
 // ---- project lifeline: scrolls sideways (wheel, drag, arrow keys) ----
 // When it comes into view it starts at the left and glides over to today (stops as soon as
 // the visitor takes over; reduced motion: straight to today). The vertical wheel moves the

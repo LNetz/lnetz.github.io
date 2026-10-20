@@ -62,8 +62,15 @@ def chip(x, y, label="AST"):
     return f'<rect class="box" x="{x}" y="{y}" width="40" height="22" rx="11"/><text x="{x + 20}" y="{y + 15}" text-anchor="middle" class="s">{label}</text>'
 
 
+def dia_scroll(svg):
+    """A wide diagram in a sideways-scrolling box; --vw (its viewBox width) sets its size on phones."""
+    m = re.search(r'viewBox="0 0 ([\d.]+)', svg)
+    vw = f' style="--vw:{m.group(1)}px"' if m else ""
+    return f'<div class="dia-scroll"{vw} tabindex="0">{svg}</div>'
+
+
 def figure(svg, caption, lang):
-    return f'''    <figure class="media"><div class="dia-scroll">{svg}</div>
+    return f'''    <figure class="media">{dia_scroll(svg)}
       <figcaption class="mono">{caption[lang]}</figcaption>
     </figure>
 '''
@@ -240,7 +247,7 @@ def esaca_diagram(lang, A):
   <text x="712" y="161" text-anchor="middle" class="s">{L(T("public", "öffentliche"))}</text>
   <text x="712" y="176" text-anchor="middle" class="s">cloud APIs</text>
 </svg>'''
-    return f'''    <figure class="media"><div class="dia-scroll">{svg}</div>
+    return f'''    <figure class="media">{dia_scroll(svg)}
       <figcaption class="mono">{L(T("Agents, code, secrets and models stay inside the organisation’s perimeter. The agent works in a sandbox and only ever sees placeholder credentials; a second container decides — and logs — what may leave.",
                                     "Agenten, Code, Secrets und Modelle bleiben innerhalb der eigenen Infrastruktur. Der Agent arbeitet in einer Sandbox und sieht nur Platzhalter-Zugangsdaten; ein zweiter Container entscheidet — und protokolliert —, was nach außen darf."))}</figcaption>
     </figure>
@@ -276,7 +283,7 @@ def chatty_diagram(lang, A):
   <text x="515" y="158">{L(T("see which topics are understood", "sehen, welche Themen verstanden"))}</text>
   <text x="515" y="173">{L(T("— and which aren’t", "werden — und welche nicht"))}</text>
 </svg>'''
-    return f'''    <figure class="media"><div class="dia-scroll">{svg}</div>
+    return f'''    <figure class="media">{dia_scroll(svg)}
       <figcaption class="mono">{L(T("Answers come from the lecture’s own material, not from the model’s general knowledge — and the questions students ask flow back to the lecturer.",
                                     "Antworten stammen aus dem Material der Vorlesung, nicht aus dem Allgemeinwissen des Modells — und die Fragen der Studierenden fließen zurück an die Dozierenden."))}</figcaption>
     </figure>
@@ -306,7 +313,7 @@ def golden_media(lang, A):
           <div class="mono faint">{L(T("description", "Beschreibung"))} · University</div>
           <p>{desc}</p>
         </blockquote>
-        <div class="uml">{uml_svg("golden-university.svg", L(T("UML class diagram of the University case: abstract class Employee with AdministrativeEmployee and ResearchAssociate, Lecturer as a subclass of ResearchAssociate, Faculty composed of Institutes, Projects linked through the association class Participation, and Lecturer teaches Course", "UML-Klassendiagramm des Falls University: abstrakte Klasse Employee mit AdministrativeEmployee und ResearchAssociate, Lecturer als Unterklasse von ResearchAssociate, Faculty aus Institutes zusammengesetzt, Projects über die Assoziationsklasse Participation verbunden, Lecturer teaches Course")))}</div>
+        <div class="uml dia-scroll" tabindex="0">{uml_svg("golden-university.svg", L(T("UML class diagram of the University case: abstract class Employee with AdministrativeEmployee and ResearchAssociate, Lecturer as a subclass of ResearchAssociate, Faculty composed of Institutes, Projects linked through the association class Participation, and Lecturer teaches Course", "UML-Klassendiagramm des Falls University: abstrakte Klasse Employee mit AdministrativeEmployee und ResearchAssociate, Lecturer als Unterklasse von ResearchAssociate, Faculty aus Institutes zusammengesetzt, Projects über die Assoziationsklasse Participation verbunden, Lecturer teaches Course")))}</div>
       </div>
       <figcaption class="mono">{L(T("One of the 45 cases: the natural-language description (left) and the reviewed reference model (right). Case <b>University</b>, contributed by the Business Informatics Group, TU Wien — CC BY 4.0.",
                                     "Einer der 45 Fälle: die natürlichsprachliche Beschreibung (links) und das geprüfte Referenzmodell (rechts). Fall <b>University</b>, beigetragen von der Business Informatics Group, TU Wien — CC BY 4.0."))}
@@ -360,8 +367,8 @@ PROJECTS = [
                 "<p>Banks, utilities, public authorities and defence suppliers face the same dilemma. Agentic coding promises large productivity gains, but a cloud-based agent can send source code and secrets to a foreign provider, delete data or pull in a malicious extension — and it ties the organisation to one vendor’s model, prices and roadmap. Banning the tools only pushes teams into shadow IT, where nobody measures what the agents actually deliver.</p>",
                 "<p>Banken, Versorger, Behörden und Rüstungszulieferer stehen vor demselben Dilemma. Agentisches Programmieren verspricht große Produktivitätsgewinne, aber ein cloudbasierter Agent kann Quellcode und Secrets an einen fremden Anbieter schicken, Daten löschen oder eine bösartige Erweiterung nachladen — und er bindet die Organisation an das Modell, die Preise und die Roadmap eines Anbieters. Ein Verbot treibt Teams nur in die Schatten-IT, wo niemand misst, was die Agenten wirklich leisten.</p>")),
             (T("The idea", "Die Idee"), T(
-                "<p>ESACA — the <b>European Sovereign Agentic Coding Appliance</b> — is a standardised system that brings coding agents into the organisation’s own perimeter: on-premises or fully air-gapped, with no data egress, no external API calls and no hidden telemetry. It is model-independent and favours sovereign models running on the customer’s own hardware. ESACA is an initiative of mgm technology partners and Fsas Technologies, a Fujitsu company.</p>",
-                "<p>ESACA — die <b>European Sovereign Agentic Coding Appliance</b> — ist ein standardisiertes System, das Coding-Agenten in die eigene Infrastruktur holt: on-premises oder vollständig air-gapped, ohne Datenabfluss, ohne externe API-Aufrufe, ohne versteckte Telemetrie. Es ist modellunabhängig und setzt bevorzugt auf souveräne Modelle auf der eigenen Hardware des Kunden. ESACA ist eine Initiative von mgm technology partners und Fsas Technologies, einem Fujitsu-Unternehmen.</p>")),
+                "<p>ESACA — the <b>European Sovereign Agentic Coding Appliance</b> — is a standardised system that brings coding agents into the organisation’s own perimeter: on-premises or fully air-gapped, with no data egress, no external API calls and no hidden telemetry. It is model-independent and favours sovereign models running on the customer’s own hardware. ESACA is an initiative of mgm technology partners and Fsas Technologies, a Fujitsu company. In the terms of my <a href=\"research-ai4se.html#harness\">article on AI-driven software engineering</a>, it is a harness for coding agents.</p>",
+                "<p>ESACA — die <b>European Sovereign Agentic Coding Appliance</b> — ist ein standardisiertes System, das Coding-Agenten in die eigene Infrastruktur holt: on-premises oder vollständig air-gapped, ohne Datenabfluss, ohne externe API-Aufrufe, ohne versteckte Telemetrie. Es ist modellunabhängig und setzt bevorzugt auf souveräne Modelle auf der eigenen Hardware des Kunden. ESACA ist eine Initiative von mgm technology partners und Fsas Technologies, einem Fujitsu-Unternehmen. In den Begriffen meines <a href=\"research-ai4se.html#harness\">Artikels über KI-getriebene Softwareentwicklung</a> ist es ein Harness für Coding-Agenten.</p>")),
             (T("The building blocks", "Die Bausteine"), lambda lang, A: pts(lang, [
                 T("<b>Sandbox</b> — the agent and the project run in one container, all outbound traffic goes through a second one. Access is deny-by-default, the agent only sees placeholder credentials, real secrets are injected on the way out, every decision is logged.",
                   "<b>Sandbox</b> — Agent und Projekt laufen in einem Container, der gesamte ausgehende Verkehr über einen zweiten. Zugriffe sind standardmäßig verboten, der Agent sieht nur Platzhalter-Zugangsdaten, echte Secrets werden erst auf dem Weg nach draußen eingesetzt, jede Entscheidung wird protokolliert."),
@@ -471,8 +478,8 @@ PROJECTS = [
                 "<p>General-purpose chatbots answer lecture questions with general knowledge: plausible, but often at the wrong level, with different notation than the course, and sometimes simply wrong. Lecturers, meanwhile, only find out what students did not understand when they grade the exam.</p>",
                 "<p>Allgemeine Chatbots beantworten Fragen zur Vorlesung mit Allgemeinwissen: plausibel, aber oft auf dem falschen Niveau, mit anderer Notation als im Kurs und manchmal schlicht falsch. Dozierende erfahren dagegen erst bei der Klausurkorrektur, was nicht verstanden wurde.</p>")),
             (T("How it works", "So funktioniert es"), T(
-                "<p>SE-Chatty is fed with the lecture’s own material — scripts, books, slides and videos. For every question it first retrieves the relevant passages and then lets the language model answer on that basis (retrieval-augmented generation). The answers therefore follow the course: its terms, its examples, its depth.</p>",
-                "<p>SE-Chatty wird mit dem Material der Vorlesung gefüttert — Skripte, Bücher, Folien und Videos. Zu jeder Frage sucht es zuerst die passenden Stellen heraus und lässt das Sprachmodell auf dieser Grundlage antworten (Retrieval-Augmented Generation). Die Antworten folgen so dem Kurs: seinen Begriffen, seinen Beispielen, seiner Tiefe.</p>")),
+                "<p>SE-Chatty is fed with the lecture’s own material — scripts, books, slides and videos. For every question it first retrieves the relevant passages and then lets the language model answer on that basis (<a href=\"research-ai4se.html#rag\">retrieval-augmented generation</a>). The answers therefore follow the course: its terms, its examples, its depth.</p>",
+                "<p>SE-Chatty wird mit dem Material der Vorlesung gefüttert — Skripte, Bücher, Folien und Videos. Zu jeder Frage sucht es zuerst die passenden Stellen heraus und lässt das Sprachmodell auf dieser Grundlage antworten (<a href=\"research-ai4se.html#rag\">Retrieval-Augmented Generation</a>). Die Antworten folgen so dem Kurs: seinen Begriffen, seinen Beispielen, seiner Tiefe.</p>")),
             (T("For students and lecturers", "Für Studierende und Dozierende"), lambda lang, A: pts(lang, [
                 T("<b>Students</b> ask questions at any time and prepare for the exam with generated questionnaires.",
                   "<b>Studierende</b> stellen jederzeit Fragen und bereiten sich mit generierten Fragebögen auf die Prüfung vor."),
@@ -597,8 +604,8 @@ PROJECTS = [
                     T("Energy management of buildings, and InviDas — comparing the privacy policies of wearables.",
                       "Energiemanagement von Gebäuden und InviDas — der Vergleich von Datenschutzerklärungen von Wearables."),
                 ])
-                + T("<p>In <a class=\"cite\" href=\"#Net24\">[Net24]</a>, MontiGem is the last link of a chain: an LLM turns a natural-language description into a class diagram, CD2GUI derives the GUI models, and MontiGem generates the application — from text to a running web app.</p>",
-                    "<p>In <a class=\"cite\" href=\"#Net24\">[Net24]</a> ist MontiGem das letzte Glied einer Kette: Ein LLM macht aus einer natürlichsprachlichen Beschreibung ein Klassendiagramm, CD2GUI leitet die GUI-Modelle ab, und MontiGem generiert die Anwendung — vom Text zur laufenden Web-App.</p>")[lang]),
+                + T("<p>In <a class=\"cite\" href=\"#Net24\">[Net24]</a>, MontiGem is the last link of a chain: an LLM turns a natural-language description into a class diagram, CD2GUI derives the GUI models, and MontiGem generates the application — from text to a running web app. <a href=\"research-ai4se.html#app\">How that works</a>.</p>",
+                    "<p>In <a class=\"cite\" href=\"#Net24\">[Net24]</a> ist MontiGem das letzte Glied einer Kette: Ein LLM macht aus einer natürlichsprachlichen Beschreibung ein Klassendiagramm, CD2GUI leitet die GUI-Modelle ab, und MontiGem generiert die Anwendung — vom Text zur laufenden Web-App. <a href=\"research-ai4se.html#app\">Wie das funktioniert</a>.</p>")[lang]),
         ],
         pubs=["BGK+24", "Net24", "NMR24", "CMNR24", "DHM+22", "GMNR21", "DGM+21", "GHK+20", "ANV+18"],
     ),

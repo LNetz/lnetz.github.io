@@ -129,6 +129,7 @@ def timeline(lang, A):
 {NL.join(runs)}
           </div>
         </div>
+        <p class="ll-hint mono" aria-hidden="true">← {L(T("swipe sideways", "seitlich wischen"))} →</p>
       </div>'''
 
 
