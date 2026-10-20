@@ -13,6 +13,11 @@ import os
 import re
 
 import ai4se
+import mde
+import dt
+import dt_figs
+import article_art
+
 import project_pages
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -22,6 +27,10 @@ NL = "\n"
 
 def T(en, de):
     return {"en": en, "de": de}
+
+# the topic card's link to part 3, only once that article is published (article_art.DT_PUBLISHED)
+DT_LINK = T(' <a class="int" href="research-dt.html">An introduction →</a>', ' <a class="int" href="research-dt.html">Eine Einführung →</a>') if article_art.DT_PUBLISHED else {"en": "", "de": ""}
+
 
 
 # =====================================================================
@@ -266,6 +275,41 @@ def row(label, title, text, role="", links=(), anchor=None):
             <h3>{title}{r}</h3>
             <p>{text}</p>{l}
           </div>
+        </li>'''
+
+
+# The article series on the research page: cards with a small drawing each (accent = the key idea),
+# set apart from the plain rows of the community and talks lists.
+ARTICLE_THUMBS = {
+    # a class diagram → a generator (two interlocking gears) → three generated pages
+    "mde": '''<rect class="b" x="14" y="30" width="62" height="58" rx="2"/><path d="M14 46H76M22 58H62M22 70H54"/>
+      <path class="a" d="M80 64H102"/><path class="a" d="M96 58L102 64L96 70"/>
+      <path class="a gear" d="M140.7 61.1L144.9 61.7L144.9 66.3L140.7 66.9L139.1 71.3L141.9 74.3L139.0 77.9L135.4 75.7L131.4 78.0L131.6 82.2L127.0 83.0L125.7 79.0L121.1 78.2L118.6 81.5L114.6 79.2L116.2 75.3L113.1 71.7L109.1 72.6L107.5 68.3L111.2 66.3L111.2 61.7L107.5 59.7L109.1 55.4L113.1 56.3L116.2 52.7L114.6 48.8L118.6 46.5L121.1 49.8L125.7 49.0L127.0 45.0L131.6 45.8L131.4 50.0L135.4 52.3L139.0 50.1L141.9 53.7L139.1 56.7Z"/><circle class="a" cx="126" cy="64" r="5"/>
+      <path class="gear" d="M158.3 41.7L161.0 43.3L159.5 46.5L156.5 45.4L153.9 47.6L154.3 50.7L150.8 51.5L149.8 48.5L146.5 47.7L144.3 50.0L141.5 47.8L143.2 45.1L141.8 42.1L138.6 41.8L138.6 38.2L141.8 37.9L143.2 34.9L141.5 32.2L144.3 30.0L146.5 32.3L149.8 31.5L150.8 28.5L154.3 29.3L153.9 32.4L156.5 34.6L159.5 33.5L161.0 36.7L158.3 38.3Z"/><circle cx="150" cy="40" r="3"/>
+      <path class="a" d="M150 64H170"/><path class="a" d="M164 58L170 64L164 70"/>
+      <rect class="b" x="176" y="22" width="50" height="34" rx="2"/><rect class="b" x="182" y="44" width="50" height="34" rx="2"/><rect class="b f" x="188" y="66" width="44" height="30" rx="2"/>
+      <path d="M194 76H224M194 84H216"/>''',
+    # a machine ⇄ its twin (dt_figs.thumb_dt)
+    "dt": dt_figs.thumb_dt(),
+    # a small neural network → the probability of the next token
+    "ai4se": '''<path d="M24 34L70 26M24 34L70 58M24 34L70 90M24 84L70 26M24 84L70 58M24 84L70 90M70 26L116 44M70 58L116 44M70 90L116 44M70 26L116 76M70 58L116 76M70 90L116 76"/>
+      <circle class="b" cx="24" cy="34" r="6"/><circle class="b" cx="24" cy="84" r="6"/><circle class="b" cx="70" cy="26" r="6"/><circle class="b" cx="70" cy="58" r="6"/><circle class="b" cx="70" cy="90" r="6"/>
+      <circle class="b f" cx="116" cy="44" r="7"/><circle class="b" cx="116" cy="76" r="7"/>
+      <path class="a" d="M128 59H146"/><path class="a" d="M140 53L146 59L140 65"/>
+      <rect class="f" x="156" y="28" width="68" height="9" rx="1"/><rect class="g" x="156" y="45" width="22" height="9" rx="1"/><rect class="g" x="156" y="62" width="12" height="9" rx="1"/><rect class="g" x="156" y="79" width="7" height="9" rx="1"/>''',
+}
+
+
+def article_card(lang, part, year, href, title, text, thumb, figures):
+    L = lambda x: x[lang] if isinstance(x, dict) else x
+    return f'''        <li>
+          <a href="{href}">
+            <svg class="thumb" viewBox="0 0 240 118" aria-hidden="true">{ARTICLE_THUMBS[thumb]}</svg>
+            <span class="meta mono">{L(T("Part", "Teil"))} {part} · {year}</span>
+            <span class="title">{L(title)}</span>
+            <span class="text">{L(text)}</span>
+            <span class="more mono">{figures} {L(T("interactive figures", "interaktive Abbildungen"))} · {L(T("read", "lesen"))} →</span>
+          </a>
         </li>'''
 
 
@@ -560,10 +604,10 @@ def research(lang):
     themes = [
         T(("LLMs for modeling", "Model synthesis in DSLs, grammar masking for syntactically valid output, how LLMs corrupt and repair textual models. <a class=\"int\" href=\"research-ai4se.html\">An introduction →</a>"),
           ("LLMs für die Modellierung", "Modellsynthese in DSLs, Grammar Masking für syntaktisch valide Ausgaben, wie LLMs textuelle Modelle beschädigen und reparieren. <a class=\"int\" href=\"research-ai4se.html\">Eine Einführung →</a>")),
-        T(("Model-driven engineering", "Generators and DSLs that stay maintainable when the model evolves."),
-          ("Modellgetriebene Entwicklung", "Generatoren und DSLs, die wartbar bleiben, wenn sich das Modell weiterentwickelt.")),
-        T(("Low-code &amp; digital twins", "Generating customized low-code platforms and cockpits for digital twins."),
-          ("Low-Code &amp; digitale Zwillinge", "Generierung maßgeschneiderter Low-Code-Plattformen und Cockpits für digitale Zwillinge.")),
+        T(("Model-driven engineering", "Generators and DSLs that stay maintainable when the model evolves. <a class=\"int\" href=\"research-mde.html\">An introduction →</a>"),
+          ("Modellgetriebene Entwicklung", "Generatoren und DSLs, die wartbar bleiben, wenn sich das Modell weiterentwickelt. <a class=\"int\" href=\"research-mde.html\">Eine Einführung →</a>")),
+        T(("Low-code &amp; digital twins", "Generating customized low-code platforms and cockpits for digital twins." + DT_LINK["en"]),
+          ("Low-Code &amp; digitale Zwillinge", "Generierung maßgeschneiderter Low-Code-Plattformen und Cockpits für digitale Zwillinge." + DT_LINK["de"])),
         T(("Information systems", "From model-driven prototype to full-size enterprise application — and retrofitting generation into existing systems."),
           ("Informationssysteme", "Vom modellgetriebenen Prototyp zur vollwertigen Unternehmensanwendung — und die nachträgliche Einführung von Generierung in bestehende Systeme.")),
     ]
@@ -573,7 +617,7 @@ def research(lang):
     # chapter markers: the page has grown long
     chapters = f'''
       <nav class="chapters mono" aria-label="{L(T("Chapters", "Kapitel"))}">
-        <a href="#topics">{L(T("Topics", "Themen"))}</a><a href="#articles">{L(T("Article", "Artikel"))}</a><a href="#community">Community</a><a href="#talks">{L(T("Talks", "Vorträge"))}</a><a href="#citation-map">{L(T("Citation map", "Zitationskarte"))}</a><a href="#publications">{L(T("Publications", "Publikationen"))}</a>
+        <a href="#topics">{L(T("Topics", "Themen"))}</a><a href="#articles">{L(T("Articles", "Artikel"))}</a><a href="#community">Community</a><a href="#talks">{L(T("Talks", "Vorträge"))}</a><a href="#citation-map">{L(T("Citation map", "Zitationskarte"))}</a><a href="#publications">{L(T("Publications", "Publikationen"))}</a>
       </nav>'''
     head = page_head("02", L(T("Research", "Forschung")), "",
         L(T("I research how <em>large language models</em> and <em>model-driven engineering</em> can make each other better: LLMs that write valid models, and models that keep LLM output in check.",
@@ -590,9 +634,11 @@ def research(lang):
 {NL.join(f"        <div><h4>{L(t)[0]}</h4><p>{L(t)[1]}</p></div>" for t in themes)}
       </div>
 
-      <div class="group mono" id="articles">{L(T("Article", "Artikel"))}</div>
-      <ul class="rows">
-{row("2024 — 2026", f'<a class="int" href="{ai4se.FILE}">AI-driven Software Engineering →</a>', L(T("What generative AI is, how a language model arrives at its answer — and how LLMs can write models that a generator turns into running software. From neurons and transformers to embeddings, RAG, agents and harnesses — and grammar masking.", "Was generative KI ist, wie ein Sprachmodell zu seiner Antwort kommt — und wie LLMs Modelle schreiben können, aus denen ein Generator lauffähige Software macht. Vom Neuron und Transformer über Embeddings, RAG, Agenten und Harnesses bis zu Grammar Masking.")))}
+      <div class="group mono" id="articles">{L(T("Articles", "Artikel"))}</div>
+      <ul class="articles">
+{article_card(lang, 1, "2026", mde.FILE, T("Model-Driven Software Engineering", "Modellgetriebene Softwareentwicklung"), T("What models, DSLs and generators are — and how MontiGem and CD2GUI turn one class diagram into a running web application.", "Was Modelle, DSLs und Generatoren sind — und wie MontiGem und CD2GUI aus einem Klassendiagramm eine laufende Webanwendung machen."), "mde", 7)}
+{article_card(lang, 2, "2024 — 2026", ai4se.FILE, T("AI-driven Software Engineering", "KI-getriebene Softwareentwicklung"), T("How a language model arrives at its answer, what agents and harnesses are — and how LLMs write models that a generator turns into software.", "Wie ein Sprachmodell zu seiner Antwort kommt, was Agenten und Harnesses sind — und wie LLMs Modelle schreiben, aus denen ein Generator Software macht."), "ai4se", 3)}
+{"" if not article_art.DT_PUBLISHED else article_card(lang, 3, "2026", dt.FILE, T("Digital Twins", "Digitale Zwillinge"), T("What a digital twin is — and what it is not: the chair’s definition, digital shadows, how a twin acts, and how to build twins with models.", "Was ein digitaler Zwilling ist — und was nicht: die Definition des Lehrstuhls, digitale Schatten, wie ein Zwilling handelt und wie man Zwillinge mit Modellen baut."), "dt", 5)}
       </ul>
 
       <div class="group mono" id="community">Community</div>
@@ -924,11 +970,12 @@ def main():
             with open(os.path.join(out, file), "w", encoding="utf8", newline="\n") as fh:
                 fh.write(html)
             print(f"wrote {os.path.join(sub, file) if sub else file}  ({len(html)} bytes)")
-        # the AI4SE article (ai4se.py)
-        file, title, desc, body, scripts = ai4se.page(lang)
-        html = shell(lang, file, title, desc, body, scripts)
-        with open(os.path.join(out, file), "w", encoding="utf8", newline="\n") as fh:
-            fh.write(html)
+        # the two articles (ai4se.py, mde.py)
+        for article in (ai4se, mde, dt):
+            file, title, desc, body, scripts = article.page(lang)
+            html = shell(lang, file, title, desc, body, scripts)
+            with open(os.path.join(out, file), "w", encoding="utf8", newline="\n") as fh:
+                fh.write(html)
         # one deeper page per project (project_pages.py, content in project_content.py)
         for i in range(len(project_pages.PROJECTS)):
             file, title, desc, body, scripts = project_pages.page(lang, i)

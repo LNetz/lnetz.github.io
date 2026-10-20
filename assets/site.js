@@ -15,6 +15,57 @@ const I18N = {
 };
 const UI = I18N[document.documentElement.lang] || I18N.en;
 
+// ---- chapters of this page in the index column, under the active page ----
+// Taken from the page's own chapter markers (nav.chapters). On an article, the sub chapters (h3[id])
+// of the chapter being read open below it. Runs before the menu block, so these links close the sheet too.
+(() => {
+  const here = document.querySelector(".index nav a.active");
+  const marks = [...document.querySelectorAll("nav.chapters a[href^='#']")];
+  if (!here || !marks.length) return;
+  const chapters = marks.map(a => ({ el: document.getElementById(a.hash.slice(1)), text: a.textContent.trim(), subs: [] }))
+    .filter(c => c.el);
+  // each h3 of an article belongs to the last chapter before it
+  document.querySelectorAll(".article h3[id]").forEach(h => {
+    const owner = chapters.filter(c => c.el.compareDocumentPosition(h) & Node.DOCUMENT_POSITION_FOLLOWING).pop();
+    if (owner) owner.subs.push({ el: h, text: h.textContent.trim() });
+  });
+  const ol = document.createElement("ol");
+  ol.className = "sub";
+  const link = (el, text) => { const a = document.createElement("a"); a.href = `#${el.id}`; a.textContent = text; return a; };
+  chapters.forEach(c => {
+    const li = document.createElement("li");
+    c.a = link(c.el, c.text);
+    li.append(c.a);
+    if (c.subs.length) {
+      const sub = document.createElement("ol");
+      c.subs.forEach(s => { const sli = document.createElement("li"); s.a = link(s.el, s.text); sli.append(s.a); sub.append(sli); });
+      li.append(sub);
+    }
+    c.li = li;
+    ol.append(li);
+  });
+  here.parentElement.append(ol);
+  // scroll spy: the last heading above the upper third of the window is the current one
+  const all = chapters.flatMap(c => [c, ...c.subs]);
+  let current = null;
+  const spy = () => {
+    const line = innerHeight * .33;
+    const now = all.filter(x => x.el.getBoundingClientRect().top < line).pop() || null;
+    if (now === current) return;
+    current = now;
+    all.forEach(x => x.a.classList.toggle("on", x === now));
+    chapters.forEach(c => {
+      const open = c === now || c.subs.includes(now);
+      c.li.classList.toggle("open", open);
+      if (open) c.a.classList.add("on");
+    });
+  };
+  let queued = false;
+  addEventListener("scroll", () => { if (!queued) { queued = true; requestAnimationFrame(() => { queued = false; spy(); }); } }, { passive: true });
+  addEventListener("resize", spy);
+  spy();
+})();
+
 // ---- mobile / tablet menu: the index column becomes a top bar with a full-screen sheet ----
 (() => {
   const index = document.getElementById("index");

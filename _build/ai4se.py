@@ -13,6 +13,7 @@ import json
 
 from project_content import _arrow_defs, box, dia_scroll
 from project_pages import pub_list
+import article_art
 
 NL = "\n"
 FILE = "research-ai4se.html"
@@ -583,7 +584,8 @@ def definition(term, short, lang):
 
 def body(lang, A):
     L = lambda x: x[lang]
-    gpts = [("CD4A Model Creator", "https://chatgpt.com/g/g-sRnmDgQvW-cd4a-class-diagram-creator", T("class diagrams in CD4A", "Klassendiagramme in CD4A")),
+    gpts = [("CD4A Class Diagram Creator", "https://chatgpt.com/g/g-sRnmDgQvW-cd4a-class-diagram-creator", T("class diagrams in CD4A", "Klassendiagramme in CD4A")),
+            ("GUI-DSL2 Model Creator", "https://chatgpt.com/g/g-OOGsSd6sA-gui-dsl2-model-creator", T("page models in GUI-DSL 2", "Seitenmodelle in GUI-DSL 2")),
             ("SysML v2 Model Creator", "https://chatgpt.com/g/g-3DkGCDlNM-sysml-v2-model-creator", T("SysML v2 models", "SysML-v2-Modelle")),
             ("MontiCore Expert", "https://chatgpt.com/g/g-Pgayc5wzx-monticore-expert", T("questions on MontiCore", "Fragen zu MontiCore"))]
     tries = "".join(f'<li><a href="{u}" target="_blank" rel="noopener">{n} ↗</a><span class="mono faint">{L(d)}</span></li>' for n, u, d in gpts)
@@ -685,9 +687,9 @@ def body(lang, A):
     # ---------------- 03 LLMs and models ----------------
     S.append(("mde", 2, T("LLMs and model-driven engineering", "LLMs und modellgetriebene Entwicklung"), L(T(
         f"""<p>Software engineering is a complex discipline with many hurdles: programming skills, experience in system modelling, domain knowledge and a lot of coordination between the stakeholders of the platform being built. Generative AI can already take over parts of this work and speed development up {ref(4)}. Assistants such as GitHub Copilot help programmers write parts of the source code. Far fewer approaches deal with modelling and generating whole systems.</p>
-<p>Generative methods can create systems, or parts of them, from textual models: a generator reads a model and produces source code from it. Depending on what the code is for, different modelling languages fit — class diagrams for data structures, sequence diagrams for processes.</p>""",
+<p>Generative methods can create systems, or parts of them, from textual models: a generator reads a model and produces source code from it. Depending on what the code is for, different modelling languages fit — class diagrams for data structures, sequence diagrams for processes. What models, DSLs and generators are is explained in <a href="research-mde.html">part 1 of this series</a>.</p>""",
         f"""<p>Softwareentwicklung ist eine komplexe Disziplin mit vielen Einstiegshürden: Programmierkenntnisse, Erfahrung in der Systemmodellierung, Domänenwissen und viel Abstimmung zwischen den Stakeholdern der zu entwickelnden Plattform. Generative KI kann uns schon heute Teile dieser Arbeit abnehmen und die Entwicklung beschleunigen {ref(4)}. Assistenten wie GitHub Copilot unterstützen Programmierer beim Schreiben von Teilen des Quellcodes. Deutlich weniger Ansätze befassen sich mit der Modellierung und Generierung ganzer Systeme.</p>
-<p>Generative Methoden können aus textuellen Modellen Systeme oder Teile davon erzeugen: Ein Generator liest ein Modell und erzeugt daraus Quellcode. Je nachdem, wofür der Code gedacht ist, passen unterschiedliche Modellierungssprachen — Klassendiagramme für Datenstrukturen, Sequenzdiagramme für Abläufe.</p>"""))))
+<p>Generative Methoden können aus textuellen Modellen Systeme oder Teile davon erzeugen: Ein Generator liest ein Modell und erzeugt daraus Quellcode. Je nachdem, wofür der Code gedacht ist, passen unterschiedliche Modellierungssprachen — Klassendiagramme für Datenstrukturen, Sequenzdiagramme für Abläufe. Was Modelle, DSLs und Generatoren sind, erklärt <a href="research-mde.html">Teil 1 dieser Reihe</a>.</p>"""))))
     S.append(("models", 3, T("Language models that write models", "Sprachmodelle, die Modelle schreiben"), L(T(
         f"""<p>Defining good models takes knowledge: of modelling concepts, of the syntax of the modelling language and of the use case. LLMs can help most with the first two. With prompt engineering we can teach an LLM a modelling language {cite("BDMN+24")} {cite("NMR24")} — combining few-shot learning {ref(5)}, retrieval-augmented generation {ref(6)} and instructions to turn natural-language input into a textual model in the language of our choice.</p>""",
         f"""<p>Gute Modelle zu definieren erfordert Vorwissen: über Modellierungskonzepte, über die Syntax der Modellierungssprache und über den Anwendungsfall. LLMs können vor allem bei den ersten beiden helfen. Mit Prompt Engineering können wir einem LLM eine Modellierungssprache beibringen {cite("BDMN+24")} {cite("NMR24")} — mit einer Kombination aus Few-Shot-Learning {ref(5)}, Retrieval-Augmented Generation {ref(6)} und Instruktionen, die natürlichsprachliche Eingaben in ein textuelles Modell in der Sprache unserer Wahl übersetzen.</p>"""))
@@ -705,8 +707,8 @@ def body(lang, A):
         + L(T("<p>Small open models running locally then produce valid models more than nine times out of ten — instead of between almost never and four times out of ten. The price is runtime. Masking needs access to the token probabilities, which is why it works with open models running on one’s own hardware.</p>",
               "<p>Kleine, lokal laufende offene Modelle liefern dann in mehr als neun von zehn Fällen gültige Modelle — statt zwischen fast nie und vier von zehn Mal. Der Preis ist die Laufzeit. Masking braucht Zugriff auf die Token-Wahrscheinlichkeiten; deshalb funktioniert es mit offenen Modellen auf der eigenen Hardware.</p>"))))
     S.append(("app", 3, T("From a sentence to an application", "Vom Satz zur Anwendung"), L(T(
-        f"""<p>Put together with model-driven engineering, this goes all the way: users describe their domain informally, an LLM derives the class diagrams, and a generator such as <a href="projects-montigem.html">MontiGem</a> turns them into a complete information system {cite("NMR24")} {cite("Net24")}.</p>""",
-        f"""<p>Zusammen mit modellgetriebener Softwareentwicklung reicht das bis zum Ende: Nutzer beschreiben ihre Domäne informell, ein LLM leitet daraus Klassendiagramme ab, und ein Generator wie <a href="projects-montigem.html">MontiGem</a> macht daraus ein vollständiges Informationssystem {cite("NMR24")} {cite("Net24")}.</p>"""))
+        f"""<p>Put together with model-driven engineering, this goes all the way: users describe their domain informally, an LLM derives the class diagrams, and a generator such as <a href="research-mde.html#montigem">MontiGem</a> turns them into a complete information system {cite("NMR24")} {cite("Net24")}.</p>""",
+        f"""<p>Zusammen mit modellgetriebener Softwareentwicklung reicht das bis zum Ende: Nutzer beschreiben ihre Domäne informell, ein LLM leitet daraus Klassendiagramme ab, und ein Generator wie <a href="research-mde.html#montigem">MontiGem</a> macht daraus ein vollständiges Informationssystem {cite("NMR24")} {cite("Net24")}.</p>"""))
         + dia_ai_mde(lang)
         + L(T(f"<p>Models help far beyond generating software artefacts. Requirements can be translated from natural language into a formal language a computer can analyse; contradictions and redundancies found there can be translated back into natural language by an LLM. And because a generated model can be analysed and checked, many sources of error are ruled out before a single line of code exists {cite('NKR+25')}.</p>",
               f"<p>Modelle helfen weit über die Generierung von Software-Artefakten hinaus. Anforderungen lassen sich aus natürlicher Sprache in eine formale, vom Computer analysierbare Sprache übersetzen; dort gefundene Widersprüche und Redundanzen kann ein LLM wieder in natürliche Sprache zurückübersetzen. Und weil sich ein generiertes Modell analysieren und prüfen lässt, lassen sich viele Fehlerquellen ausschließen, bevor auch nur eine Zeile Code existiert {cite('NKR+25')}.</p>"))))
@@ -729,6 +731,12 @@ def body(lang, A):
     return toc, NL.join(out), refs
 
 
+def series_line(lang):
+    """Part 2 of the series with the MDE article (mde.py renders the same line)."""
+    from mde import series
+    return series(lang, FILE)
+
+
 def page(lang):
     """Returns (file, title, description, body, scripts) for build.py."""
     L = lambda x: x[lang]
@@ -743,8 +751,10 @@ def page(lang):
       </div>
       <p class="lead">{L(T("What is this “new” AI, how does it work — and where does it actually help in building software? An introduction from neurons to agents and <em>language models that write models</em>.",
                           "Was ist diese „neue“ KI, wie funktioniert sie — und wo hilft sie beim Bauen von Software wirklich? Eine Einführung vom Neuron über Agenten bis zu <em>Sprachmodellen, die Modelle schreiben</em>."))}</p>
+      {series_line(lang)}
       <nav class="chapters mono" aria-label="{L(T("Chapters", "Kapitel"))}">{toc}</nav>
     </header>
+    {article_art.hero_ai4se(lang)}
     <article class="article">
 {sections}
       <section class="art-sec art-refs">
