@@ -68,18 +68,40 @@ def _json(data):
 
 
 # glyphs used in several figures (drawn around their own origin)
-def _machine(x, y, s=1.0, cls=""):
-    """An injection-moulding machine: a long body with a hopper and a control panel."""
-    return (f'<g class="glyph {cls}" transform="translate({x} {y}) scale({s})">'
-            '<rect class="box" x="0" y="18" width="92" height="30" rx="3"/><path class="box" d="M14 18V6h18v12"/>'
-            '<path class="box" d="M10 6h26l-4-6h-18z"/><rect class="box" x="60" y="4" width="22" height="14" rx="2"/>'
-            '<path class="ln" d="M64 9h14M64 13h9"/><path class="ln" d="M8 48v6M84 48v6M2 54h88"/></g>')
+IMM_W, IMM_H = 320, 120          # the machine's own size before scaling
 
 
-def _car(x, y, s=1.0):
-    return (f'<g class="glyph" transform="translate({x} {y}) scale({s})">'
-            '<path class="box" d="M2 40L10 26L36 22L50 10H92L112 22L128 26L134 40Z"/><path class="ln" d="M54 13H88L102 22H44Z"/>'
-            '<circle class="box" cx="32" cy="40" r="9"/><circle class="box" cx="106" cy="40" r="9"/></g>')
+def imm_parts(sensors=False, out=False):
+    """The running example: an injection-moulding machine, drawn after the chair's papers (BDH20 and slides): control cabinet,
+    clamping unit with the mould between tie bars, the user interface on its arm, injection unit with barrel, heater bands and
+    hopper, all on the machine bed. 320 × 120 units, clamping unit left, injection unit right. Each part is a <g data-p>,
+    so figures can light one up. sensors: accent dots where the twin's data comes from; out: a conveyor with moulded parts."""
+    p = {
+        "cabinet": '<rect class="box" x="0" y="50" width="34" height="62" rx="2"/><rect class="box" x="6" y="57" width="22" height="11" rx="1"/><path class="ln" d="M9 61h12M9 64h8"/>'
+                   '<circle class="box" cx="11" cy="78" r="3"/><circle class="box" cx="23" cy="78" r="3"/><path class="ln" d="M6 92h22M6 98h22M34 96h8"/>',
+        "bed": '<path class="box" d="M42 84H276V110H42Z"/><path class="ln" d="M42 92H276"/><rect class="box" x="98" y="96" width="62" height="10" rx="1"/>'
+               '<path class="ln" d="M50 110v6M268 110v6M46 116h226"/>',
+        "clamp": '<rect class="box" x="44" y="46" width="44" height="38" rx="2"/><path class="ln" d="M52 56h28M52 74h28"/><rect class="box" x="88" y="58" width="16" height="14" rx="1"/>'
+                 '<rect class="box" x="104" y="32" width="70" height="52" rx="2"/><path class="ln dash" d="M110 38h58v40h-58z"/>',
+        "mould": '<path class="ln" d="M108 48H170M108 68H170"/><rect class="box" x="122" y="42" width="14" height="32" rx="1"/><rect class="box" x="137" y="42" width="14" height="32" rx="1"/>'
+                 '<path class="ln hl" d="M136.5 40V76"/>',
+        "hmi": '<path class="ln" d="M151 26V32"/><rect class="box" x="134" y="6" width="34" height="20" rx="2"/><path class="ln" d="M139 12h20M139 16h14M139 20h17"/>',
+        "inject": '<path class="box" d="M170 54H178V62H170Z"/><rect class="box" x="178" y="52" width="48" height="12" rx="1"/>'
+                  '<path class="ln" d="M186 52v12M194 52v12M210 52v12M218 52v12"/>'
+                  '<rect class="box" x="226" y="44" width="48" height="28" rx="2"/><path class="ln" d="M232 52h36M232 58h36M232 64h36"/>',
+        "hopper": '<path class="box" d="M188 22H216L208 38H196Z"/><rect class="box" x="198" y="38" width="8" height="14"/>',
+    }
+    if sensors:
+        p["sensors"] = ('<circle class="sens" cx="143.5" cy="58" r="3"/><circle class="sens" cx="202" cy="58" r="3"/><circle class="sens" cx="174" cy="58" r="3"/>')
+    if out:
+        p["out"] = ('<path class="ln" d="M278 100H318"/><circle class="box" cx="284" cy="103" r="3"/><circle class="box" cx="312" cy="103" r="3"/>'
+                    '<rect class="box" x="288" y="90" width="9" height="9" rx="1"/><rect class="box" x="302" y="90" width="9" height="9" rx="1"/>')
+    return "".join(f'<g data-p="{k}">{v}</g>' for k, v in p.items())
+
+
+def _machine(x, y, s=1.0, cls="", sensors=False, out=False):
+    """The injection-moulding machine (imm_parts), placed at (x, y) and scaled; strokes keep their width (.imm in style.css)."""
+    return f'<g class="glyph imm {cls}" transform="translate({x} {y}) scale({s})">{imm_parts(sensors, out)}</g>'
 
 
 def _person(x, y):
@@ -135,7 +157,7 @@ def fig_refarch(lang):
     m = 'marker-end="url(#dtc)"'
     svg = f'''<svg class="dia" viewBox="0 0 860 230" role="img" aria-label="{L(T("Reference architecture: gateways connect the machine; inside the twin, self-adaptivity services, process-awareness services and an optimizer work on a database; a cockpit backend and frontend connect the users", "Referenzarchitektur: Gateways verbinden die Maschine; im Zwilling arbeiten Selbstadaptivitäts-Services, prozessbewusste Services und ein Optimierer auf einer Datenbank; Cockpit-Backend und -Frontend verbinden die Nutzer"))}">
   {_arrow_defs("dtc")}
-  {_machine(6, 84, .8)}
+  {_machine(4, 94, .25)}
   <path class="ln" d="M84 110H112" {m}/>
   {box(116, 86, 96, 48, "Gateways", "OPC UA · MQTT")}
   <path class="ln" d="M212 110H238" {m}/>
@@ -225,20 +247,20 @@ def demo_ladder(lang):
     """d1: model → shadow → twin, Kritzinger's data-flow view; and the human-in-the-loop case where definitions differ."""
     L = lambda x: x[lang]
     states = [
-        ("model", T("digital model", "digitales Modell"), "manual", "manual", T("“no automated data flows … such as a CAD model of a car”", "„keine automatisierten Datenflüsse … etwa ein CAD-Modell eines Autos“"), f"Kritzinger {r('Krit')}, via {r('PZC25')}"),
-        ("shadow", T("digital shadow", "digitaler Schatten"), "auto", "manual", T("“automated data flow from the actual system to the digital object … mileage, speed, on a modern car’s digital dashboard”", "„automatisierter Datenfluss vom realen System zum digitalen Objekt … Kilometerstand, Geschwindigkeit, im digitalen Armaturenbrett eines modernen Autos“"), f"Kritzinger {r('Krit')}, via {r('PZC25')}"),
-        ("twin", T("digital twin", "digitaler Zwilling"), "auto", "auto", T("“automated data flow back from the digital object to the actual system as well”", "„automatisierter Datenfluss auch zurück vom digitalen Objekt zum realen System“"), f"Kritzinger {r('Krit')}, via {r('PZC25')}"),
+        ("model", T("digital model", "digitales Modell"), "manual", "manual", T("No automated data flow in either direction. Example: the CAD model of the mould — when the machine changes, someone updates the model by hand.", "Kein automatischer Datenfluss, in keine Richtung. Beispiel: das CAD-Modell der Form — ändert sich die Maschine, aktualisiert es jemand von Hand."), f"{L(T('levels after Kritzinger', 'Stufen nach Kritzinger'))} {r('Krit')} {L(T('via', 'über'))} {r('PZC25')} · {L(T('example: ours', 'Beispiel: unseres'))}"),
+        ("shadow", T("digital shadow", "digitaler Schatten"), "auto", "manual", T("Data flows automatically from the machine to the digital object. Example: barrel temperatures and injection pressure on a live dashboard — but a new setting is still typed in at the machine.", "Daten fließen automatisch von der Maschine zum digitalen Objekt. Beispiel: Zylindertemperaturen und Einspritzdruck auf einem Live-Dashboard — eine neue Einstellung wird aber weiter an der Maschine eingetippt."), f"{L(T('levels after Kritzinger', 'Stufen nach Kritzinger'))} {r('Krit')} {L(T('via', 'über'))} {r('PZC25')} · {L(T('example: ours', 'Beispiel: unseres'))}"),
+        ("twin", T("digital twin", "digitaler Zwilling"), "auto", "auto", T("Data also flows back automatically. Example: the twin lowers the setpoint of a heating band when the barrel runs too hot — nobody types it in.", "Daten fließen auch automatisch zurück. Beispiel: Der Zwilling senkt den Sollwert eines Heizbands, wenn der Zylinder zu heiß läuft — niemand tippt ihn ein."), f"{L(T('levels after Kritzinger', 'Stufen nach Kritzinger'))} {r('Krit')} {L(T('via', 'über'))} {r('PZC25')} · {L(T('example: ours', 'Beispiel: unseres'))}"),
         ("human", T("Kritzinger: shadow · the chair: twin", "Kritzinger: Schatten · der Lehrstuhl: Zwilling"), "auto", "human", T("The way back runs through a person who reads a proposal and acts on it. For Kritzinger that is only a shadow; the chair’s definition counts indirect control by informing users.", "Der Rückweg läuft über einen Menschen, der einen Vorschlag liest und handelt. Für Kritzinger ist das nur ein Schatten; die Definition des Lehrstuhls zählt indirekte Steuerung über informierte Nutzer mit."), f"{r('essay')} {r('Mic25')}"),
     ]
     data = {"states": [{"id": i, "label": L(lab), "up": up, "down": dn, "quote": L(q), "src": s} for i, lab, up, dn, q, s in states]}
     btn = [T("model", "Modell"), T("shadow", "Schatten"), T("twin", "Zwilling"), T("person in between", "Mensch dazwischen")]
     buttons = "".join(f'<button type="button" data-v="{k}" aria-pressed="{"true" if k == 1 else "false"}">{L(b)}</button>' for k, b in enumerate(btn))
-    svg = f'''<svg class="dia ladder" viewBox="0 0 420 150" role="img" aria-label="{L(T("A car and a digital object, connected by an arrow up and an arrow back", "Ein Auto und ein digitales Objekt, verbunden durch einen Pfeil hin und einen zurück"))}">
-  {_car(4, 52, .95)}<text class="s" x="66" y="128" text-anchor="middle">{L(T("the original system", "das Originalsystem"))}</text>
+    svg = f'''<svg class="dia ladder" viewBox="0 0 420 150" role="img" aria-label="{L(T("An injection-moulding machine and a digital object, connected by an arrow up and an arrow back", "Eine Spritzgießmaschine und ein digitales Objekt, verbunden durch einen Pfeil hin und einen zurück"))}">
+  {_machine(0, 52, .5, sensors=True)}<text class="s" x="80" y="128" text-anchor="middle">{L(T("the original system", "das Originalsystem"))}</text>
   <rect class="box" x="290" y="34" width="120" height="78" rx="4"/><circle class="ln" cx="322" cy="66" r="16"/><path class="ln" d="M322 66l9-8"/><rect class="zone" x="346" y="54" width="52" height="10"/><rect class="zone" x="346" y="72" width="36" height="10"/>
   <text class="s" x="350" y="128" text-anchor="middle">{L(T("the digital object", "das digitale Objekt"))}</text>
-  <g class="arr up" data-a="up">{_arrow(150, 56, 282, 56)}<text class="s alab" x="216" y="46" text-anchor="middle"></text></g>
-  <g class="arr down" data-a="down">{_arrow(282, 98, 150, 98)}<text class="s alab" x="216" y="118" text-anchor="middle"></text>{_person(216, 100)}</g>
+  <g class="arr up" data-a="up">{_arrow(172, 56, 282, 56)}<text class="s alab" x="227" y="46" text-anchor="middle"></text></g>
+  <g class="arr down" data-a="down">{_arrow(282, 98, 172, 98)}<text class="s alab" x="227" y="118" text-anchor="middle"></text>{_person(227, 100)}</g>
 </svg>'''
     s0 = data["states"][1]
     words = {k: L(v) for k, v in dict(manual=T("manual", "manuell"), auto=T("automatic", "automatisch"), human=T("via a person", "über einen Menschen")).items()}
@@ -272,7 +294,7 @@ def demo_anatomy(lang):
   <g class="part" data-k="update"><circle class="box" cx="56" cy="216" r="11"/><path class="ln" d="M56 209v7l5 3"/><text class="s" x="72" y="220">{L(T("updated regularly", "regelmäßig aktualisiert"))}</text></g>
   <g class="part" data-k="shadows">{shadows}<text class="s" x="236" y="100">{L(T("DIGITAL SHADOWS", "DIGITALE SCHATTEN"))}</text></g>
   <g class="part" data-k="purpose">{purpose}</g>
-  <g class="part" data-k="original"><rect class="box" x="22" y="276" width="392" height="44" rx="4"/>{_machine(40, 268, .62)}<text class="t" x="118" y="302">{L(T("the original system", "das Originalsystem"))}</text></g>
+  <g class="part" data-k="original"><rect class="box" x="22" y="276" width="392" height="44" rx="4"/>{_machine(32, 280, .3)}<text class="t" x="144" y="302">{L(T("the original system", "das Originalsystem"))}</text></g>
   <g class="part" data-k="shadows">{_arrow(300, 274, 300, 200)}<text class="s" x="306" y="262">{L(T("data", "Daten"))}</text></g>
   <g class="part" data-k="info">{_arrow(150, 240, 150, 272)}<text class="s" x="156" y="262">{L(T("information", "Information"))}</text></g>
   <g class="part" data-k="commands">{_arrow(240, 240, 240, 272, "ln hl")}<text class="s a" x="246" y="262">{L(T("commands", "Befehle"))}</text></g>
@@ -285,7 +307,7 @@ def demo_anatomy(lang):
     chips = "".join(f'<button type="button" class="chip" data-k="{k}">{L(t)}</button>' for k, t in clauses)
     presets = [
         ("cad", T("a CAD file", "eine CAD-Datei"), ["models"], T("Models only — a “digital model” in Kritzinger’s terms. No data from the real system, no services, no way back.", "Nur Modelle — ein „digitales Modell“ im Sinne Kritzingers. Keine Daten aus dem realen System, keine Services, kein Rückweg.")),
-        ("dash", T("a car dashboard", "ein Auto-Armaturenbrett"), ["shadows", "update", "purpose", "cockpit", "original", "info"], T("Live data shown for one purpose — a digital shadow with a display. No models, no commands.", "Live-Daten, für einen Zweck angezeigt — ein digitaler Schatten mit Anzeige. Keine Modelle, keine Befehle.")),
+        ("dash", T("a live dashboard", "ein Live-Dashboard"), ["shadows", "update", "purpose", "cockpit", "original", "info"], T("The machine’s temperatures and pressures, shown for one purpose — a digital shadow with a display. No models, no commands.", "Temperaturen und Drücke der Maschine, für einen Zweck angezeigt — ein digitaler Schatten mit Anzeige. Keine Modelle, keine Befehle.")),
         ("sim", T("a simulation", "eine Simulation"), ["models", "svc-sim", "software"], T("Models and one service, but no data from the real system: “not only a simulation model”.", "Modelle und ein Service, aber keine Daten aus dem realen System: „nicht nur ein Simulationsmodell“.")),
         ("wind", T("the wind-turbine cockpit", "das Windkraft-Cockpit"), ["models", "software", "cockpit", "update", "purpose"], T("Models, a cockpit and agreed parameters — but no traces of a real turbine and no commands yet: a development twin, a twin of a type.", "Modelle, ein Cockpit und vereinbarte Parameter — aber keine Spuren einer echten Anlage und noch keine Befehle: ein Entwicklungszwilling, ein Zwilling eines Typs.")),
         ("twin", T("the twin", "der Zwilling"), ANATOMY_KEYS + [k for k, _ in tabs], T("Everything the definition asks for: models and shadows, kept up to date for a purpose, services that use them, and a way back — information and commands.", "Alles, was die Definition verlangt: Modelle und Schatten, zweckgerichtet aktuell gehalten, Services, die sie nutzen, und ein Rückweg — Informationen und Befehle.")),
@@ -325,7 +347,14 @@ def demo_shadows(lang):
     thr = Y(500)
     mx = max(range(24, 48), key=lambda k: vals[k])
     ticks = "".join(f'<path class="tick{"" if ok else " nok"}" d="M{X(k * 47 / 29):.1f} 128v{6 if ok else 10}"/>' for k, ok in enumerate(parts))
-    svg = f'''<svg class="dia trace" viewBox="0 0 {W} {H}" role="img" aria-label="{L(T("Illustrative data: the temperature of machine B over 48 hours with a threshold, and the parts it produced, marked OK or not OK", "Schematische Daten: die Temperatur von Maschine B über 48 Stunden mit einer Schwelle, und die produzierten Teile, als in Ordnung oder nicht in Ordnung markiert"))}">
+    # above the trace: machine B, and where each shadow's data come from (parts on the conveyor · the barrel's temperature sensor)
+    src = (f'{_machine(20, 6, .4, out=True)}'
+           f'<circle class="ov ov1 ring" cx="142" cy="44" r="11"/><circle class="ov ov2 ov3 ring" cx="101" cy="29.2" r="7"/><circle class="sens" cx="101" cy="29.2" r="2.4"/>'
+           f'<text class="s ov ov1" x="176" y="24">{L(T("A: rate typed in by hand", "A: Quote von Hand eingetippt"))}</text>'
+           f'<text class="s ov ov1" x="176" y="38">{L(T("B: parts checked by sensors", "B: Teile per Sensor geprüft"))}</text>'
+           f'<text class="s ov ov2 ov3" x="176" y="32">tempSensor[2] · {L(T("plasticising unit", "Plastifiziereinheit"))}</text>')
+    svg = f'''<svg class="dia trace" viewBox="0 0 {W} {H + 64}" role="img" aria-label="{L(T("Illustrative data: the temperature of machine B over 48 hours with a threshold, and the parts it produced, marked OK or not OK", "Schematische Daten: die Temperatur von Maschine B über 48 Stunden mit einer Schwelle, und die produzierten Teile, als in Ordnung oder nicht in Ordnung markiert"))}">
+  {src}<g transform="translate(0 64)">
   <g class="ov ov1">{"".join(f'<path class="nokhi" d="M{X(k * 47 / 29):.1f} 124v16"/>' for k, ok in enumerate(parts) if not ok)}</g>
   <rect class="ov ov2 win" x="{X(24):.1f}" y="14" width="{X(47) - X(24):.1f}" height="100"/>
   <path class="ln dash" d="M{x0} {thr:.1f}H{W - x0}"/><text class="s" x="{x0 + 2}" y="{thr - 4:.1f}">500</text>
@@ -334,7 +363,7 @@ def demo_shadows(lang):
   <circle class="ov ov3 pt" cx="{X(46):.1f}" cy="{Y(vals[46]):.1f}" r="4"/><circle class="ov ov3 pt" cx="{X(47):.1f}" cy="{Y(vals[47]):.1f}" r="4"/>
   <text class="s" x="{x0}" y="12">{L(T("MACHINE B · temperature, 48 h", "MASCHINE B · Temperatur, 48 h"))}</text>
   {ticks}<text class="s" x="{x0}" y="148">{L(T("parts: OK · not OK", "Teile: OK · nicht OK"))}</text>
-</svg>'''
+</g></svg>'''
     states = [
         (T("Which machine for part X?", "Welche Maschine für Teil X?"),
          [("Asset", T("machines A and B", "Maschinen A und B")), ("Purpose", T("lowest expected rejection rate", "niedrigste erwartete Ausschussquote")),
@@ -385,7 +414,7 @@ def demo_loop(lang):
   <rect class="zone line" x="10" y="10" width="380" height="186" rx="6"/>
   {boxes}
   <g class="lp" data-c="lake"><path class="box" d="M136 230v26c0 5 18 8 40 8s40-3 40-8v-26"/><ellipse class="box" cx="176" cy="230" rx="40" ry="8"/><text class="s" x="176" y="282" text-anchor="middle">data lake</text></g>
-  <g class="lp" data-c="cpps">{_machine(300, 226, .7)}<text class="s" x="332" y="282" text-anchor="middle">{L(T("the machine", "die Maschine"))}</text></g>
+  <g class="lp" data-c="cpps">{_machine(286, 230, .28)}<text class="s" x="332" y="282" text-anchor="middle">{L(T("the machine", "die Maschine"))}</text></g>
   {lines}
 </svg>'''
     states = [
@@ -465,9 +494,9 @@ def _check_features(feat):
 
 
 def thumb_dt():
-    """Small pictogram for the research page card: a machine ⇄ a twin with models, shadows and a cockpit."""
-    return ('<rect class="b" x="16" y="56" width="74" height="30" rx="2"/><path d="M28 56V44h16v12M24 44h24l-4-6H28z"/><rect class="b" x="64" y="42" width="20" height="12" rx="1"/>'
-            '<path class="a" d="M96 64H140"/><path class="a" d="M134 58L140 64L134 70"/><path d="M140 82H96"/><path d="M102 76L96 82L102 88"/>'
-            '<rect class="b" x="148" y="22" width="80" height="80" rx="4"/><rect class="f" x="156" y="30" width="64" height="10" rx="1"/>'
+    """Small pictogram for the research page card: the injection-moulding machine ⇄ a twin with models, shadows and a cockpit."""
+    return (f'<g class="imm" transform="translate(4 50) scale(.38)">{imm_parts(sensors=True)}</g>'
+            '<path class="a" d="M128 62H144"/><path class="a" d="M139 57L144 62L139 67"/><path d="M144 80H128"/><path d="M133 75L128 80L133 85"/>'
+            '<rect class="b" x="150" y="22" width="80" height="80" rx="4"/><rect class="f" x="158" y="30" width="64" height="10" rx="1"/>'
             '<rect class="b" x="156" y="48" width="28" height="20" rx="1"/><rect class="b" x="160" y="52" width="28" height="20" rx="1"/>'
             '<rect class="b" x="194" y="50" width="26" height="8" rx="4"/><rect class="b" x="194" y="62" width="26" height="8" rx="4"/><path d="M156 88H220M156 94H204"/>')

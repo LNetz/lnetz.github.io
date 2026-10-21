@@ -1086,6 +1086,29 @@ body.menu-open .to-top, .lightbox.open ~ .to-top { display: none; }
 .demo-ctrl .temp { display: inline-flex; align-items: center; gap: 8px; }
 .demo-ctrl .temp input { width: 110px; }
 .demo-ctrl .temp output { color: var(--ink); min-width: 2.2em; }
+
+/* MDE d0: the generator, five levels deep (mde_levels.py, mde.js). The SVG keeps its shape on every level. */
+.lv-svg .lv-el .sh { fill: var(--bg); stroke: var(--ink-3); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.lv-svg .lv-el.hl .sh { stroke: var(--accent); }
+.lv-svg .k-zone .sh { fill: var(--tile); stroke: none; }
+.lv-svg .k-zone.line .sh { fill: none; stroke: var(--ink-3); stroke-dasharray: 3 4; }
+.lv-svg .k-chip .sh { fill: color-mix(in srgb, var(--bg) 70%, var(--tile)); }
+.lv-svg .k-label .t { font-size: 15px; }
+.lv-ctrl .lv-bs { display: inline-flex; align-items: center; gap: 2px; }
+.lv-ctrl .lv-bs button {
+  min-width: 30px; height: 28px; padding: 0 6px; border: 1px solid transparent; border-radius: 3px;
+  background: none; color: var(--ink-3); font: inherit; cursor: pointer;
+}
+.lv-ctrl .lv-bs button:hover:not(:disabled) { color: var(--ink); border-color: var(--rule); }
+.lv-ctrl .lv-bs button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
+.lv-ctrl .lv-bs button:disabled { opacity: .35; cursor: default; }
+.lv-ctrl .where {                  /* room for two lines (no jump between levels), centred next to the buttons */
+  flex: 1 1 260px; min-height: 3.4em; color: var(--ink-2); display: flex; align-items: center;
+}
+.lv-ctrl .where > span { display: block; }
+.lv-svg .lv-flow circle { fill: var(--accent); stroke: var(--bg); stroke-width: 1.5; }   /* the flow along the arrows */
+@media (max-width: 600px) { .lv-ctrl .where { min-height: 6.6em; } }
+.lv-ctrl .where b { color: var(--accent); font-weight: 400; }
 .nt-cur { color: var(--accent); animation: blink 1s steps(1) infinite; }
 @keyframes blink { 50% { opacity: 0; } }
 .demo .new { color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); border-radius: 2px; }
@@ -1557,6 +1580,8 @@ details.curious p, details.curious li { font-size: 14px; }
 .trace .pt { fill: var(--bg); stroke: var(--accent); stroke-width: 2; }
 .trace .nokhi { stroke: var(--accent); stroke-width: 4; opacity: .5; }
 .sh-grid.s1 .ov1, .sh-grid.s2 .ov2, .sh-grid.s3 .ov3 { opacity: 1; }
+.trace .ring { fill: none; stroke: var(--accent); stroke-width: 1.4; }
+.trace .sens { fill: var(--accent); }
 .sh-facts { display: grid; gap: 4px; margin-bottom: 10px; }
 .sh-facts div { display: grid; grid-template-columns: 5.5em 1fr; gap: 8px; font-size: 13px; }
 .sh-facts .mono { color: var(--ink-3); }
@@ -1602,3 +1627,15 @@ details.curious p, details.curious li { font-size: 14px; }
 .art-sec p.wind-rail { font-size: var(--fs-s); color: var(--accent); margin: 4px 0 0; }
 @media (max-width: 760px) { .wind { grid-template-columns: minmax(0, 1fr); } }
 .dia .glyph .box { fill: var(--bg); }
+/* the running example, an injection-moulding machine (dt_figs.imm_parts): hairlines at every scale */
+.dia .imm .box, .dia .imm .ln { vector-effect: non-scaling-stroke; }
+.dia .imm .sens { fill: var(--accent); }
+.dia .imm [data-p="bed"] .box { fill: var(--tile); }
+.dia .imm [data-p="mould"] .box { fill: color-mix(in srgb, var(--accent) 10%, var(--bg)); }
+.dia .callout { stroke: var(--ink-3); stroke-width: .8; }
+.hero text.on { fill: var(--bg); }
+.art-hero .hero-tall { display: none; }                       /* the DT hero: stacked on phones */
+@media (max-width: 600px) { .art-hero .hero-wide:has(+ .hero-tall) { display: none; } .art-hero .hero-tall { display: block; } }
+.articles .thumb .imm path, .articles .thumb .imm rect, .articles .thumb .imm circle { stroke-width: 3; }   /* drawn at .38: as thick as the other cards */
+.articles .thumb .imm .box { fill: var(--bg); }
+.articles .thumb .imm .sens { fill: var(--accent); stroke: none; }

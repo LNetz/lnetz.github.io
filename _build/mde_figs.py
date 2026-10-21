@@ -44,28 +44,9 @@ def _uml(x, y, w, name, attrs, cls="box", gname="", gattr=""):
 # =====================================================================
 
 def fig_teaser(lang):
-    """F0: one model line, six files in three tiers (after Lukas's MontiGem documentation slides, 'data → generator → EIS')."""
-    L = lambda x: x[lang]
-    files = [(T("Table", "Tabelle"), T("DATABASE", "DATENBANK")), (T("Data class", "Datenklasse"), "SERVER"), ("Command", "SERVER"),
-             ("DTO", "SERVER ↔ BROWSER"), (T("TS model", "TS-Modell"), "BROWSER"), (T("Form", "Formular"), "BROWSER")]
-    chips = ""
-    for k, (name, tier) in enumerate(files):
-        x, y = 430 + (k % 3) * 145, 16 + (k // 3) * 56
-        chips += box(x, y, 135, 44, L(name) if isinstance(name, dict) else name, L(tier) if isinstance(tier, dict) else tier)
-        chips += f'<circle cx="{x + 126}" cy="{y + 9}" r="3" class="dot"/>'
-    svg = f'''<svg class="dia" viewBox="0 0 860 130" role="img" aria-label="{L(T("One added line in the model goes through the generator and changes six files: a table, a data class, a command, a transfer object, a browser model and a form", "Eine hinzugefügte Zeile im Modell läuft durch den Generator und ändert sechs Dateien: eine Tabelle, eine Datenklasse, ein Command, ein Transferobjekt, ein Browser-Modell und ein Formular"))}">
-  {_arrow_defs("mda")}
-  <rect class="box hl" x="0" y="36" width="180" height="58" rx="3"/>
-  <text x="12" y="54" class="s">{L(T("THE MODEL · Account.cd", "DAS MODELL · Account.cd"))}</text>
-  <text x="12" y="80" class="a">+ String iban;</text>
-  <path class="ln" d="M180 65H222" marker-end="url(#mda)"/>
-  <rect class="zone" x="226" y="26" width="150" height="78" rx="4"/>
-  <text x="238" y="44" class="s">GENERATOR</text><text x="301" y="80" text-anchor="middle" class="t">MontiGem</text>
-  <path class="ln" d="M376 65H422" marker-end="url(#mda)"/>
-  {chips}
-</svg>'''
-    return fig(svg, T('<b>One line in the model, six files in three tiers.</b> You change the data model; the generator rewrites table, server classes, transfer objects and browser code so that they fit together again. <a href="#whygen">Try it in chapter 03 →</a>',
-                      '<b>Eine Zeile im Modell, sechs Dateien in drei Schichten.</b> Sie ändern das Datenmodell; der Generator schreibt Tabelle, Serverklassen, Transferobjekte und Browser-Code so neu, dass sie wieder zusammenpassen. <a href="#whygen">In Kapitel 03 ausprobieren →</a>'), lang)
+    """F0: the generator, five levels deep — an interactive morph (built in mde_levels.py, animated by mde.js d0)."""
+    import mde_levels
+    return mde_levels.fig_levels(lang)
 
 
 def fig_maps(lang):

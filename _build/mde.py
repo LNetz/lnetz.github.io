@@ -6,7 +6,7 @@ Concept and sources: the research workflow of 10 / 2026 (se-rwth.de, the MontiCo
 
 Three chapters (h2, listed at the top): models and languages · from model to code · MontiGem, CD2GUI and beyond.
 """
-from ai4se import T, cite, ref, _link, chat, definition
+from ai4se import T, cite, ref, _link, chat, definition, curious
 from mde_figs import (fig_teaser, fig_maps, fig_classdiagram, fig_aspects, fig_generator, fig_retrofit, fig_three_languages,
                       fig_chain, demo_syntax, demo_top, demo_files, demo_cd2gui, mapping_table)
 from project_content import stats
@@ -50,12 +50,6 @@ def tries(lang, items):
 def gpt(key, what):
     n, u = GPT[key]
     return (n, u, what)
-
-
-def curious(lang, body, title=None):
-    """A collapsed box for the curious: depth that the main text does without."""
-    t = (title or T("For the curious", "Für Neugierige"))[lang]
-    return f'<details class="curious"><summary class="mono">{t}</summary>{body[lang]}</details>'
 
 
 def body(lang, A):
@@ -251,6 +245,8 @@ def series(lang, here):
     parts = [("research-mde.html", T("Model-driven SE", "Modellgetriebene SE")), ("research-ai4se.html", T("AI-driven SE", "KI-getriebene SE"))]
     if article_art.DT_PUBLISHED or here == "research-dt.html":
         parts.append(("research-dt.html", T("Digital twins", "Digitale Zwillinge")))
+    if article_art.EA_PUBLISHED or here == "research-ea.html":
+        parts.append(("research-ea.html", T("Evolutionary algorithms", "Evolutionäre Algorithmen")))
     items = "".join(f'<span aria-current="page">{T("part", "Teil")[lang]} {k + 1}: {t[lang]}</span>' if f == here else f'<a href="{f}">{T("part", "Teil")[lang]} {k + 1}: {t[lang]}</a>'
                     for k, (f, t) in enumerate(parts))
     return f'<p class="art-series mono">{T("Series", "Reihe")[lang]} · {items}</p>'

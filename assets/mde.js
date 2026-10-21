@@ -190,7 +190,142 @@
   }
   document.querySelectorAll("svg.citymap[data-map]").forEach(svg => { try { citymap(svg); } catch (e) { console.error(e); } });
 
-  const kinds = { d1: syntax, d2: top, d3: files, d4: cd2gui };
+  // ---------------- d0: the generator, five levels deep (_build/mde_levels.py) ----------------
+  // Every level has its own frame of the same shape, so the figure keeps its height; boxes move and grow,
+  // what is new fades in after the move has begun, what goes fades out first. Geometry rules as in the Python.
+  function levels(fig) {
+    const d = json(fig), svg = fig.querySelector("svg"), N = 5;
+    const els = d.els.map(e => ({ ...e, node: svg.querySelector(`[data-id="${e.id}"]`) }));
+    const byId = Object.fromEntries(els.map(e => [e.id, e]));
+    const paths = [...svg.querySelectorAll(".lv-edges path")];
+    const geo = (e, l) => e.g[l] ? [...e.g[l].slice(0, 4), e.g[l][4] ?? 1] : null;
+    const lerp = (a, b, k) => a + (b - a) * k;
+    const shape = (k, w, h) => k === "doc" ? `M0 0H${w - 10}L${w} 10V${h}H0Z M${w - 10} 0V10H${w}`
+      : k === "cyl" ? `M0 8V${h - 8}A${w / 2} 8 0 0 0 ${w} ${h - 8}V8A${w / 2} 8 0 0 0 0 8A${w / 2} 8 0 0 0 ${w} 8` : null;
+    const route = (r, a, b, ty = .5) => {
+      const [ax, ay, aw, ah] = a, [bx, by, bw, bh] = b, f = n => n.toFixed(1);
+      if (r === "h" || r === "hs" || r === "ht") {
+        const x1 = ax + aw, x2 = bx;
+        let y1 = ay + ah / 2, y2 = by + bh * ty;
+        if (r === "hs") y2 = y1;
+        if (r === "ht") y1 = y2;
+        if (Math.abs(y1 - y2) < 1) return `M${f(x1)} ${f(y1)}H${f(x2)}`;
+        const xm = (x1 + x2) / 2;
+        return `M${f(x1)} ${f(y1)}H${f(xm)}V${f(y2)}H${f(x2)}`;
+      }
+      if (r === "hv") return `M${f(ax + aw)} ${f(ay + ah / 2)}H${f(bx + bw / 2)}V${f(by + bh)}`;
+      if (r === "vx") return `M${f(ax + aw / 2)} ${f(ay)}V${f(by + bh)}`;
+      if (r === "vd") return `M${f(bx + bw / 2)} ${f(ay + ah)}V${f(by)}`;
+      const up = r === "vu", x1 = ax + aw / 2, x2 = bx + bw / 2;
+      const y1 = up ? ay : ay + ah, y2 = up ? by + bh : by;
+      if (Math.abs(x1 - x2) < 1) return `M${f(x1)} ${f(y1)}V${f(y2)}`;
+      const ym = (y1 + y2) / 2;
+      return `M${f(x1)} ${f(y1)}V${f(ym)}H${f(x2)}V${f(y2)}`;
+    };
+
+    // one frame of the morph from level a to level b at progress k (0..1); texts switch at the middle
+    const draw = (a, b, k) => {
+      const [wa, ha] = d.frames[a], [wb, hb] = d.frames[b];
+      svg.setAttribute("viewBox", `0 0 ${lerp(wa, wb, k).toFixed(1)} ${lerp(ha, hb, k).toFixed(1)}`);
+      const lv = k < .5 ? a : b, now = {};
+      for (const e of els) {
+        const g0 = geo(e, a), g1 = geo(e, b);
+        if (!g0 && !g1) { e.node.setAttribute("opacity", 0); continue; }
+        const s = g0 || g1, t = g1 || g0;
+        const [x, y, w, h] = [0, 1, 2, 3].map(i => lerp(s[i], t[i], k));
+        const o = g0 && g1 ? lerp(g0[4], g1[4], k) : g1 ? g1[4] * Math.max(0, k * 2 - 1) : g0[4] * Math.max(0, 1 - k * 2);
+        now[e.id] = [x, y, w, h, o];
+        const n = e.node;
+        n.setAttribute("transform", `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
+        n.setAttribute("opacity", o.toFixed(3));
+        const sh = n.querySelector(".sh");
+        if (sh) {
+          const p = shape(e.k, w, h);
+          if (p) sh.setAttribute("d", p); else { sh.setAttribute("width", w.toFixed(1)); sh.setAttribute("height", h.toFixed(1)); }
+        }
+        const tt = n.querySelector(".tt, .zl"), ss = n.querySelector(".ss"), title = e.t[lv - 1], sub = e.s[lv - 1];
+        const top = e.xl === lv;                      // the panel of level 5: title top left, the list below
+        if (tt.textContent !== title) tt.textContent = title;
+        if (ss && ss.textContent !== sub) ss.textContent = sub;
+        if (e.k !== "zone") {
+          tt.setAttribute("text-anchor", top ? "start" : "middle");
+          tt.setAttribute("class", top ? "s a tt" : (e.k === "chip" ? "s tt" : "t tt"));
+          tt.setAttribute("x", top ? 10 : (w / 2).toFixed(1));
+          tt.setAttribute("y", top ? 18 : (h / 2 + (sub ? -3 : 4)).toFixed(1));
+          ss?.setAttribute("x", (w / 2).toFixed(1)); ss?.setAttribute("y", (h / 2 + 12).toFixed(1));
+        }
+        const x2 = n.querySelector(".lv-x");
+        if (x2) x2.setAttribute("opacity", e.xl === b ? (e.xl === a ? 1 : Math.max(0, k * 2 - 1)) : e.xl === a ? Math.max(0, 1 - k * 2) : 0);
+      }
+      d.eds.forEach((ed, i) => {
+        const p = paths[i], A = now[ed.a], B = now[ed.b];
+        const inA = ed.lv.includes(a), inB = ed.lv.includes(b);
+        if (!A || !B || (!inA && !inB)) { p.setAttribute("opacity", 0); return; }
+        const v = inA && inB ? 1 : inB ? Math.max(0, k * 2 - 1) : Math.max(0, 1 - k * 2);
+        p.setAttribute("d", route(ed.r, A, B, ed.ty ?? .5));
+        p.setAttribute("opacity", (v * Math.min(A[4], B[4])).toFixed(3));
+      });
+    };
+
+    const buttons = [...fig.querySelectorAll(".lv-b")], where = fig.querySelector(".where");
+    const prev = fig.querySelector(".lv-prev"), next = fig.querySelector(".lv-next");
+    let cur = 1, anim = 0;
+    const set = l => {
+      press(buttons, buttons[l - 1]);
+      prev.disabled = l === 1; next.disabled = l === N;
+      where.innerHTML = `<span>${d.words[l - 1]}</span>`;
+    };
+    // the flow: dots run along the arrows of the current level in a wave from left to right — the models
+    // go in, the code comes out. Only while the figure is on screen and no level change is under way.
+    const NS = "http://www.w3.org/2000/svg", flowG = document.createElementNS(NS, "g");
+    flowG.setAttribute("class", "lv-flow");
+    svg.querySelector(".lv-edges").after(flowG);
+    const dots = paths.map(() => { const c = document.createElementNS(NS, "circle"); c.setAttribute("r", 3.8); flowG.appendChild(c); return c; });
+    let flowing = false, flowRaf = 0, t0f = 0;
+    const WAVE = 2600, RUN = 700, REST = 900;              // ms: the wave crosses the frame, one dot runs, pause
+    const flow = t => {
+      const w = d.frames[cur][0], k = (t - t0f) % (WAVE + RUN + REST);
+      d.eds.forEach((ed, i) => {
+        const p = paths[i], c = dots[i], o = +p.getAttribute("opacity");
+        if (!ed.lv.includes(cur) || o < .05) { c.setAttribute("opacity", 0); return; }
+        const box = byId[ed.a].g[cur], start = (box[0] + box[2]) / w * WAVE, q = (k - start) / RUN;
+        if (q < 0 || q > 1) { c.setAttribute("opacity", 0); return; }
+        const len = p.getTotalLength(), pt = p.getPointAtLength(len * q);
+        c.setAttribute("cx", pt.x.toFixed(1)); c.setAttribute("cy", pt.y.toFixed(1));
+        c.setAttribute("opacity", (o * Math.sin(Math.PI * q)).toFixed(3));
+      });
+      flowRaf = requestAnimationFrame(flow);
+    };
+    const flowOn = on => {
+      if (reduce || on === flowing) return;
+      flowing = on; cancelAnimationFrame(flowRaf);
+      if (on) { t0f = performance.now(); flowRaf = requestAnimationFrame(flow); }
+      else dots.forEach(c => c.setAttribute("opacity", 0));
+    };
+    let seen = false;
+    if ("IntersectionObserver" in window)
+      new IntersectionObserver(([e]) => { seen = e.isIntersecting; flowOn(seen); }, { threshold: .25 }).observe(svg);
+
+    const go = to => {
+      if (to < 1 || to > N || to === cur) return;
+      cancelAnimationFrame(anim); flowOn(false);
+      const from = cur; cur = to; set(to);
+      if (reduce) return draw(from, to, 1);
+      const t0 = performance.now(), dur = 900;
+      const step = t => {
+        const k = Math.min(1, (t - t0) / dur), e = k < .5 ? 4 * k * k * k : 1 - (-2 * k + 2) ** 3 / 2;
+        draw(from, to, e);
+        if (k < 1) anim = requestAnimationFrame(step); else if (seen) flowOn(true);
+      };
+      anim = requestAnimationFrame(step);
+    };
+    buttons.forEach((b, i) => b.addEventListener("click", () => go(i + 1)));
+    prev.addEventListener("click", () => go(cur - 1));
+    next.addEventListener("click", () => go(cur + 1));
+    draw(1, 1, 1); set(1);
+  }
+
+  const kinds = { d0: levels, d1: syntax, d2: top, d3: files, d4: cd2gui };
   document.querySelectorAll("figure.demo[data-demo]").forEach(fig => {
     try { kinds[fig.dataset.demo]?.(fig); } catch (e) { console.error(e); }
   });

@@ -5,9 +5,11 @@ The research page's article cards (build.py ARTICLE_THUMBS) are small versions o
 """
 import math
 
-# Part 3 (Digital Twins) is built but not linked from anywhere yet: no research-page card, no topic link,
-# no entry in the series line. Set to True to publish it.
-DT_PUBLISHED = False
+# Part 3 (Digital Twins): False builds the page but links it from nowhere (no research-page card, no topic link,
+# no entry in the series line).
+DT_PUBLISHED = True
+# Part 4 (Evolutionary Algorithms): same switch for research-ea.html (ea.py).
+EA_PUBLISHED = True
 
 
 def gear(cx, cy, r, teeth, phase=0.0, depth=.22):
@@ -82,18 +84,49 @@ def hero_ai4se(lang):
 
 def hero_dt(lang):
     """A machine and its twin: data goes up into shadows, the twin's models and services decide, information and commands come back."""
+    from dt_figs import imm_parts
     L = lambda en, de: en if lang == "en" else de
-    machine = ('<rect class="box" x="40" y="118" width="220" height="64" rx="4"/><path class="box" d="M74 118V92h40v26"/><path class="box" d="M66 92h56l-8-12H74z"/>'
-               '<rect class="box hl" x="196" y="88" width="48" height="30" rx="2"/><path class="ln" d="M204 98h32M204 106h22"/>'
-               '<path class="ln" d="M60 182v12M240 182v12M48 194h204"/><circle class="hfill" cx="150" cy="150" r="4"/><circle class="hfill" cx="180" cy="150" r="4"/>')
-    twin = ('<rect class="box hl" x="540" y="28" width="280" height="166" rx="8"/>'
-            '<rect class="hfill" x="556" y="42" width="56" height="18" rx="2"/><rect class="box" x="618" y="42" width="56" height="18" rx="2"/><rect class="box" x="680" y="42" width="56" height="18" rx="2"/><rect class="box" x="742" y="42" width="62" height="18" rx="2"/>'
-            '<rect class="box" x="560" y="80" width="96" height="30" rx="2"/><rect class="box" x="566" y="88" width="96" height="30" rx="2"/><rect class="box" x="572" y="96" width="96" height="30" rx="2"/>'
-            '<rect class="box" x="692" y="82" width="112" height="16" rx="8"/><rect class="box" x="692" y="104" width="112" height="16" rx="8"/><rect class="box" x="692" y="126" width="112" height="16" rx="8"/>'
-            '')
-    body = (f'<rect class="zone" x="0" y="0" width="860" height="220" rx="6"/>{machine}{twin}'
-            f'{_arrow(280, 96, 524)}<text class="s" x="300" y="86">{L("data → digital shadows", "Daten → digitale Schatten")}</text>'
-            f'<path class="ln" d="M524 150H284"/><path class="ln" d="M291 144L284 150L291 156"/><text class="s" x="300" y="172">{L("information · commands", "Informationen · Befehle")}</text>'
-            f'<text class="s" x="40" y="26">{L("THE ORIGINAL SYSTEM", "DAS ORIGINALSYSTEM")}</text><text class="s" x="540" y="18">{L("THE DIGITAL TWIN", "DER DIGITALE ZWILLING")}</text>'
-            f'<text class="s" x="562" y="146">{L("models", "Modelle")}</text><text class="s" x="692" y="160">{L("shadows", "Schatten")}</text><text class="s" x="556" y="186">{L("services · cockpit", "Services · Cockpit")}</text>')
-    return f'<figure class="art-hero" aria-hidden="true"><svg class="dia hero" viewBox="0 0 860 220">{body}</svg></figure>'
+
+    def machine(ox, oy, sx, below):
+        """The running example (dt_figs.imm_parts) with its parts labelled as in the chair's drawings; labels below at `below`."""
+        P = lambda x, y: (ox + x * sx, oy + y * sx)
+
+        def callout(px, py, tx, ty, text, anchor="middle"):
+            (x, y) = P(px, py)
+            return f'<path class="ln callout" d="M{x:.0f} {y:.0f}V{ty + (-10 if ty > y else 4)}"/><text class="s" x="{tx:.0f}" y="{ty}" text-anchor="{anchor}">{text}</text>'
+        return (f'<g class="glyph imm" transform="translate({ox} {oy}) scale({sx})">{imm_parts(sensors=True, out=True)}</g>'
+                + callout(17, 112, P(0, 0)[0], below - 12, L("control cabinet", "Schaltschrank"), "start")
+                + callout(136.5, 84, P(136.5, 0)[0], below, L("clamping unit · mould", "Schließeinheit · Form"))
+                + callout(250, 84, P(250, 0)[0], below, L("injection unit", "Spritzeinheit"))
+                + callout(151, 6, P(151, 0)[0] - 22, oy - 16, L("user interface", "Bedienoberfläche"))
+                + callout(202, 22, P(202, 0)[0] + 18, oy - 16, L("hopper", "Trichter")))
+
+    def twin(x, y, w):
+        """The twin: service tabs, stacked models, shadows as pills (170 high)."""
+        tabs = [L("monitor", "Monitor"), L("predict", "Prognose"), L("assist", "Assistenz"), L("control", "Steuerung")]
+        tw = (w - 28 - 18) / 4
+        return (f'<rect class="box hl" x="{x}" y="{y}" width="{w}" height="170" rx="8"/>'
+                + "".join(f'<rect class="{"hfill" if k == 0 else "box"}" x="{x + 14 + k * (tw + 6):.1f}" y="{y + 14}" width="{tw:.1f}" height="18" rx="2"/>'
+                          f'<text class="s{" on" if k == 0 else ""}" x="{x + 14 + k * (tw + 6) + tw / 2:.1f}" y="{y + 27}" text-anchor="middle">{t}</text>' for k, t in enumerate(tabs))
+                + "".join(f'<rect class="box" x="{x + 16 + k * 6}" y="{y + 52 + k * 8}" width="104" height="30" rx="2"/>' for k in range(3))
+                + f'<text class="s" x="{x + 38}" y="{y + 87}">{L("machine · mould", "Maschine · Form")}</text>'
+                + "".join(f'<rect class="box" x="{x + w - 146}" y="{y + 52 + k * 22}" width="132" height="16" rx="8"/><text class="s" x="{x + w - 136}" y="{y + 63 + k * 22}">{t}</text>'
+                          for k, t in enumerate(["Temp2Max", L("rejection rate", "Ausschussquote"), L("energy", "Energie")]))
+                + f'<text class="s" x="{x + 16}" y="{y + 118}">{L("models", "Modelle")}</text><text class="s" x="{x + w - 146}" y="{y + 132}">{L("shadows", "Schatten")}</text>'
+                f'<text class="s" x="{x + 16}" y="{y + 158}">{L("services · cockpit", "Services · Cockpit")}</text>')
+
+    title_m = L("THE ORIGINAL SYSTEM · AN INJECTION-MOULDING MACHINE", "DAS ORIGINALSYSTEM · EINE SPRITZGIESSMASCHINE")
+    title_t = L("THE DIGITAL TWIN", "DER DIGITALE ZWILLING")
+    data, back = L("data → digital shadows", "Daten → Schatten"), L("information · commands", "Infos · Befehle")
+    # wide screens: machine left, twin right
+    wide = (f'<rect class="zone" x="0" y="0" width="860" height="220" rx="6"/>{machine(20, 50, 1.06, 206)}{twin(540, 28, 300)}'
+            f'{_arrow(376, 96, 524)}<text class="s" x="384" y="86">{data}</text>'
+            f'<path class="ln" d="M524 150H380"/><path class="ln" d="M387 144L380 150L387 156"/><text class="s" x="384" y="172">{back}</text>'
+            f'<text class="s" x="20" y="18">{title_m}</text><text class="s" x="540" y="18">{title_t}</text>')
+    # phones: the machine on top, the twin below — the wide drawing would shrink to unreadable labels
+    tall = (f'<rect class="zone" x="0" y="0" width="430" height="496" rx="6"/>{machine(18, 64, 1.22, 236)}'
+            f'<path class="ln hl" d="M60 252V290"/><path class="ln hl" d="M54 284L60 290L66 284"/><text class="s" x="70" y="276">{data}</text>'
+            f'<path class="ln" d="M370 290V252"/><path class="ln" d="M364 258L370 252L376 258"/><text class="s" x="360" y="276" text-anchor="end">{back}</text>'
+            f'<text class="s" x="18" y="22">{title_m}</text><text class="s" x="18" y="306">{title_t}</text>{twin(15, 314, 400)}')
+    return (f'<figure class="art-hero" aria-hidden="true"><svg class="dia hero hero-wide" viewBox="0 0 860 220">{wide}</svg>'
+            f'<svg class="dia hero hero-tall" viewBox="0 0 430 496">{tall}</svg></figure>')

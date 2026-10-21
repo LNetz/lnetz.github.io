@@ -16,6 +16,8 @@ import ai4se
 import mde
 import dt
 import dt_figs
+import ea
+import ea_figs
 import article_art
 
 import project_pages
@@ -291,6 +293,8 @@ ARTICLE_THUMBS = {
       <path d="M194 76H224M194 84H216"/>''',
     # a machine ⇄ its twin (dt_figs.thumb_dt)
     "dt": dt_figs.thumb_dt(),
+    # a population on the toy wind-farm site and its stepped best-fitness curve (ea_figs.thumb_ea)
+    "ea": ea_figs.thumb_ea(),
     # a small neural network → the probability of the next token
     "ai4se": '''<path d="M24 34L70 26M24 34L70 58M24 34L70 90M24 84L70 26M24 84L70 58M24 84L70 90M70 26L116 44M70 58L116 44M70 90L116 44M70 26L116 76M70 58L116 76M70 90L116 76"/>
       <circle class="b" cx="24" cy="34" r="6"/><circle class="b" cx="24" cy="84" r="6"/><circle class="b" cx="70" cy="26" r="6"/><circle class="b" cx="70" cy="58" r="6"/><circle class="b" cx="70" cy="90" r="6"/>
@@ -639,6 +643,7 @@ def research(lang):
 {article_card(lang, 1, "2026", mde.FILE, T("Model-Driven Software Engineering", "Modellgetriebene Softwareentwicklung"), T("What models, DSLs and generators are — and how MontiGem and CD2GUI turn one class diagram into a running web application.", "Was Modelle, DSLs und Generatoren sind — und wie MontiGem und CD2GUI aus einem Klassendiagramm eine laufende Webanwendung machen."), "mde", 7)}
 {article_card(lang, 2, "2024 — 2026", ai4se.FILE, T("AI-driven Software Engineering", "KI-getriebene Softwareentwicklung"), T("How a language model arrives at its answer, what agents and harnesses are — and how LLMs write models that a generator turns into software.", "Wie ein Sprachmodell zu seiner Antwort kommt, was Agenten und Harnesses sind — und wie LLMs Modelle schreiben, aus denen ein Generator Software macht."), "ai4se", 3)}
 {"" if not article_art.DT_PUBLISHED else article_card(lang, 3, "2026", dt.FILE, T("Digital Twins", "Digitale Zwillinge"), T("What a digital twin is — and what it is not: the chair’s definition, digital shadows, how a twin acts, and how to build twins with models.", "Was ein digitaler Zwilling ist — und was nicht: die Definition des Lehrstuhls, digitale Schatten, wie ein Zwilling handelt und wie man Zwillinge mit Modellen baut."), "dt", 5)}
+{"" if not article_art.EA_PUBLISHED else article_card(lang, 4, "2015 — 2026", ea.FILE, T("Evolutionary Algorithms", "Evolutionäre Algorithmen"), T("What evolutionary and genetic algorithms are, where they sit next to machine learning, and how selection, crossover and mutation work — on a toy wind farm.", "Was evolutionäre und genetische Algorithmen sind, wo sie neben maschinellem Lernen stehen und wie Selektion, Crossover und Mutation funktionieren — an einem Spielzeug-Windpark."), "ea", 9)}
       </ul>
 
       <div class="group mono" id="community">Community</div>
@@ -971,7 +976,7 @@ def main():
                 fh.write(html)
             print(f"wrote {os.path.join(sub, file) if sub else file}  ({len(html)} bytes)")
         # the two articles (ai4se.py, mde.py)
-        for article in (ai4se, mde, dt):
+        for article in (ai4se, mde, dt, ea):
             file, title, desc, body, scripts = article.page(lang)
             html = shell(lang, file, title, desc, body, scripts)
             with open(os.path.join(out, file), "w", encoding="utf8", newline="\n") as fh:
