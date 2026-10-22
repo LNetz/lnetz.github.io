@@ -1,0 +1,183 @@
+/* =====================================================================
+   Model-Driven Software Engineering article (research-mde.html, _build/mde.py + mde_figs.py, assets/mde.js)
+   Loaded only by that page, after style.css; uses the shared tokens and .dia classes. New and overriding
+   article-specific rules live here, not in style.css.
+   ===================================================================== */
+
+/* ---------- wide figure + stacked phone twin (mde_figs.twin) ---------- */
+.v-tall { display: none; }
+@media (max-width: 600px) { .v-wide { display: none; } .v-tall { display: block; } }
+.v-tall .dia { max-width: 380px; margin: 0 auto; }
+
+/* "↔ scroll" under figures that scroll sideways on a phone (and under the level-5 close-up always) */
+.mde-hint { display: none; margin: 4px 0 0; color: var(--ink-3); font-size: var(--t-floor); text-align: right; }
+.lv-full .mde-hint, .wide-still .mde-hint { display: block; }
+@media (max-width: 600px) {
+  .mde-hint { display: block; }
+}
+
+/* ---------- d0: the generator at several levels (controls above the picture, so they never move) ---------- */
+.d0 .lv-ctrl { margin: 0 0 10px; }
+.lv-svg .k-label .t { font-size: 14px; }
+.lv-full .dia-scroll .dia { min-width: 1100px; }
+.wide-still .dia-scroll .dia { min-width: 880px; }
+@media (max-width: 600px) {
+  .d0 .lv-scroll .dia { min-width: 720px; }
+  .d0.has-tall .lv-scroll .dia { min-width: 0; max-width: 380px; margin: 0 auto; }
+  .d0.has-tall .mde-hint { display: none; }
+}
+
+/* ---------- F2: a class diagram that reads itself out ---------- */
+.f2 g.k { cursor: default; outline: none; }
+.f2 text.lab { fill: var(--ink-2); }
+.f2 text.m { fill: var(--ink); font-size: 12px; }
+.f2 text { paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; }
+.f2 g.k.on > .box, .f2 g.k.on > .ln { stroke: var(--accent); stroke-width: 1.5; }
+.f2 g.k.on > text, .f2 g.k.on > g > text, .f2 g.k[data-k="mult"].on text { fill: var(--accent); }
+.f2 g.k[data-k="book"].on g.k:not(.on) text { fill: var(--ink-2); }
+.f2 g.k:focus-visible > .box { stroke: var(--accent); }
+.art-sec .f2-read { margin: 10px 0 0; min-height: 3.1em; font-size: var(--t-prose); line-height: 1.5; color: var(--ink-3); }
+.art-sec .f2-read.on { color: var(--ink-2); }
+.f2-read.on b { color: var(--accent); font-weight: 500; }
+
+/* ---------- F3: aspects ---------- */
+.dia .hidcol { fill: var(--c-rest); stroke: var(--ink-3); stroke-width: var(--sw-hair); stroke-dasharray: 3 3; }
+.dia text.err { fill: var(--ink); }
+
+/* ---------- mail merge (mm) and the evolution figure ---------- */
+.mm-grid, .ev-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) auto minmax(0, .9fr) auto minmax(0, 1.1fr); gap: 12px; align-items: start; }
+.ev-grid { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.3fr); }
+.mm-grid > div > .k, .ev-grid > div > .k { display: block; margin-bottom: 6px; color: var(--ink-3); font-size: var(--t-floor); letter-spacing: .04em; }
+.mm-grid pre, .ev-grid pre { margin: 0; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 4px; font-size: var(--code-s); line-height: 1.6; color: var(--ink); overflow-x: auto; }
+.mm-grid pre b { font-weight: 400; color: var(--accent); }
+.mm-tpl { border-style: dashed !important; }
+.mm-op { align-self: center; padding-top: 18px; color: var(--ink-3); font-size: 18px; }
+.mm-chips { margin-bottom: 8px; }
+.mm-grid pre.flash b { animation: mmflash .7s ease-out; }
+@keyframes mmflash { from { background: color-mix(in srgb, var(--accent) 22%, transparent); } to { background: transparent; } }
+@media (max-width: 760px) {
+  .mm-grid, .ev-grid { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .mm-op { padding: 0; text-align: center; }
+}
+.ev-what { list-style: none; display: grid; gap: 6px; margin: 14px 0 0; padding: 0; font-size: 12px; }
+.ev-what li { display: grid; grid-template-columns: 4.5em minmax(0, 1fr); gap: 10px; color: var(--ink-2); }
+.ev-what b { font-weight: 400; color: var(--ink); }
+.ev-what li.ok b::before { content: "✓ "; color: var(--accent); }
+.ev-what li.todo b::before { content: "✎ "; }
+
+/* ---------- case study: bars ---------- */
+.dia .modcap { fill: var(--ink); }
+
+/* ---------- d1: text · tree · diagram ---------- */
+.d1-presets { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-bottom: 14px; }
+.d1-presets > .k { color: var(--ink-3); font-size: var(--t-floor); letter-spacing: .04em; }
+.d1-gates .gate.ok { border-color: var(--rule); }
+.d1-gates .gate.ok b::after { color: var(--ink-2); }
+.d1-gates .gate.fail { border: 1px solid var(--accent); color: var(--accent); }
+.d1-gates .gate.fail b::after { content: " ✗"; color: var(--accent); }
+.d1-grid { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
+.d1-grid .k { display: block; margin-bottom: 6px; color: var(--ink-3); font-size: var(--t-floor); letter-spacing: .04em; }
+@media (max-width: 760px) { .d1-grid { grid-template-columns: minmax(0, 1fr); } }
+.d1-right { display: grid; gap: 14px; align-content: start; }
+.d1-code { font-size: var(--code-s); }
+.d1-code .l.err, .d1-tree li.err { text-decoration: underline wavy var(--accent); text-underline-offset: 3px; }
+.d1-code .l.err::after { color: var(--accent); }
+.d1-tree { list-style: none; display: grid; gap: 1px; margin: 0; padding: 0; font-size: 11px; }
+.d1-tree li { padding: 1px 6px 1px calc(6px + var(--d) * 14px); border-left: 1px solid var(--rule); color: var(--ink-2); border-radius: 2px; transition: background-color .2s; }
+.d1-tree li[style*="--d:0"] { color: var(--ink); }
+.d1-tree li.ref { color: var(--ink-3); }
+.d1-tree li.ref::before { content: "↳ "; }
+.d1-tree li.err { color: var(--accent); }
+.d1-tree li.hi, .d1-code .l.hi { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.d1-treebox.none { display: grid; place-items: center; min-height: 120px; border: 1px dashed var(--ink-3); border-radius: 4px; }
+.art-sec .demo .d1-notree { margin: 0; color: var(--ink-3); font-size: 12px; }
+.d1-uml [data-k].hi .box, .d1-uml [data-k].hi .ln { stroke: var(--accent); stroke-width: 1.5; }
+.d1-uml [data-k].hi text, .d1-uml text[data-k].hi { fill: var(--accent); }
+.d1-uml text.err, .d1-uml .t.err { fill: var(--accent); }
+.d1-uml .ln.err { stroke: var(--accent); stroke-dasharray: 3 3; }
+.d1-none { min-height: 120px; }
+
+/* ---------- d2: notes right under the files ---------- */
+.d2-files { min-height: 0; }
+.d2-lane { display: flex; flex-direction: column; }
+.d2-lane .d2-files { flex: none; }
+
+/* ---------- d3: every changed file shows its new line ---------- */
+.d3-chip .d3-new { display: block; min-height: 1.3em; margin-top: 2px; font-family: var(--mono); font-size: var(--t-floor); color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.d3-chip.flash { animation: d3flash .8s ease-out; }
+@keyframes d3flash { from { background: color-mix(in srgb, var(--accent) 16%, var(--bg)); } to { background: var(--bg); } }
+.d3-chip span { font-size: var(--t-floor); }
+.d3-view.chips { margin-bottom: 8px; }
+.d3-code { font-size: var(--code-s); }
+@media (max-width: 760px) { .d3-tier { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .d3-tier > .k { grid-column: 1 / -1; } }
+.d3-panel { display: grid; gap: 10px; align-content: start; }
+.d3-panel:has(.d3-form-wrap:not([hidden])) { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); }
+.d3-panel .d3-form label { grid-template-columns: 5.5em minmax(0, 1fr); }
+.d3-panel .d3-form input[type=text] { width: 100%; min-width: 0; box-sizing: border-box; }
+.d3-panel .d3-form { margin-top: 0; }
+.art-sec .demo .d3-panel p.d3-tplnote { margin: 0; }
+@media (max-width: 600px) { .d3-panel:has(.d3-form-wrap:not([hidden])) { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- d4: CD2GUI ---------- */
+.d4-cd { display: grid; justify-items: start; gap: 0; margin-top: 4px; }
+.d4-cls { display: grid; gap: 1px; min-width: 150px; padding: 6px 10px 7px; border: 1px solid var(--ink-3); border-radius: 2px; background: var(--bg); color: var(--ink-2); font: inherit; text-align: left; cursor: pointer; }
+.d4-cls b { padding-bottom: 3px; margin-bottom: 2px; border-bottom: 1px solid var(--rule); font-weight: 500; font-size: 13px; color: var(--ink); text-align: center; }
+.d4-cls span { font-family: var(--mono); font-size: 11px; }
+.d4-cls:hover, .d4-cls:focus-visible { border-color: var(--accent); }
+.d4-cls[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.d4-cls[aria-pressed="true"] b { color: var(--accent); }
+.d4-as { display: grid; grid-template-rows: auto auto auto; justify-items: start; margin-left: 74px; padding: 2px 0 2px 10px; border-left: 1px solid var(--ink-3); font-size: var(--t-floor); color: var(--ink-3); line-height: 1.25; }
+.d4-as i { font-style: normal; color: var(--ink); }
+.d4-as em { font-style: normal; }
+.d4 .gp-row { gap: 6px; }
+.d4 .btn { display: inline-block; padding: 1px 8px; border: 1px solid var(--ink-3); border-radius: 3px; font-size: 11px; color: var(--ink); background: var(--bg); }
+.d4 .gp-link { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.d4-delta { padding: 6px 0; cursor: pointer; }
+.d4-delta input { width: 16px; height: 16px; }
+.d4-tree { font-size: 11px; }
+.d4-deltacode { overflow-x: auto; opacity: .4; transition: opacity .2s, border-color .2s; }
+.d4-deltacode.on { opacity: 1; border-color: var(--accent); }
+
+/* ---------- F6: three languages, the page mock stays in view next to the code ---------- */
+.f6-page { position: sticky; top: 24px; }
+.f6-code pre { font-size: var(--code-s); }
+
+/* ---------- F9: the chain, with arrows through the step numbers ---------- */
+.f9-pane pre { font-size: 10.5px; }
+.f9-step::after { content: "→"; color: var(--ink-3); font-size: 14px; }
+@media (max-width: 760px) { .f9-step::after { content: "↓"; } }
+
+/* ---------- the city map: a 2 × 2 grid of small SVGs ---------- */
+.citymap { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 24px; outline: none; cursor: crosshair; }
+.citymap:focus-visible { outline: 1px dashed var(--accent); outline-offset: 6px; }
+.cm-panel { min-width: 0; }
+.cm-panel svg.cm { display: block; width: 100%; height: auto; touch-action: pan-y; }
+.art-sec .cm-head { margin: 0 0 6px; font-size: var(--t-floor); color: var(--ink-3); letter-spacing: .03em; }
+.cm-head span { color: var(--accent); }
+.cm-panel:first-child .cm-head span { color: var(--ink-2); }
+.art-sec .cm-keep { margin: 4px 0 0; font-size: 11px; line-height: 1.45; color: var(--ink-3); }
+.citymap text.el, .citymap text.el2 { font-size: 8px; }
+.citymap .xh { opacity: 0; pointer-events: none; transition: opacity .15s; }
+.citymap.live .xh { opacity: 1; }
+.citymap .xh line { stroke: var(--accent); stroke-width: .8; stroke-dasharray: 2 2; }
+.citymap .xh circle { fill: var(--accent); stroke: var(--bg); stroke-width: 1; }
+.citymap .xh circle.ring { fill: none; stroke: var(--accent); stroke-width: 1.6; }
+.citymap .xh text { font-family: var(--mono); font-size: 9px; fill: var(--ink); paint-order: stroke; stroke: var(--bg); stroke-width: 3px; stroke-linejoin: round; }
+.citymap svg[data-k="1"] .xh line { display: none; }
+.citymap text.lbl.pulse { fill: var(--accent); animation: cmpulse 1.2s ease-in-out infinite; }
+.citymap circle.pulse { stroke: var(--accent); }
+@keyframes cmpulse { 50% { opacity: .45; } }
+.art-sec .cm-read { display: none; margin: 10px 0 0; min-height: 3em; font-size: 12px; color: var(--ink-2); }
+@media (max-width: 600px) {
+  .citymap { gap: 12px 10px; }
+  .citymap .xh text { display: none; }
+  .art-sec .cm-read { display: block; }
+  .art-sec .cm-keep { font-size: var(--t-floor); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .citymap text.lbl.pulse { animation: none; }
+  .mm-grid pre.flash b, .d3-chip.flash { animation: none; }
+}
+
+/* the source line under the "worth it when" box */
+.art-sec p.fit-src { margin: -10px 0 20px; font-size: 12px; color: var(--ink-3); }

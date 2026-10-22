@@ -1,0 +1,109 @@
+/* Digital Twins article (research-dt.html): styles of its own figures and demos, loaded after style.css.
+   Follows _build/STYLE.md (type floor 10 px, strokes .75/1/1.5/2, dashes only "3 3" and "1 3", no solid accent fills). */
+
+/* static figures with a stacked phone variant (dt_figs._pair) */
+.dt-pair .dt-tall { display: none; }
+@media (max-width: 600px) {
+  .dt-pair .dt-wide { display: none; }
+  .dt-pair .dt-tall { display: block; }
+}
+/* the "↔ scroll" hint for sideways-scrolling figures is shared (style.css) */
+
+/* labels inside the half-width demos stay at or above the 10 px floor on a 358 px phone */
+figure.demo .dia text.s { font-size: 10.8px; }
+
+/* glyphs: the car (dt_figs.car_parts), hairlines at every scale */
+.dia .car .box, .dia .car .ln { vector-effect: non-scaling-stroke; }
+.dia .car .batt { fill: var(--c-rest); }
+.dia .car .sens { fill: var(--accent); }
+.dia .person .box { vector-effect: non-scaling-stroke; }
+
+/* lifespans: grey = the system, accent strip = software support periods */
+.dia .rest.lsr { opacity: .55; }
+.dia .lsw { fill: var(--accent); }
+
+/* lifecycle sparklines; nested twins */
+.dia .spk { fill: none; stroke: var(--ink-3); stroke-width: var(--sw-em); stroke-linejoin: round; }
+.dia .spk.a { stroke: var(--accent); }
+.dia .box.gen-s { stroke: var(--c-gen); }
+
+/* two-row "ladder vs definition" */
+.dt-two { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 20px; align-items: baseline; margin: 4px 0 22px; }
+.dt-two .k { color: var(--accent); font-size: 10px; letter-spacing: .06em; }
+.art-sec .dt-two p { margin: 0; font-size: 15px; }
+@media (max-width: 600px) { .dt-two { grid-template-columns: minmax(0, 1fr); gap: 2px; } .art-sec .dt-two p { margin-bottom: 10px; } }
+.tbl.dt-tbl { min-width: 0; }
+.tbl.dt-tbl td:first-child { white-space: nowrap; color: var(--ink); }
+@media (max-width: 600px) { .tbl.dt-tbl td:first-child { white-space: normal; } }
+
+/* dt1 ladder */
+.art-sec .demo p.dl-label { font-size: 15px; font-weight: 500; }
+.art-sec .demo p.dl-quote { max-width: 40ch; }
+.ladder .arr .ln { stroke-width: var(--sw-1); }
+.ladder .arr.manual .ln { stroke-dasharray: 3 3; }
+.ladder .arr.auto .ln { stroke-width: var(--sw-acc); }
+
+/* dt2 anatomy: the definition as one sentence with underlined clauses */
+.art-sec .demo p.anat-def { margin: 0 0 14px; font-size: 14px; line-height: 1.75; color: var(--ink-2); }
+.anat-def .cl { font: inherit; padding: 0; border: 0; background: none; color: var(--ink); cursor: pointer;
+  text-decoration: underline; text-decoration-color: var(--ink-3); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.anat-def .cl:hover, .anat-def .cl:focus-visible, .anat-def .cl.hi { color: var(--accent); text-decoration-color: var(--accent); outline: none; }
+.anat .sw { stroke-dasharray: none; stroke-width: var(--sw-hair); }
+.anat .part.hi .box, .anat .part.hi .ln, .anat .part.hi .sw { stroke-width: var(--sw-em); }
+.art-sec .demo p.anat-verdict { margin-top: 0; font-size: 14px; color: var(--ink); max-width: 40ch; }
+
+/* dt3: one raw table, three views */
+.sh-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.sh-raw .k, .sh-card .k { display: block; margin-bottom: 8px; color: var(--ink-3); font-size: 10px; letter-spacing: .06em; }
+.sh-tbl { border-collapse: collapse; width: 100%; font-size: 12px; }
+.sh-tbl th { text-align: right; font-weight: 400; color: var(--ink-3); padding: 3px 0 4px 8px; border-bottom: 1px solid var(--ink-3); white-space: nowrap; }
+.sh-tbl td { text-align: right; padding: 3px 0 3px 8px; border-bottom: 1px solid var(--rule); color: var(--ink-2); transition: color .2s, background-color .2s; }
+.sh-tbl th:first-child, .sh-tbl td:first-child { text-align: left; padding-left: 0; }
+.sh-tbl.on td { color: var(--ink-3); }
+.sh-tbl th.col { color: var(--accent); }
+.sh-tbl td.col { background: color-mix(in srgb, var(--accent) 6%, transparent); }
+.sh-tbl tr.sel td { color: var(--ink); }
+.sh-tbl tr.sel td.col { color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.art-sec .demo p.sh-ans { margin: 4px 0; font-size: 15px; font-weight: 500; color: var(--ink); }
+.art-sec .demo p.sh-note { margin: 0; font-size: 13px; color: var(--ink-3); }
+@media (max-width: 760px) { .sh-grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* dt4 loop: data flows solid, the cockpit is part of the loop */
+.loop .lc .ln { stroke-dasharray: none; }
+.loop .lc.on .ln { stroke: var(--accent); stroke-width: var(--sw-acc); }
+.loop .lp.on .box { stroke-width: var(--sw-acc); }
+.loop.mode-auto .ck .box { stroke-dasharray: 3 3; }
+.loop.mode-auto .ck { opacity: .5; }
+.loop .ck.ask .box { stroke: var(--accent); stroke-width: var(--sw-acc); }
+.loop .ck.ask text { fill: var(--accent); }
+.art-sec .demo p.lp-say { font-size: 14px; min-height: 0; }
+.lp-row { display: flex; align-items: center; gap: 12px; min-height: 30px; }
+.lp-row .approve { font-family: var(--mono); font-size: var(--fs-s); padding: 4px 12px; border: 1px solid var(--accent); border-radius: 3px;
+  background: var(--bg); color: var(--accent); cursor: pointer; visibility: hidden; }
+.mode-human .lp-row .approve { visibility: visible; }
+.lp-row .approve:disabled { color: var(--ink-3); border-color: var(--rule); cursor: default; }
+.art-sec .demo p.lp-msg { margin: 0; font-size: 12px; color: var(--ink-2); }
+
+/* dt5 roles */
+.roles .person .box { fill: var(--bg); }
+.roles .q.on .box { stroke-width: var(--sw-em); }
+.art-sec .demo p.ro-text { min-height: 0; }
+.feat li { display: grid; grid-template-columns: 9em minmax(0, 1fr); gap: 8px; padding: 2px 6px 2px 14px; color: var(--accent); }
+.feat li span { color: var(--ink-3); }
+.feat li.root { display: block; padding-left: 6px; color: var(--ink); }
+.feat li[title] { cursor: help; }
+
+/* wind case: outline pills instead of solid ones */
+.pill-o { display: inline-block; padding: 0 7px; border: 1px solid var(--accent); border-radius: 9px; color: var(--accent); font-family: var(--mono); font-size: 10px; line-height: 16px; }
+
+.art-sec .tryit .tries { margin: 0; }
+
+/* the reference architecture sits in a narrower "for the curious" box: larger type keeps it above the floor */
+.dia.refarch text { font-size: 12px; }
+.dia.refarch text.s { font-size: 11.5px; }
+.dia.refarch text.t { font-size: 14px; }
+.dia.refarch text.s { font-size: 12.2px; }
+.ro-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+@media (max-width: 760px) { .ro-grid { grid-template-columns: minmax(0, 1fr); } }
+.anat-def .nw { white-space: nowrap; }
+.lp-row .approve { white-space: nowrap; flex: none; }

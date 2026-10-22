@@ -1,7 +1,9 @@
 """
 The computations behind the figures of the Evolutionary Algorithms article (research-ea.html, _build/ea.py):
-a small genetic algorithm on a toy wind-farm site and one on the two-hills function, both with a seeded random
-number generator, so that every bar, dot and curve in the figures comes from a real, replayable run.
+the running example of chapter 02 — a genetic algorithm on the two-hills function (hills_ga, the starter printed in
+the article, and hills_book, one generation with its full bookkeeping) — and, for the wind-farm case study of
+chapter 03, a small genetic algorithm on a toy wind-farm site. Every run uses a seeded random number generator, so
+that every bar, dot and curve in the figures comes from a real, replayable run.
 
 The toy site follows the master's thesis [Net17] in a reduced form: 12 turbines on a 1000 m square, a minimum
 distance of 240 m (3 rotor diameters of a V80), grid genes (ρ cells per axis), and the thesis toy objectives
@@ -52,7 +54,12 @@ def score_corners(x, y):
     return math.hypot(x - SITE / 2, y - SITE / 2) / math.hypot(SITE / 2, SITE / 2)
 
 
-FIELDS = {"ne": score_ne, "corners": score_corners}
+def score_uniform(x, y):
+    """The wake demo: every spot is equally good, so a turbine's score is the share of its power the wakes leave it."""
+    return 1.0
+
+
+FIELDS = {"ne": score_ne, "corners": score_corners, "uniform": score_uniform}
 
 
 def fits(p, others, rho):
@@ -295,6 +302,63 @@ def hills_ga(seed, k=3, p_mut=.3, sigma=.05, elite=2, imm=2, pop=20, gens=60):
     return gens_out
 
 
+def hills_book(seed, pop=10, k=3, p_mut=.3, sigma=.05, elite=2, imm=1):
+    """One generation (0 → 1) of hills_ga with its bookkeeping, for the loop figure: the scored population, the two
+    tournament winners behind every child, the children before and after mutation, the newcomers and the survivors.
+    Draws the random numbers in exactly the order of hills_ga (checked in _check)."""
+    rng = Rng(seed)
+    new = lambda: [rng.random(), rng.random()]
+    P = sorted(([hills(*g), g] for g in (new() for _ in range(pop))), key=lambda t: -t[0])
+    parents, kids0, kids, mutated = [], [], [], []
+    for _ in range(pop - elite - imm):
+        def pick():
+            best = None
+            for _ in range(k):
+                j = rng.int(pop)
+                if best is None or P[j][0] > P[best][0]:
+                    best = j
+            return best
+        a, b = pick(), pick()
+        child = [P[a][1][i] if rng.random() < .5 else P[b][1][i] for i in range(2)]
+        kids0.append(list(child))
+        m = False
+        if rng.random() < p_mut:
+            i = rng.int(2)
+            child[i] = min(1.0, max(0.0, child[i] + sigma * rng.gauss()))
+            m = True
+        parents.append((a, b))
+        kids.append(child)
+        mutated.append(m)
+    fresh = [new() for _ in range(imm)]
+    nxt = sorted([[f, g] for f, g in P[:elite]] + [[hills(*g), g] for g in kids + fresh], key=lambda t: -t[0])
+    return {"pop": [g for _, g in P], "fit": [f for f, _ in P], "parents": parents, "kids0": kids0, "kids": kids,
+            "mutated": mutated, "fresh": fresh, "next": [g for _, g in nxt], "elite": elite}
+
+
+# ---------------- crossover on a tour (TSP): why the encoding decides the operator ----------------
+CITIES = {"A": (.10, .62), "B": (.30, .92), "C": (.62, .86), "D": (.90, .62), "E": (.78, .22), "F": (.46, .08), "G": (.16, .24)}
+
+
+def tour_length(t):
+    return sum(math.dist(CITIES[a], CITIES[b]) for a, b in zip(t, t[1:] + t[:1]))
+
+
+def one_point(a, b, cut):
+    """Naive one-point crossover on a permutation: the head of A, the tail of B — may repeat and drop cities."""
+    return a[:cut] + b[cut:]
+
+
+def order_crossover(a, b, i, j):
+    """Order crossover (OX): keep A[i:j] in place, fill the other positions, starting after j, with the missing
+    cities in the order in which they appear in B (also starting after j)."""
+    child = [None] * len(a)
+    child[i:j] = a[i:j]
+    rest = [c for c in b[j:] + b[:j] if c not in child]
+    for k, pos in enumerate([(j + t) % len(a) for t in range(len(a) - (j - i))]):
+        child[pos] = rest[k]
+    return child
+
+
 def diversity(pts):
     """Mean distance to the centroid."""
     cx, cy = sum(p[0] for p in pts) / len(pts), sum(p[1] for p in pts) / len(pts)
@@ -381,6 +445,13 @@ def _check():
     run = toy_ga(MAIN_SEED, keep={7})
     best = [h[0] for h in run["hist"]]
     assert all(b2 >= b1 - 1e-12 for b1, b2 in zip(best, best[1:])), best
+    # hills_book draws exactly like hills_ga: same next generation
+    for seed in (1, 2):
+        b = hills_book(seed)
+        assert b["next"] == hills_ga(seed, pop=10, imm=1, gens=1)[1]
+    # order crossover always yields a valid tour
+    t1, t2 = list("ABCDEFG"), list("AGFBCED")
+    assert sorted(order_crossover(t1, t2, 2, 5)) == t1 and sorted(order_crossover(t2, t1, 1, 4)) == t1
     return run
 
 

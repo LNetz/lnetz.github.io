@@ -7,11 +7,6 @@ import re
 
 import article_art
 
-# the link from the geneial page to part 4 of the article series, only once that article is published
-EA_LINK = ({"en": '<p><a class="int" href="research-ea.html">How evolutionary algorithms work, step by step — an article with interactive figures →</a></p>',
-            "de": '<p><a class="int" href="research-ea.html">Wie evolutionäre Algorithmen arbeiten, Schritt für Schritt — ein Artikel mit interaktiven Abbildungen →</a></p>'}
-           if article_art.EA_PUBLISHED else {"en": "", "de": ""})
-
 
 def T(en, de):
     return {"en": en, "de": de}
@@ -638,8 +633,8 @@ PROJECTS = [
                 "<p>geneial ist eine template-basierte C++11-Bibliothek. Jede Stufe des Kreislaufs aus der Abbildung oben — Abbruchkriterien, Selektion, Kopplung, Crossover, Auswahl, Mutation, Ersetzung — ist ein Operator mit eigenem Builder; eigene Chromosomentypen, Operatoren und Fitnessfunktionen lassen sich einstecken. Die Fitnessbewertung kann mehrfädig laufen, Observer und Bookkeeper machen Läufe auswertbar. Dazu gehören ein CMake-Build, Boost-Unit-Tests, Benchmarks, Doxygen-Dokumentation und CI. Ein minimaler Lauf:</p>")[lang]
                 + f"<pre><code>{GENEIAL_CODE}</code></pre>"),
             (T("Wind farms", "Windparks"), T(
-                "<p>Later I used geneial for a different problem <a class=\"cite\" href=\"#Net17\">[Net17]</a>: placing the turbines of an offshore wind farm, rated by annual energy production, net present value and internal rate of return on the Horns Rev test cases. The question was whether turbine positions should be free continuous coordinates or points on a grid. The answer was clear: as long as the grid is fine enough, <b>discretised gene parameters converge faster and reach better results</b> in every test case.</p>" + EA_LINK["en"],
-                "<p>Später habe ich geneial für ein anderes Problem eingesetzt <a class=\"cite\" href=\"#Net17\">[Net17]</a>: die Platzierung der Turbinen eines Offshore-Windparks, bewertet nach Jahresenergieertrag, Kapitalwert und internem Zinsfuß an den Testfällen von Horns Rev. Die Frage war, ob Turbinenpositionen freie, kontinuierliche Koordinaten oder Punkte auf einem Raster sein sollten. Die Antwort war eindeutig: Solange das Raster fein genug ist, <b>konvergieren diskretisierte Genparameter schneller und erreichen bessere Ergebnisse</b> — in allen Testfällen.</p>" + EA_LINK["de"])),
+                "<p>Later I used geneial for a different problem <a class=\"cite\" href=\"#Net17\">[Net17]</a>: placing the turbines of an offshore wind farm, rated by annual energy production, net present value and internal rate of return on the Horns Rev test cases. The question was whether turbine positions should be free continuous coordinates or points on a grid. The answer was clear: as long as the grid is fine enough, <b>discretised gene parameters converge faster and reach better results</b> in every test case.</p>",
+                "<p>Später habe ich geneial für ein anderes Problem eingesetzt <a class=\"cite\" href=\"#Net17\">[Net17]</a>: die Platzierung der Turbinen eines Offshore-Windparks, bewertet nach Jahresenergieertrag, Kapitalwert und internem Zinsfuß an den Testfällen von Horns Rev. Die Frage war, ob Turbinenpositionen freie, kontinuierliche Koordinaten oder Punkte auf einem Raster sein sollten. Die Antwort war eindeutig: Solange das Raster fein genug ist, <b>konvergieren diskretisierte Genparameter schneller und erreichen bessere Ergebnisse</b> — in allen Testfällen.</p>")),
         ],
         pubs=["Net17", "NWN+15", "GJN+15a"],
     ),

@@ -6,10 +6,11 @@ The first figure of the MDE article (research-mde.html): the generator, five lev
   4  + the grammars the parsers come from, the templates the code comes from        (after [Net24], Fig. 7.1)
   5  full detail: the MontiGem back-end data-structure generator        (after the MontiGem developer documentation)
 
-One stage with a fixed aspect ratio: every level has its own frame (viewBox) of the same shape, so the figure never
-changes its height; the camera pulls back as the level rises. Every element has a box per level in that level's frame
-(or none: it fades). The three containers — models, generator, application — exist on every level and only move and grow.
-assets/mde.js (d0) tweens between the levels; this module renders level 1 as the static picture and ships all levels.
+The morph appears three times in the article (VIEWS): levels 1–2 in the intro, 2–4 in the generator section, level 5
+alone in a curious box in chapter 03. Levels 2–5 share an aspect ratio; level 1 is flatter, so the stage grows when
+leaving it (the controls sit above the picture and do not move). Every element has a box per level in that level's
+frame (or none: it fades). The three containers — models, generator, application — exist on every level and only
+move and grow. assets/mde.js (d0) tweens between the levels; this module renders the start level as the static picture.
 """
 import html
 import json
@@ -17,7 +18,7 @@ import json
 from ai4se import T, cite
 from project_content import _arrow_defs
 
-FRAMES = {1: (600, 323), 2: (740, 398), 3: (920, 495), 4: (1000, 538), 5: (1100, 592)}   # all ≈ 13 : 7
+FRAMES = {1: (760, 250), 2: (740, 398), 3: (920, 495), 4: (1000, 538), 5: (1100, 592)}   # 2–5 ≈ 13 : 7; level 1 is flatter
 LEVELS = (1, 2, 3, 4, 5)
 FADED = .42                     # level 5: the GUI lane steps back, the back end is in focus
 
@@ -73,20 +74,20 @@ def elements():
     P = T("Parser", "Parser")
     return [
         # ---------------- the three containers ----------------
-        _el("zM", "zone", {1: (20, 76, 140, 170), 2: (16, 40, 150, 318), 3: (16, 40, 140, 415), 4: (16, 120, 120, 370), 5: (12, 40, 106, 540)},
+        _el("zM", "zone", {1: (100, 26, 140, 170), 2: (16, 40, 150, 318), 3: (16, 40, 140, 415), 4: (16, 120, 120, 370), 5: (12, 40, 106, 540)},
             t={1: T("MODEL", "MODELL"), 2: T("MODELS", "MODELLE")}),
-        _el("zG", "zone", {1: (220, 76, 160, 170), 2: (226, 40, 200, 318), 3: (176, 40, 372, 415), 4: (152, 20, 592, 500), 5: (130, 12, 770, 568)},
+        _el("zG", "zone", {1: (300, 26, 160, 170), 2: (226, 40, 200, 318), 3: (176, 40, 372, 415), 4: (152, 20, 592, 500), 5: (130, 12, 770, 568)},
             t={1: "", 3: T("GENERATOR · MontiGem", "GENERATOR · MontiGem")}),
-        _el("gT", "label", {1: (220, 76, 160, 170), 2: (226, 40, 200, 318)}, t="Generator", s="MontiGem"),
-        _el("zA", "zone", {1: (440, 76, 140, 170), 2: (526, 40, 198, 318), 3: (668, 40, 236, 415), 4: (842, 120, 142, 370), 5: (1000, 40, 92, 540)},
+        _el("gT", "label", {1: (300, 26, 160, 170), 2: (226, 40, 200, 318)}, t="Generator", s="MontiGem"),
+        _el("zA", "zone", {1: (520, 26, 140, 170), 2: (526, 40, 198, 318), 3: (668, 40, 236, 415), 4: (842, 120, 142, 370), 5: (1000, 40, 92, 540)},
             t={1: "", 2: T("APPLICATION", "ANWENDUNG")}),
-        _el("aT", "label", {1: (440, 76, 140, 170)}, t=T("Application", "Anwendung"), s=T("web, running", "Web, laufend")),
+        _el("aT", "label", {1: (520, 26, 140, 170)}, t=T("Application", "Anwendung"), s=T("web, running", "Web, laufend")),
 
         # ---------------- models ----------------
-        _el("cd", "doc", {1: (40, 120, 100, 82), 2: (36, 167, 110, 64), 3: (36, 212, 100, 60), 4: (28, 276, 96, 56), 5: (18, 224, 88, 40)},
-            t={1: T("Class diagram", "Datenmodell"), 5: "Domain CD"}, s={1: "Bank.cd", 5: ""}, cls="hl"),
+        _el("cd", "doc", {1: (120, 70, 100, 82), 2: (36, 167, 110, 64), 3: (36, 212, 100, 60), 4: (28, 276, 96, 56), 5: (18, 224, 88, 40)},
+            t={1: T("Class diagram", "Klassendiagramm"), 5: "Domain CD"}, s={1: "Library.cd", 5: ""}, cls="hl"),
         _el("gui", "doc", {2: (36, 70, 110, 64), 3: (36, 92, 100, 60), 4: (28, 166, 96, 56), 5: (18, 526, 88, 44, F)},
-            t=T("GUI model", "GUI-Modell"), s={2: "Accounts.gui", 4: ""}),
+            t=T("GUI model", "GUI-Modell"), s={2: "Books.gui", 4: ""}),
         _el("ocl", "doc", {2: (36, 264, 110, 64), 3: (36, 332, 100, 60), 4: (28, 386, 96, 56), 5: (18, 176, 88, 40)},
             t="OCL", s={2: T("constraints", "Bedingungen"), 4: ""}),
         _el("vcd", "doc", {5: (18, 272, 88, 40)}, t="View CD"),
@@ -98,7 +99,7 @@ def elements():
         _el("gCd", "chip", {4: (252, 82, 70, 28), 5: (214, 402, 60, 24)}, t={4: "CD4A.mc4", 5: "CD4A"}),
         _el("gOcl", "chip", {4: (330, 82, 64, 28), 5: (280, 402, 56, 24)}, t={4: "OCL.mc4", 5: "OCL"}),
         _el("ctl", "zone", {5: (144, 36, 250, 66)}, t=T("CONTROL SCRIPTS · Groovy", "STEUERSKRIPTE · Groovy"), cls="line"),
-        *[_el(f"c{k}", "chip", {5: (150 + 60 * k, 66, 58, 24)}, t=n) for k, n in enumerate(["aggregate", "domain", "tag", "tagging"])],
+        *[_el(f"c{k}", "chip", {5: (150 + 61 * k, 66, 60, 24)}, t=n) for k, n in enumerate(["aggregate", "domain", "tag", "tagging"])],
         _el("wf", "box", {5: (144, 112, 250, 40)}, t=T("Workflow execution", "Workflow-Ausführung")),
         _el("ld", "zone", {5: (144, 166, 100, 196)}, t=T("MODEL LOADER", "MODELL-LADER"), cls="line"),
 
@@ -116,9 +117,9 @@ def elements():
         _el("tg2", "box", {5: (370, 350, 108, 36)}, t="Tagged CD4C"),
 
         # ---------------- transformations, output ASTs, template engines, templates ----------------
-        _el("trUI", "box", {3: (310, 102, 96, 40), 4: (352, 174, 82, 40), 5: (312, 542, 70, 30, F)}, t="UI-Trafo", cls="hl"),
+        _el("trUI", "box", {3: (310, 102, 96, 40), 4: (352, 174, 82, 40), 5: (312, 542, 70, 30, F)}, t={3: T("Pages", "Seiten"), 5: T("pages", "Seiten")}, s={3: T("transform", "Umformung"), 5: ""}, cls="hl"),
         _el("trDS", "box", {3: (310, 222, 96, 40), 4: (352, 284, 82, 40), 5: (410, 36, 370, 236)},
-            t={3: "DS-Trafo", 5: T("TRANSFORMATIONS · creators", "TRANSFORMATIONEN · Creators")}, cls="hl", x=(5, _trafo_list())),
+            t={3: T("Data", "Daten"), 5: T("TRANSFORMATIONS · creators", "TRANSFORMATIONEN · Creators")}, s={3: T("transform", "Umformung"), 5: ""}, cls="hl", x=(5, _trafo_list())),
         _el("oastUI", "box", {3: (432, 102, 96, 40), 4: (448, 174, 84, 40), 5: (394, 542, 80, 30, F)}, t={3: T("Output AST", "Ausgabe-AST"), 5: "AST"}),
         # the class-diagram transformation writes several output ASTs: one each for DTOs, data classes and commands
         _el("oastDS", "box", {3: (432, 190, 96, 32), 4: (448, 252, 84, 32), 5: (600, 300, 118, 36)}, t={3: T("Output AST", "Ausgabe-AST"), 5: "Output CD4C"}),
@@ -239,24 +240,69 @@ def _route(r, a, b, ty=.5):
     return f"M{x1:.1f} {y1:.1f}V{ym:.1f}H{x2:.1f}V{y2:.1f}"
 
 
-WORDS = [
-    T("<b>1</b> · A model goes in, an application comes out.",
-      "<b>1</b> · Ein Modell geht hinein, eine Anwendung kommt heraus."),
-    T("<b>2</b> · Several models, one generator — and the application has a client, a server and a database.",
-      "<b>2</b> · Mehrere Modelle, ein Generator — und die Anwendung hat Client, Server und Datenbank."),
-    T("<b>3</b> · Inside, each model becomes a syntax tree (AST); transformations turn it into new ASTs, one per kind of file.",
-      "<b>3</b> · Drinnen wird jedes Modell ein Syntaxbaum (AST); Transformationen machen daraus neue ASTs, einen je Dateiart."),
-    T("<b>4</b> · The parsers are generated from grammars; the code is printed by filling templates.",
-      "<b>4</b> · Die Parser werden aus Grammatiken generiert; der Code entsteht, indem Templates gefüllt werden."),
-    T("<b>5</b> · Full detail: MontiGem’s back-end generator — control scripts, a model loader, tagged ASTs and dozens of transformations.",
-      "<b>5</b> · Ganz genau: MontiGems Backend-Generator — Steuerskripte, ein Modell-Lader, getaggte ASTs und Dutzende Transformationen."),
-]
+WORDS = {
+    1: T("<b>1</b> · A model goes in, an application comes out.",
+         "<b>1</b> · Ein Modell geht hinein, eine Anwendung kommt heraus."),
+    2: T("<b>2</b> · Several models, one generator — and the application has a client, a server and a database.",
+         "<b>2</b> · Mehrere Modelle, ein Generator — und die Anwendung hat Client, Server und Datenbank."),
+    3: T("<b>3</b> · Inside, each model becomes a syntax tree (AST); transformations turn it into new trees, one per kind of file.",
+         "<b>3</b> · Drinnen wird jedes Modell ein Syntaxbaum (AST); Transformationen machen daraus neue Bäume, einen je Dateiart."),
+    4: T("<b>4</b> · The parsers are generated from grammars; the code is printed by filling templates.",
+         "<b>4</b> · Die Parser werden aus Grammatiken generiert; der Code entsteht, indem Templates gefüllt werden."),
+    5: T("<b>5</b> · MontiGem’s back-end generator: control scripts, a model loader, tagged syntax trees and dozens of transformations.",
+         "<b>5</b> · MontiGems Backend-Generator: Steuerskripte, ein Modell-Lader, getaggte Syntaxbäume und Dutzende Transformationen."),
+}
+
+# phones: levels 1–2 stacked (models above, generator in the middle, application below); mde.js swaps them in
+TALL_FRAMES = {1: (380, 440), 2: (380, 660)}
+TALL = {
+    "zM": {1: (90, 10, 200, 130), 2: (10, 10, 360, 120)},
+    "cd": {1: (140, 38, 100, 82), 2: (138, 40, 104, 64)},
+    "gui": {2: (24, 40, 104, 64)},
+    "ocl": {2: (252, 40, 104, 64)},
+    "zG": {1: (90, 170, 200, 110), 2: (10, 165, 360, 150)},
+    "gT": {1: (90, 170, 200, 110), 2: (10, 165, 360, 100)},
+    "chA": {2: (60, 275, 110, 26)},
+    "chB": {2: (210, 275, 110, 26)},
+    "zA": {1: (90, 315, 200, 110), 2: (10, 350, 360, 300)},
+    "aT": {1: (90, 315, 200, 110)},
+    "fe": {2: (24, 384, 150, 62)},
+    "be": {2: (206, 384, 150, 62)},
+    "db": {2: (206, 486, 150, 72)},
+}
+TALL_ROUTE = {("zG", "chA"): None, ("zG", "chB"): None}       # the chips sit inside the generator there: no arrow
 
 
-def fig_levels(lang):
+# the three places the morph appears: (levels, start level, caption, source line)
+VIEWS = {
+    "intro": ((1, 2), 1,
+              T("<b>Model-driven, from far away.</b> A model goes in, a generator reads it, an application comes out. Step to <b>2</b>: usually there are several models, and the application has several tiers. What happens inside the generator follows in chapter 02.",
+                "<b>Modellgetrieben, von Weitem.</b> Ein Modell geht hinein, ein Generator liest es, eine Anwendung kommt heraus. Auf Stufe <b>2</b>: Meist sind es mehrere Modelle, und die Anwendung hat mehrere Schichten. Was im Generator passiert, folgt in Kapitel 02."),
+              None),
+    "inside": ((2, 3, 4), 3,
+               T("<b>Inside the generator.</b> Step with − and +: from the outside view (<b>2</b>) into the generator (<b>3</b>), where each model becomes a syntax tree and transformations derive one tree per kind of file, to where the parsers and the code come from (<b>4</b>).",
+                 "<b>Im Generator.</b> Mit − und + von der Außensicht (<b>2</b>) in den Generator hinein (<b>3</b>), wo jedes Modell ein Syntaxbaum wird und Transformationen je Dateiart einen Baum ableiten, bis dahin, woher Parser und Code kommen (<b>4</b>)."),
+               "net24"),
+    "full": ((5,), 5,
+             T("<b>The real thing.</b> MontiGem’s back-end generator with a selection of its transformations — the same three containers as before, filled in.",
+               "<b>Das echte Werkzeug.</b> MontiGems Backend-Generator mit einer Auswahl seiner Transformationen — dieselben drei Behälter wie zuvor, ausgefüllt."),
+             "docs"),
+}
+
+
+def _texts_top(t):
+    """The level-5 panel: its title top left (the list is in .lv-x)."""
+    return f'<text class="s a tt" x="10" y="18">{t}</text><text class="s ss"></text>'
+
+
+def fig_levels(lang, view="intro"):
+    from article_common import src, source_line
     L = lambda x: x[lang]
+    levels, start, cap, source = VIEWS[view]
     els, eds = elements(), edges()
-    data = {"frames": FRAMES, "words": [L(w) for w in WORDS], "els": [], "eds": []}
+    mk = f"lv{view}"
+    data = {"frames": {k: FRAMES[k] for k in levels}, "levels": list(levels), "start": start,
+            "words": {k: L(WORDS[k]) for k in levels}, "els": [], "eds": []}
     by_id = {}
     for e in els:
         geo = {str(k): v for k, v in e["geo"].items()}
@@ -268,43 +314,56 @@ def fig_levels(lang):
     for a, b, r, lv, ex in eds:
         data["eds"].append({"a": a, "b": b, "r": r, "lv": list(lv), **ex})
 
-    # static picture: level 1 (what shows before the script runs, or without it)
+    # static picture: the start level (what shows before the script runs, or without it)
     parts = []
     for e, d in zip(els, data["els"]):
         x = e["x"][1] if e["x"] else ""
-        g = e["geo"].get(1)
+        g = e["geo"].get(start)
         if g:
             gx, gy, gw, gh = g[:4]
             o = g[4] if len(g) > 4 else 1
+            top = bool(e["x"]) and e["x"][0] == start
+            texts = _texts_top(d["t"][start - 1]) if top else _texts(e["kind"], gw, gh, d["t"][start - 1], d["s"][start - 1])
             parts.append(f'<g class="lv-el k-{e["kind"]} {e["cls"]}" data-id="{e["id"]}" transform="translate({gx} {gy})" opacity="{o}">'
-                         f'{_shape(e["kind"], gw, gh)}{_texts(e["kind"], gw, gh, d["t"][0], d["s"][0])}'
-                         + (f'<g class="lv-x" opacity="0">{x}</g>' if x else "") + '</g>')
+                         f'{_shape(e["kind"], gw, gh)}{texts}'
+                         + (f'<g class="lv-x" opacity="{1 if top else 0}">{x}</g>' if x else "") + '</g>')
         else:
             parts.append(f'<g class="lv-el k-{e["kind"]} {e["cls"]}" data-id="{e["id"]}" opacity="0">{_shape(e["kind"], 10, 10)}{_texts(e["kind"], 10, 10, "", "")}'
                          + (f'<g class="lv-x" opacity="0">{x}</g>' if x else "") + '</g>')
     lines = []
     for k, (a, b, r, lv, ex) in enumerate(eds):
         cls = "ln dash" if ex.get("dash") else "ln"
-        ga, gb = by_id[a]["geo"].get(1), by_id[b]["geo"].get(1)
-        if 1 in lv and ga and gb:
-            lines.append(f'<path class="{cls}" data-e="{k}" d="{_route(r, ga, gb, ex.get("ty", .5))}" marker-end="url(#lv)"/>')
+        ga, gb = by_id[a]["geo"].get(start), by_id[b]["geo"].get(start)
+        if start in lv and ga and gb:
+            lines.append(f'<path class="{cls}" data-e="{k}" d="{_route(r, ga, gb, ex.get("ty", .5))}" marker-end="url(#{mk})"/>')
         else:
-            lines.append(f'<path class="{cls}" data-e="{k}" d="M0 0" opacity="0" marker-end="url(#lv)"/>')
+            lines.append(f'<path class="{cls}" data-e="{k}" d="M0 0" opacity="0" marker-end="url(#{mk})"/>')
 
-    W, H = FRAMES[1]
-    label = L(T("The generator in five levels of detail: from one model, a generator and an application, to several models and a client–server–database application, to syntax trees and transformations inside the generator, to grammars and templates, to the full MontiGem back-end generator",
-                "Der Generator in fünf Detailstufen: von einem Modell, einem Generator und einer Anwendung über mehrere Modelle und eine Anwendung aus Client, Server und Datenbank, Syntaxbäume und Transformationen im Generator, Grammatiken und Templates bis zum vollständigen Backend-Generator von MontiGem"))
+    W, H = FRAMES[start]
+    label = L(T("The generator at different levels of detail: from one model, a generator and an application, to several models and a client–server–database application, to syntax trees and transformations inside the generator, to grammars and templates, to the full MontiGem back-end generator",
+                "Der Generator in verschiedenen Detailstufen: von einem Modell, einem Generator und einer Anwendung über mehrere Modelle und eine Anwendung aus Client, Server und Datenbank, Syntaxbäume und Transformationen im Generator, Grammatiken und Templates bis zum vollständigen Backend-Generator von MontiGem"))
     zones = "".join(p for e, p in zip(els, parts) if e["kind"] == "zone")
     rest = "".join(p for e, p in zip(els, parts) if e["kind"] != "zone")
-    svg = (f'<svg class="dia lv-svg" viewBox="0 0 {W} {H}" role="img" aria-label="{label}">{_arrow_defs("lv")}'
+    svg = (f'<svg class="dia lv-svg" viewBox="0 0 {W} {H}" role="img" aria-label="{label}">{_arrow_defs(mk)}'
            f'{zones}<g class="lv-edges">{"".join(lines)}</g>{rest}</svg>')
-    buttons = "".join(f'<button type="button" class="lv-b" aria-pressed="{str(k == 1).lower()}" aria-label="{L(T("level", "Stufe"))} {k}">{k}</button>' for k in LEVELS)
+    if view == "intro":
+        data["tall"] = {"frames": TALL_FRAMES, "geo": {k: {str(l): g for l, g in v.items()} for k, v in TALL.items()},
+                        "routes": [TALL_ROUTE.get((a, b), "v") for a, b, r, lv, ex in eds]}
+    js = html.escape(json.dumps(data, ensure_ascii=False), quote=True)
+    if source == "net24":
+        source = src("after", "Net24", where="Fig. 7.1")
+    elif source == "docs":
+        source = T("After the MontiGem developer documentation (back-end data-structure generator)",
+                   "Nach der MontiGem-Entwicklerdokumentation (Backend-Datenstruktur-Generator)")
+    tail = f'<figcaption class="mono">{L(cap)}{source_line(source, lang)}</figcaption>'
+    if len(levels) == 1:                         # a still picture, wide: it scrolls, also on desktop
+        return (f'<figure class="media art-fig lv-full"><div class="dia-scroll lv-scroll" tabindex="0">{svg}</div>'
+                f'<p class="mde-hint mono" aria-hidden="true">↔ {L(T("scroll", "scrollen"))}</p>{tail}</figure>')
+    buttons = "".join(f'<button type="button" class="lv-b" aria-pressed="{str(k == start).lower()}" aria-label="{L(T("level", "Stufe"))} {k}">{k}</button>' for k in levels)
     ctrl = (f'<div class="demo-ctrl mono lv-ctrl"><span class="lv-bs" role="group" aria-label="{L(T("Level of detail", "Detailstufe"))}">'
             f'<button type="button" class="lv-prev" aria-label="{L(T("less detail", "weniger Details"))}">−</button>{buttons}'
             f'<button type="button" class="lv-next" aria-label="{L(T("more detail", "mehr Details"))}">+</button></span>'
-            f'<span class="where" aria-live="polite"><span>{data["words"][0]}</span></span></div>')
-    js = html.escape(json.dumps(data, ensure_ascii=False), quote=True)
-    cap = T(f'<b>The generator, level by level.</b> Step from the idea to the real thing with − and +: the boxes for the models, the generator and the application stay; what is inside them grows. Levels 3 and 4 after {cite("Net24")}, Fig. 7.1; level 5 after the MontiGem developer documentation (back-end data-structure generator, a selection of its transformations). What one line in the model changes: <a href="#whygen">chapter 03 →</a>',
-            f'<b>Der Generator, Stufe für Stufe.</b> Mit − und + von der Idee zum echten Werkzeug: Die Kästen für Modelle, Generator und Anwendung bleiben; was in ihnen ist, wächst. Stufen 3 und 4 nach {cite("Net24")}, Abb. 7.1; Stufe 5 nach der MontiGem-Entwicklerdokumentation (Backend-Datenstruktur-Generator, eine Auswahl seiner Transformationen). Was eine Zeile im Modell ändert: <a href="#whygen">Kapitel 03 →</a>')
-    return (f'<figure class="media art-fig demo d0" data-demo="d0" data-json="{js}">'
-            f'<div class="dia-scroll lv-scroll" tabindex="0">{svg}</div>{ctrl}<figcaption class="mono">{L(cap)}</figcaption></figure>')
+            f'<span class="where" aria-live="polite"><span>{data["words"][start]}</span></span></div>')
+    return (f'<figure class="media art-fig demo d0{" has-tall" if view == "intro" else ""}" data-demo="d0" data-json="{js}">'
+            f'{ctrl}<div class="dia-scroll lv-scroll" tabindex="0">{svg}</div>'
+            f'<p class="mde-hint mono" aria-hidden="true">↔ {L(T("scroll", "scrollen"))}</p>{tail}</figure>')

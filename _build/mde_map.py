@@ -204,6 +204,10 @@ LINES = [("a", ["park", "central", "cathedral", "university"], "M34 100H190L232 
          ("b", ["north", "central", "harbour", "south"], "M150 26V140L124 166V178")]
 
 
+# names for the read-out, in the order MAIN + SECOND ("" = a side road)
+ROAD_NAMES = {"en": ["B 7", "B 12", "", "Ring Road", "", "", "", ""], "de": ["B 7", "B 12", "", "Ringstraße", "", "", "", ""]}
+
+
 # ---------------- the four panels ----------------
 
 def _original():
@@ -227,15 +231,15 @@ def _metro(lang):
     st = ""
     for k, (x, y) in METRO.items():
         a, dx, dy = anchor[k]
-        st += (f'<circle class="{"xchg" if k == "central" else "stn"}" cx="{x}" cy="{y}" r="{5.5 if k == "central" else 4}"/>'
-               f'<text class="lbl" x="{x + dx}" y="{y + dy}" text-anchor="{a}">{N[k]}</text>')
+        st += (f'<circle data-st="{k}" class="{"xchg" if k == "central" else "stn"}" cx="{x}" cy="{y}" r="{5.5 if k == "central" else 4}"/>'
+               f'<text class="lbl" data-st="{k}" x="{x + dx}" y="{y + dy}" text-anchor="{a}">{N[k]}</text>')
     return f'<rect class="paper" width="{W}" height="{H}"/>{river}{lines}{st}'
 
 
 def _roads(lang):
     blocks = _old_town("blk", "ri3", with_streets=True, casing="rs")
     roads = "".join(f'<path class="lane2" d="{d}"/>' for d in LANES) + "".join(f'<path class="rc1" d="{d}"/>' for d in MAIN) + "".join(f'<path class="rc2" d="{d}"/>' for d in SECOND)
-    roads += "".join(f'<path class="rm" d="{d}"/>' for d in MAIN) + "".join(f'<path class="ri2" d="{d}"/>' for d in SECOND)
+    roads += "".join(f'<path class="rm" data-road="{n}" d="{d}"/>' for d, n in zip(MAIN, ROAD_NAMES[lang][:2])) + "".join(f'<path class="ri2" data-road="{n}" d="{d}"/>' for d, n in zip(SECOND, ROAD_NAMES[lang][2:]))
     bridges = "".join(f'<path class="bridge" d="M{x - 6} {y - 5}H{x + 6}M{x - 6} {y + 5}H{x + 6}"/>' for y, x in BRIDGES)
     labels = (f'<rect class="shield" x="30" y="86" width="20" height="10" rx="2"/><text class="sh" x="40" y="94" text-anchor="middle">B 7</text>'
               f'<rect class="shield" x="140" y="34" width="22" height="10" rx="2"/><text class="sh" x="151" y="42" text-anchor="middle">B 12</text>'
@@ -273,35 +277,42 @@ def _hiking(lang):
             f'<path class="trail" d="{TRAIL}"/><path class="trail" d="{TRAIL_W}"/><path class="trail" d="M142 86 C150 82 158 78 166 76"/>{view}{labels}{summit}')
 
 
-def fig_maps(lang, fig, T):
+def fig_maps(lang, source=None):
+    """The four maps as a 2 × 2 grid of small SVGs with HTML captions — the same layout on desktop and phone
+    (on a phone the in-map crosshair labels give way to one read-out line under the grid). assets/mde.js moves
+    one crosshair through all four; each map says what is there in its own terms."""
+    from ai4se import T
+    from article_common import source_line
     L = lambda x: x[lang]
-    s = 1.38
-    pw, ph = W * s, H * s
     panels = [
-        (_original(), T("THE ORIGINAL · the city itself", "DAS ORIGINAL · die Stadt selbst"), None, None),
-        (_metro(lang), T("MODEL 1 · metro map", "MODELL 1 · Liniennetzplan"), T("for: getting across town", "für: durch die Stadt kommen"),
-         (T("keeps: stations, lines, changes", "behält: Haltestellen, Linien, Umstiege"), T("drops: distances, directions, streets, terrain", "lässt weg: Entfernungen, Richtungen, Straßen, Gelände"))),
-        (_roads(lang), T("MODEL 2 · road map", "MODELL 2 · Straßenkarte"), T("for: driving", "für: Auto fahren"),
-         (T("keeps: roads by importance, names, bridges", "behält: Straßen nach Rang, Namen, Brücken"), T("drops: stations, terrain, woods", "lässt weg: Haltestellen, Gelände, Wald"))),
-        (_hiking(lang), T("MODEL 3 · hiking map", "MODELL 3 · Wanderkarte"), T("for: walking up the hill", "für: auf den Berg wandern"),
-         (T("keeps: contour lines, summit, trails, woods", "behält: Höhenlinien, Gipfel, Wege, Wald"), T("drops: street names, stations, most roads", "lässt weg: Straßennamen, Haltestellen, die meisten Straßen"))),
+        (_original(), T("THE ORIGINAL", "DAS ORIGINAL"), T("the city itself", "die Stadt selbst"),
+         (T("everything at once — far too much for any single purpose", "alles auf einmal — viel zu viel für jeden einzelnen Zweck"), None)),
+        (_metro(lang), T("MODEL 1 · METRO MAP", "MODELL 1 · LINIENNETZPLAN"), T("for getting across town", "um durch die Stadt zu kommen"),
+         (T("keeps stations, lines, changes", "behält Haltestellen, Linien, Umstiege"), T("drops distances, directions, streets, terrain", "lässt Entfernungen, Richtungen, Straßen, Gelände weg"))),
+        (_roads(lang), T("MODEL 2 · ROAD MAP", "MODELL 2 · STRASSENKARTE"), T("for driving", "zum Autofahren"),
+         (T("keeps roads by importance, names, bridges", "behält Straßen nach Rang, Namen, Brücken"), T("drops stations, terrain, woods", "lässt Haltestellen, Gelände, Wald weg"))),
+        (_hiking(lang), T("MODEL 3 · HIKING MAP", "MODELL 3 · WANDERKARTE"), T("for walking up the hill", "um auf den Berg zu wandern"),
+         (T("keeps contour lines, summit, trails, woods", "behält Höhenlinien, Gipfel, Wege, Wald"), T("drops street names, stations, most roads", "lässt Straßennamen, Haltestellen, die meisten Straßen weg"))),
     ]
     out = ""
-    for k, (inner, title, purpose, keeps) in enumerate(panels):
-        x, y = (k % 2) * (pw + 32), 22 + (k // 2) * (ph + 84)
-        out += (f'<clipPath id="mpc{k}"><rect width="{W}" height="{H}" rx="4"/></clipPath>'
-                f'<text class="s{"" if k == 0 else " a"}" x="{x}" y="{y - 8}">{L(title)}</text>'
-                f'<g class="mp" data-k="{k}" data-x="{x:.1f}" data-y="{y:.1f}" transform="translate({x} {y}) scale({s})"><g clip-path="url(#mpc{k})">{inner}{CROSS}</g><rect class="frame" width="{W}" height="{H}" rx="4"/></g>')
-        if purpose:
-            out += (f'<text class="t" x="{x}" y="{y + ph + 20}">{L(purpose)}</text><text class="s" x="{x}" y="{y + ph + 36}">{L(keeps[0])}</text>'
-                    f'<text class="s" x="{x}" y="{y + ph + 50}">{L(keeps[1])}</text>')
-        else:
-            out += f'<text class="s" x="{x}" y="{y + ph + 20}">{L(T("everything at once — and far too much for any single purpose", "alles auf einmal — und viel zu viel für jeden einzelnen Zweck"))}</text>'
-    vh = 22 + 2 * (ph + 84) - 26
-    # the synced crosshair (assets/mde.js): heights on a 5-unit grid for the hiking map, stations for the metro map
-    data = {"s": s, "w": W, "h": H, "step": 5, "heights": [[round(height(i * 5, j * 5)) for i in range(W // 5 + 1)] for j in range(H // 5 + 1)],
-            "geo": STATIONS, "metro": METRO, "names": NAMES[lang], "m": "m"}
-    js = html.escape(json.dumps(data, separators=(",", ":")), quote=True)
-    svg = (f'<svg class="dia citymap" data-map="{js}" viewBox="0 0 {2 * pw + 32:.0f} {vh:.0f}" role="img" aria-label="{L(T("A fictional city with hills, a river, roads, an old town and woods; next to it three maps of it: a schematic metro map, a road map and a hiking map with contour lines, each keeping only what its purpose needs", "Eine fiktive Stadt mit Hügeln, Fluss, Straßen, Altstadt und Wald; daneben drei Karten von ihr: ein schematischer Liniennetzplan, eine Straßenkarte und eine Wanderkarte mit Höhenlinien, jede behält nur, was ihr Zweck braucht"))}">{out}</svg>')
-    return fig(svg, T("<b>One city, three models.</b> Each map <i>depicts</i> the city — a dot stands for a real station, a line for a real road. Each <i>leaves things out</i>: the metro map even gives up true distances and directions and keeps only who connects to whom. And what each keeps depends on its <i>purpose</i>. None of them is “the complete” map — and that is the point. Move the pointer over one map: the crosshair marks the same place in all of them — except on the metro map, which has no true positions and can only point to the nearest station. The three features go back to Herbert Stachowiak. Fictional city.",
-                      "<b>Eine Stadt, drei Modelle.</b> Jede Karte <i>bildet</i> die Stadt <i>ab</i> — ein Punkt steht für eine echte Haltestelle, eine Linie für eine echte Straße. Jede <i>lässt etwas weg</i>: Der Liniennetzplan gibt sogar echte Entfernungen und Richtungen auf und behält nur, wer mit wem verbunden ist. Und was jede behält, hängt von ihrem <i>Zweck</i> ab. Keine ist „die vollständige“ Karte — und genau darum geht es. Bewegen Sie den Zeiger über eine Karte: Das Fadenkreuz markiert in allen dieselbe Stelle — außer im Liniennetzplan, der keine echten Positionen kennt und nur auf die nächste Haltestelle zeigen kann. Die drei Merkmale gehen auf Herbert Stachowiak zurück. Fiktive Stadt."), lang)
+    for k, (inner, title, purpose, (keeps, drops)) in enumerate(panels):
+        desc = f'<p class="cm-keep mono">{L(keeps)}</p>' + (f'<p class="cm-keep mono">{L(drops)}</p>' if drops else "")
+        out += (f'<div class="cm-panel"><p class="cm-head mono"><span>{L(title)}</span> {L(purpose)}</p>'
+                f'<svg class="dia cm" data-k="{k}" viewBox="0 0 {W} {H}" aria-hidden="true"><clipPath id="mpc{k}"><rect width="{W}" height="{H}" rx="4"/></clipPath>'
+                f'<g clip-path="url(#mpc{k})">{inner}{CROSS}</g><rect class="frame" width="{W}" height="{H}" rx="4"/></svg>{desc}</div>')
+    river = [round(river_y(x), 1) for x in range(0, W + 1, 4)]
+    words = {k: L(v) for k, v in dict(
+        oldtown=T("Old Town", "Altstadt"), river=T("river", "Fluss"), park=T("park", "Park"), south=T("south district", "Südviertel"),
+        hills=T("hills", "Berge"), edge=T("edge of town", "Stadtrand"), road=T("side road", "Nebenstraße"), noroad=T("no road", "keine Straße"),
+        orig=T("original", "Original"), metro=T("metro", "Netzplan"), roads=T("road map", "Straßenkarte"), hike=T("hiking map", "Wanderkarte"),
+        nearest=T("nearest station", "nächste Haltestelle"), prompt=T("Point at a map, or tap it.", "Zeigen Sie auf eine Karte oder tippen Sie sie an.")).items()}
+    data = {"w": W, "h": H, "step": 5, "heights": [[round(height(i * 5, j * 5)) for i in range(W // 5 + 1)] for j in range(H // 5 + 1)],
+            "geo": STATIONS, "metro": METRO, "names": NAMES[lang], "river": river, "words": words}
+    js = html.escape(json.dumps(data, separators=(",", ":"), ensure_ascii=False), quote=True)
+    label = L(T("A fictional city with hills, a river, roads, an old town and woods; next to it three maps of it: a schematic metro map, a road map and a hiking map with contour lines, each keeping only what its purpose needs",
+                "Eine fiktive Stadt mit Hügeln, Fluss, Straßen, Altstadt und Wald; daneben drei Karten von ihr: ein schematischer Liniennetzplan, eine Straßenkarte und eine Wanderkarte mit Höhenlinien, jede behält nur, was ihr Zweck braucht"))
+    cap = T("<b>One city, three models.</b> Each map <i>depicts</i> the city — a dot stands for a real station, a line for a real road. Each <i>leaves things out</i>: the metro map even gives up true distances and directions and keeps only who connects to whom. And what each keeps depends on its <i>purpose</i>. None of them is “the complete” map — and that is the point. Point at a map (or use the arrow keys): the crosshair marks the same place in all four, and each map says what is there in its own terms. On the metro map you can only point at stations — it has no true positions.",
+            "<b>Eine Stadt, drei Modelle.</b> Jede Karte <i>bildet</i> die Stadt <i>ab</i> — ein Punkt steht für eine echte Haltestelle, eine Linie für eine echte Straße. Jede <i>lässt etwas weg</i>: Der Liniennetzplan gibt sogar echte Entfernungen und Richtungen auf und behält nur, wer mit wem verbunden ist. Und was jede behält, hängt von ihrem <i>Zweck</i> ab. Keine ist „die vollständige“ Karte — und genau darum geht es. Zeigen Sie auf eine Karte (oder nutzen Sie die Pfeiltasten): Das Fadenkreuz markiert in allen vieren dieselbe Stelle, und jede Karte sagt in ihren eigenen Begriffen, was dort ist. Im Liniennetzplan kann man nur auf Haltestellen zeigen — er kennt keine echten Positionen.")
+    return (f'<figure class="media art-fig cm-fig"><div class="citymap" data-map="{js}" tabindex="0" role="img" aria-label="{label}">{out}</div>'
+            f'<p class="cm-read mono" aria-live="polite">{words["prompt"]}</p>'
+            f'<figcaption class="mono">{L(cap)}{source_line(source, lang)}</figcaption></figure>')

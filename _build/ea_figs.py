@@ -1,19 +1,24 @@
 """
 Figures of the Evolutionary Algorithms article (research-ea.html, _build/ea.py). Every mark comes from a real, seeded
-run in ea_sim.py; static diagrams are inline SVG with the .dia classes, interactive ones ship their states (or the
-data for a small live computation) as data-json — assets/ea.js swaps, highlights and draws. Figures are redrawn after
-the master's thesis [Net17] and [NWN+15] ("After …, Fig. x"); the article's literature list (REFS) lives here too.
+run in ea_sim.py; static diagrams are inline SVG with the .dia classes (or small HTML grids that reflow on phones),
+interactive ones ship their states (or the data for a small live computation) as data-json — assets/ea.js swaps,
+highlights and draws. The literature list (REFS) lives here too.
+
+Chapter 02 runs on the two-hills landscape (hills_ga, the starter at the end of the article); the wind farm of the
+master's thesis [Net17] is the case study of chapter 03 (wake demo, grid vs float genes, One-Step crossover, runtimes).
+New figures are authored for the series canvas: viewBox width 784 (full) or ≤ 380 (half, never stretched).
 """
 import html
 import json
 import math
 
 from ai4se import T, fig, demo, controls, cite, _link
+from article_common import src, source_line
 import ea_sim as sim
 
 esc = html.escape
 
-# ---------------- literature (numbered) ----------------
+# ---------------- literature (numbered; article_common renumbers by first citation) ----------------
 REFS = [
     ("ES15", _link("A. E. Eiben, J. E. Smith: Introduction to Evolutionary Computing, 2nd ed. Springer (2015).", "https://doi.org/10.1007/978-3-662-44874-8")),
     ("Hol75", "J. H. Holland: Adaptation in Natural and Artificial Systems. University of Michigan Press (1975)."),
@@ -45,6 +50,7 @@ REFS = [
     ("Gra05", _link("S. A. Grady, M. Y. Hussaini, M. M. Abdullah: Placement of wind turbines using genetic algorithms. Renewable Energy 30(2), 259–270 (2005).", "https://doi.org/10.1016/j.renene.2004.05.007")),
     ("Ha17", _link("D. Ha: A Visual Guide to Evolution Strategies (2017).", "https://blog.otoro.net/2017/10/29/visual-evolution-strategies/")),
     ("geneial", _link("geneial: a template-based C++11 library for genetic algorithms (MIT).", "https://github.com/geneial/geneial")),
+    ("Dav85", _link("L. Davis: Applying Adaptive Algorithms to Epistatic Domains. IJCAI 1985, 162–164.", "https://www.ijcai.org/Proceedings/85-1/Papers/029.pdf")),
 ]
 _NUM = {k: n for n, (k, _) in enumerate(REFS, 1)}
 
@@ -66,16 +72,535 @@ def _n(v, d=3):
     return round(v, d)
 
 
-# ---------------- the shared run on the toy site ----------------
+def _dec(s, lang):
+    return s.replace(".", ",") if lang == "de" else s
+
+
+def _scroll(svg):
+    from project_content import dia_scroll
+    return dia_scroll(svg)
+
+
+# =====================================================================
+# The running example of chapter 02: the two-hills landscape
+# =====================================================================
+HILLS = sim.run_hills()
+HILL_LEVELS = [.1, .2, .3, .4, .5, .55, .7, .8, .9]
+HILL_PATHS = sim.contours(sim.hills, HILL_LEVELS, n=150)
+STARTER_RES = sim.starter_results()
+
+
+def _featured(name):
+    """The seed shown for a preset: the first one that tells the preset's story."""
+    runs = HILLS[name]["runs"]
+    want = {"balanced": lambda r: sim.on_high(r[-1]), "pressure": lambda r: not sim.on_high(r[-1]),
+            "closed": lambda r: not sim.on_high(r[-1]), "random": lambda r: True}[name]
+    return next(k for k, r in enumerate(runs) if want(r))
+
+
+def _hp(p, S, x0=0, y0=0):
+    return x0 + p[0] * S, y0 + (1 - p[1]) * S
+
+
+def land(S, x0=0, y0=0, quiet=False):
+    """The two-hills map: a frame and the contour lines of sim.hills, north up."""
+    out = [f'<rect class="box" x="{x0}" y="{y0}" width="{S}" height="{S}"/>']
+    for lv, lines in HILL_PATHS:
+        if quiet and lv not in (.1, .3, .5, .7, .9):
+            continue
+        d = "".join("M" + "L".join(f"{x0 + x * S:.1f} {y0 + (1 - y) * S:.1f}" for x, y in line) for line in lines if len(line) > 2)
+        out.append(f'<path class="iso{" iso-i" if lv in (.5, .9) else ""}" d="{d}"/>')
+    return "".join(out)
+
+
+def land_paths(S):
+    """Contour paths only (for figures that draw their own frame)."""
+    return land(S)
+
+
+# =====================================================================
+# F1  What you give / what you get (an HTML grid: it reflows on phones)
+# =====================================================================
+def fig_map(lang):
+    L = lambda x: x[lang]
+    W = lambda en, de: L(T(en, de))
+    rows = [
+        (W("a formal model", "ein formales Modell"), W("rules, constraints", "Regeln, Bedingungen"),
+         W("search and solvers", "Suche und Solver"), W("planners, SAT/SMT, integer programs", "Planer, SAT/SMT, ganzzahlige Programme"),
+         W("an answer", "eine Antwort"), W("for this one problem", "für genau dieses Problem"), ""),
+        (W("examples", "Beispiele"), W("data with answers", "Daten mit Antworten"),
+         W("machine learning", "Maschinelles Lernen"), W('regression, deep networks, LLMs <a href="research-ai4se.html#neural">→ part 2</a>', 'Regression, tiefe Netze, LLMs <a href="research-ai4se.html#neural">→ Teil 2</a>'),
+         W("a reusable model", "ein wiederverwendbares Modell"), W("for new inputs", "für neue Eingaben"), ""),
+        (W("only a score", "nur eine Bewertung"), W("a way to rate any candidate", "ein Weg, jeden Kandidaten zu benoten"),
+         W("search with a score", "Suche mit einer Bewertung"), W("hill climbing, simulated annealing, <b>evolutionary algorithms</b>", "Hill Climbing, Simulated Annealing, <b>evolutionäre Algorithmen</b>"),
+         W("good candidates", "gute Kandidaten"), W("for this one problem", "für genau dieses Problem"), "hl"),
+    ]
+    head = (f'<div class="gm-h mono">{W("you give", "Sie geben")}</div><div class="gm-a"></div><div class="gm-h mono">{W("the methods", "die Verfahren")}</div>'
+            f'<div class="gm-a"></div><div class="gm-h mono">{W("you get", "Sie bekommen")}</div>')
+    cell = lambda t, s, cls="": f'<div class="gm-c {cls}"><b>{t}</b><span class="mono">{s}</span></div>'
+    body = "".join(cell(a, b) + '<div class="gm-a mono" aria-hidden="true">→</div>' + cell(c, d, "gm-m " + k) + '<div class="gm-a mono" aria-hidden="true">→</div>' + cell(e, f)
+                   for a, b, c, d, e, f, k in rows)
+    note = (f'<p class="gm-x mono">{W("Overlap: evolution can also tune or grow a model — neuroevolution, hyperparameter search.", "Überschneidung: Evolution kann auch ein Modell einstellen oder wachsen lassen — Neuroevolution, Hyperparameter-Suche.")}</p>')
+    return (f'<figure class="media art-fig"><div class="gm">{head}{body}</div>{note}'
+            f'<figcaption class="mono">{W("<b>Sort AI methods by what you give them and what you get back.</b> Evolutionary algorithms need neither a formal model nor training data — only a way to score a candidate — and they return good candidates, not a model.", "<b>KI-Verfahren danach sortiert, was man ihnen gibt und was man zurückbekommt.</b> Evolutionäre Algorithmen brauchen weder ein formales Modell noch Trainingsdaten — nur einen Weg, einen Kandidaten zu bewerten — und sie liefern gute Kandidaten, kein Modell.")}</figcaption></figure>')
+
+
+# =====================================================================
+# F2  Learning from data vs searching with a score (toggle: the LLM as the variation step)   viewBox 784
+# =====================================================================
+def demo_pipes(lang):
+    L = lambda x: x[lang]
+    W = lambda en, de: L(T(en, de))
+
+    def b(x, y, w, t, s="", cls="box"):
+        return (f'<rect class="{cls}" x="{x}" y="{y}" width="{w}" height="44" rx="3"/>'
+                f'<text class="t" x="{x + w / 2}" y="{y + (19 if s else 27)}" text-anchor="middle">{t}</text>'
+                + (f'<text class="s" x="{x + w / 2}" y="{y + 35}" text-anchor="middle">{s}</text>' if s else ""))
+    y1, y2 = 34, 140
+    top = (b(20, y1, 140, W("examples", "Beispiele"), W("data with answers", "Daten mit Antworten"))
+           + _arrow(160, y1 + 22, 196, y1 + 22) + b(196, y1, 140, W("loss", "Fehler"), W("how wrong?", "wie falsch?"))
+           + _arrow(336, y1 + 22, 372, y1 + 22) + b(372, y1, 180, W("gradient", "Gradient"), W("which way is better?", "welche Richtung ist besser?"))
+           + _arrow(552, y1 + 22, 588, y1 + 22) + b(588, y1, 160, W("model", "Modell"), W("for new inputs", "für neue Eingaben"), "box hl")
+           + _arrow(462, y1, 462, y1 - 16) + f'<text class="s" x="472" y="{y1 - 8}">{W("adjust the weights, repeat", "Gewichte anpassen, wiederholen")}</text>')
+    bottom = (b(20, y2, 140, W("candidates", "Kandidaten"), W("a population", "eine Population"))
+              + _arrow(160, y2 + 22, 196, y2 + 22) + b(196, y2, 170, W("score", "Bewertung"), W("e.g. a simulation", "z. B. eine Simulation"))
+              + _arrow(366, y2 + 22, 402, y2 + 22) + b(402, y2, 150, W("keep the better", "die Besseren behalten"))
+              + _arrow(552, y2 + 22, 588, y2 + 22)
+              + '<g class="vary">' + b(588, y2, 176, "", "", "box hl")
+              + f'<text class="t v-classic" x="676" y="{y2 + 19}" text-anchor="middle">{W("vary", "variieren")}</text>'
+              + f'<text class="s v-classic" x="676" y="{y2 + 35}" text-anchor="middle">{W("recombine, mutate", "kreuzen, mutieren")}</text>'
+              + f'<text class="t v-llm" x="676" y="{y2 + 19}" text-anchor="middle">{W("an LLM", "ein LLM")}</text>'
+              + f'<text class="s v-llm" x="676" y="{y2 + 35}" text-anchor="middle">{W("rewrites good candidates", "schreibt gute Kandidaten um")}</text></g>'
+              + f'<path class="ln" d="M676 {y2 + 44}V{y2 + 66}H90V{y2 + 45}"/>' + _arrow(90, y2 + 56, 90, y2 + 45)
+              + f'<text class="s halo" x="383" y="{y2 + 62}" text-anchor="middle">{W("the next generation, repeat", "die nächste Generation, wiederholen")}</text>')
+    lbl = (f'<text class="s" x="20" y="14">{W("LEARNING FROM DATA", "AUS DATEN LERNEN")}</text>'
+           f'<text class="s" x="20" y="{y2 - 12}">{W("SEARCHING WITH A SCORE", "MIT EINER BEWERTUNG SUCHEN")}</text>')
+    svg = (f'<svg class="dia pipes" viewBox="0 0 784 216" role="img" aria-label="{W("Two pipelines: data, loss, gradient, model; and candidates, score, keep the better, vary", "Zwei Abläufe: Daten, Fehler, Gradient, Modell; und Kandidaten, Bewertung, die Besseren behalten, variieren")}">{lbl}{top}{bottom}</svg>')
+    btn = [W("classic", "klassisch"), W("LLM as the variation step", "LLM als Variationsschritt")]
+    buttons = "".join(f'<button type="button" data-v="{k}" aria-pressed="{"true" if k == 0 else "false"}">{x}</button>' for k, x in enumerate(btn))
+    inner = f'<div class="d1-presets chips mono" role="group"><span class="k">{W("VARIATION:", "VARIATION:")}</span>{buttons}</div>{_scroll(svg)}'
+    return demo("ea2", {}, inner, T(
+        f"<b>What each needs, what each gives.</b> Learning needs examples and a differentiable loss and yields a model; evolutionary search needs only a score — which may itself come from a simulation — and yields good candidates. Switch the variation step: in FunSearch {r('FunS')} and AlphaEvolve {r('AlphaE')} an LLM writes the variants, while the loop and the evaluator stay classical.",
+        f"<b>Was jeder braucht, was jeder liefert.</b> Lernen braucht Beispiele und eine differenzierbare Fehlerfunktion und liefert ein Modell; evolutionäre Suche braucht nur eine Bewertung — die selbst aus einer Simulation stammen kann — und liefert gute Kandidaten. Schalten Sie den Variationsschritt um: Bei FunSearch {r('FunS')} und AlphaEvolve {r('AlphaE')} schreibt ein LLM die Varianten, Schleife und Bewertung bleiben klassisch."), lang)
+
+
+# =====================================================================
+# The loop as a ring of five steps (ea3, hero, thumb)
+# =====================================================================
+NODES = [  # clockwise from the top; the run enters at "stop?" (generation 0 is random and already scored)
+    ("stop", T("stop? → the best", "Stopp? → das Beste")),
+    ("select", T("select parents", "Eltern wählen")),
+    ("vary", T("recombine + mutate", "kreuzen + mutieren")),
+    ("eval", T("evaluate", "bewerten")),
+    ("survive", T("select survivors", "Überlebende wählen")),
+]
+
+
+def _ring(lang, cx, cy, R, centre=True):
+    L = lambda x: x[lang]
+    out = [f'<circle class="ring" cx="{cx}" cy="{cy}" r="{R}"/>']
+    n = len(NODES)
+    for k in range(n):                                    # chevrons between the steps, clockwise
+        a = -math.pi / 2 + 2 * math.pi * (k + .5) / n
+        x, y, t = cx + R * math.cos(a), cy + R * math.sin(a), a + math.pi / 2
+        p1 = (x - 6 * math.cos(t) + 4 * math.cos(a), y - 6 * math.sin(t) + 4 * math.sin(a))
+        p2 = (x - 6 * math.cos(t) - 4 * math.cos(a), y - 6 * math.sin(t) - 4 * math.sin(a))
+        out.append(f'<path class="ln" d="M{p1[0]:.1f} {p1[1]:.1f}L{x:.1f} {y:.1f}L{p2[0]:.1f} {p2[1]:.1f}"/>')
+    for k, (key, name) in enumerate(NODES):
+        a = -math.pi / 2 + 2 * math.pi * k / n
+        x, y = cx + R * math.cos(a), cy + R * math.sin(a)
+        lx, ly = cx + (R + 12) * math.cos(a), cy + (R + 12) * math.sin(a)
+        anchor = "middle" if abs(math.cos(a)) < .3 else ("start" if math.cos(a) > 0 else "end")
+        dy = -4 if math.sin(a) < -.6 else (12 if math.sin(a) > .6 else 4)
+        out.append(f'<g class="nd" data-n="{key}"><circle cx="{x:.1f}" cy="{y:.1f}" r="5"/>'
+                   f'<text x="{lx:.1f}" y="{ly + dy:.1f}" text-anchor="{anchor}">{L(name)}</text></g>')
+    if centre:
+        out.append(f'<text class="cnt" x="{cx}" y="{cy + 4}" text-anchor="middle"></text><text class="s cnt2" x="{cx}" y="{cy + 22}" text-anchor="middle"></text>')
+    return "".join(out)
+
+
+# =====================================================================
+# F3  The loop: one real generation of the starter's GA on the two hills (population 10)
+# =====================================================================
+LOOP_SEED = 13
+BOOK = sim.hills_book(LOOP_SEED)
+
+
+def demo_loop(lang):
+    L = lambda x: x[lang]
+    W = lambda en, de: L(T(en, de))
+    B = BOOK
+    n_pop, n_kids, elite = len(B["pop"]), len(B["kids"]), B["elite"]
+    pos, f = {}, {}
+    for k, g in enumerate(B["pop"]):
+        pos[f"p{k}"], f[f"p{k}"] = g, B["fit"][k]
+    for k, g in enumerate(B["kids"]):
+        pos[f"c{k}"], f[f"c{k}"] = g, sim.hills(*g)
+    for k, g in enumerate(B["fresh"]):
+        pos[f"n{k}"], f[f"n{k}"] = g, sim.hills(*g)
+    parents = {f"c{k}": (f"p{a}", f"p{b}") for k, (a, b) in enumerate(B["parents"])}
+    before = {f"c{k}": g for k, g in enumerate(B["kids0"])}
+    mut = {f"c{k}" for k, m in enumerate(B["mutated"]) if m}
+    wins = {}
+    for a, b in B["parents"]:
+        for i in (a, b):
+            wins[f"p{i}"] = wins.get(f"p{i}", 0) + 1
+    kids = [f"c{k}" for k in range(n_kids)]
+    news = [f"n{k}" for k in range(len(B["fresh"]))]
+    ids = [f"p{k}" for k in range(n_pop)]
+    eli = ids[:elite]
+    better = [c for c in kids if f[c] > max(f[p] for p in parents[c]) + .01]
+    top = max(kids, key=lambda c: f[c])
+    nxt = sorted(eli + kids + news, key=lambda i: -f[i])
+    assert len(better) == 2 and f[top] > f["p0"] and len(mut) == 3
+    star = max(wins, key=wins.get)
+    never = [i for i in ids if i not in wins]
+    assert star in ("p0", "p1") and "p9" in never
+    assert f["p0"] > 3 * f["p9"] + .1 and max(f.values()) < .6            # real spread; the axis ends at 0.6
+    best0, best1 = f["p0"], f[nxt[0]]
+    fx = lambda v: _dec(f"{v:.2f}", lang)
+    pair = lambda c: f"#{int(parents[c][0][1:]) + 1} × #{int(parents[c][1][1:]) + 1}"
+    rows_p = lambda cls=lambda i: "", note=lambda i: "": [[i, cls(i), note(i)] for i in ids]
+    div = [["—", "div", ""]]
+    states = [
+        dict(node="stop", cnt=f"{n_pop}", cnt2=W("generation 0", "Generation 0"), rows=rows_p(),
+             say=W(f"Generation 0: {n_pop} random points on the two hills, each scored by its height and ranked. Stop? Not yet — the budget allows more generations.",
+                   f"Generation 0: {n_pop} zufällige Punkte auf den zwei Hügeln, jeder nach seiner Höhe bewertet und sortiert. Stopp? Noch nicht — das Budget erlaubt weitere Generationen.")),
+        dict(node="select", cnt=f"{2 * n_kids}", cnt2=W("parents drawn", "Eltern gezogen"),
+             rows=rows_p(lambda i: "sel" if i in wins else "", lambda i: f"×{wins[i]}" if i in wins else ""),
+             say=W(f"Select parents by tournament: draw 3 at random, the highest wins. {n_kids} children need {2 * n_kids} parents. #{int(star[1:]) + 1} wins {wins[star]} times, #1 {wins['p0']} times, {len(never)} candidates never — better odds, not certainty.",
+                   f"Eltern per Turnier wählen: 3 zufällig ziehen, der höchste gewinnt. {n_kids} Kinder brauchen {2 * n_kids} Eltern. #{int(star[1:]) + 1} gewinnt {wins[star]}-mal, #1 {wins['p0']}-mal, {len(never)} Kandidaten nie — bessere Chancen, keine Gewissheit.")),
+        dict(node="vary", cnt=f"{n_kids}", cnt2=W("children", "Kinder"),
+             rows=rows_p() + div + [[c, "pending" + (" mut" if c in mut else ""), pair(c)] for c in kids],
+             say=W(f"Each child takes x from one parent and y from the other (uniform crossover): it lands on a corner of the rectangle its parents span. {len(mut)} of {n_kids} children are then mutated (*): one number is nudged a little. Hover a child to see its parents.",
+                   f"Jedes Kind nimmt x von einem Elternteil und y vom anderen (gleichmäßiger Crossover): Es landet auf einer Ecke des Rechtecks, das seine Eltern aufspannen. {len(mut)} von {n_kids} Kindern werden dann mutiert (*): Eine Zahl wird ein wenig verschoben. Zeigen Sie auf ein Kind, um seine Eltern zu sehen.")),
+        dict(node="eval", cnt=f"{n_kids}", cnt2=W("evaluated", "bewertet"),
+             rows=rows_p() + div + [[c, "child" + (" mut" if c in mut else ""), pair(c)] for c in kids],
+             say=W(f"Now the children are evaluated — in a real problem, the expensive part. {len(better)} of them stand higher than both their parents; the best reaches {fx(f[top])}, above anything in generation 0.",
+                   f"Jetzt werden die Kinder bewertet — bei einem echten Problem der teure Teil. {len(better)} von ihnen stehen höher als beide Eltern; das beste erreicht {fx(f[top])}, mehr als alles in Generation 0.")),
+        dict(node="survive", cnt=f"{elite} + {n_kids} + {len(news)}", cnt2=W("survivors", "Überlebende"),
+             rows=[[i, "elite", W("elite", "Elite")] for i in eli] + [[c, "child" + (" mut" if c in mut else ""), pair(c)] for c in kids]
+                  + [[i, "fresh", W("newcomer", "Neuling")] for i in news] + [[i, "struck", ""] for i in ids[elite:]],
+             say=W(f"Select survivors: the {elite} best parents stay unchanged (the elite); the other {n_pop - elite} are replaced by the {n_kids} children and {len(news)} random newcomer.",
+                   f"Überlebende wählen: Die {elite} besten Eltern bleiben unverändert (die Elite); die anderen {n_pop - elite} werden durch die {n_kids} Kinder und {len(news)} zufälligen Neuling ersetzt.")),
+        dict(node="stop", cnt=f"{n_pop}", cnt2=W("generation 1", "Generation 1"),
+             rows=[[i, ("child" if i[0] == "c" else "fresh" if i[0] == "n" else "elite") + (" mut" if i in mut else ""), ""] for i in nxt],
+             say=W(f"Generation 1, re-ranked: best {fx(best1)} (before {fx(best0)}). Stop? Not yet — the starter at the end of the article runs this loop 60 times.",
+                   f"Generation 1, neu sortiert: Bestwert {fx(best1)} (vorher {fx(best0)}). Stopp? Noch nicht — der Starter am Ende des Artikels läuft diese Schleife 60-mal.")),
+    ]
+    data = {"states": states, "f": {k: _n(v) for k, v in f.items()}, "pos": {k: [_n(v, 4) for v in p] for k, p in pos.items()},
+            "parents": parents, "before": {k: [_n(v, 4) for v in p] for k, p in before.items() if k in mut}, "lo": 0, "hi": .6,
+            "words": {"fit": W("height", "Höhe")}}
+    ring = f'<svg class="dia ring-svg" viewBox="0 0 380 250" role="img" aria-label="{W("The loop of an evolutionary algorithm as a ring of five steps", "Die Schleife eines evolutionären Algorithmus als Ring aus fünf Schritten")}">{_ring(lang, 196, 122, 70)}</svg>'
+    mini = (f'<svg class="dia lp-map" viewBox="0 0 196 196" role="img" aria-label="{W("The two-hills map with the population as dots", "Die Zwei-Hügel-Karte mit der Population als Punkten")}">'
+            f'<g transform="translate(2 2)">{land(192, quiet=True)}<g class="lp-guides"></g><g class="lp-dots"></g></g></svg>')
+    inner = (f'<div class="lp3"><div class="lp3-ring">{ring}{mini}</div>'
+             f'<div class="lp3-side"><p class="lp3-say" aria-live="polite"></p>{controls(lang)}<div class="rank" role="list"></div></div></div>')
+    return demo("ea3", data, inner, T(
+        f"<b>One generation of a genetic algorithm.</b> {n_pop} candidates on the two-hills landscape; a candidate is a point (x, y), its fitness the height there. Each row is one candidate, the bar its height; the map shows where they stand. The settings are the starter’s at the end of the article (tournaments of 3, 30 % of the children mutated, an elite of 2), with half the population and one newcomer.",
+        f"<b>Eine Generation eines genetischen Algorithmus.</b> {n_pop} Kandidaten auf der Zwei-Hügel-Landschaft; ein Kandidat ist ein Punkt (x, y), seine Fitness die Höhe dort. Jede Zeile ist ein Kandidat, der Balken seine Höhe; die Karte zeigt, wo sie stehen. Die Einstellungen sind die des Starters am Ende des Artikels (Turniere aus 3, 30 % der Kinder mutiert, eine Elite von 2), mit halber Population und einem Neuling."), lang,
+        source=T(f"Data: a seeded run (seed {LOOP_SEED})", f"Daten: ein reproduzierbarer Lauf (Seed {LOOP_SEED})"))
+
+
+# =====================================================================
+# F4  Three encodings (HTML panels with small drawings; they stack on phones)
+# =====================================================================
+PHRASE_TARGET, PHRASE = "HELLO WORLD", "HELPO WOKLD"
+TOUR = list("ABCDEGF")
+POINT = (.74, .70)
+
+
+def _tour_svg(tour, S=120, cls="tour", label=True, missing=(), pad=12):
+    P = lambda c: (pad + sim.CITIES[c][0] * (S - 2 * pad), pad + (1 - sim.CITIES[c][1]) * (S - 2 * pad))
+    pts = [P(c) for c in tour]
+    out = []
+    if len(tour) > 1:
+        out.append(f'<path class="{cls}" d="M{"L".join(f"{x:.1f} {y:.1f}" for x, y in pts)}Z"/>')
+    for c in sim.CITIES:
+        x, y = P(c)
+        out.append(f'<circle class="city{" miss" if c in missing else ""}" cx="{x:.1f}" cy="{y:.1f}" r="3.2"/>')
+        if label:
+            out.append(f'<text class="s halo" x="{x + (6 if x < S / 2 else -6):.1f}" y="{y + (12 if y > S / 2 else -5):.1f}" text-anchor="{"start" if x < S / 2 else "end"}">{c}</text>')
+    return "".join(out)
+
+
+def fig_encodings(lang):
+    L = lambda x: x[lang]
+    W = lambda en, de: L(T(en, de))
+    right = sum(a == b for a, b in zip(PHRASE, PHRASE_TARGET))
+    length = sim.tour_length(TOUR)
+    h = sim.hills(*POINT)
+    assert right == 9 and len(PHRASE) == len(PHRASE_TARGET) and abs(length - sim.tour_length(list("ABCDEFG"))) > .05
+    letters = "".join(f'<span class="{"" if a == b else "bad"}">{"·" if a == " " else a}</span>' for a, b in zip(PHRASE, PHRASE_TARGET))
+    tgt = "".join(f'<span>{"·" if a == " " else a}</span>' for a in PHRASE_TARGET)
+    px, py = _hp(POINT, 112, 4, 4)
+    panels = [
+        (W("a phrase · letters", "ein Satz · Buchstaben"),
+         f'<div class="enc3-str mono">{letters}</div><div class="enc3-str faint mono">{tgt}</div>',
+         W(f"fitness: letters that match the target — {right} of {len(PHRASE)}", f"Fitness: Buchstaben, die zum Ziel passen — {right} von {len(PHRASE)}"),
+         W("mutate: change one letter", "mutieren: einen Buchstaben ändern"),
+         W("crossover: cut and splice — fine", "Crossover: schneiden und zusammensetzen — passt")),
+        (W("a tour · a permutation", "eine Tour · eine Permutation"),
+         f'<div class="enc3-str mono">{"".join(f"<span>{c}</span>" for c in TOUR)}</div>'
+         f'<svg class="dia enc3-svg" viewBox="0 0 120 120" aria-hidden="true">{_tour_svg(TOUR)}</svg>',
+         W(f"fitness: length of the round trip — {length:.2f}, shorter is better", f"Fitness: Länge der Rundreise — {_dec(f'{length:.2f}', lang)}, kürzer ist besser"),
+         W("mutate: swap two cities", "mutieren: zwei Städte tauschen"),
+         W("crossover: cut and splice breaks it — below", "Crossover: schneiden und zusammensetzen geht schief — unten")),
+        (W("a point · two numbers", "ein Punkt · zwei Zahlen"),
+         f'<div class="enc3-str mono"><span class="w">{_dec(f"{POINT[0]:.2f}", lang)}</span><span class="w">{_dec(f"{POINT[1]:.2f}", lang)}</span></div>'
+         f'<svg class="dia enc3-svg" viewBox="0 0 120 120" aria-hidden="true">{land(112, 4, 4, quiet=True)}<circle class="pt" cx="{px:.1f}" cy="{py:.1f}" r="4"/></svg>',
+         W(f"fitness: height of the landscape — {h:.2f}", f"Fitness: Höhe der Landschaft — {_dec(f'{h:.2f}', lang)}"),
+         W("mutate: nudge a number", "mutieren: eine Zahl verschieben"),
+         W("crossover: mix the coordinates — fine", "Crossover: Koordinaten mischen — passt")),
+    ]
+    cells = "".join(f'<div class="enc3-p"><p class="enc3-h mono">{t}</p>{g}<p class="enc3-f mono">{fi}</p>'
+                    f'<ul class="enc3-ops mono"><li>{m}</li><li>{c}</li></ul></div>' for t, g, fi, m, c in panels)
+    return (f'<figure class="media art-fig"><div class="enc3">{cells}</div><figcaption class="mono">'
+            + W("<b>Three encodings, three sets of operators.</b> The genotype (top line) is what the algorithm changes; what it means — and therefore which mutation and crossover make sense — depends on the problem. Our running example is the third.",
+                "<b>Drei Codierungen, drei Sätze von Operatoren.</b> Der Genotyp (obere Zeile) ist das, was der Algorithmus ändert; was er bedeutet — und damit, welche Mutation und welcher Crossover sinnvoll sind —, hängt vom Problem ab. Unser durchgehendes Beispiel ist das dritte.")
+            + source_line(src("illustrative"), lang) + '</figcaption></figure>')
+
+
+# =====================================================================
+# F5  Same loop, different chromosomes (SE tools)
+# =====================================================================
+def fig_chromosomes(lang):
+    L = lambda x: x[lang]
+    cols = [
+        ("EvoSuite", r("FA13"), T("a whole test suite", "eine ganze Test-Suite"),
+         "test 1:\n  Stack s = new Stack();\n  s.push(5);\ntest 2:\n  Stack s = new Stack();\n  s.pop();",
+         T("minimise: uncovered branches, and how far the tests miss each one", "minimieren: nicht erreichte Zweige und wie knapp die Tests jeden verfehlen")),
+        ("GenProg", r("LeG12"), T("a patch: a list of edits", "ein Patch: eine Liste von Änderungen"),
+         "Delete(12)\nInsert(40, 7)\nReplace(81, 44)",
+         T("maximise: tests passed. Caution: a patch that deletes the failing feature can pass too", "maximieren: bestandene Tests. Vorsicht: Auch ein Patch, der die fehlerhafte Funktion löscht, kann bestehen")),
+        ("PerOpteryx", r("PerOp"), T("an architecture: components → servers", "eine Architektur: Komponenten → Server"),
+         "Frontend → server 1\nOrders   → server 1\nBilling  → server 2\nserver 2: 4 cores",
+         T("several objectives at once: response time, cost, reliability (NSGA-II)", "mehrere Ziele zugleich: Antwortzeit, Kosten, Zuverlässigkeit (NSGA-II)")),
+    ]
+    cells = "".join(f'<div class="chr"><p class="mono chr-h">{n} {c}</p><p class="chr-k mono">{L(T("chromosome", "Chromosom"))}: {L(k)}</p>'
+                    f'<pre class="mono">{esc(code)}</pre><p class="chr-f">{L(f)}</p></div>' for n, c, k, code, f in cols)
+    return (f'<figure class="media art-fig"><div class="chr-grid">{cells}</div><figcaption class="mono">'
+            + L(T("<b>And in software engineering.</b> Choosing what a candidate <i>is</i> — and how to score it — is the creative part; the loop is the same. Edit indices of the GenProg column are illustrative.",
+                  "<b>Und in der Softwaretechnik.</b> Die Wahl, was ein Kandidat <i>ist</i> — und wie man ihn bewertet —, ist der kreative Teil; die Schleife bleibt dieselbe. Die Indizes der GenProg-Spalte sind illustrativ."))
+            + '</figcaption></figure>')
+
+
+# =====================================================================
+# F7  Selection: wheel, tournament, temperature — on generation 0 of the convergence run
+# =====================================================================
+SEL_RUN = HILLS["balanced"]["runs"][_featured("balanced")]
+
+
+def demo_selection(lang):
+    L = lambda x: x[lang]
+    W = lambda en, de: L(T(en, de))
+    fs = sorted((sim.hills(*p) for p in SEL_RUN[0]), reverse=True)
+    assert max(fs) < .6 and fs[0] / sum(fs) > 3 / len(fs)            # the best slice is more than 3× a fair share: real pressure
+    modes = [("wheel", W("roulette wheel", "Glücksrad (Roulette)")), ("tour", W("tournament", "Turnier")), ("temp", W("temperature", "Temperatur"))]
+    buttons = "".join(f'<button type="button" data-m="{k}" aria-pressed="{"true" if i == 0 else "false"}">{n}</button>' for i, (k, n) in enumerate(modes))
+    inner = (f'<div class="d1-presets chips mono" role="group"><span class="k">{W("SELECTION:", "SELEKTION:")}</span>{buttons}</div>'
+             f'<div class="sel-knobs mono"><label class="sl-k"><span>k</span> <input type="range" min="2" max="8" value="3" aria-label="{W("tournament size k", "Turniergröße k")}"> <output>3</output></label>'
+             f'<label class="sl-t"><span>T</span> <input type="range" min="0" max="40" value="20" aria-label="{W("temperature", "Temperatur")}"> <output></output></label>'
+             f'<label class="sl-off"><input type="checkbox"> {W("+1000 to every score", "+1000 auf jede Bewertung")}</label></div>'
+             f'<div class="sl-wrap"><div class="sl-left"><svg class="dia wheel" viewBox="0 0 240 240" role="img" aria-label="{W("A roulette wheel with one slice per candidate", "Ein Glücksrad mit einem Stück je Kandidat")}"></svg>'
+             f'<div class="sel-foot mono"><button type="button" class="act draw">{W("draw 6 parents", "6 Eltern ziehen")}</button></div>'
+             f'<p class="sel-say mono" aria-live="polite"></p><pre class="sel-tour mono" aria-live="polite"></pre></div>'
+             f'<div class="sel-side"><div class="rank sel-rank" role="list"></div></div></div>')
+    data = {"f": [_n(v, 4) for v in fs], "lo": 0, "hi": .6,
+            "words": {"best": W("best", "bester"), "worst": W("worst", "schlechtester"), "of": W("of the wheel", "des Rads"),
+                      "none": W("almost no pressure", "fast kein Druck"), "some": W("some pressure", "etwas Druck"), "strong": W("strong pressure", "starker Druck"),
+                      "chance": W("chance per draw", "Chance je Zug"), "tour": W("tournament", "Turnier"), "fit": W("height", "Höhe")}}
+    return demo("ea7", data, inner, T(
+        f"<b>Where selection pressure comes from.</b> The 20 random candidates of generation 0 in the convergence figure below, best first. The roulette wheel gives each a slice proportional to its height — add 1000 to every score and the wheel turns fair, all differences gone. A tournament (best of k) only compares, so the offset changes nothing; k is the pressure dial {r('GD91')}. Temperature works as in <a href=\"research-ai4se.html#tokens\">part 2</a>: a softmax over the scores, sharp when cold, flat when hot. “Draw” spins six equally spaced pointers once (stochastic universal sampling).",
+        f"<b>Woher der Selektionsdruck kommt.</b> Die 20 zufälligen Kandidaten der Generation 0 aus der Konvergenz-Abbildung unten, der beste zuerst. Das Glücksrad gibt jedem ein Stück proportional zu seiner Höhe — addieren Sie 1000 auf jede Bewertung, und das Rad wird fair, alle Unterschiede sind weg. Ein Turnier (Bester aus k) vergleicht nur, der Versatz ändert also nichts; k ist der Regler für den Druck {r('GD91')}. Die Temperatur wirkt wie in <a href=\"research-ai4se.html#tokens\">Teil 2</a>: ein Softmax über die Bewertungen, scharf wenn kalt, flach wenn heiß. „Ziehen“ dreht sechs gleichmäßig verteilte Zeiger einmal (stochastisches universelles Stichprobenverfahren)."), lang)
+
+
+# =====================================================================
+# F8  Crossover: ordered strips · order crossover (OX) on a tour
+# =====================================================================
+OX_A, OX_B, OX_I, OX_J, OX_CUT = list("ABCDEGF"), list("ABCEDFG"), 2, 5, 4
+
+
+def demo_crossover(lang):
+    L = lambda x: x[lang]
+    W = lambda en, de: L(T(en, de))
+    A, B, i, j, cut = OX_A, OX_B, OX_I, OX_J, OX_CUT
+    naive = sim.one_point(A, B, cut)
+    child = sim.order_crossover(A, B, i, j)
+    la, lb, lc = (sim.tour_length(t) for t in (A, B, child))
+    dup = [c for c in sim.CITIES if naive.count(c) > 1]
+    miss = [c for c in sim.CITIES if c not in naive]
+    fill = [c for c in B[j:] + B[:j] if c not in A[i:j]]
+    assert len(dup) == 1 and len(miss) == 1 and sorted(child) == sorted(A) and lc < min(la, lb)
+    fx = lambda v: _dec(f"{v:.2f}", lang)
+    cw, x0 = 30, 90
+
+    def strip(y, label, letters, cls=lambda k: ""):
+        out = f'<text class="s" x="0" y="{y + 17}">{label}</text>'
+        for k, c in enumerate(letters):
+            out += (f'<rect class="lt {cls(k)}" x="{x0 + k * cw}" y="{y}" width="{cw - 4}" height="24" rx="2"/>'
+                    + (f'<text class="lt-t {cls(k)}" x="{x0 + k * cw + (cw - 4) / 2}" y="{y + 16}" text-anchor="middle">{c}</text>' if c else ""))
+        return out
+
+    def maps(t3, lab3, miss3=(), cls3="tour hl"):
+        out = ""
+        for k, (t, lab, mi, cls) in enumerate(((A, f"A · {fx(la)}", (), "tour"), (B, f"B · {fx(lb)}", (), "tour"), (t3, lab3, miss3, cls3))):
+            out += (f'<g transform="translate({4 + k * 126} 120)"><rect class="box" width="118" height="118" rx="2"/>'
+                    f'{_tour_svg(t, 118, cls, label=False, missing=mi, pad=12) if t else _tour_svg([], 118, label=False)}</g>'
+                    f'<text class="s" x="{4 + k * 126}" y="252">{lab}</text>')
+        return out
+    pa, pb, ch = W("parent A", "Elternteil A"), W("parent B", "Elternteil B"), W("child", "Kind")
+    keep = lambda k: "keep" if i <= k < j else ""
+    states = [
+        (strip(4, pa, A) + strip(34, pb, B) + strip(78, ch, [""] * 7, lambda k: "empty") + maps([], ""),
+         W(f"Two tours through the same 7 cities; the genotype lists the order. Every city exactly once — a permutation. A is {fx(la)} long, B {fx(lb)}: each has one pair of cities in the wrong order.",
+           f"Zwei Touren durch dieselben 7 Städte; der Genotyp listet die Reihenfolge. Jede Stadt genau einmal — eine Permutation. A ist {fx(la)} lang, B {fx(lb)}: Bei jeder steht ein Paar Städte falsch herum.")),
+        (strip(4, pa, A, lambda k: "fa" if k < cut else "off") + strip(34, pb, B, lambda k: "fb" if k >= cut else "off")
+         + strip(78, ch, naive, lambda k: ("bad " if naive[k] in dup else "") + ("fa" if k < cut else "fb"))
+         + maps(naive, W(f"{dup[0]} twice, {miss[0]} missing", f"{dup[0]} doppelt, {miss[0]} fehlt"), miss3=miss, cls3="tour bad"),
+         W(f"Naive one-point crossover, cut after position {cut}: the head of A, the tail of B. City {dup[0]} appears twice, {miss[0]} not at all — no longer a tour.",
+           f"Naiver Ein-Punkt-Crossover, Schnitt nach Position {cut}: der Anfang von A, das Ende von B. Stadt {dup[0]} kommt doppelt vor, {miss[0]} gar nicht — keine Tour mehr.")),
+        (strip(4, pa, A, lambda k: "fa keep" if i <= k < j else "off") + strip(34, pb, B, lambda k: "off")
+         + strip(78, ch, [c if i <= k < j else "" for k, c in enumerate(A)], lambda k: "fa" if i <= k < j else "empty")
+         + maps(A[i:j], W("the slice of A", "der Ausschnitt von A"), cls3="tour hl open"),
+         W(f"Order crossover (OX) {r('Dav85')} instead: keep a slice of A in place — positions {i + 1} to {j}, {' '.join(A[i:j])}.",
+           f"Stattdessen Order Crossover (OX) {r('Dav85')}: einen Ausschnitt von A an seinem Platz behalten — Positionen {i + 1} bis {j}, {' '.join(A[i:j])}.")),
+        (strip(4, pa, A, lambda k: "fa keep" if i <= k < j else "off") + strip(34, pb, B, lambda k: "fb" if B[k] in fill else "off")
+         + strip(78, ch, child, lambda k: "fa" if i <= k < j else "fb")
+         + maps(child, W(f"child · {fx(lc)}", f"Kind · {fx(lc)}")),
+         W(f"Fill the other positions, starting after the slice, with the missing cities in the order they appear in B: {', '.join(fill)}. A valid tour — and here, {fx(lc)}, shorter than both parents.",
+           f"Die übrigen Positionen, beginnend hinter dem Ausschnitt, mit den fehlenden Städten in der Reihenfolge von B füllen: {', '.join(fill)}. Eine gültige Tour — und hier mit {fx(lc)} kürzer als beide Eltern.")),
+    ]
+    data = {"states": [{"svg": s, "say": t} for s, t in states],
+            "a": [.20, .35, .35, .60, .80, .70, .40], "b": [.90, .85, .50, .30, .30, .15, .10],
+            "words": {"parent": W("parent", "Elternteil"), "child": W("child", "Kind")}}
+    ops = [("one", W("one-point", "Ein-Punkt")), ("two", W("two-point", "Zwei-Punkt")), ("uni", W("uniform", "gleichmäßig"))]
+    obtn = "".join(f'<button type="button" data-o="{k}" aria-pressed="{"true" if n_ == 0 else "false"}">{n}</button>' for n_, (k, n) in enumerate(ops))
+    strip_ = (f'<div class="xo-a"><p class="xo-k mono">{W("NUMBERS IN A FIXED ORDER", "ZAHLEN IN FESTER REIHENFOLGE")}</p>'
+              f'<div class="d1-presets chips mono" role="group">{obtn}<button type="button" class="act retoss">{W("new cuts", "neue Schnitte")}</button></div>'
+              f'<svg class="dia xo-strip" viewBox="0 0 380 156" role="img" aria-label="{W("Two parent strips of seven numbers and the two children", "Zwei Eltern-Streifen aus sieben Zahlen und die beiden Kinder")}"></svg>'
+              f'<p class="xo-say">{W("A schedule of 7 numbers — say, how much of its torque a hybrid car’s engine delivers, second by second (chapter 03). The order means something, so a cut makes sense: children inherit whole stretches.", "Ein Zeitplan aus 7 Zahlen — etwa, welchen Anteil seines Drehmoments der Motor eines Hybridautos liefert, Sekunde für Sekunde (Kapitel 03). Die Reihenfolge bedeutet etwas, ein Schnitt ist also sinnvoll: Kinder erben ganze Abschnitte.")}</p></div>')
+    ox = (f'<div class="xo-b"><p class="xo-k mono">{W("A TOUR: ORDER CROSSOVER", "EINE TOUR: ORDER CROSSOVER")}</p>'
+          f'<svg class="dia ox" viewBox="0 0 380 258" role="img" aria-label="{W("Two parent tours, a broken one-point child and the order-crossover child", "Zwei Eltern-Touren, ein kaputtes Ein-Punkt-Kind und das Kind des Order Crossover")}"><g class="ox-g"></g></svg>'
+          f'<p class="ox-say" aria-live="polite"></p>{controls(lang)}</div>')
+    return demo("ea8", data, f'<div class="xo">{strip_}{ox}</div>', T(
+        "<b>How to recombine depends on the encoding.</b> Left: the textbook operators on numbers in a fixed order (values illustrative). Right: on a permutation, cutting and splicing repeats and drops cities; order crossover keeps a slice of one parent and the order of the other. City positions illustrative, lengths computed.",
+        "<b>Wie man kreuzt, hängt von der Codierung ab.</b> Links die Lehrbuch-Operatoren auf Zahlen in fester Reihenfolge (Werte illustrativ). Rechts: Auf einer Permutation wiederholt Schneiden und Zusammensetzen Städte und verliert andere; Order Crossover behält einen Ausschnitt des einen Elternteils und die Reihenfolge des anderen. Lage der Städte illustrativ, Längen berechnet."), lang)
+
+
+# =====================================================================
+# F9  Mutation: a σ circle on the landscape, sampled mutants (computed live: an illustration of chance)
+# =====================================================================
+MUT_SPOTS = [("slope", (.70, .62)), ("low", (sim.LOW[0], sim.LOW[1])), ("valley", (.52, .48))]
+
+
+def demo_mutation(lang):
+    L = lambda x: x[lang]
+    W = lambda en, de: L(T(en, de))
+    S = 300
+    names = {"slope": W("on a slope", "am Hang"), "low": W("top of the low hill", "Gipfel des niedrigen Hügels"), "valley": W("in the valley", "im Tal")}
+    chips = "".join(f'<button type="button" data-s="{k}" class="{"first" if k == "low" else ""}" aria-pressed="{"true" if k == "slope" else "false"}">{names[k]}</button>' for k, _ in MUT_SPOTS)
+    knob = lambda cls, lab, aria, mn, mx, st, v: (f'<label class="{cls}"><span><code>{lab}</code> {aria}</span>'
+                                                  f'<input type="range" min="{mn}" max="{mx}" step="{st}" value="{v}" aria-label="{lab}"><output></output></label>')
+    knobs = (knob("kn-s", "sigma", W("step size σ", "Schrittweite σ"), .01, .25, .01, .08)
+             + knob("kn-i", "indpb", W("chance per number", "Chance je Zahl"), 0, 1, .1, 1)
+             + knob("kn-p", "mutpb", W("chance per child", "Chance je Kind"), 0, 1, .1, .5))
+    svg = (f'<svg class="dia mu-svg" viewBox="0 0 {S + 8} {S + 8}" role="img" aria-label="{W("The two-hills map with one child, its step-size circle and sampled mutants; tap to move the child", "Die Zwei-Hügel-Karte mit einem Kind, seinem Schrittweiten-Kreis und gezogenen Mutanten; tippen verschiebt das Kind")}">'
+           f'<g transform="translate(4 4)">{land(S, quiet=True)}<g class="mu-g"></g></g></svg>')
+    inner = (f'<div class="d1-presets chips mono" role="group"><span class="k">{W("THE CHILD:", "DAS KIND:")}</span>{chips}</div>'
+             f'<div class="mu">{svg}<div class="mu-side"><div class="kn mono">{knobs}</div>'
+             f'<p class="mu-count mono" aria-live="polite"></p><p class="mu-say"></p>'
+             f'<button type="button" class="act mutate mono">{W("mutate again", "neu mutieren")}</button></div></div>')
+    data = {"S": S, "spots": {k: list(p) for k, p in MUT_SPOTS}, "low": list(sim.LOW), "high": list(sim.HIGH), "n": 20,
+            "words": {"changed": W("changed", "verändert"), "of": W("of", "von"), "better": W("higher", "höher"), "worse": W("lower", "tiefer"),
+                      "same": W("unchanged", "unverändert"), "child": W("child", "Kind"),
+                      "say": {"slope": W("On a slope, half the steps go up: small steps refine.", "Am Hang geht die Hälfte der Schritte bergauf: Kleine Schritte verfeinern."),
+                              "low": W("On top of the low hill every small step goes down. Only a big σ — or a newcomer — reaches the high hill: that is exploration.", "Auf dem Gipfel des niedrigen Hügels geht jeder kleine Schritt bergab. Nur ein großes σ — oder ein Neuling — erreicht den hohen Hügel: Das ist Erkunden."),
+                              "valley": W("In the flat valley most steps change almost nothing: the landscape gives no direction.", "Im flachen Tal ändern die meisten Schritte fast nichts: Die Landschaft gibt keine Richtung vor."),
+                              "free": W("Tap anywhere on the map to move the child.", "Tippen Sie irgendwo auf die Karte, um das Kind zu verschieben.")}}}
+    return demo("ea9", data, inner, T(
+        "<b>Three knobs, not one.</b> Twenty copies of one child go through mutation. <code>mutpb</code>: the chance that a child is mutated at all; <code>indpb</code>: the chance per number (below 1, some mutants move only sideways or only up and down); <code>sigma</code>: the step size — the circle has radius σ, and about 4 in 10 two-dimensional Gaussian steps land inside it. Filled: higher than the child, hollow: lower. The names are those of DEAP; the starter at the end mutates exactly one of the two numbers. Mutants are drawn live.",
+        "<b>Drei Regler, nicht einer.</b> Zwanzig Kopien eines Kindes durchlaufen die Mutation. <code>mutpb</code>: die Chance, dass ein Kind überhaupt mutiert wird; <code>indpb</code>: die Chance je Zahl (unter 1 bewegen sich manche Mutanten nur seitwärts oder nur auf und ab); <code>sigma</code>: die Schrittweite — der Kreis hat den Radius σ, und etwa 4 von 10 zweidimensionalen Gauß-Schritten landen darin. Gefüllt: höher als das Kind, hohl: tiefer. Die Namen sind die von DEAP; der Starter am Ende mutiert genau eine der beiden Zahlen. Die Mutanten werden live gezogen."), lang)
+
+
+# =====================================================================
+# F10  Watching a population converge (two hills)
+# =====================================================================
+def demo_converge(lang):
+    L = lambda x: x[lang]
+    W = lambda en, de: L(T(en, de))
+    S0 = 344
+    labels = (f'<text class="s halo" x="{sim.LOW[0] * S0 - 60:.0f}" y="{(1 - sim.LOW[1]) * S0 - 132:.0f}">{W("broad low hill (0.6)", "breiter niedriger Hügel (0,6)")}</text>'
+              f'<text class="s halo" x="{S0 - 6}" y="{(1 - sim.HIGH[1]) * S0 - 46:.0f}" text-anchor="end">{W("narrow high hill (1.0)", "schmaler hoher Hügel (1,0)")}</text>')
+    tops = {k: sum(sim.hills(*r_[-1][0]) >= .99 for r_ in HILLS[k]["runs"]) for k in sim.PRESETS}
+    assert tops["random"] < tops["balanced"] and HILLS["random"]["high"] == 10      # the texts say so
+    presets, names = {}, {"balanced": W("balanced", "ausgewogen"), "pressure": W("high pressure, no mutation", "hoher Druck, keine Mutation"),
+                          "closed": W("no newcomers", "keine Neulinge"), "random": W("random search", "Zufallssuche")}
+    for name, cfg in sim.PRESETS.items():
+        runs, k = HILLS[name]["runs"], _featured(name)
+        run = runs[k]
+        f_gen = [[sim.hills(*p) for p in gen] for gen in run]
+        presets[name] = {
+            "pts": [[int(round(v * 999)) for p in gen for v in p] for gen in run], "seed": k + 1, "high": HILLS[name]["high"],
+            "best": [_n(max(f)) for f in f_gen], "mean": [_n(sum(f) / len(f)) for f in f_gen], "worst": [_n(min(f)) for f in f_gen],
+            "div": [_n(sim.diversity(g)) for g in run],
+            "seeds": [[_n(max(sim.hills(*p) for p in g)) for g in r] for r in runs],
+            "final": [_n(sim.hills(*r[-1][0])) for r in runs], "cfg": cfg}
+    say = {"balanced": W("Tournament of 3, 30 % of children mutated, 2 elite, 2 random newcomers per generation — the starter at the end of this article.",
+                         "Turnier aus 3, 30 % der Kinder mutiert, 2 Elite, 2 zufällige Neulinge je Generation — der Starter am Ende dieses Artikels."),
+           "pressure": W("Tournament of 8, no mutation, no newcomers: the population collapses onto whatever is best early — often the wrong hill. The best curve looks healthy; the dots and the diversity tell the truth.",
+                         "Turnier aus 8, keine Mutation, keine Neulinge: Die Population fällt auf das zusammen, was früh am besten ist — oft der falsche Hügel. Die Bestkurve sieht gesund aus; die Punkte und die Vielfalt sagen die Wahrheit."),
+           "closed": W("Like balanced, but without newcomers: mutation alone rarely carries a candidate across the valley.",
+                       "Wie ausgewogen, aber ohne Neulinge: Mutation allein trägt selten einen Kandidaten über das Tal."),
+           "random": W("The baseline: 18 fresh random candidates per generation, only the 2 best kept. It finds the right hill — but rarely its top: nothing refines what it has found.",
+                       "Die Vergleichslinie: 18 neue Zufallskandidaten je Generation, nur die 2 besten bleiben. Sie findet den richtigen Hügel — aber selten seine Spitze: Nichts verfeinert, was sie gefunden hat.")}
+    for name, p in presets.items():
+        t = sum(f >= .99 for f in p["final"])
+        p["say"] = say[name]
+        p["count"] = W(f"10 seeds: {p['high']} ended on the high hill, {t} of them at its top (≥ 0.99). Shown: seed {p['seed']}.",
+                       f"10 Seeds: {p['high']} endeten auf dem hohen Hügel, {t} davon auf seiner Spitze (≥ 0,99). Gezeigt: Seed {p['seed']}.")
+    buttons = "".join(f'<button type="button" data-p="{k}" aria-pressed="{"true" if k == "balanced" else "false"}">{n}</button>' for k, n in names.items())
+    land_svg = (f'<svg class="dia land" viewBox="-4 -4 {S0 + 8} {S0 + 8}" role="img" aria-label="{W("Contour lines of two hills with the population as dots", "Höhenlinien zweier Hügel mit der Population als Punkten")}">'
+                f'{land(S0)}{labels}<g class="dots"></g></svg>')
+    charts = (f'<svg class="dia conv" viewBox="0 0 400 290" role="img" aria-label="{W("Best, mean and worst fitness and the diversity per generation", "Beste, mittlere und schlechteste Fitness und die Vielfalt je Generation")}">'
+              f'<g class="ch1" transform="translate(40 18)"></g><g class="ch2" transform="translate(40 196)"></g></svg>')
+    inner = (f'<div class="d1-presets chips mono" role="group"><span class="k">{W("SETTINGS:", "EINSTELLUNGEN:")}</span>{buttons}'
+             f'<label class="cv-seeds"><input type="checkbox"> {W("all 10 seeds", "alle 10 Seeds")}</label></div>'
+             f'<div class="cv">{land_svg}<div class="cv-side">{charts}<p class="cv-say"></p><p class="cv-count mono"></p></div></div>' + controls(lang))
+    data = {"presets": presets, "S": S0, "W": 340, "H1": 130, "H2": 56,
+            "words": {"best": W("best", "beste"), "mean": W("mean", "Mittel"), "worst": W("worst (newcomers)", "schlechteste (Neulinge)"),
+                      "gap": W("fitness gap", "Fitnesslücke"), "div": W("diversity", "Vielfalt"), "gen": W("generation", "Generation"),
+                      "evals": W("evaluations", "Bewertungen"), "of": W("of", "von")}}
+    return demo("ea10", data, inner, T(
+        "<b>Watching a population converge.</b> 20 candidates of two numbers on a landscape with a broad low hill and a narrow high one. Top chart: best, mean and worst fitness; the band between best and worst is the <i>fitness gap</i>. Bottom: diversity (mean distance to the centre of the population) — when it hits zero, the run has converged, right or wrong. Counts over 10 seeds each.",
+        "<b>Einer Population beim Konvergieren zusehen.</b> 20 Kandidaten aus zwei Zahlen auf einer Landschaft mit einem breiten niedrigen und einem schmalen hohen Hügel. Oberes Diagramm: beste, mittlere und schlechteste Fitness; das Band zwischen bester und schlechtester ist die <i>Fitnesslücke</i>. Unten: Vielfalt (mittlerer Abstand zum Zentrum der Population) — erreicht sie null, ist der Lauf konvergiert, richtig oder falsch. Anzahlen über je 10 Seeds."), lang,
+        source=T("Data: seeded runs · landscape illustrative", "Daten: reproduzierbare Läufe · Landschaft illustrativ"))
+
+
+# =====================================================================
+# F11  The family
+# =====================================================================
+def fig_family(lang):
+    L = lambda x: x[lang]
+    W = lambda en, de: L(T(en, de))
+    head = (f'<tr><th></th><th>{W("bits, integers", "Bits, ganze Zahlen")}</th><th>{W("real numbers", "reelle Zahlen")}</th>'
+            f'<th>{W("programs, trees", "Programme, Bäume")}</th><th>{W("networks", "Netze")}</th></tr>')
+    se = lambda t: f'<span class="faint">{t}</span>'
+    rows = (f'<tr><td>{W("one best solution", "eine beste Lösung")}</td>'
+            f'<td><b>GA</b> {r("Hol75")}</td><td><b>ES</b> {r("BS02")}, <b>CMA-ES</b> {r("Han16")}, <b>DE</b> {r("SP97")}</td>'
+            f'<td><b>GP</b> · {se("GenProg, EvoSuite")}</td><td><b>NEAT</b> {r("SM02")}</td></tr>'
+            f'<tr><td>{W("a Pareto front", "eine Pareto-Front")}</td><td colspan="4"><b>NSGA-II</b> {r("Deb02")} — {W("works with any of the encodings above", "funktioniert mit jeder Codierung oben")} · {se("Sapienz, PerOpteryx")}</td></tr>'
+            f'<tr><td>{W("a diverse archive", "ein vielfältiges Archiv")}</td><td colspan="4"><b>MAP-Elites</b> {r("MC15")}, {W("novelty search", "Novelty Search")} {r("LS11")} — {W("likewise", "ebenso")} · {se("ELM, AlphaEvolve")}</td></tr>')
+    return (f'<figure class="media art-fig"><div class="tbl-wrap"><table class="tbl mono ea-fam">{head}{rows}</table></div>'
+            f'<figcaption class="mono">{W("<b>One loop, many dialects.</b> Columns: what a candidate is, which decides how to vary it. Rows: what you want back, which decides what survives. NSGA-II and MAP-Elites change only selection and archive, so they span every encoding. Grey: the software-engineering tools from this article.", "<b>Eine Schleife, viele Dialekte.</b> Spalten: was ein Kandidat ist — das entscheidet, wie man ihn variiert. Zeilen: was man zurückhaben will — das entscheidet, was überlebt. NSGA-II und MAP-Elites ändern nur Selektion und Archiv, sie überspannen also jede Codierung. Grau: die Softwaretechnik-Werkzeuge aus diesem Artikel.")}</figcaption></figure>')
+
+
+# =====================================================================
+# Chapter 03, case: the wind farm (toy site after [Net17])
+# =====================================================================
 RHO = 20
 TOY = sim.TOY
-GEN = 7                                           # the generation the loop figure dissects (7 → 8)
-BOOK = TOY["books"][GEN]
 CELL = sim.SITE / RHO
-
-
-def _m(cell, rho=RHO):
-    return sim.centre(cell, rho)
 
 
 def site(layout, x0, y0, size, rho=RHO, grid=False, iso=True, cls="tb", extra="", r_=3.0, label=True):
@@ -95,11 +620,9 @@ def site(layout, x0, y0, size, rho=RHO, grid=False, iso=True, cls="tb", extra=""
             (ax, ay), (bx, by) = P(*a), P(*b)
             out.append(f'<path class="iso" d="M{ax:.1f} {ay:.1f}L{bx:.1f} {by:.1f}"/>')
             if label:
-                lx, ly = P(*b)
-                out.append(f'<text class="s iso-l" x="{lx + 3:.1f}" y="{ly - 3:.1f}">{c:.1f}</text>' if c > .5 else
-                           f'<text class="s iso-l" x="{ax + 3:.1f}" y="{ay + 10:.1f}">{c:.1f}</text>')
+                out.append(f'<text class="s iso-l halo" x="{ax + 4:.1f}" y="{ay + 12:.1f}">{c:.1f}</text>')
     for p in layout:
-        x, y = (_m(p, rho) if rho else p)
+        x, y = (sim.centre(p, rho) if rho else p)
         px, py = P(x, y)
         out.append(f'<circle class="{cls}" cx="{px:.1f}" cy="{py:.1f}" r="{r_}"/>')
     return "".join(out) + extra
@@ -110,202 +633,38 @@ def site_xy(x, y, x0, y0, size):
     return x0 + x * s, y0 + (sim.SITE - y) * s
 
 
-# =====================================================================
-# F1  What you give / what you get
-# =====================================================================
-def fig_map(lang):
+# ---- the wake: drag a turbine (uniform field: the labels are the share of power the wakes leave) ----
+WAKE_START = [[125, 525], [375, 525], [625, 525], [125, 875], [625, 875], [375, 175], [875, 175]]
+WAKE_KEEP = sim.wake_scores(WAKE_START, "uniform")
+
+
+def demo_wake(lang):
     L = lambda x: x[lang]
-    a4 = r("AIMA")
-    rows = [
-        (T("a formal model of the problem<br><span class=\"faint\">rules, constraints</span>", "ein formales Modell des Problems<br><span class=\"faint\">Regeln, Bedingungen</span>"),
-         T("search and solvers: A*, planners, SAT/SMT, integer programming", "Suche und Solver: A*, Planer, SAT/SMT, ganzzahlige Optimierung"), "—", ""),
-        (T("examples<br><span class=\"faint\">data</span>", "Beispiele<br><span class=\"faint\">Daten</span>"), "—",
-         T('machine learning: regression, deep networks, LLMs <a href="research-ai4se.html#neural">→ part 2</a>', 'Maschinelles Lernen: Regression, tiefe Netze, LLMs <a href="research-ai4se.html#neural">→ Teil 2</a>'), ""),
-        (T("only a score<br><span class=\"faint\">a way to rate a candidate</span>", "nur eine Bewertung<br><span class=\"faint\">ein Weg, Kandidaten zu benoten</span>"),
-         T(f"hill climbing, simulated annealing, <b>evolutionary algorithms</b> {a4}", f"Bergsteigen, Simulated Annealing, <b>evolutionäre Algorithmen</b> {a4}"),
-         T("neuroevolution, hyperparameter search — evolving the settings of a model", "Neuroevolution, Hyperparameter-Suche — die Einstellungen eines Modells evolvieren"), "ea"),
-    ]
-    head = f'<tr><th>{L(T("You give …", "Sie geben …"))}</th><th>{L(T("… and get an answer for this one problem", "… und bekommen eine Antwort für genau dieses Problem"))}</th><th>{L(T("… and get a reusable model", "… und bekommen ein wiederverwendbares Modell"))}</th></tr>'
-    body = "".join(f'<tr><td>{L(a)}</td><td class="{"hl" if k == "ea" else ""}">{L(b) if isinstance(b, dict) else b}</td><td>{L(c) if isinstance(c, dict) else c}</td></tr>' for a, b, c, k in rows)
-    return (f'<figure class="media art-fig"><div class="tbl-wrap"><table class="tbl mono ea-map">{head}{body}</table></div>'
-            f'<figcaption class="mono">{L(T(f"<b>Sort AI methods by what you give them and what you get back.</b> Evolutionary algorithms need neither a formal model nor training data — only a way to score a candidate — and they return a good candidate, not a model. One cell overlaps with machine learning: evolution can also tune or grow the model itself. Russell and Norvig file EAs under search and optimisation, next to hill climbing {a4}.", f"<b>KI-Verfahren danach sortiert, was man ihnen gibt und was man zurückbekommt.</b> Evolutionäre Algorithmen brauchen weder ein formales Modell noch Trainingsdaten — nur einen Weg, einen Kandidaten zu bewerten — und sie liefern einen guten Kandidaten, kein Modell. Eine Zelle überschneidet sich mit maschinellem Lernen: Evolution kann auch das Modell selbst einstellen oder wachsen lassen. Russell und Norvig ordnen EAs bei Suche und Optimierung ein, neben dem Bergsteigen {a4}."))}</figcaption></figure>')
-
-
-# =====================================================================
-# F2  Learning from data vs searching with a score (toggle: the LLM as the variation step)
-# =====================================================================
-def demo_pipes(lang):
-    L = lambda x: x[lang]
-    b = lambda x, y, w, t, s="", cls="box": (f'<rect class="{cls}" x="{x}" y="{y}" width="{w}" height="40" rx="3"/>'
-                                             f'<text class="t" x="{x + w / 2}" y="{y + (17 if s else 24)}" text-anchor="middle">{t}</text>'
-                                             + (f'<text class="s" x="{x + w / 2}" y="{y + 32}" text-anchor="middle">{s}</text>' if s else ""))
-    top = (b(10, 30, 110, L(T("examples", "Beispiele")), L(T("data with answers", "Daten mit Antworten")))
-           + _arrow(120, 50, 160, 50) + b(160, 30, 120, L(T("loss", "Fehler")), L(T("how wrong?", "wie falsch?")))
-           + _arrow(280, 50, 320, 50) + b(320, 30, 130, L(T("gradient", "Gradient")), L(T("which way is better?", "welche Richtung ist besser?")))
-           + _arrow(450, 50, 490, 50) + b(490, 30, 120, L(T("model", "Modell")), L(T("for new inputs", "für neue Eingaben")), "box hl")
-           + _arrow(385, 30, 385, 14, "ln") + f'<text class="s" x="393" y="18">{L(T("adjust the weights, repeat", "Gewichte anpassen, wiederholen"))}</text>')
-    y = 130
-    chain = L(T("wind → wake → power → cost", "Wind → Nachlauf → Leistung → Kosten"))
-    bottom = (b(10, y, 110, L(T("candidates", "Kandidaten")), L(T("a population", "eine Population")))
-              + _arrow(120, y + 20, 160, y + 20) + b(160, y, 160, L(T("score", "Bewertung")), chain)
-              + _arrow(320, y + 20, 350, y + 20) + b(350, y, 110, L(T("keep the better", "die Besseren behalten")))
-              + _arrow(460, y + 20, 490, y + 20)
-              + '<g class="vary">' + b(490, y, 120, "", "", "box hl")
-              + f'<text class="t v-classic" x="550" y="{y + 17}" text-anchor="middle">{L(T("vary", "variieren"))}</text>'
-              + f'<text class="s v-classic" x="550" y="{y + 32}" text-anchor="middle">{L(T("recombine, mutate", "kreuzen, mutieren"))}</text>'
-              + f'<text class="t v-llm" x="550" y="{y + 17}" text-anchor="middle">{L(T("an LLM", "ein LLM"))}</text>'
-              + f'<text class="s v-llm" x="550" y="{y + 32}" text-anchor="middle">{L(T("writes a variant of k parents", "schreibt eine Variante von k Eltern"))}</text></g>'
-              + f'<path class="ln" d="M550 {y + 40}V{y + 62}H65V{y + 40}"/>' + _arrow(65, y + 50, 65, y + 41)
-              + f'<text class="s" x="300" y="{y + 56}" text-anchor="middle">{L(T("the next generation, repeat", "die nächste Generation, wiederholen"))}</text>')
-    lbl = (f'<text class="s" x="10" y="16">{L(T("LEARNING FROM DATA", "AUS DATEN LERNEN"))}</text>'
-           f'<text class="s" x="10" y="{y - 14}">{L(T("SEARCHING WITH A SCORE", "MIT EINER BEWERTUNG SUCHEN"))}</text>')
-    svg = f'<svg class="dia pipes" viewBox="0 0 620 210" role="img" aria-label="{L(T("Two pipelines: data, loss, gradient, model; and candidates, score, keep the better, vary", "Zwei Abläufe: Daten, Fehler, Gradient, Modell; und Kandidaten, Bewertung, die Besseren behalten, variieren"))}">{lbl}{top}{bottom}</svg>'
-    btn = [T("classic", "klassisch"), T("LLM as the variation step", "LLM als Variationsschritt")]
-    buttons = "".join(f'<button type="button" data-v="{k}" aria-pressed="{"true" if k == 0 else "false"}">{L(x)}</button>' for k, x in enumerate(btn))
-    inner = f'<div class="d1-presets mono" role="group"><span class="k">{L(T("VARIATION:", "VARIATION:"))}</span>{buttons}</div>{_scroll(svg)}'
-    return demo("ea2", {}, inner, T(
-        f"<b>What each needs, what each gives.</b> Learning needs examples and a differentiable loss and yields a model; evolutionary search needs only a score — which may itself come from a simulation, here the wind-farm chain of [Net17] Fig. 3 — and yields good candidates. Switch the variation step: in FunSearch {r('FunS')} and AlphaEvolve {r('AlphaE')} an LLM writes the variants, while the loop and the evaluator stay classical.",
-        f"<b>Was jeder braucht, was jeder liefert.</b> Lernen braucht Beispiele und eine differenzierbare Fehlerfunktion und liefert ein Modell; evolutionäre Suche braucht nur eine Bewertung — die selbst aus einer Simulation stammen kann, hier die Windpark-Kette aus [Net17] Abb. 3 — und liefert gute Kandidaten. Schalten Sie den Variationsschritt um: Bei FunSearch {r('FunS')} und AlphaEvolve {r('AlphaE')} schreibt ein LLM die Varianten, Schleife und Bewertung bleiben klassisch."), lang)
-
-
-def _scroll(svg):
-    from project_content import dia_scroll
-    return dia_scroll(svg)
-
-
-# =====================================================================
-# F3  The loop: one real generation, step by step
-# =====================================================================
-NODES = [  # (key, plain name, thesis / geneial name)
-    ("stop", T("stop? → return the best", "Stopp? → das Beste zurück"), T("stopping criteria", "Abbruchkriterien")),
-    ("select", T("select parents", "Eltern wählen"), T("selection", "Selektion")),
-    ("pair", T("pair up", "Paare bilden"), T("coupling", "Kopplung")),
-    ("cross", T("recombine", "kreuzen"), T("crossover", "Crossover")),
-    ("choose", T("pick children", "Kinder auswählen"), T("choosing", "Auswahl")),
-    ("mutate", T("mutate", "mutieren"), T("mutation", "Mutation")),
-    ("eval", T("score", "bewerten"), T("fitness", "Fitness")),
-    ("replace", T("drop the worst", "aussortieren"), T("replacement", "Ersetzung")),
-    ("new", T("add newcomers", "Neulinge hinzu"), T("replenish", "Auffüllen")),
-]
-
-
-def _loop_ring(lang, cnt="", cnt2="", inner=False):
-    """The ring after Net17 Fig. 13; `inner` returns only the drawing (for the hero), with a fixed centre text."""
-    L = lambda x: x[lang]
-    cx, cy, R = 220, 160, 104
-    out = [f'<circle class="ring" cx="{cx}" cy="{cy}" r="{R}"/>']
-    pos = {}
-    for k, (key, name, th) in enumerate(NODES):
-        a = -math.pi / 2 + 2 * math.pi * k / len(NODES)
-        x, y = cx + R * math.cos(a), cy + R * math.sin(a)
-        pos[key] = (x, y)
-        lx, ly = cx + (R + 14) * math.cos(a), cy + (R + 14) * math.sin(a)
-        anchor = "middle" if abs(math.cos(a)) < .3 else ("start" if math.cos(a) > 0 else "end")
-        dy = -14 if math.sin(a) < -.6 else (6 if math.sin(a) > .6 else -2)
-        out.append(f'<g class="nd" data-n="{key}"><circle cx="{x:.1f}" cy="{y:.1f}" r="5"/>'
-                   f'<text x="{lx:.1f}" y="{ly + dy:.1f}" text-anchor="{anchor}">{L(name)}</text>'
-                   f'<text class="s" x="{lx:.1f}" y="{ly + dy + 12:.1f}" text-anchor="{anchor}">{L(th)}</text></g>')
-    # arrowheads along the ring (clockwise)
-    for k in range(len(NODES)):
-        a = -math.pi / 2 + 2 * math.pi * (k + .5) / len(NODES)
-        x, y = cx + R * math.cos(a), cy + R * math.sin(a)
-        t = a + math.pi / 2
-        p1 = (x - 6 * math.cos(t) + 4 * math.cos(a), y - 6 * math.sin(t) + 4 * math.sin(a))
-        p2 = (x - 6 * math.cos(t) - 4 * math.cos(a), y - 6 * math.sin(t) - 4 * math.sin(a))
-        out.append(f'<path class="ln" d="M{p1[0]:.1f} {p1[1]:.1f}L{x:.1f} {y:.1f}L{p2[0]:.1f} {p2[1]:.1f}"/>')
-    # elitism: a dashed chord from 'select' to 'drop the worst' (the elite skips everything in between)
-    (x1, y1), (x2, y2) = pos["select"], pos["replace"]
-    pid = f"elite-{lang}-{'h' if inner else 'f'}"                    # the label runs along the chord
-    out.append(f'<path id="{pid}" class="ln dash" d="M{x2:.1f} {y2:.1f}Q{cx + 10} {cy + 6} {x1:.1f} {y1:.1f}"/>'
-               f'<text class="s" dy="-5"><textPath href="#{pid}" startOffset="52%" text-anchor="middle">{L(T("the elite skips all", "die Elite überspringt alles"))}</textPath></text>')
-    # the factory feeding newcomers
-    xn, yn = pos["new"]
-    out.append(f'<rect class="box" x="{xn - 110:.1f}" y="{yn + 16:.1f}" width="70" height="22" rx="2"/><text class="s" x="{xn - 75:.1f}" y="{yn + 31:.1f}" text-anchor="middle">{L(T("factory", "Fabrik"))}</text>'
-               + _arrow(xn - 40, yn + 20, xn - 6, yn + 4))
-    out.append(f'<text class="cnt" x="{cx}" y="{cy + 36}" text-anchor="middle">{cnt}</text><text class="s cnt2" x="{cx}" y="{cy + 52}" text-anchor="middle">{cnt2}</text>')
-    if inner:
-        return "".join(out)
-    return f'<svg class="dia ring-svg" viewBox="0 0 440 300" role="img" aria-label="{L(T("The loop of an evolutionary algorithm as a ring of nine steps", "Die Schleife eines evolutionären Algorithmus als Ring aus neun Schritten"))}">{"".join(out)}</svg>'
-
-
-def demo_loop(lang):
-    """ea3: generation 7 → 8 of the toy run, after Net17 Fig. 13 and NWN+15 Fig. 2."""
-    L = lambda x: x[lang]
-    B = BOOK
-    pop, fit = B["pop"], B["fit"]
-    ids = [f"p{k}" for k in range(len(pop))]
-    lay = {f"p{k}": l for k, l in enumerate(pop)}
-    fv = {f"p{k}": fit[k] for k in range(len(pop))}
-    for k, l in enumerate(B["kids"]):
-        lay[f"c{k}"] = l
-        fv[f"c{k}"] = sim.fitness(l, RHO)
-    for k, l in enumerate(B["fresh"]):
-        lay[f"n{k}"] = l
-        fv[f"n{k}"] = sim.fitness(l, RHO)
-    sel_count = {i: B["sel"].count(i) for i in set(B["sel"])}
-    elite = {"p0", "p1"}
-    mut = {k for k, _ in B["mutated"]}
-    pair_lbl = {f"c{k}": f"#{a + 1} × #{b + 1}" for k, (a, b) in enumerate(B["pairs"])}
-    kids = [f"c{k}" for k in range(len(B["kids"]))]
-    merged = [f"{w}{k}" for w, k in B["merged"]]
-    keep = merged[:len(pop) - len(B["fresh"])]
-    struck = merged[len(keep):]
-    final = sorted(keep + [f"n{k}" for k in range(len(B["fresh"]))], key=lambda i: -fv[i])
-    n_sel, n_kids, n_mut, n_new = len(B["sel"]), len(kids), len(mut), len(B["fresh"])
-    assert max(sel_count.values()) == 3                     # "… three times" in the text below
     W = lambda en, de: L(T(en, de))
-
-    def row(i, cls="", note=""):
-        return [i, cls, note]
-    base = [row(i, "elite" if i in elite else "") for i in ids]
-    states = []
-    states.append(dict(node=["stop"], rows=base, cnt=f"{len(pop)}", cnt2=W(f"generation {GEN}", f"Generation {GEN}"),
-        say=W(f"Generation {GEN}: 20 layouts, ranked by fitness. Stop? Not yet — the best possible score is unknown, so only the budget of 60 generations ends this run.",
-              f"Generation {GEN}: 20 Layouts, nach Fitness sortiert. Stopp? Noch nicht — die bestmögliche Bewertung ist unbekannt, also beendet nur das Budget von 60 Generationen diesen Lauf.")))
-    states.append(dict(node=["select"], rows=[row(i, ("elite " if i in elite else "") + ("sel" if int(i[1:]) in sel_count else ""), f"×{sel_count[int(i[1:])]}" if int(i[1:]) in sel_count else "") for i in ids],
-        cnt=f"20 → {n_sel}", cnt2=W("parents", "Eltern"),
-        say=W(f"Roulette wheel: each layout gets a slice proportional to its fitness, the wheel is spun {n_sel} times. Good layouts are drawn more often — #{max(sel_count, key=sel_count.get) + 1} three times — but weaker ones get a chance, too. The two best (outlined) are the elite: they will survive unchanged.",
-              f"Glücksrad: Jedes Layout bekommt ein Stück proportional zu seiner Fitness, das Rad wird {n_sel}-mal gedreht. Gute Layouts werden öfter gezogen — #{max(sel_count, key=sel_count.get) + 1} dreimal —, aber auch schwächere haben eine Chance. Die beiden besten (umrandet) sind die Elite: Sie überleben unverändert.")))
-    pend = [row(i, "pending", pair_lbl[i]) for i in kids]
-    states.append(dict(node=["pair", "cross"], rows=base + [["—", "div", ""]] + pend, cnt=f"{n_sel} → {n_kids}", cnt2=W("pairs → children", "Paare → Kinder"),
-        say=W(f"The parents are paired at random — one parent may appear in several pairs — and each pair is recombined into one child. The children are not scored yet.",
-              f"Die Eltern werden zufällig zu Paaren — ein Elternteil kann in mehreren Paaren stehen —, und jedes Paar wird zu einem Kind gekreuzt. Die Kinder sind noch nicht bewertet.")))
-    states.append(dict(node=["choose", "mutate"], rows=base + [["—", "div", ""]] + [row(i, "pending" + (" mut" if int(i[1:]) in mut else ""), pair_lbl[i]) for i in kids],
-        cnt=f"{n_kids} → {n_mut}", cnt2=W("mutated", "mutiert"),
-        say=W(f"Each child is picked for mutation with a probability of 30 % — here {n_mut} of {n_kids}. Mutation moves one to three of its turbines, preferably the badly placed ones.",
-              f"Jedes Kind wird mit 30 % Wahrscheinlichkeit zur Mutation ausgewählt — hier {n_mut} von {n_kids}. Die Mutation verschiebt eine bis drei seiner Turbinen, bevorzugt die schlecht platzierten.")))
-    states.append(dict(node=["eval"], rows=base + [["—", "div", ""]] + [row(i, "child" + (" mut" if int(i[1:]) in mut else ""), pair_lbl[i]) for i in kids],
-        cnt=f"{n_kids}", cnt2=W("scored", "bewertet"),
-        say=W("Now the children are scored — in the real wind farm, this is the expensive simulation. Some children beat both their parents, some do not.",
-              "Jetzt werden die Kinder bewertet — im echten Windpark ist das die teure Simulation. Manche Kinder schlagen beide Eltern, manche nicht.")))
-    states.append(dict(node=["replace"], rows=[row(i, ("child " if i[0] == "c" else "") + ("elite " if i in elite else "") + ("struck" if i in struck else "")) for i in merged],
-        cnt=f"{len(merged)} → {len(keep)}", cnt2=W("survivors", "Überlebende"),
-        say=W(f"Parents and children in one ranking: the {len(struck)} worst are dropped. The elite cannot drop out — they are at the top.",
-              f"Eltern und Kinder in einer Rangliste: Die {len(struck)} schlechtesten fallen weg. Die Elite kann nicht herausfallen — sie steht oben.")))
-    states.append(dict(node=["new"], rows=[row(i, ("child " if i[0] == "c" else "") + ("elite " if i in elite else "")) for i in keep] + [row(f"n{k}", "new") for k in range(n_new)],
-        cnt=f"{len(keep)} + {n_new}", cnt2=W("newcomers", "Neulinge"),
-        say=W(f"{n_new} random layouts from the factory join — after the culling, so they get in although they are weak. They keep the population diverse.",
-              f"{n_new} zufällige Layouts aus der Fabrik kommen dazu — nach dem Aussieben, damit sie trotz ihrer Schwäche hineinkommen. Sie halten die Population vielfältig.")))
-    states.append(dict(node=["stop"], rows=[row(i, ("child " if i[0] == "c" else "") + ("new" if i[0] == "n" else "")) for i in final],
-        cnt="20", cnt2=W(f"generation {GEN + 1}", f"Generation {GEN + 1}"),
-        say=W(f"Generation {GEN + 1}, re-ranked. The newcomers sit at the bottom, the shortest bars — and they stay anyway. Best fitness {fv[final[0]]:.3f} (before: {fit[0]:.3f}).",
-              f"Generation {GEN + 1}, neu sortiert. Die Neulinge stehen unten, die kürzesten Balken — und sie bleiben trotzdem. Beste Fitness {fv[final[0]]:.3f} (vorher: {fit[0]:.3f}).")))
-    assert .45 <= min(fv.values()) and max(fv.values()) <= .65
-    data = {"states": states, "f": {k: _n(v) for k, v in fv.items()}, "lay": lay, "rho": RHO, "lo": .45, "hi": .65,
-            "words": {"play": W("play", "abspielen"), "pause": W("pause", "anhalten"), "step": W("step", "Schritt"), "of": W("of", "von"),
-                      "tap": W("tap a row to see its layout", "Zeile antippen zeigt das Layout")}}
-    mini = f'<svg class="dia lp-mini" viewBox="0 0 132 140" aria-hidden="true">{site([], 6, 4, 120, iso=True, label=False)}<g class="mini-dots"></g><text class="s mini-l" x="66" y="138" text-anchor="middle"></text></svg>'
-    inner = (f'<div class="lp3"><div class="lp3-ring">{_loop_ring(lang)}</div>'
-             f'<div class="lp3-side"><p class="lp3-say" aria-live="polite"></p><div class="lp3-pane"><div class="rank" role="list"></div>{mini}</div></div></div>'
-             + controls(lang))
-    return demo("ea3", data, inner, T(
-        f"<b>One generation of a genetic algorithm, on 20 wind-farm layouts.</b> Each row is a whole layout of 12 turbines; the bar is its fitness. Every number comes from a seeded run of the toy problem (generation {GEN} → {GEN + 1}). Plain names on the ring; underneath, the names in my master’s thesis and in geneial. After [Net17] Fig. 13 and [NWN+15] Fig. 2.",
-        f"<b>Eine Generation eines genetischen Algorithmus, an 20 Windpark-Layouts.</b> Jede Zeile ist ein ganzes Layout aus 12 Turbinen; der Balken ist seine Fitness. Jede Zahl stammt aus einem reproduzierbaren Lauf des Spielzeugproblems (Generation {GEN} → {GEN + 1}). Auf dem Ring die einfachen Namen, darunter die Namen aus meiner Masterarbeit und aus geneial. Nach [Net17] Abb. 13 und [NWN+15] Abb. 2."), lang)
+    ws = WAKE_KEEP
+    keep2, keep3 = round(ws[1] * 100), round(ws[2] * 100)
+    far = round((1 - sim.deficit(1000)) ** 3 * 100)
+    assert (keep2, keep3, far) == (37, 30, 78) and round((1 - sim.deficit(250)) ** 3 * 100) == 37
+    data = {"pts": WAKE_START, "k": sim.K_WAKE, "ct": sim.CT, "R": sim.R_ROTOR, "dmin": sim.D_MIN, "cell": CELL, "uniform": True,
+            "words": {"total": W("farm output", "Parkleistung"), "nowake": W("without wakes", "ohne Nachlauf"), "too": W("too close", "zu nah"),
+                      "now": W("now tap its new place · Esc cancels", "jetzt den neuen Platz antippen · Esc bricht ab"), "turbine": W("turbine", "Turbine")}}
+    svg = (f'<svg class="dia wake" viewBox="0 0 300 300" role="img" aria-label="{W("A wind-farm site seen from above; turbines cast wake cones to the east", "Ein Windpark-Gelände von oben; Turbinen werfen Nachlaufkegel nach Osten")}">'
+           '<defs><linearGradient id="wk-fade"><stop offset="0" stop-color="var(--accent)" stop-opacity=".2"/><stop offset="1" stop-color="var(--accent)" stop-opacity=".03"/></linearGradient>'
+           '<clipPath id="wk-clip"><rect width="260" height="260"/></clipPath></defs>'
+           f'<text class="s" x="20" y="13">{W("wind from the west →", "Wind aus Westen →")}</text>'
+           f'<g transform="translate(20 20)">{site([], 0, 0, 260, iso=False)}<g class="cones"></g><g class="tbs"></g></g>'
+           + _arrow(2, 150, 16, 150, "ln hl") + '</svg>')
+    inner = (f'<div class="wk">{svg}<div class="wk-side mono"><p class="wk-total"></p><p class="wk-nowake"></p>'
+             f'<p class="wk-hint">{W("The turbines in the middle row sit in a wake — drag one out of it.", "Die Turbinen der mittleren Reihe stehen im Nachlauf — ziehen Sie eine heraus.")}</p>'
+             f'<p class="wk-legend">{W("▮ rotor, seen from above · shaded = slowed air · dashed = closer than 240 m", "▮ Rotor, von oben · schattiert = gebremste Luft · gestrichelt = näher als 240 m")}</p>'
+             f'<button type="button" class="act wk-reset">{W("reset", "zurücksetzen")}</button></div></div>')
+    return demo("ea6", data, inner, T(
+        f"<b>Fitness is a simulation.</b> Here every spot of the site is equally windy, so each label is the share of its power a turbine keeps. With a west wind, every turbine slows the air behind it: in the middle row the second turbine keeps {keep2} %, the third {keep3} %, and even 1000 m downstream a wake still costs {100 - far} %. Move one turbine and <i>other</i> turbines’ numbers change — the genes are not independent. Jensen’s wake model {r('Jen83')} (top-hat, k = 0.5 / ln(z/z₀), C<sub>T</sub> = 0.8); the farm output is the mean.",
+        f"<b>Fitness ist eine Simulation.</b> Hier ist jede Stelle des Geländes gleich windig, jede Zahl ist also der Anteil seiner Leistung, den eine Turbine behält. Bei Westwind bremst jede Turbine die Luft hinter sich: In der mittleren Reihe behält die zweite Turbine {keep2} %, die dritte {keep3} %, und selbst 1000 m dahinter kostet ein Nachlauf noch {100 - far} %. Verschieben Sie eine Turbine, und die Zahlen <i>anderer</i> Turbinen ändern sich — die Gene sind nicht unabhängig. Nachlaufmodell nach Jensen {r('Jen83')} (Top-Hat, k = 0,5 / ln(z/z₀), C<sub>T</sub> = 0,8); die Parkleistung ist der Mittelwert."), lang,
+        source=src("after", "Net17", where="§3.3"))
 
 
-# =====================================================================
-# F4  Genotype → phenotype: cells per axis
-# =====================================================================
+# ---- grid genes vs float genes: three presets ----
 def _log10_comb(n, k):
     return (math.lgamma(n + 1) - math.lgamma(k + 1) - math.lgamma(n - k + 1)) / math.log(10)
 
@@ -315,163 +674,50 @@ def _median(v):
     return v[len(v) // 2] if len(v) % 2 else (v[len(v) // 2 - 1] + v[len(v) // 2]) / 2
 
 
-GA_BY_RHO = {rho: [sim.toy_ga(s, rho=rho, gens=40)["hist"][-1][0] for s in range(1, 6)] for rho in (4, 10, 20, 100, 10000)}
+GA_BY_RHO = {rho: [sim.toy_ga(s, rho=rho, gens=40)["hist"][-1][0] for s in range(1, 6)] for rho in (10, 20, 10000)}
 
 
 def demo_encoding(lang):
-    """ea4: the same idea at different resolutions — what fits, what is reachable, how big the space is."""
+    """ea4: the same layout idea at three resolutions — what fits, how big the space is, what a short run reaches."""
     L = lambda x: x[lang]
     W = lambda en, de: L(T(en, de))
     S0 = 168
+    md = {k: _median(v) for k, v in GA_BY_RHO.items()}
+    assert abs(md[10000] - md[20]) < .01 and md[10] < md[20] - .01, md                      # the notes say so
+    m = {k: _dec(f"{v:.3f}", lang) for k, v in md.items()}
+    e = {k: f"{_log10_comb(k * k, 12):.0f}" for k in GA_BY_RHO}
+    notes = {10: W(f"100 m cells: two turbines in a row must keep 3 cells = 300 m instead of 240 m. The grid wastes space near the good corner — runs reach only {m[10]}.",
+                   f"100-m-Zellen: Zwei Turbinen in einer Reihe müssen 3 Zellen = 300 m statt 240 m Abstand halten. Das Raster verschenkt Platz an der guten Ecke — die Läufe erreichen nur {m[10]}."),
+             20: W(f"50 m cells, the grid of this case: 400 cells, about 10<sup>{e[20]}</sup> layouts — far too many to list, few enough to search. Runs reach {m[20]}.",
+                   f"50-m-Zellen, das Raster dieses Falls: 400 Zellen, rund 10<sup>{e[20]}</sup> Layouts — viel zu viele zum Auflisten, wenige genug zum Suchen. Die Läufe erreichen {m[20]}."),
+             10000: W(f"Floating-point positions look most precise. Here they reach {m[10000]} — about the same, in a space of about 10<sup>{e[10000]}</sup> layouts. The score cannot tell the extra precision apart.",
+                      f"Gleitkomma-Positionen wirken am genauesten. Hier erreichen sie {m[10000]} — etwa dasselbe, in einem Raum von rund 10<sup>{e[10000]}</sup> Layouts. Die Bewertung kann die zusätzliche Genauigkeit nicht unterscheiden.")}
     presets = []
-    # 1. the thesis example, ρ = 5, five positions → bits
-    pts = [(248, 183), (572, 301), (893, 520), (312, 621), (741, 952)]
-    cells = [(int(x * 5 / 1000), int(y * 5 / 1000)) for x, y in pts]
-    idx = sorted(c[0] + c[1] * 5 for c in cells)
-    bits = "".join("1" if i in idx else "0" for i in range(25))
-    gen = [f"p{k + 1} = ({x}, {y})  → {W('cell', 'Zelle')} {c[0] + 5 * c[1]}" for k, ((x, y), c) in enumerate(zip(pts, cells))]
-    gen += ["", W("one bit per cell:", "ein Bit je Zelle:"), " ".join(bits[k:k + 5] for k in range(0, 25, 5))]
-    svg = site(cells, 4, 4, S0, rho=5, grid=True, iso=False, cls="tb hl") + "".join(
-        f'<text class="s" x="{4 + (c[0] + .5) * S0 / 5:.1f}" y="{4 + (5 - c[1] - .5) * S0 / 5 + 14:.1f}" text-anchor="middle">{c[0] + 5 * c[1]}</text>' for c in cells)
-    presets.append(dict(label="ρ = 5", svg=svg, gen=gen, read=[(W("cells per axis", "Zellen je Achse"), "5"), (W("cell size", "Zellgröße"), "200 m"),
-                    (W("turbines", "Turbinen"), "5 (" + W("thesis example", "Beispiel der Arbeit") + ")"), (W("bits", "Bits"), "25")],
-                    note=W("The worked example of my thesis: five positions on a 5 × 5 grid become the bits 1, 7, 14, 16 and 23. Simple — but at ρ = 10,000 one chromosome would need 10⁸ bits.",
-                           "Das Rechenbeispiel meiner Arbeit: Fünf Positionen auf einem 5 × 5-Raster werden zu den Bits 1, 7, 14, 16 und 23. Einfach — aber bei ρ = 10.000 bräuchte ein Chromosom 10⁸ Bits.")))
-    # 2. ρ = 6: too dense — the factory gives up
-    log = []
-    rng = sim.Rng(11)
-    lay6 = sim.factory(rng, 6, log=log, tries=40)
-    placed = [p for ok, p in log if ok == "ok"]
-    assert lay6 is None and len(placed) <= sim.max_fit(6) == 9
-    reverted = sum(1 for ok, _ in log if ok == "rev")
-    svg = site(placed, 4, 4, S0, rho=6, grid=True, iso=False, cls="tb") + "".join(
-        f'<circle class="disc" cx="{4 + (c[0] + .5) * S0 / 6:.1f}" cy="{4 + (6 - c[1] - .5) * S0 / 6:.1f}" r="{120 * S0 / 1000:.1f}"/>' for c in placed)
-    presets.append(dict(label="ρ = 6", svg=svg, gen=[f"({c[0]}, {c[1]})" for c in placed] + ["", W(f"{reverted} insertions reverted", f"{reverted} Einfügungen zurückgenommen"), W("→ gives up: layout too dense", "→ gibt auf: Layout zu dicht")],
-                    read=[(W("cells per axis", "Zellen je Achse"), "6"), (W("cell size", "Zellgröße"), "167 m"), (W("turbines that fit (exact)", "passende Turbinen (exakt)"), "9"),
-                          (W("search space", "Suchraum"), "—")],
-                    note=W(f"Neighbouring cells are only 167 m apart, diagonal ones 236 m — both closer than 240 m. At most 9 turbines fit; the factory placed {len(placed)} and then found no free cell. 12 turbines cannot be encoded at all.",
-                           f"Benachbarte Zellen liegen nur 167 m auseinander, diagonale 236 m — beides näher als 240 m. Höchstens 9 Turbinen passen; die Fabrik setzte {len(placed)} und fand dann keine freie Zelle mehr. 12 Turbinen lassen sich gar nicht codieren.")))
-    # 3. ρ = 4, 10, 100, floats: GA results
-    for rho, name in ((4, "ρ = 4"), (10, "ρ = 10"), (20, "ρ = 20"), (100, "ρ = 100"), (10000, W("floats", "Gleitkomma"))):
+    for rho, name in ((10, W("10 × 10 grid", "Raster 10 × 10")), (20, W("20 × 20 grid", "Raster 20 × 20")), (10000, W("floats", "Gleitkomma"))):
         run = sim.toy_ga(1, rho=rho, gens=40)
         best = max(run["last"], key=lambda l: sim.fitness(l, rho))
-        med = _median(GA_BY_RHO[rho])
-        fitn = sim.max_fit(rho) if rho <= 5 else None
-        space = _log10_comb(rho * rho, 12)
         svg = site(best, 4, 4, S0, rho=rho, grid=rho <= 20, iso=True, label=False, cls="tb hl") + "".join(
             f'<circle class="disc" cx="{site_xy(*sim.centre(c, rho), 4, 4, S0)[0]:.1f}" cy="{site_xy(*sim.centre(c, rho), 4, 4, S0)[1]:.1f}" r="{120 * S0 / 1000:.1f}"/>' for c in best)
         if rho == 10000:
-            gen = [f"({sim.centre(c, rho)[0]:.1f}, {sim.centre(c, rho)[1]:.1f})" for c in best[:6]] + ["…"]
-            read = [(W("cells per axis", "Zellen je Achse"), W("— (0.1 m steps)", "— (0,1-m-Schritte)")), (W("cell size", "Zellgröße"), "0.1 m"),
-                    (W("search space", "Suchraum"), f"≈ 10<sup>{space:.0f}</sup>"), (W("best after 40 gen.", "Bestwert nach 40 Gen."), f"{med:.3f}")]
+            gen = [f"({_dec(f'{sim.centre(c, rho)[0]:.1f}', lang)}, {_dec(f'{sim.centre(c, rho)[1]:.1f}', lang)})" for c in best[:6]] + ["…"]
+            read = [(W("cell size", "Zellgröße"), W("— (0.1 m steps)", "— (0,1-m-Schritte)"))]
         else:
             gen = [f"({c[0]}, {c[1]})" for c in best[:6]] + ["…"]
-            read = [(W("cells per axis", "Zellen je Achse"), str(rho)), (W("cell size", "Zellgröße"), f"{1000 / rho:.0f} m")]
-            read.append((W("turbines that fit (exact)", "passende Turbinen (exakt)"), str(fitn)) if fitn else (W("turbines that fit", "passende Turbinen"), W("more than 12", "mehr als 12")))
-            read += [(W("search space", "Suchraum"), f"≈ 10<sup>{space:.0f}</sup>"), (W("best after 40 gen.", "Bestwert nach 40 Gen."), f"{med:.3f}")]
-        m = {k: f"{_median(v):.3f}" for k, v in GA_BY_RHO.items()}
-        e = {k: f"{_log10_comb(k * k, 12):.0f}" for k in GA_BY_RHO}
-        grow = f"{_log10_comb(100 ** 2, 12) - _log10_comb(400, 12):.0f}"
-        md = {k: _median(v) for k, v in GA_BY_RHO.items()}
-        assert abs(md[100] - md[20]) < .01 and abs(md[10000] - md[20]) < .01 and md[10] < md[20] and md[4] < md[20], md   # the notes say so
-        notes = {4: W(f"Coarser, yet denser: at 250 m per cell even neighbours keep the distance, so 16 turbines fit. But each turbine must sit on one of only 16 spots — the best reachable layout is fixed, and runs reach {m[4]}.",
-                      f"Gröber, und doch dichter: Bei 250 m je Zelle halten selbst Nachbarn den Abstand, also passen 16 Turbinen. Aber jede Turbine muss auf einem von nur 16 Plätzen stehen — das beste erreichbare Layout liegt fest, die Läufe erreichen {m[4]}."),
-                 10: W(f"100 m cells: two turbines in a row must now keep 3 cells = 300 m instead of 240 m. The grid wastes space near the good corner — runs reach only {m[10]}.",
-                       f"100-m-Zellen: Zwei Turbinen in einer Reihe müssen jetzt 3 Zellen = 300 m statt 240 m Abstand halten. Das Raster verschenkt Platz an der guten Ecke — die Läufe erreichen nur {m[10]}."),
-                 20: W(f"50 m cells, the grid used throughout this article: 400 cells, about 10<sup>{e[20]}</sup> layouts — far too many to list, few enough to search. Runs reach {m[20]}.",
-                       f"50-m-Zellen, das Raster in diesem ganzen Artikel: 400 Zellen, rund 10<sup>{e[20]}</sup> Layouts — viel zu viele zum Auflisten, wenige genug zum Suchen. Die Läufe erreichen {m[20]}."),
-                 100: W(f"Five times finer per axis: the space grows by {grow} orders of magnitude — and the runs reach {m[100]}, about what 50 m cells reach.",
-                        f"Fünfmal feiner je Achse: Der Suchraum wächst um {grow} Größenordnungen — und die Läufe erreichen {m[100]}, etwa so viel wie mit 50-m-Zellen."),
-                 10000: W(f"Floating-point positions look most precise. Here they reach {m[10000]} — about the same again, in a space of about 10<sup>{e[10000]}</sup> layouts. In the real wind farm of my thesis, the same held, and grid genes were also much faster (chapter 03).",
-                          f"Gleitkomma-Positionen wirken am genauesten. Hier erreichen sie {m[10000]} — wieder etwa dasselbe, in einem Raum von rund 10<sup>{e[10000]}</sup> Layouts. Im echten Windpark meiner Arbeit galt dasselbe, und Rastergene waren zudem viel schneller (Kapitel 03).")}
+            read = [(W("cell size", "Zellgröße"), f"{1000 / rho:.0f} m")]
+        read += [(W("search space", "Suchraum"), f"≈ 10<sup>{e[rho]}</sup>"), (W("best after 40 gen.", "Bestwert nach 40 Gen."), m[rho])]
         presets.append(dict(label=name, svg=svg, gen=gen, read=read, note=notes[rho]))
-    order = [0, 2, 1, 3, 4, 5, 6]            # ρ=5 (thesis), ρ=4, ρ=6, ρ=10, ρ=20, ρ=100, floats
-    presets = [presets[k] for k in order]
-    buttons = "".join(f'<button type="button" aria-pressed="{"true" if k == 0 else "false"}">{esc(p["label"])}</button>' for k, p in enumerate(presets))
-    inner = (f'<div class="d1-presets mono" role="group"><span class="k">{W("CELLS PER AXIS:", "ZELLEN JE ACHSE:")}</span>{buttons}</div>'
+    buttons = "".join(f'<button type="button" aria-pressed="{"true" if k == 1 else "false"}">{esc(p["label"])}</button>' for k, p in enumerate(presets))
+    inner = (f'<div class="d1-presets chips mono" role="group"><span class="k">{W("GENES:", "GENE:")}</span>{buttons}</div>'
              f'<div class="enc"><pre class="enc-gen mono" aria-label="{W("genotype", "Genotyp")}"></pre>'
              f'<svg class="dia enc-site" viewBox="0 0 176 176" role="img" aria-label="{W("the site with the decoded turbines", "das Gelände mit den decodierten Turbinen")}"></svg>'
              f'<dl class="enc-read mono"></dl></div><p class="enc-note"></p>')
     return demo("ea4", {"presets": presets}, inner, T(
-        "<b>Genotype → phenotype.</b> Left the genes, middle what they mean on the 1 km site (dashed circles: half the minimum distance, so overlapping circles are too close), right what it costs and what a short run reached (median of 5 runs, 40 generations). Finer is not denser, and past a point more precise is not better. The thesis example after [Net17] §4.2, Fig. 15a; counts are “before the spacing rule”.",
-        "<b>Genotyp → Phänotyp.</b> Links die Gene, in der Mitte ihre Bedeutung auf dem 1-km-Gelände (gestrichelte Kreise: halber Mindestabstand, sich überlappende Kreise stehen also zu nah), rechts, was es kostet und was ein kurzer Lauf erreichte (Median aus 5 Läufen, 40 Generationen). Feiner ist nicht dichter, und ab einem Punkt ist genauer nicht besser. Das Beispiel der Arbeit nach [Net17] §4.2, Abb. 15a; Anzahlen „vor der Abstandsregel“."), lang)
+        "<b>Genotype → phenotype at three resolutions.</b> Left the genes, middle what they mean on the 1 km site (dashed circles: half the minimum distance, so overlapping circles are too close), right what it costs and what a short run reached (median of 5 runs, 40 generations, toy score “better toward the north-east”). Past a point, more precise is not better. Counts are “before the spacing rule”.",
+        "<b>Genotyp → Phänotyp in drei Auflösungen.</b> Links die Gene, in der Mitte ihre Bedeutung auf dem 1-km-Gelände (gestrichelte Kreise: halber Mindestabstand, sich überlappende Kreise stehen also zu nah), rechts, was es kostet und was ein kurzer Lauf erreichte (Median aus 5 Läufen, 40 Generationen, Spielzeug-Bewertung „besser nach Nordosten“). Ab einem Punkt ist genauer nicht besser. Anzahlen „vor der Abstandsregel“."), lang,
+        source=src("after", "Net17", where="§4.2"))
 
 
-# =====================================================================
-# F5  Same loop, different chromosomes (SE tools)
-# =====================================================================
-def fig_chromosomes(lang):
-    L = lambda x: x[lang]
-    cols = [
-        ("EvoSuite", r("FA13"), T("a whole test suite", "eine ganze Test-Suite"),
-         "test 1:\n  Stack s = new Stack();\n  s.push(5);\ntest 2:\n  Stack s = new Stack();\n  s.pop();",
-         T("minimise: uncovered methods + branch distance. For <code>x &gt;= 10</code> with x = 5 the distance is 10 − 5 + k", "minimieren: nicht erreichte Methoden + Zweig-Distanz. Für <code>x &gt;= 10</code> mit x = 5 ist die Distanz 10 − 5 + k")),
-        ("GenProg", r("LeG12"), T("a patch: a list of edits", "ein Patch: eine Liste von Änderungen"),
-         "Delete(12)\nInsert(40, 7)\nReplace(81, 44)",
-         T("maximise: tests passed. Caution: a patch that deletes the failing feature can pass too [Qi15]", "maximieren: bestandene Tests. Vorsicht: Auch ein Patch, der die fehlerhafte Funktion löscht, kann bestehen [Qi15]")),
-        ("PerOpteryx", r("PerOp"), T("an architecture: components → servers", "eine Architektur: Komponenten → Server"),
-         "Frontend → server 1\nOrders   → server 1\nBilling  → server 2\nserver 2: 4 cores",
-         T("several objectives at once: response time, cost, reliability (NSGA-II)", "mehrere Ziele zugleich: Antwortzeit, Kosten, Zuverlässigkeit (NSGA-II)")),
-    ]
-    cells = "".join(f'<div class="chr"><p class="mono chr-h">{n} {c}</p><p class="chr-k mono">{L(T("chromosome", "Chromosom"))}: {L(k)}</p>'
-                    f'<pre class="mono">{esc(code)}</pre><p class="chr-f">{L(f).replace("[Qi15]", r("Qi15"))}</p></div>' for n, c, k, code, f in cols)
-    return (f'<figure class="media art-fig"><div class="chr-grid">{cells}</div><figcaption class="mono">'
-            + L(T("<b>Same loop, different chromosomes.</b> In software engineering, choosing what a candidate <i>is</i> — and how to score it — is the creative part; the loop is the same. Edit indices of the GenProg column are illustrative.",
-                  "<b>Dieselbe Schleife, andere Chromosomen.</b> In der Softwaretechnik ist die Wahl, was ein Kandidat <i>ist</i> — und wie man ihn bewertet —, der kreative Teil; die Schleife bleibt dieselbe. Die Indizes der GenProg-Spalte sind illustrativ."))
-            + '</figcaption></figure>')
-
-
-# =====================================================================
-# F6  Fitness is a simulation: drag a turbine, watch the wakes
-# =====================================================================
-def demo_wake(lang):
-    L = lambda x: x[lang]
-    W = lambda en, de: L(T(en, de))
-    best = max(TOY["last"], key=lambda l: sim.fitness(l, RHO))
-    pts = [list(sim.centre(c, RHO)) for c in best]
-    ws = sim.wake_scores(pts)
-    data = {"pts": pts, "k": sim.K_WAKE, "ct": sim.CT, "R": sim.R_ROTOR, "dmin": sim.D_MIN, "cell": CELL,
-            "words": {"total": W("fitness", "Fitness"), "nowake": W("without wakes", "ohne Nachlauf"), "too": W("too close", "zu nah")}}
-    svg = (f'<svg class="dia wake" viewBox="0 0 340 300" role="img" aria-label="{W("A wind-farm site seen from above; turbines cast wake cones to the east", "Ein Windpark-Gelände von oben; Turbinen werfen Nachlaufkegel nach Osten")}">'
-           f'<g transform="translate(20 20)">{site([], 0, 0, 260, iso=True)}<g class="cones"></g><g class="tbs"></g></g>'
-           + _arrow(2, 150, 16, 150, "ln hl") + f'<text class="s" x="2" y="140">{W("wind", "Wind")}</text>'
-           '</svg>')
-    inner = (f'<div class="wk">{svg}<div class="wk-side mono"><p class="wk-total"></p><p class="wk-nowake"></p>'
-             f'<p class="wk-hint">{W("Drag a turbine (or tap one, then tap its new place).", "Ziehen Sie eine Turbine (oder tippen Sie eine an und dann ihren neuen Platz).")}</p>'
-             f'<button type="button" class="wk-reset">{W("reset", "zurücksetzen")}</button></div></div>')
-    keep = round((1 - sim.deficit(240)) ** 3 * 100)
-    return demo("ea6", data, inner, T(
-        f"<b>Fitness is a simulation.</b> The layout is the best of the run in chapter 02 (scored without wakes). With a west wind, every turbine slows the air behind it; a turbine 240 m downstream keeps only {keep} % of its score. Move one turbine and <i>other</i> turbines’ scores change — the genes are not independent. Jensen’s wake model {r('Jen83')} (top-hat, k = 0.5 / ln(z/z₀), C_T = 0.8), as in [Net17] §3.3, Fig. 7; the score is “better toward the north-east”, the mean over turbines is our choice.",
-        f"<b>Fitness ist eine Simulation.</b> Das Layout ist das beste aus dem Lauf in Kapitel 02 (ohne Nachlauf bewertet). Bei Westwind bremst jede Turbine die Luft hinter sich; eine Turbine 240 m dahinter behält nur {keep} % ihres Werts. Verschieben Sie eine Turbine, und die Werte <i>anderer</i> Turbinen ändern sich — die Gene sind nicht unabhängig. Nachlaufmodell nach Jensen {r('Jen83')} (Top-Hat, k = 0,5 / ln(z/z₀), C_T = 0,8), wie in [Net17] §3.3, Abb. 7; die Bewertung ist „besser nach Nordosten“, der Mittelwert über die Turbinen ist unsere Wahl."), lang)
-
-
-# =====================================================================
-# F7  Selection: wheel, tournament, temperature
-# =====================================================================
-def demo_selection(lang):
-    L = lambda x: x[lang]
-    W = lambda en, de: L(T(en, de))
-    fs = sorted((sim.fitness(l, RHO) for l in TOY["first"]), reverse=True)
-    modes = [("wheel", W("roulette wheel", "Glücksrad")), ("tour", W("tournament", "Turnier")), ("temp", W("temperature", "Temperatur"))]
-    buttons = "".join(f'<button type="button" data-m="{k}" aria-pressed="{"true" if i == 0 else "false"}">{n}</button>' for i, (k, n) in enumerate(modes))
-    inner = (f'<div class="d1-presets mono" role="group"><span class="k">{W("SELECTION:", "SELEKTION:")}</span>{buttons}'
-             f'<label class="sl-k"><span>k</span> <input type="range" min="2" max="8" value="3"> <output>3</output></label>'
-             f'<label class="sl-t"><span>T</span> <input type="range" min="0" max="40" value="20"> <output></output></label>'
-             f'<label class="sl-off"><input type="checkbox"> {W("+1000 to every score", "+1000 auf jede Bewertung")}</label></div>'
-             f'<div class="sl-wrap"><svg class="dia wheel" viewBox="0 0 220 220" role="img" aria-label="{W("A roulette wheel with one slice per layout", "Ein Glücksrad mit einem Stück je Layout")}"></svg>'
-             f'<div class="sel-side"><div class="rank sel-rank" role="list"></div></div></div>'
-             f'<div class="sel-foot mono"><button type="button" class="draw">{W("draw 6 parents", "6 Eltern ziehen")}</button><span class="expect"></span></div>')
-    assert .40 <= min(fs) and max(fs) <= .60
-    data = {"f": [_n(v, 4) for v in fs], "lo": .40, "hi": .60, "words": {"exp": W("expected copies of the best among 6 parents", "erwartete Kopien des Besten unter 6 Eltern"),
-                                                    "drawn": W("drawn", "gezogen")}}
-    return demo("ea7", data, inner, T(
-        f"<b>Where selection pressure comes from.</b> The 20 random layouts of generation 0, best first. Roulette gives each a slice proportional to its fitness [Net17] §4.5 — add 1000 to every score and the wheel turns fair, all differences gone. A tournament (best of k) only compares, so the offset changes nothing; k is the pressure dial {r('GD91')}. Temperature works like in <a href=\"research-ai4se.html#tokens\">part 2</a>: a softmax over the scores, sharp when cold, flat when hot.",
-        f"<b>Woher der Selektionsdruck kommt.</b> Die 20 zufälligen Layouts der Generation 0, das beste zuerst. Das Glücksrad gibt jedem ein Stück proportional zu seiner Fitness [Net17] §4.5 — addieren Sie 1000 auf jede Bewertung, und das Rad wird fair, alle Unterschiede sind weg. Ein Turnier (Bester aus k) vergleicht nur, der Versatz ändert also nichts; k ist der Regler für den Druck {r('GD91')}. Die Temperatur wirkt wie in <a href=\"research-ai4se.html#tokens\">Teil 2</a>: ein Softmax über die Bewertungen, scharf wenn kalt, flach wenn heiß."), lang)
-
-
-# =====================================================================
-# F8  Crossover: ordered genes vs unordered layouts (One-Step)
-# =====================================================================
+# ---- One-Step crossover: a problem-aware operator ----
 def _find_onestep():
     """A real crossover from the toy run where the child beats both parents and conflicts had to be resolved."""
     run = sim.toy_ga(sim.MAIN_SEED, keep=set(range(60)))
@@ -489,11 +735,12 @@ def _find_onestep():
 ONESTEP = _find_onestep()
 
 
-def demo_crossover(lang):
+def demo_onestep(lang):
     L = lambda x: x[lang]
     W = lambda en, de: L(T(en, de))
     g, A, B, child, info, (fa, fb, fc) = ONESTEP
     S0 = 150
+    fx = lambda v: _dec(f"{v:.3f}", lang)
     tri = lambda c, cls, up: (lambda x, y: f'<path class="{cls}" d="M{x - 4.5:.1f} {y + (3 if up else -3):.1f}L{x + 4.5:.1f} {y + (3 if up else -3):.1f}L{x:.1f} {y + (-5 if up else 5):.1f}Z"/>')(*site_xy(*sim.centre(c, RHO), 0, 0, S0))
 
     def panel(cells_a, cells_b, rings=(), ranks=None, keep=None):
@@ -507,142 +754,53 @@ def demo_crossover(lang):
             out += f'<circle class="conf" cx="{x:.1f}" cy="{y:.1f}" r="8"/>'
         if ranks:
             for k, c in enumerate(ranks):
-                x, y = site_xy(*sim.centre(c, RHO), 0, 0, S0)
-                out += f'<text class="s rk{"" if k < 12 else " off"}" x="{x + 5:.1f}" y="{y - 4:.1f}">{k + 1}</text>'
+                if k < 12:
+                    x, y = site_xy(*sim.centre(c, RHO), 0, 0, S0)
+                    out += f'<text class="s rk halo" x="{x + 5:.1f}" y="{y - 4:.1f}">{k + 1}</text>'
         return out
     kept_b = [c for c in B if c not in info["dropped"]]
     states = [
-        (panel(A, []) + f'<g transform="translate({S0 + 20} 0)">{panel([], B)}</g>', W(f"Parent A (▼, fitness {fa:.3f}) and parent B (▲, {fb:.3f}): two layouts of 12 turbines. Which turbine is “gene 3”? There is no order — a cut in the middle means nothing.", f"Elternteil A (▼, Fitness {fa:.3f}) und B (▲, {fb:.3f}): zwei Layouts aus 12 Turbinen. Welche Turbine ist „Gen 3“? Es gibt keine Reihenfolge — ein Schnitt in der Mitte bedeutet nichts.")),
+        (panel(A, []) + f'<g transform="translate({S0 + 24} 0)">{panel([], B)}</g>', W(f"Parent A (▼, fitness {fx(fa)}) and parent B (▲, {fx(fb)}): two layouts of 12 turbines. Which turbine is “gene 3”? There is no order — a cut in the middle means nothing.", f"Elternteil A (▼, Fitness {fx(fa)}) und B (▲, {fx(fb)}): zwei Layouts aus 12 Turbinen. Welche Turbine ist „Gen 3“? Es gibt keine Reihenfolge — ein Schnitt in der Mitte bedeutet nichts.")),
         (panel(A, B, rings=info["dropped"]), W(f"Merge both layouts: 24 turbines. {len(info['dropped'])} of B’s turbines are closer than 240 m to one of A’s (circled).", f"Beide Layouts zusammenlegen: 24 Turbinen. {len(info['dropped'])} Turbinen von B stehen näher als 240 m an einer von A (eingekreist).")),
-        (panel(A, kept_b), W("Resolve each conflict by dropping B’s turbine. What remains is a valid layout — with too many turbines.", "Jeden Konflikt lösen, indem B’s Turbine wegfällt. Was bleibt, ist ein gültiges Layout — mit zu vielen Turbinen.")),
-        (panel(A, kept_b, ranks=info["ranked"], keep=set(child)), W(f"Rank every turbine by its own score and keep the best 12. The child: fitness {fc:.3f} — better than both parents, without a single new position.", f"Jede Turbine nach ihrem eigenen Wert sortieren und die besten 12 behalten. Das Kind: Fitness {fc:.3f} — besser als beide Eltern, ohne eine einzige neue Position.")),
+        (panel(A, kept_b), W("Resolve each conflict by dropping B’s turbine. What remains is a valid layout — with too many turbines.", "Jeden Konflikt lösen, indem die Turbine von B wegfällt. Was bleibt, ist ein gültiges Layout — mit zu vielen Turbinen.")),
+        (panel(A, kept_b, ranks=info["ranked"], keep=set(child)), W(f"Rank every turbine by its own score and keep the best 12. The child: fitness {fx(fc)} — better than both parents, without a single new position.", f"Jede Turbine nach ihrem eigenen Wert sortieren und die besten 12 behalten. Das Kind: Fitness {fx(fc)} — besser als beide Eltern, ohne eine einzige neue Position.")),
     ]
     assert fc > fa and fc > fb
-    data = {"states": [{"svg": s, "say": t} for s, t in states],
-            "a": [.20, .35, .35, .60, .80, .70, .40], "b": [.90, .85, .50, .30, .30, .15, .10],
-            "words": {"step": W("step", "Schritt"), "of": W("of", "von"), "play": W("play", "abspielen"), "pause": W("pause", "anhalten")}}
-    ops = [("one", W("one-point", "Ein-Punkt")), ("two", W("two-point", "Zwei-Punkt")), ("uni", W("uniform", "gleichmäßig"))]
-    obtn = "".join(f'<button type="button" data-o="{k}" aria-pressed="{"true" if i == 0 else "false"}">{n}</button>' for i, (k, n) in enumerate(ops))
-    strip = (f'<div class="xo-a"><div class="d1-presets mono" role="group"><span class="k">{W("ORDERED GENES:", "GEORDNETE GENE:")}</span>{obtn}<button type="button" class="retoss">{W("new cuts", "neue Schnitte")}</button></div>'
-             f'<svg class="dia xo-strip" viewBox="0 0 360 150" role="img" aria-label="{W("Two parent strips of seven numbers and the two children", "Zwei Eltern-Streifen aus sieben Zahlen und die beiden Kinder")}"></svg>'
-             f'<p class="xo-say">{W("A schedule of 7 numbers — e.g. how much of the torque the engine delivers, second by second. The order means something, so a cut makes sense: children inherit whole stretches. (Illustrative values.)", "Ein Zeitplan aus 7 Zahlen — etwa welchen Anteil des Drehmoments der Motor liefert, Sekunde für Sekunde. Die Reihenfolge bedeutet etwas, ein Schnitt ist also sinnvoll: Kinder erben ganze Abschnitte. (Illustrative Werte.)")}</p></div>')
-    one = (f'<div class="xo-b"><p class="k mono xo-k">{W("UNORDERED LAYOUTS: ONE-STEP CROSSOVER", "UNGEORDNETE LAYOUTS: ONE-STEP-CROSSOVER")}</p>'
-           f'<svg class="dia os" viewBox="0 0 320 156" role="img" aria-label="{W("Two parent layouts merged into one child", "Zwei Eltern-Layouts werden zu einem Kind verschmolzen")}"><g class="os-g" transform="translate(4 3)"></g></svg>'
-           f'<p class="os-say" aria-live="polite"></p>{controls(lang)}</div>')
-    inner = f'<div class="xo">{strip}{one}</div>'
-    return demo("ea8", data, inner, T(
-        f"<b>How to recombine depends on the encoding.</b> Left: the textbook operators on ordered genes, after [Net17] Fig. 16 and the engine schedules of [NWN+15] Fig. 4. Right: a real crossover from generation {g} of the toy run with the One-Step crossover of [Net17] Fig. 17. Its trick needs a <b>score per turbine</b>; if your evaluator returns only one number per candidate, use a generic operator.",
-        f"<b>Wie man kreuzt, hängt von der Codierung ab.</b> Links die Lehrbuch-Operatoren auf geordneten Genen, nach [Net17] Abb. 16 und den Motor-Zeitplänen aus [NWN+15] Abb. 4. Rechts eine echte Kreuzung aus Generation {g} des Spielzeuglaufs mit dem One-Step-Crossover aus [Net17] Abb. 17. Sein Trick braucht einen <b>Wert je Turbine</b>; liefert Ihre Bewertung nur eine Zahl je Kandidat, nehmen Sie einen generischen Operator."), lang)
+    data = {"states": [{"svg": s, "say": t} for s, t in states]}
+    inner = (f'<div class="os-wrap"><svg class="dia os" viewBox="0 0 328 156" role="img" aria-label="{W("Two parent layouts merged into one child", "Zwei Eltern-Layouts werden zu einem Kind verschmolzen")}"><g class="os-g" transform="translate(2 3)"></g></svg>'
+             f'<div class="os-side"><p class="os-say" aria-live="polite"></p>{controls(lang)}</div></div>')
+    return demo("ea13", data, inner, T(
+        f"<b>A problem-aware operator.</b> A layout is a <i>set</i> of positions, not a sequence, so the thesis built its own crossover. A real crossover from generation {g} of the toy run (toy score “better toward the north-east”). Its trick needs a <b>score per turbine</b>.",
+        f"<b>Ein problembewusster Operator.</b> Ein Layout ist eine <i>Menge</i> von Positionen, keine Folge, deshalb hat die Arbeit einen eigenen Crossover gebaut. Eine echte Kreuzung aus Generation {g} des Spielzeuglaufs (Spielzeug-Bewertung „besser nach Nordosten“). Sein Trick braucht einen <b>Wert je Turbine</b>."), lang,
+        source=src("after", "Net17", where="Fig. 17"))
 
 
-# =====================================================================
-# F9  Mutation: three separate knobs
-# =====================================================================
-def demo_mutation(lang):
+# ---- runtimes of grid genes vs float genes  [Net17] §6.3–6.5 ----
+RUNTIMES = [("AEP", 48 * 60, 88732.62), ("NPV", 137 * 60, 73594.79), ("IRR", 49 * 60, 17768.83)]   # seconds: grid genes, float genes
+assert [round(c / d, 2) for _, d, c in RUNTIMES] == [30.81, 8.95, 6.04]
+
+
+def fig_runtimes(lang):
     L = lambda x: x[lang]
     W = lambda en, de: L(T(en, de))
-    kids = BOOK["kids0"]
-    data = {"kids": kids, "rho": RHO, "dmin": sim.D_MIN, "seed": 7,
-            "words": {"mut": W("mutated", "mutiert"), "not": W("not chosen", "nicht gewählt"), "f": W("fitness", "Fitness")}}
-    knobs = (f'<label><span>{W("share of children mutated", "Anteil mutierter Kinder")}</span><input class="kn-p" type="range" min="0" max="100" step="10" value="30"><output></output></label>'
-             f'<label><span>{W("genes moved per child", "verschobene Gene je Kind")}</span><input class="kn-n" type="range" min="1" max="6" value="2"><output></output></label>'
-             f'<label><span>{W("step size s", "Schrittweite s")}</span><input class="kn-s" type="range" min="0" max="100" step="5" value="30"><output></output></label>')
-    inner = (f'<div class="kn mono">{knobs}<button type="button" class="mutate">{W("mutate", "mutieren")}</button></div>'
-             f'<svg class="dia mut" viewBox="0 0 660 128" role="img" aria-label="{W("Six children of one generation, some mutated", "Sechs Kinder einer Generation, einige mutiert")}"></svg>')
-    return demo("ea9", data, inner, T(
-        "<b>Three knobs, not one.</b> The six children of the generation shown above, before mutation. <i>Share</i>: how many children are touched at all — mutation can also spoil a good one. <i>Genes</i>: how many turbines move; the badly placed ones (low on the dotted iso-lines) are picked more often, as in [Net17] Eq. 30. <i>Step size</i>: s = 1 jumps anywhere, s = 0.1 nudges — new = old · (1 − s) + random · s, snapped to the grid, after [Net17] Eq. 31. In my thesis s is called the “mutation rate”; textbooks use that word for the share of genes.",
-        "<b>Drei Regler, nicht einer.</b> Die sechs Kinder der Generation von oben, vor der Mutation. <i>Anteil</i>: wie viele Kinder überhaupt verändert werden — Mutation kann auch ein gutes verderben. <i>Gene</i>: wie viele Turbinen sich bewegen; schlecht platzierte (tief an den gepunkteten Linien) werden öfter gewählt, wie in [Net17] Gl. 30. <i>Schrittweite</i>: s = 1 springt irgendwohin, s = 0,1 schubst — neu = alt · (1 − s) + Zufall · s, aufs Raster gerundet, nach [Net17] Gl. 31. In meiner Arbeit heißt s „Mutationsrate“; Lehrbücher nennen so den Anteil der Gene."), lang)
-
-
-# =====================================================================
-# F10  Watching a population converge (two hills)
-# =====================================================================
-HILLS = sim.run_hills()
-HILL_LEVELS = [.1, .2, .3, .4, .5, .55, .7, .8, .9]
-HILL_PATHS = sim.contours(sim.hills, HILL_LEVELS, n=150)
-STARTER_RES = sim.starter_results()
-STARTER_DECOY = [s for s, f, _ in STARTER_RES if f < .9]
-
-
-def _featured(name):
-    """The seed shown for a preset: the first one that tells the preset's story."""
-    runs = HILLS[name]["runs"]
-    want = {"balanced": lambda r: sim.on_high(r[-1]), "pressure": lambda r: not sim.on_high(r[-1]),
-            "closed": lambda r: not sim.on_high(r[-1]), "random": lambda r: True}[name]
-    return next(k for k, r in enumerate(runs) if want(r))
-
-
-def demo_converge(lang):
-    L = lambda x: x[lang]
-    W = lambda en, de: L(T(en, de))
-    S0 = 260
-    paths = []
-    for lv, lines in HILL_PATHS:
-        d = "".join("M" + "L".join(f"{x * S0:.1f} {(1 - y) * S0:.1f}" for x, y in line) for line in lines if len(line) > 2)
-        paths.append(f'<path class="iso{" iso-i" if lv in (.5, .9) else ""}" d="{d}"/>')
-    labels = (f'<text class="s" x="{sim.LOW[0] * S0 - 50:.0f}" y="{(1 - sim.LOW[1]) * S0 - 104:.0f}">{W("broad low hill (0.6)", "breiter niedriger Hügel (0,6)")}</text>'
-              f'<text class="s" x="{S0 - 4}" y="{(1 - sim.HIGH[1]) * S0 - 38:.0f}" text-anchor="end">{W("narrow high hill (1.0)", "schmaler hoher Hügel (1,0)")}</text>')
-    tops = {k: sum(r_[-1] and sim.hills(*r_[-1][0]) >= .99 for r_ in HILLS[k]["runs"]) for k in sim.PRESETS}
-    assert tops["random"] < tops["balanced"] and HILLS["random"]["high"] == 10      # the texts say so
-    presets, names = {}, {"balanced": W("balanced", "ausgewogen"), "pressure": W("high pressure, no mutation", "hoher Druck, keine Mutation"),
-                          "closed": W("no newcomers", "keine Neulinge"), "random": W("random search", "Zufallssuche")}
-    for name, cfg in sim.PRESETS.items():
-        runs, k = HILLS[name]["runs"], _featured(name)
-        run = runs[k]
-        pts = [[int(round(v * 999)) for p in gen for v in p] for gen in run]
-        f_gen = [[sim.hills(*p) for p in gen] for gen in run]
-        presets[name] = {
-            "pts": pts, "seed": k + 1, "high": HILLS[name]["high"],
-            "best": [_n(max(f)) for f in f_gen], "mean": [_n(sum(f) / len(f)) for f in f_gen], "worst": [_n(min(f)) for f in f_gen],
-            "div": [_n(sim.diversity(g)) for g in run],
-            "seeds": [[_n(max(sim.hills(*p) for p in g)) for g in r] for r in runs],
-            "final": [_n(sim.hills(*r[-1][0])) for r in runs], "cfg": cfg}
-    say = {"balanced": W("Tournament of 3, 30 % of children mutated, 2 elite, 2 random newcomers per generation — the starter at the end of this article.",
-                         "Turnier aus 3, 30 % der Kinder mutiert, 2 Elite, 2 zufällige Neulinge je Generation — der Starter am Ende dieses Artikels."),
-           "pressure": W("Tournament of 8, no mutation, no newcomers: the population collapses onto whatever is best early — often the wrong hill. The best curve looks healthy; the dots and the diversity tell the truth.",
-                         "Turnier aus 8, keine Mutation, keine Neulinge: Die Population fällt auf das zusammen, was früh am besten ist — oft der falsche Hügel. Die Bestkurve sieht gesund aus; die Punkte und die Vielfalt sagen die Wahrheit."),
-           "closed": W("Like balanced, but without newcomers: mutation alone rarely carries a candidate across the valley.",
-                       "Wie ausgewogen, aber ohne Neulinge: Mutation allein trägt selten einen Kandidaten über das Tal."),
-           "random": W("The baseline: 18 fresh random candidates per generation, only the 2 best kept. It finds the right hill — but rarely its top: nothing refines what it has found.",
-                       "Die Vergleichslinie: 18 neue Zufallskandidaten je Generation, nur die 2 besten bleiben. Sie findet den richtigen Hügel — aber selten seine Spitze: Nichts verfeinert, was sie gefunden hat.")}
-    for name in presets:
-        p = presets[name]
-        tops = sum(f >= .99 for f in p["final"])
-        p["say"] = say[name]
-        p["count"] = W(f"10 seeds: {p['high']} ended on the high hill, {tops} of them at its top (≥ 0.99). Shown: seed {p['seed']}.",
-                       f"10 Seeds: {p['high']} endeten auf dem hohen Hügel, {tops} davon auf seiner Spitze (≥ 0,99). Gezeigt: Seed {p['seed']}.")
-    buttons = "".join(f'<button type="button" data-p="{k}" aria-pressed="{"true" if k == "balanced" else "false"}">{n}</button>' for k, n in names.items())
-    land = (f'<svg class="dia land" viewBox="-4 -4 {S0 + 8} {S0 + 8}" role="img" aria-label="{W("Contour lines of two hills with the population as dots", "Höhenlinien zweier Hügel mit der Population als Punkten")}">'
-            f'<rect class="box" x="0" y="0" width="{S0}" height="{S0}"/>{"".join(paths)}{labels}<g class="dots"></g></svg>')
-    charts = (f'<svg class="dia conv" viewBox="0 0 330 250" role="img" aria-label="{W("Best, mean and worst fitness and the diversity per generation", "Beste, mittlere und schlechteste Fitness und die Vielfalt je Generation")}">'
-              f'<g class="ch1" transform="translate(34 10)"></g><g class="ch2" transform="translate(34 160)"></g></svg>')
-    inner = (f'<div class="d1-presets mono" role="group"><span class="k">{W("SETTINGS:", "EINSTELLUNGEN:")}</span>{buttons}'
-             f'<label class="cv-seeds"><input type="checkbox"> {W("all 10 seeds", "alle 10 Seeds")}</label></div>'
-             f'<div class="cv">{land}<div class="cv-side">{charts}<p class="cv-say"></p><p class="cv-count mono"></p></div></div>' + controls(lang))
-    data = {"presets": presets, "words": {"best": W("best", "beste"), "mean": W("mean", "Mittel"), "worst": W("worst", "schlechteste"),
-                                          "gap": W("fitness gap", "Fitnesslücke"), "div": W("diversity", "Vielfalt"), "gen": W("generation", "Generation"),
-                                          "evals": W("evaluations", "Bewertungen"), "play": W("play", "abspielen"), "pause": W("pause", "anhalten"), "of": W("of", "von")}}
-    return demo("ea10", data, inner, T(
-        "<b>Watching a population converge.</b> 20 candidates of two numbers on a landscape with a broad low hill and a narrow high one (illustrative). Top chart: best, mean and worst fitness; the band between best and worst is the <i>fitness gap</i> of [Net17] Fig. 18. Bottom: diversity (mean distance to the centre of the population) — when it hits zero, the run has converged, right or wrong. Seeded runs; counts over 10 seeds each.",
-        "<b>Einer Population beim Konvergieren zusehen.</b> 20 Kandidaten aus zwei Zahlen auf einer Landschaft mit einem breiten niedrigen und einem schmalen hohen Hügel (illustrativ). Oberes Diagramm: beste, mittlere und schlechteste Fitness; das Band zwischen bester und schlechtester ist die <i>Fitnesslücke</i> aus [Net17] Abb. 18. Unten: Vielfalt (mittlerer Abstand zum Zentrum der Population) — erreicht sie null, ist der Lauf konvergiert, richtig oder falsch. Reproduzierbare Läufe; Anzahlen über je 10 Seeds."), lang)
-
-
-# =====================================================================
-# F11  The family
-# =====================================================================
-def fig_family(lang):
-    L = lambda x: x[lang]
-    W = lambda en, de: L(T(en, de))
-    head = (f'<tr><th></th><th>{W("bits, integers", "Bits, ganze Zahlen")}</th><th>{W("real numbers", "reelle Zahlen")}</th>'
-            f'<th>{W("programs, trees", "Programme, Bäume")}</th><th>{W("networks", "Netze")}</th></tr>')
-    se = lambda t: f'<span class="faint">{t}</span>'
-    rows = (f'<tr><td>{W("one best solution", "eine beste Lösung")}</td>'
-            f'<td><b>GA</b> {r("Hol75")}</td><td><b>ES</b> {r("BS02")}, <b>CMA-ES</b> {r("Han16")}, <b>DE</b> {r("SP97")}</td>'
-            f'<td><b>GP</b> · {se("GenProg, EvoSuite")}</td><td><b>NEAT</b> {r("SM02")}</td></tr>'
-            f'<tr><td>{W("a Pareto front", "eine Pareto-Front")}</td><td colspan="4" class="band"><b>NSGA-II</b> {r("Deb02")} — {W("works with any of the encodings above", "funktioniert mit jeder Codierung oben")} · {se("Sapienz, PerOpteryx")}</td></tr>'
-            f'<tr><td>{W("a diverse archive", "ein vielfältiges Archiv")}</td><td colspan="4" class="band"><b>MAP-Elites</b> {r("MC15")}, {W("novelty search", "Novelty Search")} {r("LS11")} — {W("likewise", "ebenso")} · {se("ELM, AlphaEvolve")}</td></tr>')
-    return (f'<figure class="media art-fig"><div class="tbl-wrap"><table class="tbl mono ea-fam"><tr><th></th><th colspan="4" class="axis">{W("what a candidate is → decides the variation operators", "was ein Kandidat ist → entscheidet die Variationsoperatoren")}</th></tr>{head}{rows}</table></div>'
-            f'<figcaption class="mono">{W("<b>One loop, many dialects.</b> Columns: what a candidate is, which decides how to vary it. Rows: what you want back, which decides what survives. NSGA-II and MAP-Elites change only selection and archive, so they span every encoding. Grey: the software-engineering tools from this article.", "<b>Eine Schleife, viele Dialekte.</b> Spalten: was ein Kandidat ist — das entscheidet, wie man ihn variiert. Zeilen: was man zurückhaben will — das entscheidet, was überlebt. NSGA-II und MAP-Elites ändern nur Selektion und Archiv, sie überspannen also jede Codierung. Grau: die Softwaretechnik-Werkzeuge aus diesem Artikel.")}</figcaption></figure>')
+    X0, X1 = 200, 560
+    lx = lambda s: X0 + (math.log10(s) - 3) / (5 - 3) * (X1 - X0)       # 10^3 … 10^5 s
+    out = []
+    for e, lab in ((3, "17 min"), (4, "2.8 h"), (5, "28 h")):
+        x = X0 + (e - 3) / 2 * (X1 - X0)
+        out.append(f'<path class="gridl" d="M{x:.1f} 14V170"/><text class="s" x="{x:.1f}" y="186" text-anchor="middle">10{"³⁴⁵"[e - 3]} s · {_dec(lab, lang)}</text>')
+    fmt = lambda s: _dec(f"{s / 60:.0f} min" if s < 3 * 3600 else f"{s / 3600:.1f} h", lang)
+    names = {"AEP": W("energy per year", "Jahresenergie"), "NPV": W("net present value", "Kapitalwert"), "IRR": W("internal rate of return", "interner Zinsfuß")}
+    for k, (obj, d, c) in enumerate(RUNTIMES):
+        y = 22 + k * 52
+        out.append(f'<text class="t" x="20" y="{y + 12}">{obj}</text><text class="s" x="20" y="{y + 26}">{names[obj]}</text>')
+        out.append(f'<rect class="bar-g" x="{X0}" y="{y}" width="{lx(d) - X0:.1f}" height="12"/><text class="s" x="{lx(d) + 6:.1f}" y="{y + 10}">{W("grid genes", "Rastergene")} · {fmt(d)}</text>')
+        out.append(f'<rect class="bar-c" x="{X0}" y="{y + 16}" width="{lx(c) - X0:.1f}" height="12"/>'
+                   f'<text class="s" x="{lx(c) + 6:.1f}" y="{y + 26}">{W("float genes", "Gleitkomma-Gene")} · {fmt(c)} · <tspan class="a">×{_dec(f"{c / d:.1f}", lang)}</tspan></text>')
+    svg = f'<svg class="dia rt" viewBox="0 0 784 196" role="img" aria-label="{W("Runtimes of the wind-farm optimisation with grid genes and with float genes", "Laufzeiten der Windpark-Optimierung mit Rastergenen und mit Gleitkomma-Genen")}">{"".join(out)}</svg>'
+    return fig(svg, T("<b>Horns Rev 1, 80 turbines, three objectives: grid genes finished in 48 to 137 minutes, float genes needed 5 to 24 hours</b> (log scale). Fair warning: each encoding ran once, with its own recommended setup — 100 candidates for grid genes, 1000 for float genes — so the factor is not the encoding alone; most of the time went into crossover.",
+                      "<b>Horns Rev 1, 80 Turbinen, drei Ziele: Rastergene waren nach 48 bis 137 Minuten fertig, Gleitkomma-Gene brauchten 5 bis 24 Stunden</b> (logarithmische Skala). Ehrlicher Hinweis: Jede Codierung lief einmal, mit ihrer eigenen empfohlenen Einstellung — 100 Kandidaten für Rastergene, 1000 für Gleitkomma-Gene —, der Faktor liegt also nicht allein an der Codierung; die meiste Zeit ging in den Crossover."), lang,
+               source=src("data", "Net17", where="§6.3–6.5"))
 
 
 # =====================================================================
@@ -687,132 +845,86 @@ def demo_phev(lang):
                                     "Wieder optimieren, wieder das erste Gen anwenden — ein zurückweichender Horizont. Ein festes Budget an Generationen hält die Zeit je Schritt fest: Die Steuerung muss in Echtzeit antworten.")),
     ]
     weights = [
-        (W("fuel only", "nur Kraftstoff"), PHEV_T2[0], W("Saving fuel is all that counts — yet this uses more fuel than the mixed weighting below. Optimising a 20-second window for fuel alone is short-sighted.", "Nur Kraftstoffsparen zählt — und doch braucht das mehr Kraftstoff als die gemischte Gewichtung unten. Ein 20-Sekunden-Fenster nur auf Kraftstoff zu optimieren, ist kurzsichtig.")),
+        (W("fuel only", "nur Kraftstoff"), PHEV_T2[0], W("Saving fuel is all that counts — yet this uses more fuel than the mixed weighting. Optimising a 20-second window for fuel alone is short-sighted.", "Nur Kraftstoffsparen zählt — und doch braucht das mehr Kraftstoff als die gemischte Gewichtung. Ein 20-Sekunden-Fenster nur auf Kraftstoff zu optimieren, ist kurzsichtig.")),
         (W("fuel + battery near 60 %", "Kraftstoff + Batterie nahe 60 %"), PHEV_T2[1], W("Half fuel, half “keep the battery near its target”. The best result in the paper: 1.8 % less fuel than the best of the published reference controllers on this cycle.", "Halb Kraftstoff, halb „Batterie nahe am Ziel halten“. Das beste Ergebnis der Arbeit: 1,8 % weniger Kraftstoff als die beste der veröffentlichten Vergleichs-Steuerungen auf diesem Zyklus.")),
         (W("battery level only", "nur Batteriestand"), PHEV_T2[2], W("Only a full battery counts: the GA keeps the battery full and burns fuel — almost as much as driving with the engine alone (428.1 g).", "Nur eine volle Batterie zählt: Der GA hält die Batterie voll und verbrennt Kraftstoff — fast so viel wie mit dem Verbrennungsmotor allein (428,1 g).")),
     ]
+    wnames = [W("fuel", "Kraftstoff"), W("battery level", "Batteriestand"), W("battery near target", "Batterie nahe Ziel"), W("smooth", "glatt"), W("very smooth", "sehr glatt")]
     data = {"steps": [{"svg": s, "say": t} for s, t in steps],
-            "w": [{"name": nme, "fuel": f"{fuel:.3f} g".replace(".", "," if lang == "de" else "."), "soc": f"{soc:.2f}".replace(".", "," if lang == "de" else "."), "say": say, "wv": list(wv)} for nme, (wv, fuel, soc), say in weights],
-            "words": {"step": W("step", "Schritt"), "of": W("of", "von"), "play": W("play", "abspielen"), "pause": W("pause", "anhalten")}}
+            "w": [{"name": nme, "fuel": _dec(f"{fuel:.1f} g", lang), "soc": _dec(f"{soc:.2f}", lang), "say": say, "wv": list(wv)} for nme, (wv, fuel, soc), say in weights],
+            "wnames": wnames}
     wbtn = "".join(f'<button type="button" aria-pressed="{"true" if k == 0 else "false"}">{nme}</button>' for k, (nme, _, _) in enumerate(weights))
     inner = (f'<div class="ph"><div class="ph-a"><svg class="dia ph-strip" viewBox="0 0 330 100" role="img" aria-label="{W("A strip of 21 genes over the next 20 seconds", "Ein Streifen aus 21 Genen über die nächsten 20 Sekunden")}"><g class="ph-g"></g></svg>'
              f'<p class="ph-say" aria-live="polite"></p>{controls(lang)}</div>'
-             f'<div class="ph-b"><div class="d1-presets mono" role="group"><span class="k">{W("FITNESS WEIGHTS:", "FITNESS-GEWICHTE:")}</span>{wbtn}</div>'
-             f'<dl class="ph-read mono"><dt>{W("weights (fuel, battery level, battery near target, smooth, very smooth)", "Gewichte (Kraftstoff, Batteriestand, Batterie nahe Ziel, glatt, sehr glatt)")}</dt><dd class="ph-w"></dd>'
-             f'<dt>{W("fuel on the NEDC test cycle", "Kraftstoff im NEFZ-Testzyklus")}</dt><dd class="ph-fuel"></dd><dt>{W("battery charge at the end", "Ladestand am Ende")}</dt><dd class="ph-soc"></dd></dl>'
+             f'<div class="ph-b"><div class="d1-presets chips mono" role="group"><span class="k">{W("FITNESS WEIGHTS:", "FITNESS-GEWICHTE:")}</span>{wbtn}</div>'
+             f'<div class="ph-w mono" aria-label="{W("weights", "Gewichte")}"></div>'
+             f'<dl class="ph-read mono"><dt>{W("fuel on the NEDC test cycle", "Kraftstoff im NEFZ-Testzyklus")}</dt><dd class="ph-fuel"></dd><dt>{W("battery charge at the end", "Ladestand am Ende")}</dt><dd class="ph-soc"></dd></dl>'
              f'<p class="ph-wsay"></p></div></div>')
     return demo("ea12", data, inner, T(
-        "<b>A genetic algorithm inside a car’s controller.</b> Left: the chromosome and the receding horizon (schedule values illustrative), after [NWN+15] §4 and Fig. 4. Right: the same GA with three fitness weightings — real results from [NWN+15] Table 2 (simulated parallel hybrid, NEDC cycle, GA configuration 50 / 0.75 / 0.1 / 100).",
-        "<b>Ein genetischer Algorithmus in der Steuerung eines Autos.</b> Links das Chromosom und der zurückweichende Horizont (Werte des Zeitplans illustrativ), nach [NWN+15] §4 und Abb. 4. Rechts derselbe GA mit drei Fitness-Gewichtungen — echte Ergebnisse aus [NWN+15] Tabelle 2 (simulierter Parallelhybrid, NEFZ-Zyklus, GA-Konfiguration 50 / 0,75 / 0,1 / 100)."), lang)
+        "<b>A genetic algorithm inside a car’s controller.</b> Left: the chromosome and the receding horizon (schedule values illustrative). Right: the same GA with three fitness weightings — real results (simulated parallel hybrid, NEDC cycle, 50 candidates, 100 generations).",
+        "<b>Ein genetischer Algorithmus in der Steuerung eines Autos.</b> Links das Chromosom und der zurückweichende Horizont (Werte des Zeitplans illustrativ). Rechts derselbe GA mit drei Fitness-Gewichtungen — echte Ergebnisse (simulierter Parallelhybrid, NEFZ-Zyklus, 50 Kandidaten, 100 Generationen)."), lang,
+        source=src("data", "NWN+15", where="Table 2"))
 
 
 def fig_phev_tradeoff(lang):
     L = lambda x: x[lang]
     W = lambda en, de: L(T(en, de))
-    X0, X1, Y0, Y1 = 60, 600, 20, 190                    # plot area
+    X0, X1, Y0, Y1 = 70, 744, 36, 200                    # plot area
     fx = lambda s: X0 + (s - 20) / (130 - 20) * (X1 - X0)
     fy = lambda f: Y1 - (f - 384) / (390 - 384) * (Y1 - Y0)
     out = [f'<path class="ln" d="M{X0} {Y0}V{Y1}H{X1}"/>']
     for f in range(384, 391, 2):
-        out.append(f'<path class="gridl" d="M{X0} {fy(f):.1f}H{X1}"/><text class="s" x="{X0 - 6}" y="{fy(f) + 4:.1f}" text-anchor="end">{f}</text>')
+        out.append(f'<path class="gridl" d="M{X0} {fy(f):.1f}H{X1}"/><text class="s" x="{X0 - 8}" y="{fy(f) + 4:.1f}" text-anchor="end">{f}</text>')
     for s in (25, 50, 75, 100, 125):
-        out.append(f'<text class="s" x="{fx(s):.1f}" y="{Y1 + 14}" text-anchor="middle">{s}</text>')
-    out.append(f'<text class="s" x="{X1}" y="{Y1 + 28}" text-anchor="end">{W("jerkiness: Σ |change of the split| over the cycle", "Unruhe: Σ |Änderung der Aufteilung| über den Zyklus")}</text>'
-               f'<text class="s" x="{X0 - 44}" y="{Y0 - 6}">{W("fuel [g]", "Kraftstoff [g]")}</text>')
+        out.append(f'<text class="s" x="{fx(s):.1f}" y="{Y1 + 16}" text-anchor="middle">{s}</text>')
+    out.append(f'<text class="s" x="{X1}" y="{Y1 + 34}" text-anchor="end">{W("jerkiness: Σ |change of the split| over the cycle", "Unruhe: Σ |Änderung der Aufteilung| über den Zyklus")}</text>'
+               f'<text class="s" x="{X0}" y="{Y0 - 18}" text-anchor="middle">{W("fuel [g]", "Kraftstoff [g]")}</text>')
     d = "M" + "L".join(f"{fx(s):.1f} {fy(f):.1f}" for _, f, s in PHEV_T4)
     out.append(f'<path class="ln hl" d="{d}"/>' + "".join(f'<circle class="dot" cx="{fx(s):.1f}" cy="{fy(f):.1f}" r="2.6"/>' for _, f, s in PHEV_T4))
-    out.append(f'<text class="s a" x="{fx(35.19) + 6:.1f}" y="{fy(388.471) - 6:.1f}">{W("max change per step 0.1", "max. Änderung je Schritt 0,1")}</text>'
-               f'<text class="s a" x="{fx(109.26):.1f}" y="{fy(385.400) - 8:.1f}" text-anchor="middle">1.0</text>')
+    out.append(f'<text class="s a halo" x="{fx(35.19) + 8:.1f}" y="{fy(388.471) - 6:.1f}">{W("max change per step 0.1", "max. Änderung je Schritt 0,1")}</text>'
+               f'<text class="s a halo" x="{fx(109.26):.1f}" y="{fy(385.400) - 10:.1f}" text-anchor="middle">{W("max change 1.0 (unrestricted)", "max. Änderung 1,0 (unbeschränkt)")}</text>')
     for (wv, f, s), lab in zip(PHEV_T3, (W("weight: fuel only", "Gewicht: nur Kraftstoff"), W("weight: smoothness only", "Gewicht: nur Glätte"))):
         x, y = fx(s), fy(f)
-        out.append(f'<rect class="sq" x="{x - 3:.1f}" y="{y - 3:.1f}" width="6" height="6"/><text class="s" x="{x + (8 if s < 100 else -8):.1f}" y="{y + 4:.1f}" text-anchor="{"start" if s < 100 else "end"}">{lab}</text>')
-    svg = f'<svg class="dia trade" viewBox="0 0 640 230" role="img" aria-label="{W("Fuel against jerkiness for different settings", "Kraftstoff gegen Unruhe für verschiedene Einstellungen")}">{"".join(out)}</svg>'
-    return fig(svg, T("<b>A trade-off, not one answer.</b> Smooth driving costs fuel. Squares: two fitness weightings ([NWN+15] Table 3). Line: instead of weighting, restrict the search space — consecutive genes may differ by at most 0.1 … 1.0 ([NWN+15] Table 4). A weighted sum picks one point on such a curve; multi-objective algorithms like NSGA-II return the whole curve. NEDC cycle.",
-                      "<b>Ein Zielkonflikt, nicht eine Antwort.</b> Ruhiges Fahren kostet Kraftstoff. Quadrate: zwei Fitness-Gewichtungen ([NWN+15] Tabelle 3). Linie: statt zu gewichten den Suchraum einschränken — aufeinanderfolgende Gene dürfen sich um höchstens 0,1 … 1,0 unterscheiden ([NWN+15] Tabelle 4). Eine gewichtete Summe wählt einen Punkt auf so einer Kurve; mehrkriterielle Algorithmen wie NSGA-II liefern die ganze Kurve. NEFZ-Zyklus."), lang)
+        out.append(f'<rect class="sq" x="{x - 3.5:.1f}" y="{y - 3.5:.1f}" width="7" height="7"/><text class="s halo" x="{x + (9 if s < 100 else -9):.1f}" y="{y + 4:.1f}" text-anchor="{"start" if s < 100 else "end"}">{lab}</text>')
+    svg = f'<svg class="dia trade" viewBox="0 0 784 244" role="img" aria-label="{W("Fuel against jerkiness for different settings", "Kraftstoff gegen Unruhe für verschiedene Einstellungen")}">{"".join(out)}</svg>'
+    return fig(svg, T("<b>A trade-off, not one answer.</b> Smooth driving costs fuel. Squares: two fitness weightings. Line: instead of weighting, restrict the search space — consecutive genes may differ by at most 0.1 … 1.0. A weighted sum picks one point on such a curve; multi-objective algorithms like NSGA-II return the whole curve. NEDC cycle.",
+                      "<b>Ein Zielkonflikt, nicht eine Antwort.</b> Ruhiges Fahren kostet Kraftstoff. Quadrate: zwei Fitness-Gewichtungen. Linie: statt zu gewichten den Suchraum einschränken — aufeinanderfolgende Gene dürfen sich um höchstens 0,1 … 1,0 unterscheiden. Eine gewichtete Summe wählt einen Punkt auf so einer Kurve; mehrkriterielle Algorithmen wie NSGA-II liefern die ganze Kurve. NEFZ-Zyklus."), lang,
+               source=src("data", "NWN+15", where="Tables 3–4"))
 
 
 # =====================================================================
-# F13  Wind farm: runtimes of grid genes vs float genes  [Net17] §6.3–6.5
+# Hero (the shared template: grey panel, three columns) and the research-page pictogram
 # =====================================================================
-RUNTIMES = [("AEP", 48 * 60, 88732.62), ("NPV", 137 * 60, 73594.79), ("IRR", 49 * 60, 17768.83)]   # seconds: grid genes, float genes
-assert [round(c / d, 2) for _, d, c in RUNTIMES] == [30.81, 8.95, 6.04]
-
-
-def fig_runtimes(lang):
-    L = lambda x: x[lang]
-    W = lambda en, de: L(T(en, de))
-    X0, X1 = 170, 430
-    lx = lambda s: X0 + (math.log10(s) - 3) / (5 - 3) * (X1 - X0)       # 10^3 … 10^5 s
-    out = []
-    for e, lab in ((3, "17 min"), (4, "2.8 h"), (5, "28 h")):
-        x = X0 + (e - 3) / 2 * (X1 - X0)
-        out.append(f'<path class="gridl" d="M{x:.1f} 14V176"/><text class="s" x="{x:.1f}" y="190" text-anchor="middle">10{"³⁴⁵"[e - 3]} s · {lab if lang == "en" else lab.replace(".", ",")}</text>')
-    fmt = lambda s: (f"{s / 60:.0f} min" if s < 3 * 3600 else f"{s / 3600:.1f} h")
-    for k, (obj, d, c) in enumerate(RUNTIMES):
-        y = 22 + k * 52
-        names = {"AEP": W("energy per year", "Jahresenergie"), "NPV": W("net present value", "Kapitalwert"), "IRR": W("internal rate of return", "interner Zinsfuß")}
-        out.append(f'<text class="t" x="0" y="{y + 12}">{obj}</text><text class="s" x="0" y="{y + 26}">{names[obj]}</text>')
-        out.append(f'<rect class="bar-g" x="{X0}" y="{y}" width="{lx(d) - X0:.1f}" height="12"/><text class="s" x="{lx(d) + 6:.1f}" y="{y + 10}">{W("grid genes", "Rastergene")} · {fmt(d)}</text>')
-        out.append(f'<rect class="bar-c" x="{X0}" y="{y + 16}" width="{lx(c) - X0:.1f}" height="12"/>'
-                   f'<text class="s" x="{lx(c) + 6:.1f}" y="{y + 26}">{W("float genes", "Gleitkomma-Gene")} · {fmt(c)} · <tspan class="a">×{c / d:.1f}</tspan></text>')
-    svg = f'<svg class="dia rt" viewBox="0 0 600 200" role="img" aria-label="{W("Runtimes of the wind-farm optimisation with grid genes and with float genes", "Laufzeiten der Windpark-Optimierung mit Rastergenen und mit Gleitkomma-Genen")}">{"".join(out)}</svg>'
-    return fig(svg, T("<b>Horns Rev 1, 80 turbines, three objectives: grid genes finished in 48 to 137 minutes, float genes needed 5 to 24 hours</b> (log scale). Fair warning: each encoding ran once, with its own recommended setup — 100 candidates for grid genes, 1000 for float genes — so the factor is not the encoding alone. From [Net17] §6.3–6.5; most of the time went into crossover.",
-                      "<b>Horns Rev 1, 80 Turbinen, drei Ziele: Rastergene waren nach 48 bis 137 Minuten fertig, Gleitkomma-Gene brauchten 5 bis 24 Stunden</b> (logarithmische Skala). Ehrlicher Hinweis: Jede Codierung lief einmal, mit ihrer eigenen empfohlenen Einstellung — 100 Kandidaten für Rastergene, 1000 für Gleitkomma-Gene —, der Faktor liegt also nicht allein an der Codierung. Aus [Net17] §6.3–6.5; die meiste Zeit ging in den Crossover."), lang)
-
-
-# =====================================================================
-# Hero and the research-page pictogram
-# =====================================================================
-def _cloud(layouts, x0, y0, size, cls, r_=1.6):
-    out = []
-    for l in layouts:
-        for c in l:
-            x, y = site_xy(*sim.centre(c, RHO), x0, y0, size)
-            out.append(f'<circle class="{cls}" cx="{x:.1f}" cy="{y:.1f}" r="{r_}"/>')
-    return "".join(out)
-
-
-def _curve(x0, y0, w, h, vals, lo, hi, cls):
-    n = len(vals) - 1
-    pts = [(x0 + k / n * w, y0 + h - (v - lo) / (hi - lo) * h) for k, v in enumerate(vals)]
-    d = "M" + "".join((f"{x:.1f} {y:.1f}" if k == 0 else f"H{x:.1f}V{y:.1f}") for k, (x, y) in enumerate(pts))
-    return f'<path class="{cls}" d="{d}"/>'
-
-
 def hero_ea(lang):
     L = lambda en, de: en if lang == "en" else de
-    hist = TOY["hist"]
-    best_last = max(TOY["last"], key=lambda l: sim.fitness(l, RHO))
+    run = HILLS["balanced"]["runs"][_featured("balanced")]
+    g0, g60 = run[0], run[-1]
 
-    def panel(x0, y0, size, layouts, cls, title):
-        return (site([], x0, y0, size, iso=True, label=False) + _cloud(layouts, x0, y0, size, cls)
-                + f'<text class="s" x="{x0}" y="{y0 + size + 16}">{title}</text>')
-
-    def chart(x0, y0, w, h, short=False):
-        lo, hi = .4, .65
-        out = [f'<path class="ln" d="M{x0} {y0}V{y0 + h}H{x0 + w}"/>']
-        out.append(_curve(x0, y0, w, h, [v[2] for v in hist], lo, hi, "ln worst"))
-        out.append(_curve(x0, y0, w, h, [v[1] for v in hist], lo, hi, "ln mean"))
-        out.append(_curve(x0, y0, w, h, [v[0] for v in hist], lo, hi, "ln hl"))
-        out.append(f'<text class="s" x="{x0}" y="{y0 + h + 16}">{L("fitness: best, mean, worst", "Fitness: beste, Mittel, schlechteste") if short else L("fitness over 60 generations: best, mean, worst", "Fitness über 60 Generationen: beste, mittlere, schlechteste")}</text>')
-        return "".join(out)
-    dots = lambda x0, y0, size: "".join(f'<circle class="hfill" cx="{site_xy(*sim.centre(c, RHO), x0, y0, size)[0]:.1f}" cy="{site_xy(*sim.centre(c, RHO), x0, y0, size)[1]:.1f}" r="3"/>' for c in best_last)
-    ring = _loop_ring(lang, "20", L("layouts · 60 generations", "Layouts · 60 Generationen"), inner=True)
-    wide = (f'<g transform="translate(0 4) scale(.72)">{ring}</g>'
-            + panel(330, 24, 150, TOY["first"], "gdot", L("generation 0", "Generation 0"))
-            + _arrow(488, 99, 510, 99, "ln hl")
-            + panel(518, 24, 150, TOY["last"], "gdot", L("generation 60, best in colour", "Generation 60, bestes farbig")) + dots(518, 24, 150)
-            + chart(700, 30, 150, 144, short=True))
-    tall = (f'<g transform="translate(-5 0)">{ring}</g>'
-            + panel(20, 320, 180, TOY["first"], "gdot", L("generation 0", "Generation 0"))
-            + panel(230, 320, 180, TOY["last"], "gdot", L("generation 60", "Generation 60")) + dots(230, 320, 180)
-            + chart(40, 550, 360, 120))
+    def pop(gen, x0, y0, S):
+        best = max(gen, key=lambda p: sim.hills(*p))
+        out = land(S, x0, y0, quiet=True)
+        for p in gen:
+            x, y = _hp(p, S, x0, y0)
+            out += f'<circle class="{"hfill" if p is best else "gdot"}" cx="{x:.1f}" cy="{y:.1f}" r="{3.6 if p is best else 3}"/>'
+        return out
+    h1, h2, h3 = L("THE POPULATION", "DIE POPULATION"), L("THE LOOP", "DIE SCHLEIFE"), L("THE RESULT", "DAS ERGEBNIS")
+    wide = (f'<rect class="zone" x="0" y="0" width="860" height="220" rx="6"/>'
+            f'<text class="s hh" x="40" y="24">{h1}</text>{pop(g0, 40, 38, 160)}'
+            + _arrow(214, 118, 258, 118, "ln hl")
+            + f'<text class="s hh" x="418" y="24" text-anchor="middle">{h2}</text>{_ring(lang, 418, 122, 58, centre=False)}'
+            + _arrow(608, 118, 652, 118, "ln hl")
+            + f'<text class="s hh" x="666" y="24">{h3}</text>{pop(g60, 666, 38, 160)}')
+    tall = (f'<rect class="zone" x="0" y="0" width="430" height="500" rx="6"/>'
+            f'<text class="s hh" x="215" y="26" text-anchor="middle">{h2}</text>{_ring(lang, 215, 134, 68, centre=False)}'
+            f'<text class="s hh" x="24" y="282">{h1}</text>{pop(g0, 24, 294, 180)}'
+            f'<text class="s hh" x="226" y="282">{h3}</text>{pop(g60, 226, 294, 180)}'
+            + _arrow(206, 384, 220, 384, "ln hl"))
     return (f'<figure class="art-hero" aria-hidden="true"><svg class="dia hero hero-wide" viewBox="0 0 860 220">{wide}</svg>'
-            f'<svg class="dia hero hero-tall" viewBox="0 0 430 700">{tall}</svg></figure>')
+            f'<svg class="dia hero hero-tall" viewBox="0 0 430 500">{tall}</svg></figure>')
 
 
 def thumb_ea():
-    """Research-page card: the loop as a ring of nine steps (as in ea3 and the hero) and a DNA helix — the chromosome."""
+    """Research-page card: the loop as a ring of five steps (as in ea3 and the hero) and a DNA helix — the chromosome."""
     cx, cy, R, n = 60, 59, 38, len(NODES)
     out = [f'<circle cx="{cx}" cy="{cy}" r="{R}"/>']
     for k in range(n):                                   # chevrons between the steps, clockwise
@@ -823,9 +935,10 @@ def thumb_ea():
         out.append(f'<path d="M{p1[0]:.1f} {p1[1]:.1f}L{x:.1f} {y:.1f}L{p2[0]:.1f} {p2[1]:.1f}"/>')
     for k in range(n):
         a = -math.pi / 2 + 2 * math.pi * k / n
-        out.append(f'<circle class="{"f" if k == 0 else "b"}" cx="{cx + R * math.cos(a):.1f}" cy="{cy + R * math.sin(a):.1f}" r="3.2"/>')
+        out.append(f'<circle class="{"f" if k == 0 else "b"}" cx="{cx + R * math.cos(a):.1f}" cy="{cy + R * math.sin(a):.1f}" r="3.6"/>')
     # two helices side by side (vertical), rungs = alleles; accent lines map specific alleles of one onto the other
     y0, y1, A, P = 14, 104, 11, 45.0
+
     def helix(xc):
         rungs = []
         for k, y in enumerate(range(y0 + 3, y1 - 1, 7)):
@@ -848,5 +961,5 @@ def thumb_ea():
     for a, b in links:                                   # the mapping, from the right end of one allele to the left end of the other
         _, ya, _, xa = pick_l[a]
         _, yb, xb, _ = pick_r[b]
-        out.append(f'<path class="a" style="stroke-width:1;stroke-dasharray:2 2" d="M{xa + 2:.1f} {ya}L{xb - 2:.1f} {yb}"/>')
+        out.append(f'<path class="a" style="stroke-width:1;stroke-dasharray:3 3" d="M{xa + 2:.1f} {ya}L{xb - 2:.1f} {yb}"/>')
     return "".join(out)

@@ -1,67 +1,89 @@
 // Interactive figures of the MDE article (research-mde.html, built by _build/mde.py + mde_figs.py).
 // All states are precomputed at build time and shipped as data-json; this script only swaps and highlights.
-//   d1 — one model, two notations, three gates (presets; hover a line ↔ diagram)
-//   d2 — edit the generated file, or extend it (TOP mechanism; stepper, plays once when seen)
+// Shared helpers (stepper, height lock, autoplay rule, chips) come from assets/demo-common.js (window.SiteDemo).
+//   d0 — the generator at several levels of detail (morph; three instances: intro, inside, —)
+//   f2 — reading a class diagram: point at a part, the strip reads it out
+//   map — one city, three maps: one crosshair through all four
+//   d1 — one model, three views (text · tree · diagram), three gates (presets; linked highlighting)
+//   mm — mail merge: one template, three models
 //   d3 — one line in the model, six files change (+ attribute, file chips, code | template)
+//   d2 — edit the generated file, or extend it (TOP mechanism; stepper, plays once when seen)
 //   d4 — CD2GUI: pages nobody drew (class picker, dashboard / overview / details, hand-written delta)
 (() => {
-  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const D = window.SiteDemo;
+  const reduce = D.reduce, press = D.press;
   const json = fig => JSON.parse(fig.dataset.json);
-  const press = (buttons, on) => buttons.forEach(b => b.setAttribute("aria-pressed", String(b === on)));
-  const whenSeen = (el, fn) => {
-    if (!("IntersectionObserver" in window)) return fn();
-    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { io.disconnect(); fn(); } }, { threshold: .4 });
-    io.observe(el);
-  };
 
-  // ---------------- a stepper: play button, step slider, label (as in ai4se.js) ----------------
-  function stepper(fig, count, render, delay) {
-    const play = fig.querySelector(".play"), range = fig.querySelector("input.step"), words = json(fig).words;
-    let k = 0, timer = null;
-    range.max = count - 1;
-    const show = i => { k = i; range.value = i; render(i); };
-    const stop = () => { clearTimeout(timer); timer = null; play.textContent = k >= count - 1 ? "↺" : "▶"; play.setAttribute("aria-label", words.play); };
-    const tick = () => { if (k >= count - 1) return stop(); show(k + 1); timer = setTimeout(tick, delay); };
-    const start = () => { if (k >= count - 1) show(0); play.textContent = "❚❚"; play.setAttribute("aria-label", words.pause); timer = setTimeout(tick, delay); };
-    play.addEventListener("click", () => (timer ? stop() : start()));
-    range.addEventListener("input", () => { stop(); show(+range.value); stop(); });
-    show(0); stop();
-    return { start };
+  // ---------------- f2: a class diagram that reads itself out ----------------
+  function readAloud(fig) {
+    const { read, prompt } = JSON.parse(fig.dataset.read);
+    const strip = fig.querySelector(".f2-read"), parts = [...fig.querySelectorAll("g.k[data-k]")];
+    const light = k => {
+      parts.forEach(g => g.classList.toggle("on", g.dataset.k === k));
+      strip.innerHTML = k ? read[k] : prompt;
+      strip.classList.toggle("on", !!k);
+    };
+    // the innermost part under the pointer wins (the attributes sit inside the Book class)
+    fig.addEventListener("pointerover", e => { const g = e.target.closest("g.k[data-k]"); if (g) light(g.dataset.k); });
+    fig.addEventListener("pointerleave", e => { if (e.pointerType === "mouse") light(null); });
+    parts.forEach(g => {
+      g.addEventListener("focus", e => { e.stopPropagation(); light(g.dataset.k); });
+      g.addEventListener("blur", () => light(null));
+    });
+    D.lock(strip, [null, ...Object.keys(read)], k => { strip.innerHTML = k ? read[k] : prompt; }, () => null);
   }
 
-  // ---------------- d1: syntax and the three gates ----------------
+  // ---------------- d1: text, tree, diagram — and the three gates ----------------
   function syntax(fig) {
-    const { variants } = json(fig);
-    const code = fig.querySelector(".d1-code"), msg = fig.querySelector(".d1-msg");
+    const { variants, none } = json(fig);
+    const code = fig.querySelector(".d1-code"), msg = fig.querySelector(".d1-msg"), treeBox = fig.querySelector(".d1-treebox");
     const gates = [...fig.querySelectorAll(".gate")], umls = [...fig.querySelectorAll(".d1-uml")];
     const buttons = [...fig.querySelectorAll(".d1-presets button")];
-    const set = i => {
+    let cur = 0;
+    const render = i => {
       const v = variants[i];
-      press(buttons, buttons[i]);
       code.innerHTML = v.code;
       gates.forEach((g, k) => { g.className = "gate " + (v.gates[k] === 1 ? "ok" : v.gates[k] === 0 ? "fail" : "skip"); });
       umls.forEach(u => { u.hidden = u.dataset.uml !== v.uml; });
+      treeBox.innerHTML = v.tree || `<p class="d1-notree mono">${none}</p>`;
+      treeBox.classList.toggle("none", !v.tree);
       msg.textContent = v.msg;
     };
+    const set = i => { cur = i; press(buttons, buttons[i]); render(i); };
     buttons.forEach((b, i) => b.addEventListener("click", () => set(i)));
-    // pointing at a line lights up its element in the diagram, and the other way round
+    // pointing at a line, a tree node or a part of the diagram lights up the same element in the other two
     const light = k => {
-      code.querySelectorAll(".l").forEach(l => l.classList.toggle("hi", !!k && l.dataset.k === k));
-      fig.querySelectorAll(".d1-uml g[data-k]").forEach(g => g.classList.toggle("hi", !!k && g.dataset.k === k));
+      fig.querySelectorAll(".d1-code .l, .d1-tree li, .d1-uml [data-k]").forEach(el => el.classList.toggle("hi", !!k && el.dataset.k === k));
     };
-    code.addEventListener("pointerover", e => light(e.target.closest(".l")?.dataset.k));
-    code.addEventListener("pointerleave", () => light(null));
-    fig.querySelectorAll(".d1-uml g[data-k]").forEach(g => {
-      g.addEventListener("pointerenter", () => light(g.dataset.k));
-      g.addEventListener("pointerleave", () => light(null));
-    });
+    const over = e => { const el = e.target.closest("[data-k]"); light(el && el.dataset.k); };
+    for (const el of [code, treeBox, ...umls]) {
+      el.addEventListener("pointerover", over);
+      el.addEventListener("pointerleave", () => light(null));
+    }
+    D.lock(msg, variants.length, render, () => cur);
+    D.lock(fig.querySelector(".d1-right"), variants.length, render, () => cur);
+  }
+
+  // ---------------- mm: mail merge ----------------
+  function mailmerge(fig) {
+    const { out, model } = json(fig);
+    const o = fig.querySelector(".mm-out"), m = fig.querySelector(".mm-model"), chips = [...fig.querySelectorAll(".mm-chips button")];
+    let cur = "Book";
+    const render = c => {
+      o.innerHTML = out[c]; m.innerHTML = model[c];
+      if (!reduce) for (const el of [o, m]) { el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); }
+    };
+    chips.forEach(b => b.addEventListener("click", () => { cur = b.dataset.c; press(chips, b); b.classList.remove("first"); render(cur); }));
+    const keys = Object.keys(out);
+    D.lock(o, keys, c => { o.innerHTML = out[c]; }, () => cur);
+    D.lock(m, keys, c => { m.innerHTML = model[c]; }, () => cur);
   }
 
   // ---------------- d2: the TOP mechanism ----------------
   function top(fig) {
-    const { steps, words } = json(fig);
+    const { steps } = json(fig);
     const lanes = { a: fig.querySelector('[data-lane="a"]'), b: fig.querySelector('[data-lane="b"]') };
-    const where = fig.querySelector(".where");
+    const where = fig.querySelector(".where"), W = D.words;
     const render = i => {
       const s = steps[i];
       for (const l of ["a", "b"]) {
@@ -70,10 +92,9 @@
         note.textContent = s[l + "n"];
         note.className = "d2-note mono " + (s[l + "c"] || "");
       }
-      where.textContent = `${words.step} ${i + 1} ${words.of} ${steps.length} · ${s.title}`;
+      where.textContent = `${W.step} ${i + 1} ${W.of} ${steps.length} · ${s.title}`;
     };
-    const st = stepper(fig, steps.length, render, 2600);
-    if (!reduce) whenSeen(fig, st.start);
+    D.stepper(fig, steps.length, render, { delay: 2600, narrated: true, lock: [lanes.a, lanes.b], label: false });
   }
 
   // ---------------- d3: one line, six files ----------------
@@ -84,117 +105,176 @@
     const chips = [...fig.querySelectorAll(".d3-chip")], views = [...fig.querySelectorAll(".d3-view button")];
     const add = fig.querySelector(".d3-add");
     let k = 0, file = "data", view = "code";
-    const render = () => {
+    const panel = ([kk, f, v]) => {                 // the variable part: the code, the form, the template note
+      const s = states[kk], tpl = v === "template";
+      out.innerHTML = tpl ? templates[f] : s.files[f];
+      out.classList.toggle("tpl", tpl);
+      form.hidden = tpl || f !== "form";
+      if (!form.hidden) form.innerHTML = s.form;
+      note.hidden = !tpl;
+      note.textContent = words.tpl;
+    };
+    const render = flash => {
       const s = states[k];
       model.innerHTML = s.model;
       chips.forEach(c => {
         const n = k ? s.changed[c.dataset.f] : 0;
         c.querySelector(".d3-badge").textContent = n ? `+${n}` : "";
+        c.querySelector(".d3-new").textContent = n ? s.first[c.dataset.f] : "";
         c.classList.toggle("touched", n > 0);
+        if (flash && n && !reduce) { c.classList.remove("flash"); void c.offsetWidth; c.classList.add("flash"); }
       });
       press(chips, chips.find(c => c.dataset.f === file));
       press(views, views.find(v => v.dataset.view === view));
-      const tpl = view === "template";
-      out.innerHTML = tpl ? templates[file] : s.files[file];
-      out.classList.toggle("tpl", tpl);
-      form.hidden = tpl || file !== "form";
-      if (!form.hidden) form.innerHTML = s.form;
-      note.hidden = !tpl;
-      note.textContent = words.tpl;
-      count.textContent = k ? words.count.replace("{n}", s.n).replace("{m}", s.m) : words.start;
+      panel([k, file, view]);
+      count.textContent = k ? words.count.replace("{n}", s.n).replace("{m}", s.m) + (k === states.length - 1 ? ` · ${words.full}` : "") : words.start;
       add.disabled = k >= states.length - 1;
       add.classList.toggle("hint", k === 0);
     };
-    add.addEventListener("click", () => { if (k < states.length - 1) { k++; render(); if (k === states.length - 1) count.textContent += " · " + words.full; } });
+    add.addEventListener("click", () => { if (k < states.length - 1) { k++; render(true); } });
     fig.querySelector(".d3-reset").addEventListener("click", () => { k = 0; render(); });
     chips.forEach(c => c.addEventListener("click", () => { file = c.dataset.f; render(); }));
     views.forEach(v => v.addEventListener("click", () => { view = v.dataset.view; render(); }));
     render();
+    // the panel never changes height: lock it over every state, file and view
+    const all = [];
+    states.forEach((_, kk) => chips.forEach(c => ["code", "template"].forEach(v => all.push([kk, c.dataset.f, v]))));
+    D.lock(fig.querySelector(".d3-panel"), all, panel, () => [k, file, view]);
+    // and the chips keep their height when their new line appears
+    D.lock(fig.querySelector(".d3-tiers"), states.map((_, kk) => kk), kk => {
+      chips.forEach(c => { const n = kk ? states[kk].changed[c.dataset.f] : 0; c.querySelector(".d3-new").textContent = n ? states[kk].first[c.dataset.f] : ""; });
+    }, () => k);
   }
 
   // ---------------- d4: CD2GUI ----------------
   function cd2gui(fig) {
-    const { pages } = json(fig);
+    const { pages, start } = json(fig);
     const url = fig.querySelector(".d4-url"), page = fig.querySelector(".d4-page"), tree = fig.querySelector(".d4-tree-wrap");
     const tabs = [...fig.querySelectorAll(".d4-tabs button")], classes = [...fig.querySelectorAll(".d4-cls")];
     const delta = fig.querySelector(".d4-delta input"), deltaCode = fig.querySelector(".d4-deltacode");
-    let cls = null, tab = "dashboard";
+    let cls = start, tab = "dashboard";
+    const key = (c, t, dl) => (t === "dashboard" ? "dashboard" : `${c}/${t}${dl ? "+delta" : ""}`);
     const render = () => {
-      const canDelta = cls === "Accountant" && tab === "details";
+      const canDelta = cls === "Member" && tab === "details";
       delta.disabled = !canDelta;
       if (!canDelta) delta.checked = false;
-      deltaCode.hidden = !delta.checked;
-      const key = tab === "dashboard" ? "dashboard" : `${cls}/${tab}${delta.checked ? "+delta" : ""}`;
-      const p = pages[key];
+      deltaCode.classList.toggle("on", delta.checked);
+      const p = pages[key(cls, tab, delta.checked)];
       url.textContent = p.url;
       page.innerHTML = p.html;
       tree.innerHTML = p.tree;
       press(tabs, tabs.find(t => t.dataset.t === tab));
-      tabs.forEach(t => { if (t.dataset.t !== "dashboard") t.disabled = !cls; });
-      classes.forEach(g => { g.classList.toggle("on", g.dataset.c === cls); g.setAttribute("aria-pressed", String(g.dataset.c === cls)); });
+      press(classes, classes.find(g => g.dataset.c === cls));
     };
-    const pick = c => { cls = c; if (tab === "dashboard") tab = "details"; render(); };
-    classes.forEach(g => {
-      g.addEventListener("click", () => pick(g.dataset.c));
-      g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(g.dataset.c); } });
-    });
-    tabs.forEach(t => t.addEventListener("click", () => { tab = t.dataset.t; render(); }));
+    classes.forEach(g => g.addEventListener("click", () => { cls = g.dataset.c; if (tab === "dashboard") tab = "details"; render(); }));
+    tabs.forEach(t => t.addEventListener("click", () => { tab = t.dataset.t; t.classList.remove("first"); render(); }));
     delta.addEventListener("change", render);
     render();
+    const all = Object.keys(pages);
+    D.lock(page, all, k => { page.innerHTML = pages[k].html; }, () => key(cls, tab, delta.checked));
+    D.lock(tree, all, k => { tree.innerHTML = pages[k].tree; }, () => key(cls, tab, delta.checked));   // stacked on phones
   }
 
   // ---------------- the city map: one crosshair marks the same place in every map ----------------
-  // Original, road map and hiking map share the city's geography; the metro map does not — there the
-  // crosshair can only snap to the nearest station (and pointing at the metro map snaps the others to it).
-  function citymap(svg) {
-    const d = JSON.parse(svg.dataset.map);
-    const parts = [...svg.querySelectorAll(".mp")].map(g => ({ k: +g.dataset.k, x: +g.dataset.x, y: +g.dataset.y, g: g.querySelector(".xh") }));
-    const W = d.w, H = d.h, S = d.s;
-    const heightAt = (x, y) => {            // bilinear on the precomputed grid
-      const i = Math.min(x / d.step, d.heights[0].length - 1.001), j = Math.min(y / d.step, d.heights.length - 1.001);
+  // Original, road map and hiking map share the city's geography; the metro map does not — pointing at it can
+  // only pick the nearest station, and the other maps then ring that station's true position.
+  function citymap(box) {
+    const d = JSON.parse(box.dataset.map), w = d.words;
+    const svgs = [...box.querySelectorAll("svg.cm")].map(s => ({ k: +s.dataset.k, s, g: s.querySelector(".xh") }));
+    const read = box.closest("figure").querySelector(".cm-read");
+    const heightAt = (x, y) => {                       // bilinear on the precomputed grid
+      const i = Math.min(Math.max(x, 0) / d.step, d.heights[0].length - 1.001), j = Math.min(Math.max(y, 0) / d.step, d.heights.length - 1.001);
       const i0 = Math.floor(i), j0 = Math.floor(j), fi = i - i0, fj = j - j0, h = d.heights;
       return (h[j0][i0] * (1 - fi) + h[j0][i0 + 1] * fi) * (1 - fj) + (h[j0 + 1][i0] * (1 - fi) + h[j0 + 1][i0 + 1] * fi) * fj;
     };
+    const riverAt = x => { const i = Math.min(Math.max(x / 4, 0), d.river.length - 1.001), i0 = Math.floor(i); return d.river[i0] + (d.river[i0 + 1] - d.river[i0]) * (i - i0); };
     const nearest = (pts, x, y) => Object.keys(pts).reduce((a, k) => (Math.hypot(pts[k][0] - x, pts[k][1] - y) < Math.hypot(pts[a][0] - x, pts[a][1] - y) ? k : a));
-    const put = (p, x, y, label) => {
-      const [v, h, c, t] = p.g.children;
+    // the road map's roads, sampled once (city coordinates)
+    const roadSvg = svgs.find(p => p.k === 2).s, roads = [];
+    roadSvg.querySelectorAll("path[data-road]").forEach(p => {
+      const n = p.getTotalLength(), pts = [];
+      for (let t = 0; t <= n; t += 3) { const q = p.getPointAtLength(t); pts.push([q.x, q.y]); }
+      roads.push({ name: p.dataset.road || w.road, pts });
+    });
+    const roadAt = (x, y) => {
+      let best = null, dist = 9;
+      for (const r of roads) for (const [px, py] of r.pts) { const dd = Math.hypot(px - x, py - y); if (dd < dist) { dist = dd; best = r.name; } }
+      return best;
+    };
+    const oldTown = (x, y) => x > 78 && x < 204 && y > 56 && y < 118;
+    const place = (x, y, h) => {
+      if (Math.abs(y - riverAt(x)) < 5) return w.river;
+      if (oldTown(x, y)) return w.oldtown;
+      if (x > 42 && x < 80 && y > 98 && y < 120) return w.park;
+      if (x > 172 && x < 276 && y > 146) return w.south;
+      return h > 95 ? w.hills : w.edge;
+    };
+    const put = (p, x, y, label, ring) => {
+      const [v, hl, c, t] = p.g.children;
       v.setAttribute("x1", x); v.setAttribute("x2", x);
-      h.setAttribute("y1", y); h.setAttribute("y2", y);
+      hl.setAttribute("y1", y); hl.setAttribute("y2", y);
       c.setAttribute("cx", x); c.setAttribute("cy", y);
-      const right = x > W - 70, below = y < 22;
-      t.setAttribute("x", right ? x - 6 : x + 6); t.setAttribute("y", below ? y + 12 : y - 6);
+      c.setAttribute("r", ring ? 7 : 3.2);
+      c.classList.toggle("ring", !!ring);
+      const right = x > d.w - 90, below = y < 24;
+      t.setAttribute("x", right ? x - 7 : x + 7); t.setAttribute("y", below ? y + 15 : y - 7);
       t.setAttribute("text-anchor", right ? "end" : "start");
       t.textContent = label;
     };
-    const show = (x, y) => {
-      const st = nearest(d.geo, x, y);
-      for (const p of parts) {
-        if (p.k === 1) { const [mx, my] = d.metro[st]; put(p, mx, my, `→ ${d.names[st]}`); }
-        else put(p, x, y, p.k === 3 ? `≈ ${Math.round(heightAt(x, y))} ${d.m}` : `${Math.round(x)} · ${Math.round(y)}`);
+    let pos = null, snapped = null;
+    const show = (x, y, station) => {
+      pos = [x, y];
+      const h = Math.round(heightAt(x, y)), st = station || nearest(d.geo, x, y);
+      const where = station ? d.names[station] : place(x, y, h);
+      const road = oldTown(x, y) && !station ? w.oldtown : (roadAt(x, y) || w.noroad);
+      for (const p of svgs) {
+        if (p.k === 1) { const [mx, my] = d.metro[st]; put(p, mx, my, ""); }
+        else put(p, x, y, p.k === 0 ? `${where} · ${h} m` : p.k === 2 ? road : `≈ ${h} m`, station && p.k !== 3);
       }
-      svg.classList.add("live");
+      svgs[1].s.querySelectorAll("[data-st]").forEach(el => el.classList.toggle("pulse", el.dataset.st === st));
+      snapped = st;
+      read.textContent = `${w.orig}: ${where} · ${h} m — ${w.roads}: ${road} — ${w.hike}: ≈ ${h} m — ${w.metro}: ${station ? d.names[st] : `${w.nearest} ${d.names[st]}`}`;
+      box.classList.add("live");
     };
-    const move = e => {
-      const pt = svg.createSVGPoint();
+    const hide = () => { box.classList.remove("live"); svgs[1].s.querySelectorAll(".pulse").forEach(el => el.classList.remove("pulse")); };
+    const at = (p, e) => {
+      const pt = p.s.createSVGPoint();
       pt.x = e.clientX; pt.y = e.clientY;
-      const q = pt.matrixTransform(svg.getScreenCTM().inverse());
-      const p = parts.find(p => q.x >= p.x && q.x <= p.x + W * S && q.y >= p.y && q.y <= p.y + H * S);
-      if (!p) return svg.classList.remove("live");
-      let x = (q.x - p.x) / S, y = (q.y - p.y) / S;
-      if (p.k === 1) { const st = nearest(d.metro, x, y); [x, y] = d.geo[st]; }    // the metro map has no geography
-      show(x, y);
+      return pt.matrixTransform(p.s.getScreenCTM().inverse());
     };
-    svg.addEventListener("pointermove", move);
-    svg.addEventListener("pointerdown", move);
-    svg.addEventListener("pointerleave", () => svg.classList.remove("live"));
+    for (const p of svgs) {
+      const move = e => {
+        if (e.pointerType !== "mouse" && e.type === "pointermove" && !e.buttons) return;
+        const q = at(p, e);
+        if (q.x < 0 || q.y < 0 || q.x > d.w || q.y > d.h) return;
+        if (p.k === 1) { const st = nearest(d.metro, q.x, q.y); show(d.geo[st][0], d.geo[st][1], st); }    // the metro map has no geography
+        else show(q.x, q.y, null);
+      };
+      p.s.addEventListener("pointermove", move);
+      p.s.addEventListener("pointerdown", move);
+      p.s.addEventListener("pointerleave", e => { if (e.pointerType === "mouse") hide(); });   // a tap keeps its crosshair
+    }
+    box.addEventListener("keydown", e => {
+      const step = { ArrowLeft: [-10, 0], ArrowRight: [10, 0], ArrowUp: [0, -10], ArrowDown: [0, 10] }[e.key];
+      if (!step) return;
+      e.preventDefault();
+      const [x, y] = pos || [d.w / 2, d.h / 2];
+      show(Math.min(d.w - 2, Math.max(2, x + step[0])), Math.min(d.h - 2, Math.max(2, y + step[1])), null);
+    });
+    box.addEventListener("blur", hide);
   }
-  document.querySelectorAll("svg.citymap[data-map]").forEach(svg => { try { citymap(svg); } catch (e) { console.error(e); } });
+  document.querySelectorAll(".citymap[data-map]").forEach(box => { try { citymap(box); } catch (e) { console.error(e); } });
 
-  // ---------------- d0: the generator, five levels deep (_build/mde_levels.py) ----------------
-  // Every level has its own frame of the same shape, so the figure keeps its height; boxes move and grow,
-  // what is new fades in after the move has begun, what goes fades out first. Geometry rules as in the Python.
+  // ---------------- d0: the generator at several levels of detail (_build/mde_levels.py) ----------------
+  // Boxes move and grow between levels, what is new fades in after the move has begun, what goes fades out first.
+  // Geometry rules as in the Python. One instance per figure; each knows only its own levels.
   function levels(fig) {
-    const d = json(fig), svg = fig.querySelector("svg"), N = 5;
+    const d = json(fig), svg = fig.querySelector("svg"), L = d.levels;
+    if (d.tall && matchMedia("(max-width: 600px)").matches) {        // phones: the stacked layout of levels 1–2
+      d.frames = d.tall.frames;
+      d.els.forEach(e => { e.g = d.tall.geo[e.id] || {}; });
+      d.eds.forEach((ed, i) => { const r = d.tall.routes[i]; if (r) ed.r = r; else ed.lv = []; });
+    }
     const els = d.els.map(e => ({ ...e, node: svg.querySelector(`[data-id="${e.id}"]`) }));
     const byId = Object.fromEntries(els.map(e => [e.id, e]));
     const paths = [...svg.querySelectorAll(".lv-edges path")];
@@ -269,18 +349,22 @@
 
     const buttons = [...fig.querySelectorAll(".lv-b")], where = fig.querySelector(".where");
     const prev = fig.querySelector(".lv-prev"), next = fig.querySelector(".lv-next");
-    let cur = 1, anim = 0;
+    let cur = d.start, anim = 0;
     const set = l => {
-      press(buttons, buttons[l - 1]);
-      prev.disabled = l === 1; next.disabled = l === N;
-      where.innerHTML = `<span>${d.words[l - 1]}</span>`;
+      press(buttons, buttons[L.indexOf(l)]);
+      prev.disabled = l === L[0]; next.disabled = l === L[L.length - 1];
+      where.innerHTML = `<span>${d.words[l]}</span>`;
     };
     // the flow: dots run along the arrows of the current level in a wave from left to right — the models
     // go in, the code comes out. Only while the figure is on screen and no level change is under way.
     const NS = "http://www.w3.org/2000/svg", flowG = document.createElementNS(NS, "g");
     flowG.setAttribute("class", "lv-flow");
     svg.querySelector(".lv-edges").after(flowG);
-    const dots = paths.map(() => { const c = document.createElementNS(NS, "circle"); c.setAttribute("r", 3.8); flowG.appendChild(c); return c; });
+    const dots = paths.map(() => {
+      const c = document.createElementNS(NS, "circle");
+      c.setAttribute("r", 3.8); c.setAttribute("opacity", 0); c.setAttribute("cx", -20); c.setAttribute("cy", -20);   // hidden until the first frame
+      flowG.appendChild(c); return c;
+    });
     let flowing = false, flowRaf = 0, t0f = 0;
     const WAVE = 2600, RUN = 700, REST = 900;              // ms: the wave crosses the frame, one dot runs, pause
     const flow = t => {
@@ -307,7 +391,7 @@
       new IntersectionObserver(([e]) => { seen = e.isIntersecting; flowOn(seen); }, { threshold: .25 }).observe(svg);
 
     const go = to => {
-      if (to < 1 || to > N || to === cur) return;
+      if (!L.includes(to) || to === cur) return;
       cancelAnimationFrame(anim); flowOn(false);
       const from = cur; cur = to; set(to);
       if (reduce) return draw(from, to, 1);
@@ -319,13 +403,23 @@
       };
       anim = requestAnimationFrame(step);
     };
-    buttons.forEach((b, i) => b.addEventListener("click", () => go(i + 1)));
-    prev.addEventListener("click", () => go(cur - 1));
-    next.addEventListener("click", () => go(cur + 1));
-    draw(1, 1, 1); set(1);
+    buttons.forEach((b, i) => b.addEventListener("click", () => go(L[i])));
+    prev.addEventListener("click", () => go(L[L.indexOf(cur) - 1]));
+    next.addEventListener("click", () => go(L[L.indexOf(cur) + 1]));
+    draw(cur, cur, 1); set(cur);
+    // height lock (STYLE.md): the viewBox morphs, so reserve the tallest level's height below the controls
+    const lockH = () => {
+      const W = svg.getBoundingClientRect().width; if (!W) return;
+      const box = svg.parentElement;                      // a smaller level sits in the middle of the reserved height
+      box.style.minHeight = `${Math.ceil(Math.max(...L.map(l => W * d.frames[l][1] / d.frames[l][0])))}px`;
+      box.style.display = "flex"; box.style.flexDirection = "column"; box.style.justifyContent = "center";
+    };
+    lockH();
+    if ("ResizeObserver" in window) { let w0 = 0; new ResizeObserver(() => { const w = svg.getBoundingClientRect().width; if (Math.abs(w - w0) > 1) { w0 = w; lockH(); } }).observe(svg.parentElement); }
   }
 
-  const kinds = { d0: levels, d1: syntax, d2: top, d3: files, d4: cd2gui };
+  document.querySelectorAll("figure.f2-fig[data-read]").forEach(fig => { try { readAloud(fig); } catch (e) { console.error(e); } });
+  const kinds = { d0: levels, d1: syntax, d2: top, d3: files, d4: cd2gui, mm: mailmerge };
   document.querySelectorAll("figure.demo[data-demo]").forEach(fig => {
     try { kinds[fig.dataset.demo]?.(fig); } catch (e) { console.error(e); }
   });

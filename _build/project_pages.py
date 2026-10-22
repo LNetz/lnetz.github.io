@@ -10,6 +10,19 @@ import os
 import re
 
 from project_content import PROJECTS
+import article_common
+
+# project → the articles it is background for: (article file, anchor)
+ARTICLE_LINKS = {
+    "esaca": [("research-ai4se.html", "harness")],
+    "macoco": [("research-mde.html", "practice")],
+    "se-chatty": [("research-ai4se.html", "rag")],
+    "ford": [("research-mde.html", "")],
+    "add": [("research-mde.html", ""), ("research-dt.html", "wind")],
+    "montigem": [("research-mde.html", "montigem"), ("research-ai4se.html", "app")],
+    "geneial": [("research-ea.html", "")],
+    "smt-rat": [("research-ea.html", "")],
+}
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 NL = "\n"
@@ -37,8 +50,10 @@ def ext(label, url):
     return f'<a href="{url}" target="_blank" rel="noopener">{label} ↗</a>'
 
 
-def pub_list(lang, keys):
-    """Same markup as the publication list on the research page (site.js); the <li>s only."""
+def pub_list(lang, keys, id_prefix="", full_list=False):
+    """Same markup as the publication list on the research page (site.js); the <li>s only.
+    Articles pass id_prefix="pub-" (their cites point to #pub-KEY on the same page) and full_list=True, which adds a
+    link to the entry in the research page's full list."""
     flags = {"Article": T("Article", "Artikel"), "Dissertation": T("Dissertation", "Dissertation"),
              "MastersThesis": T("Master’s thesis", "Masterarbeit"), "BachelorsThesis": T("Bachelor’s thesis", "Bachelorarbeit")}
     items = []
@@ -49,7 +64,9 @@ def pub_list(lang, keys):
         if p.get("doi"): links.append(ext("doi", "https://doi.org/" + p["doi"]))
         if p.get("url"): links.append(ext(p.get("urlLabel", "link"), p["url"]))
         flag = f'<span class="flag mono">{flags[p["flag"]][lang]}</span>' if p.get("flag") else ""
-        items.append(f'''        <li id="{k}">
+        if full_list:
+            links.append(f'<a class="int" href="research.html#pub-{k}">{T("in the publication list", "in der Publikationsliste")[lang]} →</a>')
+        items.append(f'''        <li id="{id_prefix}{k}">
           <span class="key mono">{k}</span>
           <div>
             <div class="t">{p["title"]}{flag}</div>
@@ -159,6 +176,9 @@ def page(lang, idx):
     facts = "".join(f'<div><dt>{L(k)}</dt><dd>{L(v)}</dd></div>' for k, v in p["facts"])
     links = "".join(ext(L(a), b) for a, b in p.get("links", ()))
     links = f'\n      <div class="links-top mono">{links}</div>' if links else ""
+    # "Background: Part N · Title →" — the articles that explain what this project builds on (article_common.SERIES)
+    background = "".join(article_common.art_link(lang, f, a) for f, a in ARTICLE_LINKS.get(p["slug"], ()))
+    background = f"\n      {background}" if background else ""
     head = f'''    <header class="page proj">
       <a class="back mono" href="projects.html">← {L(T("all projects", "alle Projekte"))}</a>
       <div class="section-head">
@@ -166,7 +186,7 @@ def page(lang, idx):
         <span class="mono faint">{L(p["when"])}</span>
       </div>{logo}
       <p class="lead">{L(p["lead"])}</p>
-      <dl class="facts mono{" wide" if len(p["facts"]) > 3 else ""}">{facts}</dl>{links}
+      <dl class="facts mono{" wide" if len(p["facts"]) > 3 else ""}">{facts}</dl>{links}{background}
     </header>
 '''
     media = p["media"](lang, A) if p.get("media") else ""

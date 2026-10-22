@@ -212,8 +212,7 @@ section > .group:first-child { padding-top: 0; }
 .chapters a { color: var(--ink-3); }
 .chapters a::before { content: "↓ "; color: var(--accent); }
 .chapters a:hover { color: var(--accent); }
-.group[id] { scroll-margin-top: 24px; }
-@media (max-width: 900px) { .group[id] { scroll-margin-top: 72px; } }
+.group[id] { scroll-margin-top: 24px; }       /* under 900px html{scroll-padding-top} adds the sticky bar */
 .group.split { display: flex; justify-content: space-between; gap: 16px; }
 .group.split a { color: var(--ink-3); }
 .group.split a:hover { color: var(--accent); }
@@ -602,7 +601,6 @@ footer > a { justify-self: end; }
   .index.open .menu { display: flex; }
   /* backdrop-filter would make the bar the containing block of the fixed sheet */
   .index.open { background: var(--bg); -webkit-backdrop-filter: none; backdrop-filter: none; }
-  .series { scroll-margin-top: calc(var(--bar) + 16px); }
   .grid { --row: 104px; }
   body.menu-open { overflow: hidden; }
 
@@ -766,12 +764,12 @@ section > .pubs li { grid-template-columns: 120px minmax(0, 1fr); gap: 24px; }
 .dia text.a { fill: var(--accent); }
 .dia .box { fill: var(--bg); stroke: var(--ink-3); stroke-width: 1; }
 .dia .box.hl { stroke: var(--accent); stroke-width: 1.5; }
-.dia .box.dashbox { stroke-dasharray: 3 4; }
+.dia .box.dashbox { stroke-dasharray: 3 3; }
 .dia .zone { fill: var(--tile); stroke: none; }
-.dia .zone.line { fill: none; stroke: var(--ink-3); stroke-dasharray: 3 4; }
+.dia .zone.line { fill: none; stroke: var(--ink-3); stroke-dasharray: 3 3; }
 .dia .ln { fill: none; stroke: var(--ink-3); stroke-width: 1; }
 .dia .ln.hl { stroke: var(--accent); stroke-width: 1.5; }
-.dia .ln.dash { stroke-dasharray: 3 4; }
+.dia .ln.dash { stroke-dasharray: 3 3; }
 .dia .dot { fill: var(--accent); }
 .dia-scroll {                       /* edges fade where there is more to scroll (--fl / --fr, site.js) */
   --fl: 0px; --fr: 0px; overflow-x: auto;
@@ -779,6 +777,9 @@ section > .pubs li { grid-template-columns: 120px minmax(0, 1fr); gap: 24px; }
           mask-image: linear-gradient(to right, transparent, #000 var(--fl), #000 calc(100% - var(--fr)), transparent);
 }
 .dia-scroll .dia { min-width: 640px; }
+/* a figure whose drawing really scrolls sideways (site.js sets .scrolls) says so above its caption */
+.art-fig:has(> .dia-scroll.scrolls) > figcaption::before { content: "↔ scroll"; display: block; margin-bottom: 6px; color: var(--ink-3); font-family: var(--mono); font-size: var(--t-floor, 10px); text-align: right; }
+:lang(de) .art-fig:has(> .dia-scroll.scrolls) > figcaption::before { content: "↔ scrollen"; }
 
 /* figures from papers / theses: always on white paper, so they read in the dark theme too */
 .paper { background: #fff; padding: 20px; border: 1px solid var(--rule); }
@@ -937,7 +938,6 @@ body.menu-open .to-top, .lightbox.open ~ .to-top { display: none; }
 .anim .page .ll-wrap { animation: fadein .8s ease .4s both; }
 .spec > li[id], .rows > li[id] { scroll-margin-top: 24px; }
 .spec > li:target, .rows > li:target { background: color-mix(in srgb, var(--accent) 5%, transparent); }
-@media (max-width: 900px) { .spec > li[id], .rows > li[id] { scroll-margin-top: 72px; } }
 
 /* Connect Four as an overlay (footer gamepad, assets/site.js): the page dims, the game sits on top */
 .game-overlay {
@@ -1389,7 +1389,7 @@ details.curious p, details.curious li { font-size: 14px; }
 .gp-body table { border-collapse: collapse; width: 100%; font-size: 11.5px; }
 .gp-body th { text-align: left; font-weight: 400; color: var(--ink-3); border-bottom: 1px solid var(--ink-3); padding: 2px 6px 2px 0; }
 .gp-body td { padding: 3px 6px 3px 0; border-bottom: 1px solid var(--rule); color: var(--ink); }
-.pill { display: inline-block; padding: 0 7px; border-radius: 9px; background: var(--accent); color: var(--bg); font-family: var(--mono); font-size: 10px; line-height: 16px; }
+.pill { display: inline-block; padding: 0 7px; border: 1px solid var(--accent); border-radius: 9px; background: none; color: var(--accent); font-family: var(--mono); font-size: 10px; line-height: 14px; }
 .gp-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; padding: 4px 6px; border: 1px dashed var(--accent); border-radius: 4px; }
 .d4-treebox summary { cursor: pointer; list-style: none; }
 .d4-tree { list-style: none; display: grid; gap: 3px; font-size: 10.5px; }
@@ -1634,8 +1634,144 @@ details.curious p, details.curious li { font-size: 14px; }
 .dia .imm [data-p="mould"] .box { fill: color-mix(in srgb, var(--accent) 10%, var(--bg)); }
 .dia .callout { stroke: var(--ink-3); stroke-width: .8; }
 .hero text.on { fill: var(--bg); }
+/* hero type: the 860-wide drawing renders at ~784 px and the 430-wide phone variant at ~358 px; these sizes keep
+   every label at the 10 px floor (EA sets its own in ea.css) */
+.art-hero .hero text.s, .art-hero .hero .hc { font-size: 11px; }
+.art-hero .hero-tall text, .art-hero .hero-tall text.s, .art-hero .hero-tall .hc { font-size: 12px; }
+.art-hero .hero-tall text.t { font-size: 14px; }
 .art-hero .hero-tall { display: none; }                       /* the DT hero: stacked on phones */
 @media (max-width: 600px) { .art-hero .hero-wide:has(+ .hero-tall) { display: none; } .art-hero .hero-tall { display: block; } }
 .articles .thumb .imm path, .articles .thumb .imm rect, .articles .thumb .imm circle { stroke-width: 3; }   /* drawn at .38: as thick as the other cards */
 .articles .thumb .imm .box { fill: var(--bg); }
 .articles .thumb .imm .sens { fill: var(--accent); stroke: none; }
+
+/* =====================================================================
+   Article series shell (_build/article_common.py) and the shared figure
+   vocabulary — see _build/STYLE.md for the rules behind these tokens.
+   ===================================================================== */
+:root {
+  /* type (rendered px): box title · label · section header in a figure · floor · prose inside a demo */
+  --t-title: 13px; --t-label: 11px; --t-head: 10.5px; --t-floor: 10px; --t-prose: 14px;
+  --code: 12.5px; --code-s: 11.5px;                 /* stand-alone listing · code inside a figure */
+  /* strokes: hairline · box/connector · emphasis/data · accent path · handles */
+  --sw-hair: .75; --sw-1: 1; --sw-em: 1.5; --sw-acc: 2; --sw-handle: 2.5;
+  /* colour roles: the subject = var(--accent); generated/derived; everything else */
+  --c-gen: color-mix(in srgb, var(--accent) 45%, transparent);
+  --c-rest: color-mix(in srgb, var(--ink-3) 35%, transparent);
+}
+
+/* anchors land below the sticky bar on phones and tablets (nav entries, [n] / [KEY] cites, cross links) */
+@media (max-width: 900px) { html { scroll-padding-top: calc(var(--bar) + 12px); } }
+.article :is(h2, h3, figure, li)[id], .art-refs .pubs li { scroll-margin-top: 24px; }
+
+/* header: part number, series line, numbered chapters */
+.art-head .section-head .mono:first-child { white-space: nowrap; }
+.page .art-series { gap: 4px 16px; align-items: baseline; }
+.page .art-series .k { color: var(--ink-3); margin-right: 2px; }
+.page .art-series .n { margin-right: 6px; color: var(--ink-3); }
+.page .art-series [aria-current] .n { color: var(--accent); }
+@media (max-width: 600px) {         /* phones: the other parts as numbers only, the current one with its name */
+  .page .art-series { gap: 4px 12px; }
+  .page .art-series .k, .page .art-series a .nm { display: none; }
+  .page .art-series a { padding: 2px 4px; margin: -2px -4px; }
+  .art-head .section-head { flex-wrap: wrap; row-gap: 2px; }
+  .art-head .section-head > .faint { white-space: nowrap; }
+}
+.chapters a .n { color: var(--ink-3); margin-right: 6px; }
+.chapters a:hover .n { color: inherit; }
+
+/* literature: the key line, uncited literature, own papers with a link to the full list */
+.art-refs .refs-key { margin: -4px 0 12px; color: var(--ink-3); font-size: var(--fs-s); }
+.art-refs .refs-more { margin: 18px 0 6px; color: var(--ink-3); }
+.art-refs .refs.more { list-style: none; padding-left: 0; }
+.art-refs .pubs .plinks a.int { color: var(--ink-3); }
+.art-refs .pubs .plinks a.int:hover { color: var(--accent); }
+
+/* end of an article: the next part as a card, then the way back */
+.art-end { margin-top: 56px; }
+.art-end .articles { grid-template-columns: minmax(0, 660px); }
+@media (min-width: 601px) {          /* a wide card: the drawing left, the text right */
+  .art-end .articles a { grid-template-columns: 200px minmax(0, 1fr); grid-template-rows: auto auto 1fr auto; column-gap: 22px; }
+  .art-end .articles .thumb { grid-row: 1 / -1; margin-bottom: 0; }
+}
+.art-end-links { display: flex; flex-wrap: wrap; gap: 6px 24px; margin: 16px 0 24px; color: var(--ink-3); }
+.art-end-links a { color: var(--ink-2); }
+.art-end-links a:hover { color: var(--accent); }
+
+/* project pages: "Background: Part N · Title →" */
+.page .art-link { margin-top: 18px; }
+.page .art-link + .art-link { margin-top: 4px; }
+.page .art-link a { color: var(--ink-2); }
+.page .art-link a span { color: var(--ink-3); }
+.page .art-link a:hover, .page .art-link a:hover span { color: var(--accent); }
+
+/* boxes for the curious: "+ FOR THE CURIOUS · topic" */
+details.curious summary .cu-k { color: var(--accent); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; }
+details.curious summary .cu-t { color: var(--ink-2); }
+details.curious summary .cu-t::before { content: " · "; color: var(--ink-3); }
+details.curious summary:hover .cu-t { color: var(--accent); }
+
+/* the source line at the end of a caption: After [KEY], Fig. 3 · Data: … · Illustrative */
+.art-fig figcaption .src { display: block; margin-top: 6px; color: var(--ink-3); }
+
+/* side nav: numbered chapters; the current chapter and section in the accent */
+.index nav .sub a .n { margin-right: 8px; }
+.index nav .sub > li > a.on, .index nav .sub > li > a.on .n { color: var(--accent); }
+@media (min-width: 901px) {          /* a long sub list never runs off the bottom of the window */
+  .index { max-height: calc(100vh - 96px); overflow-y: auto; scrollbar-width: none;
+           padding: 0 6px 0 4px; margin: 0 -6px 0 -4px; }
+  .index::-webkit-scrollbar { display: none; }
+}
+
+/* tables in articles: on phones they scroll sideways instead of breaking words inside */
+@media (max-width: 600px) {
+  .tbl-wrap .tbl { min-width: 520px; width: auto; }
+  .tbl-wrap .tbl td, .tbl-wrap .tbl td:first-child { overflow-wrap: normal; hyphens: auto; }
+}
+
+/* controls: one vocabulary
+   - segmented chips (choose one): .chips > button[aria-pressed]; accent border and text when pressed, never a fill
+   - stepper: .demo-ctrl with .play (▶ / ❚❚ / ↺), a thin range and "step n of N"
+   - thin slider for every range in an article (the fill comes from --p, set by demo-common.js) */
+.chips { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.chips button {
+  font: inherit; font-family: var(--mono); font-size: var(--fs-s); padding: 4px 10px; border: 1px solid var(--rule); border-radius: 3px;
+  background: var(--bg); color: var(--ink-2); cursor: pointer;
+}
+.chips button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.chips button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.chips button.first:not([aria-pressed="true"]) { border-style: dashed; border-color: var(--accent); }   /* "try this first" */
+.art-sec input[type=range] {
+  -webkit-appearance: none; appearance: none; height: 18px; margin: 0; background: transparent; cursor: pointer; accent-color: var(--accent);
+}
+.art-sec input[type=range]::-webkit-slider-runnable-track {
+  height: 2px; background: linear-gradient(var(--accent), var(--accent)) 0 0 / var(--p, 0%) 100% no-repeat, var(--rule);
+}
+.art-sec input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 12px; height: 12px; margin-top: -5px; border: 0; border-radius: 50%; background: var(--accent);
+}
+.art-sec input[type=range]::-moz-range-track { height: 2px; background: var(--rule); }
+.art-sec input[type=range]::-moz-range-progress { height: 2px; background: var(--accent); }
+.art-sec input[type=range]::-moz-range-thumb { width: 12px; height: 12px; border: 0; border-radius: 50%; background: var(--accent); }
+.art-sec input[type=range]:focus-visible { outline: 1px solid var(--accent); outline-offset: 4px; }
+@media (pointer: coarse) {
+  .demo-ctrl .play { width: 44px; height: 40px; }
+  .art-sec input[type=range] { height: 32px; }
+  .art-sec input[type=range]::-webkit-slider-thumb { width: 18px; height: 18px; margin-top: -8px; }
+  .art-sec input[type=range]::-moz-range-thumb { width: 18px; height: 18px; }
+}
+
+/* SVG figures: label halo, colour roles, stroke tokens, the two dash patterns */
+.dia .halo, .dia text.halo { paint-order: stroke; stroke: var(--halo, var(--bg)); stroke-width: 4px; stroke-linejoin: round; }
+.dia .on-tile { --halo: var(--tile); }            /* labels on a grey zone: halo in the zone colour */
+.dia .gen { fill: var(--c-gen); }
+.dia .rest { fill: var(--c-rest); }
+.dia .sw-hair { stroke-width: var(--sw-hair); }
+.dia .sw-em { stroke-width: var(--sw-em); }
+.dia .sw-acc { stroke-width: var(--sw-acc); }
+.dia .sw-handle { stroke-width: var(--sw-handle); }
+.dia .dash-opt { stroke-dasharray: 3 3; }         /* optional / not generated */
+.dia .dash-guide { stroke-dasharray: 1 3; }       /* guides */
+
+/* back-to-top hides while an interactive figure is under it (site.js) */
+.to-top.over-demo { opacity: 0; pointer-events: none; }

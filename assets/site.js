@@ -16,25 +16,35 @@ const I18N = {
 const UI = I18N[document.documentElement.lang] || I18N.en;
 
 // ---- chapters of this page in the index column, under the active page ----
-// Taken from the page's own chapter markers (nav.chapters). On an article, the sub chapters (h3[id])
-// of the chapter being read open below it. Runs before the menu block, so these links close the sheet too.
+// Taken from the page's own chapter markers (nav.chapters; an article lists its numbered chapters, "In short" and
+// "Literature"). On an article, the sub chapters (h3[id]) of the chapter being read open below it; a long h3 can
+// give a short label in data-nav. The current chapter and sub chapter are in the accent; on phones the bar shows
+// where you are ("EA · 02 How …"). Runs before the menu block, so these links close the sheet too.
 (() => {
   const here = document.querySelector(".index nav a.active");
   const marks = [...document.querySelectorAll("nav.chapters a[href^='#']")];
   if (!here || !marks.length) return;
-  const chapters = marks.map(a => ({ el: document.getElementById(a.hash.slice(1)), text: a.textContent.trim(), subs: [] }))
+  const label = a => { const c = a.cloneNode(true); c.querySelector(".n")?.remove(); return c.textContent.trim(); };
+  const chapters = marks.map(a => ({ el: document.getElementById(a.hash.slice(1)), num: a.querySelector(".n")?.textContent || "",
+                                     text: a.dataset.nav || label(a), subs: [] }))
     .filter(c => c.el);
   // each h3 of an article belongs to the last chapter before it
   document.querySelectorAll(".article h3[id]").forEach(h => {
     const owner = chapters.filter(c => c.el.compareDocumentPosition(h) & Node.DOCUMENT_POSITION_FOLLOWING).pop();
-    if (owner) owner.subs.push({ el: h, text: h.textContent.trim() });
+    if (owner) owner.subs.push({ el: h, text: h.dataset.nav || h.textContent.trim() });
   });
   const ol = document.createElement("ol");
   ol.className = "sub";
-  const link = (el, text) => { const a = document.createElement("a"); a.href = `#${el.id}`; a.textContent = text; return a; };
+  const link = (el, text, num) => {
+    const a = document.createElement("a");
+    a.href = `#${el.id}`;
+    if (num) { const n = document.createElement("span"); n.className = "n"; n.textContent = num; a.append(n); }
+    a.append(text);
+    return a;
+  };
   chapters.forEach(c => {
     const li = document.createElement("li");
-    c.a = link(c.el, c.text);
+    c.a = link(c.el, c.text, c.num);
     li.append(c.a);
     if (c.subs.length) {
       const sub = document.createElement("ol");
@@ -45,6 +55,10 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
     ol.append(li);
   });
   here.parentElement.append(ol);
+  // the bar on phones: the article's short name and the chapter being read
+  const bar = document.querySelector(".index .here"), abbr = document.querySelector(".art-head")?.dataset.abbr;
+  const title = bar && bar.textContent;
+  const index = document.getElementById("index");
   // scroll spy: the last heading above the upper third of the window is the current one
   const all = chapters.flatMap(c => [c, ...c.subs]);
   let current = null;
@@ -54,11 +68,18 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
     if (now === current) return;
     current = now;
     all.forEach(x => x.a.classList.toggle("on", x === now));
+    let chap = null;
     chapters.forEach(c => {
       const open = c === now || c.subs.includes(now);
       c.li.classList.toggle("open", open);
-      if (open) c.a.classList.add("on");
+      if (open) { c.a.classList.add("on"); chap = c; }
     });
+    if (bar && abbr) bar.textContent = chap ? `${abbr} · ${chap.num ? chap.num + " " : ""}${chap.text}` : title;
+    // a long list scrolls inside the (desktop) index column: keep the current entry in it
+    if (now && index && index.scrollHeight > index.clientHeight + 1) {
+      const r = now.a.getBoundingClientRect(), box = index.getBoundingClientRect();
+      if (r.top < box.top + 24 || r.bottom > box.bottom - 24) index.scrollTop += r.top - box.top - box.height / 2;
+    }
   };
   let queued = false;
   addEventListener("scroll", () => { if (!queued) { queued = true; requestAnimationFrame(() => { queued = false; spy(); }); } }, { passive: true });
@@ -804,14 +825,25 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
   a.textContent = "↑";
   a.setAttribute("aria-label", document.documentElement.lang === "de" ? "nach oben" : "back to top");
   document.body.append(a);
-  let on = false;
+  let on = false, over = false;
+  // interactive figures in view: the button steps aside while one of them is under it (bottom 80px)
+  const demos = new Set();
+  if ("IntersectionObserver" in window) {
+    const io = new IntersectionObserver(es => { es.forEach(e => (e.isIntersecting ? demos.add(e.target) : demos.delete(e.target))); sync(); });
+    document.querySelectorAll("figure.demo").forEach(f => io.observe(f));
+  }
   const sync = () => {
     const show = scrollY > innerHeight * 0.9;
     if (show !== on) { on = show; a.classList.toggle("on", on); }
+    const o = [...demos].some(f => { const r = f.getBoundingClientRect(); return r.top < innerHeight && r.bottom > innerHeight - 80; });
+    if (o !== over) { over = o; a.classList.toggle("over-demo", over); }
   };
   addEventListener("scroll", sync, { passive: true });
   sync();
 })();
+
+// ---- thin sliders in articles (demo-common.js): also those a figure script created ----
+if (window.SiteDemo) document.querySelectorAll(".art-sec input[type=range]").forEach(SiteDemo.thin);
 
 // ---- wide diagrams (.dia-scroll): on phones they scroll sideways; the edges fade where there is more ----
 (() => {
@@ -820,6 +852,7 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
       const max = el.scrollWidth - el.clientWidth;
       el.style.setProperty("--fl", `${Math.min(40, el.scrollLeft)}px`);
       el.style.setProperty("--fr", `${Math.max(0, Math.min(40, max - el.scrollLeft))}px`);
+      el.classList.toggle("scrolls", max > 2);          // the figure's caption then shows "↔ scroll" (style.css)
     };
     el.addEventListener("scroll", sync, { passive: true });
     addEventListener("resize", sync);

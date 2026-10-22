@@ -1,19 +1,22 @@
 """
 Research sub page: AI-driven software engineering (research-ai4se.html) — an article in the
-manner of a blog post, based on the acronio page and the AI4SE / SE4AI talk (10 / 2024).
-Imported by build.py. Diagrams are inline SVG with the .dia classes of style.css; the three
-interactive figures (neural network, next token, grammar masking) are driven by assets/ai4se.js,
-which reads its data from the figure's data-json attribute.
+manner of a blog post, based on the acronio page and the AI4SE / SE4AI talk (10 / 2024), revised 2026.
+Imported by build.py. Diagrams are inline SVG with the .dia classes of style.css; the article's own styles are in
+assets/ai4se.css. The interactive figures (next token, embeddings-free: neural network, attention, agent trace,
+grammar masking) are driven by assets/ai4se.js, which reads its data from the figure's data-json attribute.
 
-Three chapters (h2, listed at the top): how an LLM works · basic terms · LLMs and models.
-Their sub chapters are h3 and stay out of the chapter list.
+Three chapters: what an LLM does (from the outside in) · what is built around the model · making output reliable
+(LLMs and models, the case study). Running example of chapter 03: the library (Book / Member / Loan) of part 1.
+
+Shared helpers used by the other articles (keep their signatures): T, cite, ref, _link, fig, demo, controls,
+curious, definition.
 """
 import html
 import json
 
 from project_content import _arrow_defs, box, dia_scroll
-from project_pages import pub_list
 import article_art
+import article_common
 
 NL = "\n"
 FILE = "research-ai4se.html"
@@ -24,8 +27,9 @@ def T(en, de):
 
 
 def cite(key):
-    """Own paper: a subtle reference into the research page's publication list."""
-    return f'<a class="cite" href="research.html#pub-{key}">[{key}]</a>'
+    """Own paper: a reference to its entry under "My papers on the topic" on the same page (#pub-KEY; that entry
+    links on to the research page's full list). article_common.page() lists exactly the cited papers."""
+    return f'<a class="cite" href="#pub-{key}">[{key}]</a>'
 
 
 def ref(n):
@@ -37,29 +41,37 @@ def _link(label, url):
     return f'{label} <a href="{url}" target="_blank" rel="noopener">↗</a>'
 
 
+# Literature of this article, by key; article_common.page() renumbers by first citation.
 REFS = [
-    "A. M. Turing: Computing Machinery and Intelligence. Mind 59(236), 433–460 (1950).",
-    "F. Rosenblatt: The perceptron: a probabilistic model for information storage and organization in the brain. Psychological Review 65(6), 386–408 (1958).",
-    "A. Vaswani et al.: Attention is all you need. Advances in Neural Information Processing Systems 30 (2017).",
-    "S. Barke, M. B. James, N. Polikarpova: Grounded Copilot: How programmers interact with code-generating models. arXiv:2206.15000 (2022).",
-    "T. Brown et al.: Language models are few-shot learners. Advances in Neural Information Processing Systems 33, 1877–1901 (2020).",
-    "G. Izacard et al.: Few-shot learning with retrieval augmented language models. arXiv:2208.03299 (2022).",
-    "M. Nezhurina, L. Cipolina-Kun, M. Cherti, J. Jitsev: Alice in Wonderland: Simple tasks showing complete reasoning breakdown in state-of-the-art large language models. arXiv:2406.02061 (2024).",
-    _link("S. Wolfram: What Is ChatGPT Doing … and Why Does It Work? Stephen Wolfram Writings (2023).", "https://writings.stephenwolfram.com/2023/02/what-is-chatgpt-doing-and-why-does-it-work/"),
-    _link("E. Schluntz, B. Zhang: Building effective agents. Anthropic Engineering (2024).", "https://www.anthropic.com/engineering/building-effective-agents"),
-    _link("S. Willison: on the definition of “agent”. simonwillison.net (2025).", "https://simonwillison.net/2025/Sep/18/agents/"),
-    _link("B. Böckeler: Harness engineering for coding agent users. martinfowler.com.", "https://martinfowler.com/articles/harness-engineering.html"),
-    _link("V. Trivedy: The Anatomy of an Agent Harness. LangChain Blog (2026).", "https://www.langchain.com/blog/the-anatomy-of-an-agent-harness"),
-    "D. E. Rumelhart, G. E. Hinton, R. J. Williams: Learning representations by back-propagating errors. Nature 323, 533–536 (1986).",
-    "L. Ouyang et al.: Training language models to follow instructions with human feedback. Advances in Neural Information Processing Systems 35 (2022).",
-    "R. Sennrich, B. Haddow, A. Birch: Neural machine translation of rare words with subword units. Proc. ACL, 1715–1725 (2016).",
-    "A. Holtzman, J. Buys, L. Du, M. Forbes, Y. Choi: The curious case of neural text degeneration. ICLR (2020).",
-    "A. T. Kalai, O. Nachum, S. S. Vempala, E. Zhang: Why language models hallucinate. arXiv:2509.04664 (2025).",
-    "T. Mikolov, W. Yih, G. Zweig: Linguistic regularities in continuous space word representations. Proc. NAACL-HLT, 746–751 (2013).",
-    "S. Geng, M. Josifoski, M. Peyrard, R. West: Grammar-constrained decoding for structured NLP tasks without finetuning. Proc. EMNLP (2023).",
-    "P. Lewis et al.: Retrieval-augmented generation for knowledge-intensive NLP tasks. Advances in Neural Information Processing Systems 33 (2020).",
+    ("turing", "A. M. Turing: Computing Machinery and Intelligence. Mind 59(236), 433–460 (1950)."),
+    ("rosenblatt", "F. Rosenblatt: The perceptron: a probabilistic model for information storage and organization in the brain. Psychological Review 65(6), 386–408 (1958)."),
+    ("vaswani", "A. Vaswani et al.: Attention is all you need. Advances in Neural Information Processing Systems 30 (2017)."),
+    ("brown", "T. Brown et al.: Language models are few-shot learners. Advances in Neural Information Processing Systems 33, 1877–1901 (2020)."),
+    ("alice", "M. Nezhurina, L. Cipolina-Kun, M. Cherti, J. Jitsev: Alice in Wonderland: Simple tasks showing complete reasoning breakdown in state-of-the-art large language models. arXiv:2406.02061 (2024)."),
+    ("wolfram", _link("S. Wolfram: What Is ChatGPT Doing … and Why Does It Work? Stephen Wolfram Writings (2023).", "https://writings.stephenwolfram.com/2023/02/what-is-chatgpt-doing-and-why-does-it-work/")),
+    ("anthropic", _link("E. Schluntz, B. Zhang: Building effective agents. Anthropic Engineering (2024).", "https://www.anthropic.com/engineering/building-effective-agents")),
+    ("willison", _link("S. Willison: on the definition of “agent”. simonwillison.net (2025).", "https://simonwillison.net/2025/Sep/18/agents/")),
+    ("boeckeler", _link("B. Böckeler: Harness engineering for coding agent users. martinfowler.com.", "https://martinfowler.com/articles/harness-engineering.html")),
+    ("trivedy", _link("V. Trivedy: The Anatomy of an Agent Harness. LangChain Blog (2026).", "https://www.langchain.com/blog/the-anatomy-of-an-agent-harness")),
+    ("rumelhart", "D. E. Rumelhart, G. E. Hinton, R. J. Williams: Learning representations by back-propagating errors. Nature 323, 533–536 (1986)."),
+    ("ouyang", "L. Ouyang et al.: Training language models to follow instructions with human feedback. Advances in Neural Information Processing Systems 35 (2022)."),
+    ("sennrich", "R. Sennrich, B. Haddow, A. Birch: Neural machine translation of rare words with subword units. Proc. ACL, 1715–1725 (2016)."),
+    ("holtzman", "A. Holtzman, J. Buys, L. Du, M. Forbes, Y. Choi: The curious case of neural text degeneration. ICLR (2020)."),
+    ("kalai", "A. T. Kalai, O. Nachum, S. S. Vempala, E. Zhang: Why language models hallucinate. arXiv:2509.04664 (2025)."),
+    ("mikolov", "T. Mikolov, W. Yih, G. Zweig: Linguistic regularities in continuous space word representations. Proc. NAACL-HLT, 746–751 (2013)."),
+    ("geng", "S. Geng, M. Josifoski, M. Peyrard, R. West: Grammar-constrained decoding for structured NLP tasks without finetuning. Proc. EMNLP (2023)."),
+    ("lewis", "P. Lewis et al.: Retrieval-augmented generation for knowledge-intensive NLP tasks. Advances in Neural Information Processing Systems 33 (2020)."),
+    ("spracklen", _link("J. Spracklen, R. Wijewickrama, A. H. M. N. Sakib, A. Maiti, B. Viswanath, M. Jadliwala: We Have a Package for You! A Comprehensive Analysis of Package Hallucinations by Code Generating LLMs. USENIX Security (2025).", "https://arxiv.org/abs/2406.10279")),
+    ("levesque", "H. J. Levesque, E. Davis, L. Morgenstern: The Winograd Schema Challenge. Proc. KR, 552–561 (2012)."),
+    ("openai-cfg", _link("OpenAI: Function calling — custom tools with context-free grammars. OpenAI API documentation (accessed October 2026).", "https://developers.openai.com/api/docs/guides/function-calling")),
 ]
+_RK = {k: n for n, (k, _) in enumerate(REFS, 1)}
 OWN = ["NMR24", "BDMN+24", "NRR24", "Net24", "NKR+25"]
+
+
+def r(key):
+    """A literature reference by key (see REFS)."""
+    return ref(_RK[key])
 
 
 def chat(lang, turns, source):
@@ -69,16 +81,20 @@ def chat(lang, turns, source):
     return f'<figure class="chat">{rows}<figcaption class="mono">{source}</figcaption></figure>'
 
 
-def fig(svg, caption, lang, scroll=True):
+def fig(svg, caption, lang, scroll=True, source=None):
+    """A static figure. source: the caption's final source line, built with article_common.src(...)
+    (e.g. src("after", "Net24", where="Fig. 2.4")) or any T()."""
+    from article_common import source_line
     inner = dia_scroll(svg) if scroll else svg
-    return f'<figure class="media art-fig">{inner}<figcaption class="mono">{caption[lang]}</figcaption></figure>'
+    return f'<figure class="media art-fig">{inner}<figcaption class="mono">{caption[lang]}{source_line(source, lang)}</figcaption></figure>'
 
 
-def demo(kind, data, inner, caption, lang):
-    """An interactive figure: assets/ai4se.js finds it by data-demo and reads data-json."""
+def demo(kind, data, inner, caption, lang, source=None):
+    """An interactive figure: assets/ai4se.js finds it by data-demo and reads data-json. source: as in fig()."""
+    from article_common import source_line
     js = html.escape(json.dumps(data, ensure_ascii=False), quote=True)
     return (f'<figure class="media art-fig demo {kind}" data-demo="{kind}" data-json="{js}">{inner}'
-            f'<figcaption class="mono">{caption[lang]}</figcaption></figure>')
+            f'<figcaption class="mono">{caption[lang]}{source_line(source, lang)}</figcaption></figure>')
 
 
 def controls(lang, temperature=False):
@@ -90,36 +106,184 @@ def controls(lang, temperature=False):
             f'<span class="where" aria-live="polite"></span>{t}</div>')
 
 
+def side_fig(svg, w, caption, lang, source=None, cls=""):
+    """A narrow figure (viewBox width w ≤ 360, drawn 1:1, never stretched) with its caption beside it on wide
+    screens and below it on phones. Narrow figures need no phone variant: they fit 358 px."""
+    from article_common import source_line
+    return (f'<figure class="media art-fig side {cls}" style="--w:{w}px"><div class="side-art">{svg}</div>'
+            f'<figcaption class="mono">{caption[lang]}{source_line(source, lang)}</figcaption></figure>')
+
+
+def src(*a, **k):
+    return article_common.src(*a, **k)
+
+
 # =====================================================================
-# Diagrams
+# 01 · What an LLM does
 # =====================================================================
 
-def dia_ai_terms(lang):
-    """Slide 4: AI as an umbrella term — nested fields, each with a one-line definition."""
+# Next-token prediction as a small graph: every node lists its candidates (token, probability, next node).
+# Only the listed candidates can be drawn (top-k); several candidates may lead to the same node. The demo draws
+# real random numbers ("draw again"); the first, autoplayed answer uses the fixed numbers NT_SEED.
+NT = {
+    "en": {"start": [("The", .56, "the"), ("Paris", .20, "paris"), ("It", .14, "it"), ("France's", .10, "france")],
+           "the": [("capital", .88, "cap"), ("answer", .12, "ans")],
+           "cap": [("is", .58, "city"), ("city", .42, "capcity")],
+           "capcity": [("is", .93, "city"), (":", .07, "city")],
+           "ans": [("is", .80, "city"), (":", .20, "city")],
+           "it": [("is", .97, "city"), ("'s", .03, "city")],
+           "france": [("capital", 1.0, "capcity")]},
+    "de": {"start": [("Die", .56, "the"), ("Paris", .20, "paris"), ("Es", .14, "it"), ("Frankreichs", .10, "france")],
+           "the": [("Hauptstadt", .88, "cap"), ("Antwort", .12, "ans")],
+           "cap": [("ist", .58, "city"), ("heißt", .42, "city")],
+           "ans": [("ist", .80, "city"), (":", .20, "city")],
+           "it": [("ist", .97, "city"), ("heißt", .03, "city")],
+           "france": [("Hauptstadt", 1.0, "capcity")],
+           "capcity": [("ist", .93, "city"), (":", .07, "city")]},
+}
+for _l in NT.values():
+    _l.update({"city": [("Paris", .96, "after"), ("Lyon", .015, "after"), ("Marseille", .01, "after"), ("Toulouse", .01, "after"), ("Berlin", .005, "after")],
+               "after": [("<|END|>", .70, None), (".", .30, "end")],
+               "paris": [("<|END|>", .55, None), (".", .35, "end"), ("!", .10, "end")],
+               "end": [("<|END|>", 1.0, None)]})
+NT_SEED = [.30, .20, .62, .15, .40, .50, .50, .50]
+
+
+def _nt_probs(cands, t):
+    """Same as ai4se.js: p_i ∝ p_i^(1/T) over the listed candidates."""
+    w = [c[1] ** (1 / t) for c in cands]
+    return [v / sum(w) for v in w]
+
+
+def _nt_answers(nodes, t):
+    """{answer text: probability} at temperature t, by walking every path."""
+    out = {}
+
+    def walk(n, toks, p):
+        for (tok, _, nxt), q in zip(nodes[n], _nt_probs(nodes[n], t)):
+            if nxt is None:
+                a = _nt_join(toks)
+                out[a] = out.get(a, 0) + p * q
+            else:
+                walk(nxt, toks + [tok], p * q)
+    walk("start", [], 1)
+    return out
+
+
+def _nt_join(toks):
+    s = ""
+    for t in toks:
+        s += t if (not s or t[0] in ".,!:;'") else " " + t
+    return s
+
+
+def _nt_seeded(nodes, t):
+    n, toks, k = "start", [], 0
+    while n:
+        ps, acc = _nt_probs(nodes[n], t), 0
+        for (tok, _, nxt), p in zip(nodes[n], ps):
+            acc += p
+            if NT_SEED[k] < acc:
+                break
+        toks.append(tok)
+        n, k = nxt, k + 1
+    return _nt_join([x for x in toks if x != "<|END|>"])
+
+
+def _check_nt():
+    """The numbers the caption and the text quote."""
+    for lang, nodes in NT.items():
+        for n, cands in nodes.items():
+            assert abs(sum(c[1] for c in cands) - 1) < 1e-9, (lang, n)
+            assert all(c[2] is None or c[2] in nodes for c in cands), (lang, n)
+        cold, warm, hot = (_nt_answers(nodes, t) for t in (.1, 1.0, 2.0))
+        assert max(cold.values()) > .95                                      # "at 0.1 the answer hardly ever changes"
+        wrong = lambda d: sum(p for a, p in d.items() if "Paris" not in a)
+        assert .18 < wrong(hot) < .25, wrong(hot)                            # "at 2.0 about one answer in five … wrong city"
+        assert wrong(warm) < .05                                             # "at 1.0 almost always Paris"
+        assert sum(p ** 10 for p in hot.values()) < .01                      # ten draws at 2.0 give different answers
+        assert _nt_seeded(nodes, 1.0) != _nt_seeded(nodes, .1)               # the fixed first answer changes when cold
+    assert _nt_seeded(NT["en"], 1.0) == "The capital city is Paris" and _nt_seeded(NT["de"], 1.0) == "Die Hauptstadt heißt Paris"
+
+
+_check_nt()
+
+
+def dia_next_token(lang):
+    """Slides 12–28: the model only ever picks the next token — by drawing it. Stepped through with the stepper;
+    the temperature slider reshapes the distribution; "draw again" draws fresh random numbers and the tally counts
+    the answers (assets/ai4se.js)."""
     L = lambda x: x[lang]
-    levels = [
-        (T("Artificial intelligence", "Künstliche Intelligenz"), T("research on intelligent machines that act and react like humans", "Forschung an intelligenten Maschinen, die wie Menschen handeln und reagieren")),
-        ("Machine learning", T("statistical algorithms that learn from data and generalise to unseen data", "statistische Algorithmen, die aus Daten lernen und auf Ungesehenes verallgemeinern")),
-        ("Deep learning", T("machine learning with neural networks that find complex patterns", "Machine Learning mit neuronalen Netzen, die komplexe Muster erkennen")),
-        (T("Generative AI", "Generative KI"), T("AI that creates new content from patterns it has learned", "KI, die aus gelernten Mustern neue Inhalte erzeugt")),
-        ("LLMs", T("large language models: process and produce human-like text", "große Sprachmodelle: verarbeiten und erzeugen menschenähnlichen Text")),
-    ]
-    parts = []
-    for k, (name, desc) in enumerate(levels):
-        x, y, w, h = 12 + k * 22, 12 + k * 46, 300 - k * 44, 300 - k * 46
-        parts.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{22 - k * 2}" style="fill:var(--accent);fill-opacity:{.06 + k * .05};stroke:var(--accent);stroke-opacity:.35"/>')
-        ty = y + 24
-        parts.append(f'<text x="{x + w / 2}" y="{ty}" text-anchor="middle" class="t">{L(name) if isinstance(name, dict) else name}</text>')
-        parts.append(f'<path class="ln" d="M{x + w / 2 + 70} {ty - 4}H340"/><circle cx="340" cy="{ty - 4}" r="2" class="dot"/>')
-        words, line1 = L(desc).split(" "), ""
-        while words and len(line1 + words[0]) < 52:
-            line1 += words.pop(0) + " "
-        parts.append(f'<text x="352" y="{ty}">{line1.strip()}</text>' + (f'<text x="352" y="{ty + 15}" class="s">{" ".join(words)}</text>' if words else ""))
-    parts.append('<circle cx="124" cy="270" r="27" class="box hl"/><text x="124" y="274" text-anchor="middle" class="s" style="font-size:9px">ChatGPT</text>')
-    parts.append('<circle cx="190" cy="270" r="27" class="box"/><text x="190" y="274" text-anchor="middle" class="s" style="font-size:9px">Copilot</text>')
-    svg = f'<svg class="dia" viewBox="0 0 860 324" role="img" aria-label="{L(T("Artificial intelligence as an umbrella term: machine learning, deep learning, generative AI and LLMs nested inside each other", "Künstliche Intelligenz als Sammelbegriff: Machine Learning, Deep Learning, generative KI und LLMs ineinander geschachtelt"))}">{"".join(parts)}</svg>'
-    return fig(svg, T("AI is an umbrella term. What is meant today is usually its innermost part: large language models such as ChatGPT or Copilot.",
-                      "KI ist ein Sammelbegriff. Gemeint ist heute meist der innerste Teil: große Sprachmodelle wie ChatGPT oder Copilot."), lang)
+    nodes = NT[lang]
+    names = list(nodes)
+    data = {"nodes": [{"cands": [[t, p] for t, p, _ in nodes[n]], "next": [names.index(x) if x else -1 for _, _, x in nodes[n]]} for n in names],
+            "seed": NT_SEED, "words": {k: L(v) for k, v in dict(
+                token=T("token", "Token"), dist=T("probabilities computed", "Wahrscheinlichkeiten berechnet"),
+                drawn=T("drawn and appended", "gezogen und angehängt"), notTop=T("not the most likely one", "nicht das wahrscheinlichste"),
+                done=T("end token drawn — the answer is complete", "End-Token gezogen — die Antwort ist fertig"),
+                random=T("random number", "Zufallszahl"), lands=T("lands on", "landet auf"),
+                answers=T("answers", "Antworten"), at=T("at temperature", "bei Temperatur"), empty=T("no answers yet — draw a few", "noch keine Antworten — ziehen Sie ein paar"),
+                others=T("other answers", "weitere Antworten"), wrong=T("wrong city", "falsche Stadt")).items()}}
+    prompt = [L(T("System: You are a helpful chatbot!", "System: Du bist ein hilfreicher Chatbot!")),
+              L(T("User: What is the capital of France?", "Nutzer: Was ist die Hauptstadt von Frankreich?")),
+              L(T("Assistant:", "Assistent:"))]
+    esc = html.escape
+    inner = f'''<div class="nt-stage">
+  <div class="nt-prompt"><span class="k mono">{L(T("INPUT PROMPT", "EINGABE-PROMPT"))}</span>
+    <p>{esc(prompt[0])}</p><p>{esc(prompt[1])}</p><p>{esc(prompt[2])} <span class="nt-out"></span><span class="nt-cur" aria-hidden="true">▌</span></p>
+    <span class="nt-loop mono">↺ {L(T("the drawn token is appended — and the whole text goes in again", "das gezogene Token wird angehängt — und der ganze Text geht erneut hinein"))}</span></div>
+  <div class="nt-model"><b>LLM</b><span class="mono">{L(T("next token", "nächstes Token"))}</span></div>
+  <div class="nt-probs"><span class="k mono">{L(T("PROBABILITY OF THE NEXT TOKEN", "WAHRSCHEINLICHKEIT DES NÄCHSTEN TOKENS"))}</span><ol class="bars mono"></ol>
+    <div class="nt-draw"><span class="k mono">{L(T("THE DRAW: A RANDOM NUMBER BETWEEN 0 AND 1", "DIE ZIEHUNG: EINE ZUFALLSZAHL ZWISCHEN 0 UND 1"))}</span>
+      <div class="strip"><i class="mark" aria-hidden="true"></i></div><span class="nt-r mono"></span></div></div>
+</div>
+<div class="nt-tally"><div class="nt-tally-head"><span class="k mono">{L(T("ANSWERS SO FAR", "BISHERIGE ANTWORTEN"))}</span>
+  <span class="chips"><button type="button" class="nt-again first" aria-pressed="false">{L(T("draw again", "neu ziehen"))}</button><button type="button" class="nt-ten" aria-pressed="false">{L(T("draw 10 ×", "10 × ziehen"))}</button></span></div>
+  <ol class="nt-list mono" aria-live="polite"></ol></div>
+{controls(lang, temperature=True)}'''
+    return demo("nt", data, inner, T(
+        "The model computes a probability for every candidate, a random number picks one, the token is appended, and the whole text goes in again — until the end token is drawn. Draw a few answers, then move the temperature: at 0.1 the answer hardly ever changes; at 1.0 the wording varies; at 2.0 about one answer in five names the wrong city.",
+        "Das Modell berechnet für jeden Kandidaten eine Wahrscheinlichkeit, eine Zufallszahl wählt einen aus, das Token wird angehängt, und der ganze Text geht erneut hinein — bis das End-Token gezogen wird. Ziehen Sie ein paar Antworten und verschieben Sie dann die Temperatur: Bei 0,1 ändert sich die Antwort fast nie; bei 1,0 wechselt die Formulierung; bei 2,0 nennt etwa jede fünfte Antwort die falsche Stadt."), lang,
+        source=src("illustrative", note=T("made-up probabilities; only the listed candidates can be drawn (top-k)", "ausgedachte Wahrscheinlichkeiten; gezogen wird nur unter den gezeigten Kandidaten (Top-k)")))
+
+
+EMB_WORDS = [(T("king", "König"), .95, .72), (T("queen", "Königin"), -.37, .87), (T("man", "Mann"), .70, -.45),
+             (T("woman", "Frau"), -.62, -.30), (T("princess", "Prinzessin"), -.62, 1.02)]
+assert all(abs((EMB_WORDS[0][i] - EMB_WORDS[2][i]) - (EMB_WORDS[1][i] - EMB_WORDS[3][i])) < 1e-9 for i in (1, 2))   # king − man = queen − woman
+
+
+def dia_embeddings(lang):
+    """Slides 55 / 56: word embeddings in two dimensions, as points. Accent only on the two equal steps
+    man → king and woman → queen. The vectors as numbers sit beside the plot (HTML, so it stacks on phones)."""
+    L = lambda x: x[lang]
+    cx, cy, u = 186, 168, 104
+    P = {L(w): (cx + x * u, cy - y * u) for w, x, y in EMB_WORDS}
+    king, queen, man, woman, princess = (L(w) for w, *_ in EMB_WORDS)
+    # label offsets (dx, dy, anchor), chosen so that no label sits on a step arrow
+    off = {king: (10, 4, "start"), queen: (10, 14, "start"), man: (10, 14, "start"), woman: (-10, 14, "end"), princess: (-10, -6, "end")}
+    step = lambda a, b: (f'<path class="ln hl sw-em" d="M{P[a][0]:.1f} {P[a][1]:.1f}L{P[b][0]:.1f} {P[b][1] + 8:.1f}" marker-end="url(#emaa)"/>')
+    pts = "".join(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="4" class="{"dot" if w in (king, queen) else "emb-pt"}"/>'
+                  f'<text class="halo{" t" if w in (king, queen) else ""}" x="{x + off[w][0]:.1f}" y="{y + off[w][1]:.1f}" text-anchor="{off[w][2]}">{w}</text>' for w, (x, y) in P.items())
+    mx, my = (P[man][0] + P[king][0]) / 2, (P[man][1] + P[king][1]) / 2
+    svg = f'''<svg class="dia emb" viewBox="0 0 360 300" role="img" aria-label="{L(T("Five words as points in two dimensions. The step from man to king is the same as from woman to queen; princess lies close to queen.", "Fünf Wörter als Punkte in zwei Dimensionen. Der Schritt von Mann zu König ist derselbe wie von Frau zu Königin; Prinzessin liegt nahe bei Königin."))}">
+  {_arrow_defs("ema")}
+  <path class="ln dash-guide sw-hair" d="M{cx - 170} {cy}H{cx + 170}M{cx} {cy + 120}V{cy - 160}"/>
+  <text class="s" x="{cx + 170}" y="{cy + 16}" text-anchor="end">{L(T("dimension 1", "Dimension 1"))}</text>
+  <text class="s" x="{cx + 8}" y="{cy - 150}">{L(T("dimension 2", "Dimension 2"))}</text>
+  {step(man, king)}{step(woman, queen)}
+  <text class="a halo" x="{mx + 8:.0f}" y="{my + 4:.0f}">+ {L(T("royal", "königlich"))}</text>
+  <text class="a halo" x="{(P[woman][0] + P[queen][0]) / 2 - 8:.0f}" y="{(P[woman][1] + P[queen][1]) / 2 + 4:.0f}" text-anchor="end">+ {L(T("royal", "königlich"))}</text>
+  {pts}
+</svg>'''
+    num = (lambda v: f"{v:+.2f}".replace(".", ",")) if lang == "de" else (lambda v: f"{v:+.2f}")
+    sep = "; " if lang == "de" else ", "
+    rows = "".join(f'<tr{" class=\"hl\"" if k < 2 else ""}><td>{L(w)}</td><td class="n">[ {num(x)}{sep}{num(y)} ]</td></tr>' for k, (w, x, y) in enumerate(EMB_WORDS))
+    table = f'<table class="emb-tbl mono"><caption class="k">{L(T("EACH WORD IS A LIST OF NUMBERS", "JEDES WORT IST EINE ZAHLENLISTE"))}</caption>{rows}</table>'
+    from article_common import source_line
+    cap = T("Meaning sits in directions, not in the axes: the step from “man” to “king” is the same as from “woman” to “queen” — king − man + woman ≈ queen. Real models use hundreds to thousands of dimensions instead of two.",
+            "Die Bedeutung steckt in Richtungen, nicht in den Achsen: Der Schritt von „Mann“ zu „König“ ist derselbe wie von „Frau“ zu „Königin“ — König − Mann + Frau ≈ Königin. Echte Modelle nutzen Hunderte bis Tausende Dimensionen statt zwei.")
+    return (f'<figure class="media art-fig emb-fig"><div class="emb-row">{table}<div class="emb-plot">{svg}</div></div>'
+            f'<figcaption class="mono">{cap[lang]}{source_line(src("illustrative"), lang)}</figcaption></figure>')
 
 
 # the five pixels the small network reads (column, row in the 16 × 16 image)
@@ -127,452 +291,201 @@ NN_PIXELS = [(6, 5), (4, 3), (12, 4), (7, 11), (9, 13)]
 NN_IN = [36, 68, 100, 132, 164]          # y of the input, hidden and output neurons
 NN_HID = [52, 84, 116, 148]
 NN_OUT = [76, 124]
-NN_X = (340, 470, 600)
+NN_X = (330, 420, 510)
+NN_PANEL = (300, 250)                    # top left of the "one neuron" panel (368 × 210); ai4se.js draws into it
 
 
 def dia_neural_net(lang, A):
-    """Slides 5–9: a picture becomes pixels, pixels feed a network, the network says dog or cat.
-    Below it, one neuron in detail — the one the visitor points at (assets/ai4se.js)."""
+    """Slides 5–9: a picture becomes pixels, pixels feed a network, the network says dog or cat. Below it, one
+    neuron in detail — the one the visitor points at (assets/ai4se.js). Three groups (source, network, panel) that
+    ai4se.js stacks on phones: the network is 368 units wide, so each part fits a phone at full size."""
     L = lambda x: x[lang]
     xi, xh, xo = NN_X
     cell = 7.5
     px = "".join(f'<rect class="nn-px" data-i="{k}" x="{140 + c * cell}" y="{40 + r * cell}" width="{cell}" height="{cell}"/>'
                  for k, (c, r) in enumerate(NN_PIXELS))
-    feed = "".join(f'<path class="nn-feed" data-i="{k}" d="M{140 + (c + .5) * cell:.1f} {40 + (r + .5) * cell:.1f}L292 {y}"/>'
+    feed = "".join(f'<path class="nn-feed" data-i="{k}" d="M{140 + (c + .5) * cell:.1f} {40 + (r + .5) * cell:.1f}L{xi - 30} {y}"/>'
                    for k, ((c, r), y) in enumerate(zip(NN_PIXELS, NN_IN)))
     edges = "".join(f'<path class="nn-e" data-l="1" data-i="{a}" data-j="{b}" d="M{xi} {ya}L{xh} {yb}"/>' for a, ya in enumerate(NN_IN) for b, yb in enumerate(NN_HID))
     edges += "".join(f'<path class="nn-e" data-l="2" data-i="{a}" data-j="{b}" d="M{xh} {ya}L{xo} {yb}"/>' for a, ya in enumerate(NN_HID) for b, yb in enumerate(NN_OUT))
 
     def node(l, i, x, y, r, label, name):
         return (f'<g class="nn-n" data-l="{l}" data-i="{i}" tabindex="0" role="button" aria-label="{name}">'
-                f'<circle class="box" cx="{x}" cy="{y}" r="{r}"/><circle class="nn-act" cx="{x}" cy="{y}" r="{r}"/>'
+                f'<circle class="nn-hit" cx="{x}" cy="{y}" r="14"/><circle class="box" cx="{x}" cy="{y}" r="{r}"/><circle class="nn-act" cx="{x}" cy="{y}" r="{r}"/>'
                 f'<text x="{x}" y="{y + 3.5}" text-anchor="middle" class="s nn-lbl">{label}</text></g>')
     neuron = L(T("neuron", "Neuron"))
-    nodes = "".join(node(0, k, xi, y, 8, "", f"{L(T('pixel', 'Pixel'))} x{k + 1}") + f'<text class="nn-v" data-i="{k}" x="324" y="{y + 4}" text-anchor="end"></text>' for k, y in enumerate(NN_IN))
+    nodes = "".join(node(0, k, xi, y, 8, "", f"{L(T('pixel', 'Pixel'))} x{k + 1}") + f'<text class="nn-v" data-i="{k}" x="{xi - 14}" y="{y + 4}" text-anchor="end"></text>' for k, y in enumerate(NN_IN))
     nodes += "".join(node(1, k, xh, y, 11, f"h{k + 1}", f"{neuron} h{k + 1}") for k, y in enumerate(NN_HID))
     outs = [T("dog", "Hund"), T("cat", "Katze")]
     nodes += "".join(node(2, k, xo, y, 12, "", f"{neuron} {L(o)}") for k, (y, o) in enumerate(zip(NN_OUT, outs)))
-    labels = "".join(f'<text x="{xo + 22}" y="{y + 4}" class="t{" nn-win" if k == 0 else ""}">{L(o)}</text>'
-                     f'<rect class="nn-track" x="{xo + 72}" y="{y - 4}" width="110" height="8" rx="2"/><rect class="nn-bar" data-i="{k}" x="{xo + 72}" y="{y - 4}" width="{[100, 10][k]}" height="8" rx="2"/>'
-                     f'<text class="nn-pv s" data-i="{k}" x="{xo + 190}" y="{y + 4}">{["0.91", "0.09"][k]}</text>' for k, (y, o) in enumerate(zip(NN_OUT, outs)))
-    labels += (f'<text x="{xi}" y="200" text-anchor="middle" class="s">{L(T("pixel values", "Pixelwerte"))}</text>'
-               f'<text x="{xh}" y="200" text-anchor="middle" class="s">{L(T("hidden layer", "verdeckte Schicht"))}</text>'
-               f'<text x="{xo}" y="200" text-anchor="middle" class="s">{L(T("output", "Ausgabe"))}</text>')
-    # the static detail (no script): one neuron with symbolic inputs; ai4se.js redraws it with numbers
-    ny = 362
-    panel = "".join(f'<text x="306" y="{ny - 44 + k * 30}" class="s">x{k + 1}</text><path class="ln" d="M330 {ny - 48 + k * 30}H385"/>'
-                    f'<circle cx="398" cy="{ny - 48 + k * 30}" r="13" class="box"/><text x="398" y="{ny - 44 + k * 30}" text-anchor="middle" class="s">w{k + 1}</text>'
-                    f'<path class="ln" d="M411 {ny - 48 + k * 30}L480 {ny}"/>' for k in range(4))
-    panel += (f'<circle cx="500" cy="{ny}" r="20" class="box hl"/><text x="500" y="{ny + 5}" text-anchor="middle" class="t">Σ</text>'
-              f'<path class="ln" d="M520 {ny}H546" marker-end="url(#nna)"/><rect x="550" y="{ny - 20}" width="40" height="40" rx="3" class="box"/>'
-              f'<text x="570" y="{ny + 5}" text-anchor="middle" class="t">φ</text><path class="ln" d="M590 {ny}H618" marker-end="url(#nna)"/>'
-              f'<circle cx="638" cy="{ny}" r="16" class="box"/>')
-    aria = L(T("A photo of a dog is reduced to pixels; five pixel values feed a small neural network whose output neuron for dog wins. Below: the neuron you point at, with its inputs, weights, weighted sum and activation function.",
-               "Ein Hundefoto wird zu Pixeln; fünf Pixelwerte speisen ein kleines neuronales Netz, dessen Ausgabeneuron für Hund gewinnt. Darunter: das Neuron, auf das man zeigt, mit seinen Eingaben, Gewichten, gewichteter Summe und Aktivierungsfunktion."))
-    svg = f'''<svg class="dia nn" viewBox="0 0 860 480" role="group" aria-label="{aria}">
+    labels = "".join(f'<text x="{xo + 20}" y="{y + 4}" class="t">{L(o)}</text>'
+                     f'<rect class="nn-track" x="{xo + 66}" y="{y - 6}" width="56" height="12"/><rect class="nn-bar" data-i="{k}" x="{xo + 66}" y="{y - 6}" width="{[50, 6][k]}" height="12"/>'
+                     f'<text class="nn-pv s" data-i="{k}" x="{xo + 128}" y="{y + 4}">{["0.91", "0.09"][k]}</text>' for k, (y, o) in enumerate(zip(NN_OUT, outs)))
+    labels += (f'<text x="{xi}" y="196" text-anchor="middle" class="s">{L(T("inputs", "Eingaben"))}</text>'
+               f'<text x="{xh}" y="196" text-anchor="middle" class="s">{L(T("hidden", "verdeckt"))}</text>'
+               f'<text x="{xo}" y="196" text-anchor="middle" class="s">{L(T("output", "Ausgabe"))}</text>')
+    x0, y0 = NN_PANEL
+    aria = L(T("A photo of a dog is reduced to pixels; five pixel values feed a small neural network whose output neuron for dog wins. Below: the neuron you point at, with its inputs, weights, weighted sum and activation.",
+               "Ein Hundefoto wird zu Pixeln; fünf Pixelwerte speisen ein kleines neuronales Netz, dessen Ausgabeneuron für Hund gewinnt. Darunter: das Neuron, auf das man zeigt, mit seinen Eingaben, Gewichten, gewichteter Summe und Aktivierung."))
+    svg = f'''<svg class="dia nn" viewBox="0 0 784 470" data-wide="0 0 784 470" role="group" aria-label="{aria}">
   {_arrow_defs("nna")}
-  <image href="{A}assets/ai4se/dog.jpg" x="0" y="40" width="120" height="120"/>
-  <image href="{A}assets/ai4se/dog-pixels.png" x="140" y="40" width="120" height="120" style="image-rendering:pixelated"/>
-  <text x="60" y="178" text-anchor="middle" class="s">{L(T("photo", "Foto"))}</text>
-  <text x="200" y="178" text-anchor="middle" class="s">{L(T("16 × 16 pixels", "16 × 16 Pixel"))}</text>
-  {feed}{px}{edges}{nodes}{labels}
-  <path class="nn-lead" d="M{xo} {NN_OUT[0] + 12}V258"/>
-  <text x="290" y="250" class="s nn-title">{L(T("ONE NEURON", "EIN NEURON"))}</text>
-  <rect class="zone line" x="290" y="258" width="430" height="212" rx="4"/>
-  <g class="nn-panel">{panel}</g>
+  <g class="nn-src">
+    <image href="{A}assets/ai4se/dog.jpg" x="0" y="40" width="120" height="120"/>
+    <image href="{A}assets/ai4se/dog-pixels.png" x="140" y="40" width="120" height="120" style="image-rendering:pixelated"/>
+    <text x="60" y="178" text-anchor="middle" class="s">{L(T("photo", "Foto"))}</text>
+    <text x="200" y="178" text-anchor="middle" class="s">{L(T("16 × 16 pixels", "16 × 16 Pixel"))}</text>
+    {px}
+  </g>
+  <g class="nn-feeds">{feed}</g>
+  <path class="nn-lead" d="M{xo} {NN_OUT[0] + 12}V{y0}"/>
+  <g class="nn-net">{edges}{nodes}{labels}</g>
+  <g class="nn-cal" data-x="{x0}" data-y="{y0}">
+    <rect class="zone" x="{x0}" y="{y0}" width="368" height="210" rx="4"/>
+    <text x="{x0 + 12}" y="{y0 + 20}" class="s nn-title on-tile">{L(T("ONE NEURON", "EIN NEURON"))}</text>
+    <g class="nn-panel"></g>
+  </g>
 </svg>'''
-    data = {"px": f"{A}assets/ai4se/dog-pixels.png", "pixels": NN_PIXELS,
+    data = {"px": f"{A}assets/ai4se/dog-pixels.png", "pixels": NN_PIXELS, "panel": NN_PANEL,
             "words": {k: L(v) for k, v in dict(
                 one=T("ONE NEURON", "EIN NEURON"), inputs=T("input", "Eingabe"), weights=T("× weight", "× Gewicht"),
-                sum=T("weighted sum", "gewichtete Summe"), out=T("output", "Ausgabe"),
-                relu=T("ReLU: below 0 → 0", "ReLU: unter 0 → 0"), softmax=T("softmax: share of both outputs", "Softmax: Anteil an beiden Ausgaben"),
-                silent=T("stays silent", "bleibt still"), dog=T("dog", "Hund"), cat=T("cat", "Katze"), pixel=T("pixel", "Pixel")).items()}}
+                sum=T("sum", "Summe"), out=T("output", "Ausgabe"),
+                relu=T("negative → 0", "negativ → 0"), share=T("share of both outputs", "Anteil an beiden Ausgaben"),
+                silent=T("stays silent", "bleibt still"), dog=T("dog", "Hund"), cat=T("cat", "Katze")).items()}}
     hint = L(T("Point at a neuron (or tap it) to see its calculation.", "Zeigen Sie auf ein Neuron (oder tippen Sie es an), um seine Rechnung zu sehen."))
-    return demo("nn", data, f'{dia_scroll(svg)}<button type="button" class="replay mono">↺ {L(T("replay", "nochmal"))}</button>',
-                T(f"A neural network sees numbers, not dogs: every pixel is an input, every connection a weight. Each neuron adds up its weighted inputs and passes the result on through an activation function; at the end, the stronger output wins. Training adjusts the weights until “dog” wins for dogs. {hint}",
-                  f"Ein neuronales Netz sieht Zahlen, keine Hunde: Jeder Pixel ist eine Eingabe, jede Verbindung ein Gewicht. Jedes Neuron summiert seine gewichteten Eingaben und gibt das Ergebnis über eine Aktivierungsfunktion weiter; am Ende gewinnt die stärkere Ausgabe. Training passt die Gewichte an, bis bei Hunden „Hund“ gewinnt. {hint}"), lang)
+    ctrl = f'<div class="demo-ctrl mono"><button type="button" class="play replay" aria-label="{L(T("replay the forward pass", "Durchlauf noch einmal abspielen"))}">↺</button><span>{L(T("replay the forward pass", "Durchlauf noch einmal abspielen"))}</span></div>'
+    return demo("nn", data, f'<div class="nn-wrap">{svg}</div>{ctrl}',
+                T(f"Every pixel value is an input, every connection a weight; each neuron adds up its weighted inputs, and the stronger output wins. {hint}",
+                  f"Jeder Pixelwert ist eine Eingabe, jede Verbindung ein Gewicht; jedes Neuron summiert seine gewichteten Eingaben, und die stärkere Ausgabe gewinnt. {hint}"), lang,
+                source=src("illustrative", note=T("a toy: five pixels and made-up weights; real image networks read every pixel and have millions of weights",
+                                                  "ein Spielzeug: fünf Pixel und ausgedachte Gewichte; echte Bildnetze lesen jeden Pixel und haben Millionen Gewichte")))
+
+
+# The Winograd pair: one word decides what "it" refers to. Attention of the deciding word to the earlier words
+# (illustrative numbers: real models spread this over many heads and layers).
+WG = {
+    "en": {"words": ["The", "trophy", "doesn’t", "fit", "into", "the", "suitcase", "because", "it", "is", "too", "{}."],
+           "adj": ["big", "small"], "who": ["the trophy", "the suitcase"], "src": 11, "nouns": [1, 6]},
+    "de": {"words": ["Der", "Pokal", "passt", "nicht", "in", "den", "Koffer,", "weil", "er", "zu", "{}", "ist."],
+           "adj": ["groß", "klein"], "who": ["der Pokal", "der Koffer"], "src": 10, "nouns": [1, 6]},
+}
+
+
+def _wg_weights(n_before, nouns, it, pick):
+    """Illustrative attention of the deciding word to the n_before earlier words: most of it to the referent."""
+    w = [.02] * n_before
+    w[nouns[pick]], w[nouns[1 - pick]], w[it] = .52, .12, .14
+    rest = 1 - (.52 + .12 + .14)
+    small = [k for k in range(n_before) if k not in (nouns[0], nouns[1], it)]
+    for k in small:
+        w[k] = rest / len(small)
+    assert abs(sum(w) - 1) < 1e-9
+    return [round(v, 3) for v in w]
+
+
+def dia_attention(lang):
+    """A Winograd pair as a small demo: chips switch big / small; the bars show how strongly the deciding word
+    attends to each earlier word, and the referent flips (assets/ai4se.js)."""
+    L = lambda x: x[lang]
+    d = WG[lang]
+    it = d["words"].index("it" if lang == "en" else "er")
+    n = d["src"]
+    data = {"words": d["words"], "adj": d["adj"], "who": d["who"], "src": n, "it": it,
+            "w": [_wg_weights(n, d["nouns"], it, k) for k in (0, 1)],
+            "words2": {k: L(v) for k, v in dict(means=T("so “it” means", "also meint „er“"), reads=T("the word", "das Wort"),
+                                                  looks=T("looks back at", "schaut zurück auf")).items()}}
+    chips = "".join(f'<button type="button" aria-pressed="{str(k == 0).lower()}"{" class=\"first\"" if k == 0 else ""}>{L(T("too ", "zu "))}{a}</button>' for k, a in enumerate(d["adj"]))
+    inner = (f'<div class="wg-head"><span class="k mono">{L(T("THE LAST WORD DECIDES", "DAS EINE WORT ENTSCHEIDET"))}</span><span class="chips">{chips}</span></div>'
+             f'<p class="wg-sent" aria-live="polite"></p><p class="wg-say mono"></p>')
+    return demo("wg", data, inner, T(
+        "Change one word and the reference flips: with “big”, “it” is the trophy; with “small”, the suitcase. The bars show how much the deciding word attends to each earlier word.",
+        "Ein Wort ändern, und der Bezug kippt: Bei „groß“ ist „er“ der Pokal, bei „klein“ der Koffer. Die Balken zeigen, wie stark das entscheidende Wort auf jedes frühere Wort achtet."), lang,
+        source=src("after", _RK["levesque"], note=T("weights illustrative", "Gewichte illustrativ")))
+
+
+def dia_transformer_simple(lang):
+    """The transformer in three plain steps (HTML, so it stacks on phones)."""
+    L = lambda x: x[lang]
+    steps = [(T("text → numbers", "Text → Zahlen"), T("every token becomes an embedding", "jedes Token wird ein Embedding")),
+             (T("tokens look at each other", "Tokens schauen einander an"), T("attention, 96 layers deep in GPT-3", "Attention, bei GPT-3 96 Schichten tief")),
+             (T("score every next token", "jedes nächste Token bewerten"), T("one probability per token", "eine Wahrscheinlichkeit pro Token"))]
+    io = lambda t: f'<span class="tf-io mono">{L(t)}</span>'
+    boxes = "".join(f'<li class="tf-box{" hl" if k == 1 else ""}"><b>{L(a)}</b><span class="mono">{L(b)}</span></li>' for k, (a, b) in enumerate(steps))
+    from article_common import source_line
+    cap = T("A GPT in three steps. The middle one is the transformer’s idea; the full stack is in the box below.",
+            "Ein GPT in drei Schritten. Der mittlere ist die Idee des Transformers; den vollständigen Stapel zeigt der Kasten unten.")
+    return (f'<figure class="media art-fig"><div class="tf-row">{io(T("the text so far", "der bisherige Text"))}<ol class="tf">{boxes}</ol>{io(T("the next token", "das nächste Token"))}</div>'
+            f'<figcaption class="mono">{cap[lang]}{source_line(src("after", _RK["vaswani"], _RK["brown"]), lang)}</figcaption></figure>')
 
 
 def dia_transformer(lang):
-    """Slides 100–106: the decoder stack of a GPT, simplified, with what each block does."""
+    """Slides 100–106: the decoder stack of a GPT, simplified, with what each block does (in the curious box)."""
     L = lambda x: x[lang]
     m = 'marker-end="url(#tra)"'
     stack = [
-        (T("Output embedding", "Output-Embedding"), T("the text so far, as token vectors", "der bisherige Text als Token-Vektoren"), ""),
-        (T("+ positional encoding", "+ Positionskodierung"), T("where in the text each token is", "wo im Text jedes Token steht"), ""),
-        ("Masked multi-head attention", T("how the tokens relate to each other", "wie die Tokens zueinander in Beziehung stehen"), "hl"),
+        (T("Token embedding", "Token-Embedding"), T("the text so far, as vectors", "der bisherige Text als Vektoren"), ""),
+        (T("+ position", "+ Position"), T("where in the text each token is", "wo im Text jedes Token steht"), ""),
+        ("Masked multi-head attention", T("each token looks at the earlier ones", "jedes Token schaut auf die früheren"), "hl"),
         ("Feed forward", T("a plain neural network per token", "ein einfaches neuronales Netz pro Token"), ""),
-        ("Linear · Softmax", T("a probability for every possible next token", "eine Wahrscheinlichkeit für jedes mögliche nächste Token"), ""),
+        ("Linear · Softmax", T("a probability for every next token", "eine Wahrscheinlichkeit pro möglichem Token"), ""),
     ]
+    # one narrow column (viewBox 380, never stretched): each block carries its name and, below it, what it does,
+    # so the figure keeps 10 px labels on a phone instead of shrinking a wide drawing
     parts = []
     for k, (name, what, cls) in enumerate(reversed(stack)):
-        y = 20 + k * 58
-        parts.append(box(110, y, 250, 40, L(name) if isinstance(name, dict) else name, cls=f"box {cls}".strip()))
-        parts.append(f'<path class="ln dash" d="M370 {y + 20}H400"/><text x="410" y="{y + 24}">{L(what)}</text>')
+        y = 16 + k * 60
+        parts.append(f'<rect class="box {cls}" x="78" y="{y}" width="290" height="44" rx="3"/>'
+                     f'<text class="t" x="223" y="{y + 19}" text-anchor="middle">{L(name) if isinstance(name, dict) else name}</text>'
+                     f'<text class="s" x="223" y="{y + 35}" text-anchor="middle">{L(what)}</text>')
         if k < len(stack) - 1:
-            parts.append(f'<path class="ln" d="M235 {y + 56}V{y + 42}" {m}/>')
-    parts.append('<rect class="zone line" x="96" y="70" width="278" height="114" rx="4"/>')
-    parts.append(f'<text x="86" y="124" text-anchor="end" class="t">× N</text><text x="86" y="140" text-anchor="end" class="s">{L(T("layers", "Schichten"))}</text>')
-    parts.append('<text x="86" y="154" text-anchor="end" class="s">GPT-3: 96</text>')
-    svg = f'<svg class="dia" viewBox="0 0 900 300" role="img" aria-label="{L(T("Simplified transformer decoder: embeddings with positional encoding pass through attention and feed-forward layers, repeated N times; a linear layer and softmax produce next-token probabilities", "Vereinfachter Transformer-Decoder: Embeddings mit Positionskodierung durchlaufen Attention- und Feed-Forward-Schichten, N-mal wiederholt; eine lineare Schicht und Softmax liefern Wahrscheinlichkeiten für das nächste Token"))}">{_arrow_defs("tra")}{"".join(parts)}</svg>'
-    return fig(svg, T(f"The core of a GPT, read from bottom to top. Attention is what made the difference in 2017: every token can look at every earlier token and weigh how much it matters. GPT-3 stacks 96 of these layers {ref(8)}.",
-                      f"Der Kern eines GPT, von unten nach oben gelesen. Attention war 2017 der entscheidende Schritt: Jedes Token kann auf jedes frühere Token schauen und abwägen, wie wichtig es ist. GPT-3 stapelt 96 dieser Schichten {ref(8)}."), lang)
+            parts.append(f'<path class="ln" d="M223 {y + 60}V{y + 46}" {m}/>')
+    parts.append('<rect class="zone line" x="70" y="70" width="306" height="116" rx="4"/>')
+    parts.append(f'<text x="62" y="122" text-anchor="end" class="t">× N</text><text x="62" y="140" text-anchor="end">{L(T("layers", "Schichten"))}</text>')
+    parts.append('<text x="62" y="156" text-anchor="end">GPT-3: 96</text>')
+    svg = f'<svg class="dia tf-stack" viewBox="0 0 380 312" style="max-width:380px" role="img" aria-label="{L(T("Simplified transformer decoder: token embeddings with positions pass through attention and feed-forward layers, repeated N times; a linear layer and softmax produce next-token probabilities", "Vereinfachter Transformer-Decoder: Token-Embeddings mit Positionen durchlaufen Attention- und Feed-Forward-Schichten, N-mal wiederholt; eine lineare Schicht und Softmax liefern Wahrscheinlichkeiten für das nächste Token"))}">{_arrow_defs("tra")}{"".join(parts)}</svg>'
+    return fig(svg, T("The core of a GPT, read from bottom to top.", "Der Kern eines GPT, von unten nach oben gelesen."), lang, scroll=False, source=src("after", _RK["vaswani"]))
 
 
-# Next-token prediction as a small tree: each node lists the five most likely next tokens and where each
-# drawable one leads. Every node has a fixed "random" number r: the token whose share of the (temperature-
-# reshaped) distribution contains r is drawn. At node 2, r falls on the second-most likely token for
-# temperatures from about 0.4 upwards; below that the most likely one wins and the sentence takes the other
-# branch. _check_nt() makes sure every token that can be drawn has a continuation.
-NT = {
-    "en": [([("The", .52), ("I", .14), ("Paris", .11), ("Hey", .06), ("A", .04)], None, {"The": 1}),
-           ([("capital", .71), ("city", .12), ("answer", .07), ("correct", .04), ("French", .03)], None, {"capital": 2}),
-           ([("of", .41), ("is", .38), ("city", .05), (",", .04), ("France", .02)], .55, {"is": 3, "of": 5}),
-           ([("Paris", .81), ("Lyon", .07), ("Toulouse", .04), ("the", .03), ("Berlin", .01)], None, {"Paris": 4}),
-           ([("<|END|>", .74), (".", .12), (",", .06), ("and", .04), ("because", .02)], None, {}),
-           ([("France", .93), ("the", .02), ("Paris", .01), ("French", .01), (",", .01)], None, {"France": 6}),
-           ([("is", .88), (",", .05), ("remains", .03), ("was", .02), ("has", .01)], None, {"is": 3})],
-    "de": [([("Die", .48), ("Ich", .16), ("Du", .08), ("Hey", .05), ("Eine", .04)], None, {"Die": 1}),
-           ([("Hauptstadt", .69), ("Stadt", .13), ("Antwort", .08), ("korrekte", .04), ("beste", .03)], None, {"Hauptstadt": 2}),
-           ([("von", .41), ("ist", .38), ("der", .05), ("Frankreichs", .04), (",", .02)], .55, {"ist": 3, "von": 5}),
-           ([("Paris", .81), ("Lyon", .07), ("Toulouse", .04), ("die", .03), ("Berlin", .01)], None, {"Paris": 4}),
-           ([("<|END|>", .74), (",", .10), ("denn", .06), ("und", .04), ("weil", .02)], None, {}),
-           ([("Frankreich", .93), ("Frankreichs", .02), ("Paris", .01), ("Europa", .01), (",", .01)], None, {"Frankreich": 6}),
-           ([("ist", .88), (",", .05), ("heißt", .03), ("lautet", .02), ("war", .01)], None, {"ist": 3})],
-}
-NT_TEMPS = [k / 10 for k in range(1, 21)]          # the temperature slider: 0.1 … 2.0
+# =====================================================================
+# 02 · Around the model
+# =====================================================================
 
-
-def _nt_probs(cands, t):
-    """Same as ai4se.js: p_i ∝ p_i^(1/T); the tokens not listed share the remaining mass as one bucket."""
-    rest = max(0, 1 - sum(p for _, p in cands))
-    w = [p ** (1 / t) for _, p in cands]
-    wr = rest ** (1 / t) if rest else 0
-    return [v / (sum(w) + wr) for v in w]
-
-
-def _nt_draw(cands, t, r):
-    acc = 0
-    for j, p in enumerate(_nt_probs(cands, t)):
-        acc += p
-        if r < acc:
-            return j
-    return None
-
-
-def _check_nt(nodes):
-    """Without an own r, a node draws its most likely token at every temperature (r = 60 % of its smallest
-    share, which it has at T = 2). Every token that can be drawn must lead somewhere (or be the end token)."""
-    out = []
-    for cands, r, nxt in nodes:
-        r = r if r is not None else round(.6 * _nt_probs(cands, max(NT_TEMPS))[0], 3)
-        for t in NT_TEMPS:
-            j = _nt_draw(cands, t, r)
-            assert j is not None and (cands[j][0] in nxt or cands[j][0] == "<|END|>"), (cands[0], t)
-        out.append({"cands": cands, "r": r, "next": nxt})
-    return out
-
-
-def dia_next_token(lang):
-    """Slides 12–28: the model only ever picks the next token — by drawing it. Stepped through with a slider;
-    the temperature slider reshapes the distribution and can change what is drawn (assets/ai4se.js)."""
+def dia_ai_terms(lang):
+    """Slide 4: AI as an umbrella term — nested fields in grey, accent only on the LLMs; the definitions beside
+    it as a list (HTML, so it stacks on phones)."""
     L = lambda x: x[lang]
-    prompt = [L(T("System: You are a helpful chatbot!", "System: Du bist ein hilfreicher Chatbot!")),
-              L(T("User: What is the capital of France?", "Nutzer: Was ist die Hauptstadt von Frankreich?")),
-              L(T("Assistant:", "Assistent:"))]
-    data = {"nodes": _check_nt(NT[lang]), "words": {k: L(v) for k, v in dict(
-        token=T("token", "Token"), dist=T("probabilities computed", "Wahrscheinlichkeiten berechnet"),
-        drawn=T("drawn and appended", "gezogen und angehängt"), notTop=T("not the most likely one", "nicht das wahrscheinlichste"),
-        done=T("end token drawn — the answer is complete", "End-Token gezogen — die Antwort ist fertig"),
-        sampled=T("drawn", "gezogen"), random=T("random number", "Zufallszahl"), lands=T("lands on", "landet auf"),
-        play=T("play", "abspielen"), pause=T("pause", "anhalten")).items()}}
-    esc = html.escape
-    inner = f'''<div class="nt-stage">
-  <div class="nt-prompt"><span class="k mono">{L(T("INPUT PROMPT", "EINGABE-PROMPT"))}</span>
-    <p>{esc(prompt[0])}</p><p>{esc(prompt[1])}</p><p>{esc(prompt[2])} <span class="nt-out"></span><span class="nt-cur" aria-hidden="true">▌</span></p>
-    <span class="nt-loop mono">↺ {L(T("the drawn token is appended — and the whole text goes in again", "das gezogene Token wird angehängt — und der ganze Text geht erneut hinein"))}</span></div>
-  <div class="nt-model"><b>GPT</b><span class="mono">{L(T("transformer", "Transformer"))}</span></div>
-  <div class="nt-probs"><span class="k mono">{L(T("PROBABILITY OF THE NEXT TOKEN", "WAHRSCHEINLICHKEIT DES NÄCHSTEN TOKENS"))}</span><ol class="bars mono"></ol>
-    <div class="nt-draw"><span class="k mono">{L(T("THE DRAW: A RANDOM NUMBER BETWEEN 0 AND 1", "DIE ZIEHUNG: EINE ZUFALLSZAHL ZWISCHEN 0 UND 1"))}</span>
-      <div class="strip"><i class="mark" aria-hidden="true"></i></div><span class="nt-r mono"></span></div></div>
-</div>{controls(lang, temperature=True)}'''
-    return demo("nt", data, inner, T(
-        "An LLM answers one token at a time: it computes a probability for every possible next token, one is <i>drawn</i> — like a random number landing on one of the shares — appended, and the whole text goes in again, until an end token is drawn. Usually the most likely token wins, but not always: in the third step the second one is drawn. Turn the temperature down and the most likely token wins every time — the answer changes. (The random numbers are fixed here so that the demo can be replayed.)",
-        "Ein LLM antwortet Token für Token: Es berechnet für jedes mögliche nächste Token eine Wahrscheinlichkeit, eines wird <i>gezogen</i> — wie eine Zufallszahl, die auf einem der Anteile landet —, angehängt, und der ganze Text geht erneut hinein, bis ein End-Token gezogen wird. Meist gewinnt das wahrscheinlichste Token, aber nicht immer: Im dritten Schritt wird das zweite gezogen. Mit niedriger Temperatur gewinnt jedes Mal das wahrscheinlichste — und die Antwort ändert sich. (Die Zufallszahlen sind hier fest, damit sich die Demo wiederholen lässt.)"), lang)
-
-
-def dia_formalize(lang):
-    """Slide 46: from free text to a model — few-shot prompt, LLM, parser decides."""
-    L = lambda x: x[lang]
-    m, ma = 'marker-end="url(#fma)"', 'marker-end="url(#fmaa)"'
-    svg = f'''<svg class="dia" viewBox="0 0 860 210" role="img" aria-label="{L(T("Pipeline: free text from the user is extended with examples (few-shot), the LLM writes a textual model, a parser accepts it or sends it back", "Pipeline: Freitext des Nutzers wird mit Beispielen erweitert (Few-Shot), das LLM schreibt ein textuelles Modell, ein Parser nimmt es an oder schickt es zurück"))}">
-  {_arrow_defs("fma")}
-  <rect class="box" x="0" y="50" width="170" height="70" rx="3"/>
-  <text x="12" y="72" class="s">{L(T("FREE TEXT", "FREITEXT"))}</text>
-  <text x="12" y="94">{L(T("“Design a library", "„Entwirf ein Bücherei-"))}</text><text x="12" y="110">{L(T("management system”", "verwaltungssystem“"))}</text>
-  <path class="ln" d="M170 85H206" {m}/>
-  {box(210, 60, 110, 50, "Few-shot", L(T("+ examples", "+ Beispiele")))}
-  {box(210, 146, 110, 44, L(T("Examples", "Beispiele")), "(q, a)ᵢ")}
-  <path class="ln" d="M265 146V114" {m}/>
-  <path class="ln" d="M320 85H356" {m}/>
-  {box(360, 60, 110, 50, "LLM", L(T("writes it", "schreibt es")), cls="box hl")}
-  <path class="ln" d="M470 85H506" {m}/>
-  {box(510, 60, 120, 50, L(T("Textual model", "Textuelles Modell")), "CD4A · SysML v2")}
-  <path class="ln" d="M630 85H666" {m}/>
-  {box(670, 60, 100, 50, "Parser", L(T("valid?", "gültig?")))}
-  <path class="ln hl" d="M770 85H806" {ma}/><text x="814" y="90" class="t" style="fill:var(--accent)">✓</text>
-  <path class="ln dash" d="M720 110V140H415V114" {m}/>
-  <text x="566" y="156" text-anchor="middle" class="s">{L(T("✗ invalid: try again, with the parser's error", "✗ ungültig: neuer Versuch, mit der Fehlermeldung des Parsers"))}</text>
-</svg>'''
-    return fig(svg, T("Free text becomes a model in a modelling language. Few-shot examples teach the LLM the language; a parser — not the LLM — decides whether the result can be used.",
-                      "Aus Freitext wird ein Modell in einer Modellierungssprache. Few-Shot-Beispiele bringen dem LLM die Sprache bei; ein Parser — nicht das LLM — entscheidet, ob das Ergebnis verwendbar ist."), lang)
-
-
-# Grammar masking, stepped: a (much simplified) CD4A grammar as an automaton with a stack for the braces.
-# States: 0 start · 1 after "classdiagram" · 2 after the diagram name · 3 in the diagram · 4 after "class" ·
-# 5 after the class name · 6 in the class · 7 after a type · 8 after an attribute name · 9 all closed · 10 done.
-GM_STEPS = [  # (from, to, candidates (token, p, allowed by the grammar), chosen)
-    (0, 1, [("Here", .38, 0), ("classdiagram", .30, 1), ("```", .16, 0), ("Sure", .10, 0), ("class", .06, 0)], "classdiagram"),
-    (1, 2, [("Shop", .52, 1), ("{", .18, 0), (":", .12, 0), ('"Shop"', .10, 0), ("Online", .08, 1)], "Shop"),
-    (2, 3, [("{", .64, 1), ("(", .17, 0), (":", .11, 0), ("->", .05, 0), (";", .03, 0)], "{"),
-    (3, 4, [("class", .46, 1), ("Order", .24, 0), ("table", .14, 0), ("<!--", .09, 0), ("}", .07, 1)], "class"),
-    (4, 5, [("Order", .78, 1), ("{", .10, 0), ("(", .06, 0), (":", .04, 0), ("Orders", .02, 1)], "Order"),
-    (5, 6, [("(", .41, 0), ("{", .39, 1), (":", .10, 0), ("->", .06, 0), (";", .04, 0)], "{"),
-    (6, 7, [("-", .34, 0), ("int", .30, 1), ("+", .14, 0), ("String", .12, 1), ("}", .10, 1)], "int"),
-    (7, 8, [("id", .72, 1), (":", .12, 0), ("=", .08, 0), ("[", .05, 0), (";", .03, 0)], "id"),
-    (8, 6, [(",", .38, 0), (";", .36, 1), ("=", .12, 0), (":", .08, 0), ("}", .06, 0)], ";"),
-    (6, 3, [("}", .48, 1), ("String", .22, 1), ("int", .14, 1), ("-", .10, 0), ("<!--", .06, 0)], "}"),
-    (3, 9, [("<|END|>", .44, 0), ("}", .31, 1), ("class", .17, 1), ("```", .05, 0), ("Here", .03, 0)], "}"),
-    (9, 10, [("<|END|>", .58, 1), ("```", .20, 0), ("This", .14, 0), ("}", .05, 0), ("class", .03, 0)], "<|END|>"),
-]
-
-
-def dia_grammar_mask(lang):
-    """Slides 48–52: grammar masking, as a stepped animation (assets/ai4se.js). The automaton is
-    static SVG; the script highlights the current state and the transition taken."""
-    L = lambda x: x[lang]
-    S = {0: (40, 64), 1: (150, 64), 2: (260, 64), 3: (370, 64), 4: (480, 64), 5: (590, 64), 6: (700, 64),
-         7: (810, 64), 8: (810, 150), 9: (370, 150)}
-    E = [(0, 1, "classdiagram"), (1, 2, L(T("name", "Name"))), (2, 3, "{"), (3, 4, "class"), (4, 5, L(T("name", "Name"))), (5, 6, "{"),
-         (6, 7, L(T("type", "Typ"))), (7, 8, L(T("name", "Name"))), (8, 6, ";"), (6, 3, "}"), (3, 9, "}")]
-    r = 15
-    parts = [_arrow_defs("gma"), f'<path class="ln" d="M4 64H{40 - r - 3}" marker-end="url(#gma)"/>']
-    for a, b, lab in E:
-        (x1, y1), (x2, y2) = S[a], S[b]
-        anchor = "middle"
-        if (a, b) == (6, 3):     # back from the class to the diagram: an arc above the row
-            d, lx, ly = f"M{x1 - 8} {y1 - r + 2}C{x1 - 60} 6 {x2 + 60} 6 {x2 + 8} {y2 - r + 2}", (x1 + x2) / 2, 16
-        elif (a, b) == (8, 6):
-            d, lx, ly = f"M{x1 - 11} {y1 - 11}L{x2 + 11} {y2 + 11}", (x1 + x2) / 2 - 10, (y1 + y2) / 2 + 12
-        elif x1 == x2:
-            d, lx, ly, anchor = f"M{x1} {y1 + r}V{y2 - r - 3}", x1 + 8, (y1 + y2) / 2 + 4, "start"
-        else:
-            d, lx, ly = f"M{x1 + r} {y1}H{x2 - r - 3}", (x1 + x2) / 2, y1 - 8
-        parts.append(f'<g class="gm-e" data-e="{a}-{b}"><path class="ln" d="{d}" marker-end="url(#gma)"/>'
-                     f'<text x="{lx}" y="{ly}" text-anchor="{anchor}">{html.escape(lab)}</text></g>')
-    parts.append(f'<g class="gm-e" data-e="9-10"><path class="ln" d="M{370 - r} 150H286" marker-end="url(#gma)"/><text x="320" y="142" text-anchor="middle">{html.escape("<|END|>")}</text></g>')
-    parts.append(f'<g class="gm-s" data-s="10"><text x="276" y="154" text-anchor="end" class="t">✓ {L(T("parses", "parst"))}</text></g>')
-    names = {0: T("start", "Start"), 3: T("in the diagram", "im Diagramm"), 6: T("in a class", "in einer Klasse"), 9: T("all closed", "alles zu")}
-    for s, (x, y) in S.items():
-        ring = f'<circle class="box" cx="{x}" cy="{y}" r="{r - 4}"/>' if s == 9 else ""
-        cap = f'<text x="{x}" y="{y + r + 14}" text-anchor="middle" class="s">{L(names[s])}</text>' if s in names else ""
-        parts.append(f'<g class="gm-s" data-s="{s}"><circle class="box" cx="{x}" cy="{y}" r="{r}"/>{ring}'
-                     f'<text x="{x}" y="{y + 4}" text-anchor="middle" class="s">{s}</text>{cap}</g>')
-    svg = (f'<svg class="dia gm-auto" viewBox="0 0 860 186" role="img" aria-label="{L(T("The grammar as an automaton: from the start, classdiagram, a name and an opening brace lead into the diagram; class, a name and a brace into a class; type, name and semicolon repeat; closing braces lead back out, and only when all are closed may the model end.", "Die Grammatik als Automat: Vom Start führen classdiagram, ein Name und eine öffnende Klammer ins Diagramm; class, ein Name und eine Klammer in eine Klasse; Typ, Name und Semikolon wiederholen sich; schließende Klammern führen wieder hinaus, und erst wenn alle geschlossen sind, darf das Modell enden."))}">'
-           + "".join(parts) + '</svg>')
-    allowed = {0: "classdiagram", 1: T("a name", "ein Name"), 2: "{", 3: "class · }", 4: T("a name", "ein Name"), 5: "{",
-               6: T("a type · }", "ein Typ · }"), 7: T("a name", "ein Name"), 8: ";", 9: "<|END|>", 10: "—"}
-    data = {"steps": [{"from": a, "to": b, "cands": [[t, p, bool(ok)] for t, p, ok in c], "pick": pick} for a, b, c, pick in GM_STEPS],
-            "allowed": {s: (L(v) if isinstance(v, dict) else v) for s, v in allowed.items()},
-            "words": {k: L(v) for k, v in dict(
-                p0=T("1 · The LLM proposes the next token. It knows nothing about the grammar.", "1 · Das LLM schlägt das nächste Token vor. Von der Grammatik weiß es nichts."),
-                p1=T("2 · The grammar filters: every token that cannot follow here is removed, the rest is rescaled (the old share stays faint).", "2 · Die Grammatik filtert: Jedes Token, das hier nicht folgen kann, wird gestrichen, der Rest neu skaliert (der alte Anteil bleibt blass)."),
-                p2=T("3 · The most likely remaining token is appended; the automaton moves on.", "3 · Das wahrscheinlichste verbleibende Token wird angehängt; der Automat geht weiter."),
-                would=T("Without the mask the model would have written", "Ohne Maske hätte das Modell geschrieben"),
-                masked=T("filtered", "gefiltert"), chosen=T("chosen", "gewählt"),
-                agree=T("Here the most likely token was allowed anyway.", "Hier war das wahrscheinlichste Token ohnehin erlaubt."),
-                allowed=T("allowed here", "hier erlaubt"), stack=T("open braces", "offene Klammern"), none=T("none", "keine"),
-                step=T("token", "Token"), of=T("of", "von"), play=T("play", "abspielen"), pause=T("pause", "anhalten")).items()}}
-    inner = f'''<div class="gm-stage">
-  <div class="gm-code"><span class="k mono">{L(T("THE MODEL SO FAR", "DAS MODELL BIS HIER"))}</span><pre class="mono"><code></code><span class="nt-cur" aria-hidden="true">▌</span></pre></div>
-  <div class="gm-cands"><span class="k mono">{L(T("NEXT-TOKEN CANDIDATES", "KANDIDATEN FÜR DAS NÄCHSTE TOKEN"))}</span><ol class="bars mono"></ol><p class="gm-phase mono" aria-live="polite"></p></div>
-  <div class="gm-grammar"><span class="k mono">{L(T("THE GRAMMAR (SIMPLIFIED CD4A) AS AN AUTOMATON", "DIE GRAMMATIK (VEREINFACHTES CD4A) ALS AUTOMAT"))}</span>
-    {dia_scroll(svg)}
-    <p class="gm-status mono"><span class="gm-allowed"></span><span class="gm-stack"></span></p></div>
-</div>{controls(lang)}'''
-    return demo("gm", data, inner, T(
-        f"Constrained decoding, token by token: the LLM proposes, the grammar filters, then a token is chosen. The grammar is checked by an automaton; for nested braces it needs a stack that remembers what is still open. That is exactly where LLMs are weak — even ChatGPT has trouble matching brackets in long texts {ref(8)}. With the mask the model cannot stop before every brace is closed.",
-        f"Constrained Decoding, Token für Token: Das LLM schlägt vor, die Grammatik filtert, dann wird ein Token gewählt. Geprüft wird die Grammatik von einem Automaten; für verschachtelte Klammern braucht er einen Stapel, der sich merkt, was noch offen ist. Genau dort sind LLMs schwach — selbst ChatGPT hat Mühe, Klammern in langen Texten richtig zu schließen {ref(8)}. Mit der Maske kann das Modell nicht aufhören, bevor jede Klammer geschlossen ist."), lang)
-
-
-def masking_table(lang):
-    """Slide 53 / [NRR24]: share of parsing CD4A models, without and with grammar masking."""
-    L = lambda x: x[lang]
-    rows = [("Llama 3 8B · 4-bit", 416, 991, 5.71, 918, 991, 74.10), ("Phi-3 Mini · 4-bit", 357, 976, 4.63, 849, 976, 138.29),
-            ("Gemma 7B · 4-bit", 2, 658, 2.46, 612, 658, 54.20), ("Mistral 7B · 3-bit", 190, 905, 4.89, 836, 905, 73.59)]
-    fmt = (lambda n: f"{n:,.1f}".replace(",", "X").replace(".", ",").replace("X", ".")) if lang == "de" else (lambda n: f"{n:,.1f}")
-    body = "".join(f'<tr><td>{name}</td><td class="n">{fmt(a / b * 100)} %</td><td class="n hl">{fmt(c / d * 100)} %</td><td class="n faint">{fmt(t0)} s → {fmt(t1)} s</td></tr>'
-                   for name, a, b, t0, c, d, t1 in rows)
-    head = f'<tr><th>{L(T("Model", "Modell"))}</th><th class="n">{L(T("without", "ohne"))}</th><th class="n">{L(T("with masking", "mit Masking"))}</th><th class="n">{L(T("time per model", "Zeit pro Modell"))}</th></tr>'
-    return (f'<figure class="media art-fig"><div class="tbl-wrap"><table class="tbl mono">{head}{body}</table></div>'
-            f'<figcaption class="mono">{L(T("Share of generated class diagrams that parse, for about 1,000 modelling tasks from a third-semester exam. For comparison, GPT-4o without masking: 76 % (100 tasks). Validity costs time.", "Anteil der erzeugten Klassendiagramme, die parsen, für rund 1.000 Modellierungsaufgaben aus einer Klausur im dritten Semester. Zum Vergleich GPT-4o ohne Masking: 76 % (100 Aufgaben). Gültigkeit kostet Zeit."))} {cite("NRR24")}</figcaption></figure>')
-
-
-def dia_embeddings(lang):
-    """Slides 55 / 56: word embeddings in two dimensions. The vectors sit at odd angles on purpose:
-    the directions that carry meaning (royalty, gender) are not the axes."""
-    L = lambda x: x[lang]
-    cx, cy, u = 560, 160, 110
-    words = [("King", .95, .72, "start", 12, 4), ("Queen", -.37, .87, "start", 8, 24), ("Man", .70, -.45, "start", 12, 12),
-             ("Woman", -.62, -.30, "end", -12, 14), ("Princess", -.62, 1.02, "end", -14, 2)]
-    P = {w: (cx + x * u, cy - y * u) for w, x, y, *_ in words}
-    groups = []
-    for k, (w, x, y, anchor, dx, dy) in enumerate(words):
-        hl = w == "Princess"
-        px, py = P[w]
-        groups.append(f'<g class="w{" hl" if hl else ""}">'
-                      f'<text x="10" y="{50 + k * 38}" class="t">{w}</text><text x="120" y="{50 + k * 38}" class="v">[ {x:+.2f}, {y:+.2f} ]</text>'
-                      f'<path class="ln vec" d="M{cx} {cy}L{px:.1f} {py:.1f}" marker-end="url(#ema{"a" if hl else ""})"/>'
-                      f'<text x="{px + dx:.1f}" y="{py + dy:.1f}" text-anchor="{anchor}" class="t">{w}</text></g>')
-    m = lambda a, b, cls, mk="": f'<path class="ln {cls}" d="M{P[a][0]:.1f} {P[a][1]:.1f}L{P[b][0]:.1f} {P[b][1]:.1f}"{mk}/>'
-    rel = (m("Man", "King", "hl dash", ' marker-end="url(#emaa)"') + m("Woman", "Queen", "hl dash", ' marker-end="url(#emaa)"')
-           + m("Man", "Woman", "dash") + m("King", "Queen", "dash")
-           + f'<text x="{(P["Man"][0] + P["King"][0]) / 2 + 12:.0f}" y="{(P["Man"][1] + P["King"][1]) / 2:.0f}" class="s a">+ {L(T("royalty", "Königlichkeit"))}</text>'
-           + f'<text x="{(P["Man"][0] + P["Woman"][0]) / 2:.0f}" y="{(P["Man"][1] + P["Woman"][1]) / 2 + 18:.0f}" text-anchor="middle" class="s">{L(T("gender", "Geschlecht"))}</text>')
-    svg = f'''<svg class="dia emb" viewBox="0 0 860 300" role="img" aria-label="{L(T("Words as vectors in two dimensions, at odd angles: king, queen, man, woman. The step from man to king is the same as from woman to queen; princess lies close to queen", "Wörter als Vektoren in zwei Dimensionen, in schiefen Winkeln: King, Queen, Man, Woman. Der Schritt von Man zu King ist derselbe wie von Woman zu Queen; Princess liegt nahe bei Queen"))}">
-  {_arrow_defs("ema")}
-  <path class="ln axis" d="M{cx - 190} {cy}H{cx + 190}"/><path class="ln axis" d="M{cx} {cy + 130}V{cy - 150}"/>
-  <text x="{cx + 190}" y="{cy + 16}" text-anchor="end" class="s">{L(T("dimension 1", "Dimension 1"))}</text>
-  <text x="{cx + 8}" y="{cy - 140}" class="s">{L(T("dimension 2", "Dimension 2"))}</text>
-  {rel}{"".join(groups)}
-  <ellipse cx="{(P["Princess"][0] + P["Queen"][0]) / 2:.0f}" cy="{(P["Princess"][1] + P["Queen"][1]) / 2:.0f}" rx="26" ry="17" style="fill:none;stroke:var(--accent);stroke-dasharray:3 4;opacity:.7"/>
-  <text x="{P["Princess"][0] - 14:.0f}" y="{P["Princess"][1] + 18:.0f}" text-anchor="end" class="s a">{L(T("similar", "ähnlich"))}</text>
-</svg>'''
-    return fig(svg, T("Embeddings turn words and texts into vectors. Meaning does not sit in the axes but in directions: the step from “man” to “king” is the same as from “woman” to “queen” — king − man + woman ≈ queen. And “princess” lands right next to “queen”. Real models use thousands of dimensions — OpenAI’s text-embedding-3 has 3,072 — but the idea stays the same: similar meaning, nearby vectors.",
-                      "Embeddings machen aus Wörtern und Texten Vektoren. Die Bedeutung steckt nicht in den Achsen, sondern in Richtungen: Der Schritt von „Man“ zu „King“ ist derselbe wie von „Woman“ zu „Queen“ — King − Man + Woman ≈ Queen. Und „Princess“ landet direkt neben „Queen“. Echte Modelle nutzen Tausende Dimensionen — OpenAIs text-embedding-3 hat 3.072 —, aber die Idee bleibt: ähnliche Bedeutung, benachbarte Vektoren."), lang)
-
-
-def dia_rag(lang):
-    """Slide 59: retrieval-augmented generation."""
-    L = lambda x: x[lang]
-    m, ma = 'marker-end="url(#rga)"', 'marker-end="url(#rgaa)"'
-    num = lambda x, y, n: f'<text x="{x}" y="{y}" class="s a">0{n}</text>'
-    svg = f'''<svg class="dia" viewBox="0 0 860 220" role="img" aria-label="{L(T("RAG: the question is embedded, compared with embedded entries of a knowledge base, and the closest snippets are handed to the LLM together with the question", "RAG: Die Frage wird eingebettet, mit eingebetteten Einträgen einer Wissensbasis verglichen, und die ähnlichsten Ausschnitte gehen zusammen mit der Frage an das LLM"))}">
-  {_arrow_defs("rga")}
-  {box(0, 30, 130, 50, L(T("Question", "Frage")), L(T("from the user", "vom Nutzer")))}{num(0, 22, 1)}
-  <path class="ln" d="M130 55H186" {m}/>
-  {box(190, 30, 130, 50, "Embedding", L(T("question → vector", "Frage → Vektor")))}{num(190, 22, 2)}
-  <path class="ln" d="M255 80V126" {m}/>
-  {box(190, 130, 130, 60, L(T("Knowledge base", "Wissensbasis")), L(T("embedded documents", "eingebettete Dokumente")))}{num(190, 210, 3)}
-  <path class="ln" d="M320 160H376" {m}/>
-  {box(380, 130, 130, 60, L(T("Snippets", "Ausschnitte")), L(T("nearest vectors", "nächste Vektoren")))}{num(380, 210, 4)}
-  <path class="ln" d="M445 130V82" {m}/>
-  <path class="ln" d="M320 55H426" />
-  {box(380, 30, 130, 50, L(T("Prompt", "Prompt")), L(T("question + snippets", "Frage + Ausschnitte")))}
-  <path class="ln" d="M510 55H566" {m}/>
-  {box(570, 30, 120, 50, "LLM", L(T("answers", "antwortet")), cls="box hl")}{num(570, 22, 5)}
-  <path class="ln hl" d="M690 55H736" {ma}/>
-  {box(740, 30, 120, 50, L(T("Answer", "Antwort")), L(T("with sources", "mit Quellen")))}
-</svg>'''
-    return fig(svg, T("Retrieval-augmented generation lets an LLM answer from knowledge it was never trained on — lecture material, specifications, publications. The search is semantic: users describe their problem and find the right passage without knowing its terms. This is how <a href=\"projects-se-chatty.html\">SE-Chatty</a> works.",
-                      "Retrieval-Augmented Generation lässt ein LLM aus Wissen antworten, auf das es nie trainiert wurde — Vorlesungsmaterial, Spezifikationen, Publikationen. Die Suche ist semantisch: Nutzer beschreiben ihr Problem und finden die passende Stelle, ohne ihre Begriffe zu kennen. So funktioniert <a href=\"projects-se-chatty.html\">SE-Chatty</a>."), lang)
-
-
-def dia_agent(lang):
-    """An agent: the LLM decides, acts through a tool, looks at the result — in a loop until the goal is met."""
-    L = lambda x: x[lang]
-    m, ma = 'marker-end="url(#aga)"', 'marker-end="url(#agaa)"'
-    svg = f'''<svg class="dia" viewBox="0 0 860 236" role="img" aria-label="{L(T("An agent: a goal goes to the LLM, which decides on the next step, acts through a tool and looks at the result, in a loop, until the goal is reached", "Ein Agent: Ein Ziel geht an das LLM, das den nächsten Schritt wählt, über ein Werkzeug handelt und das Ergebnis betrachtet, in einer Schleife, bis das Ziel erreicht ist"))}">
-  {_arrow_defs("aga")}
-  {box(0, 86, 140, 50, L(T("Goal", "Ziel")), L(T("“fix the failing test”", "„behebe den roten Test“")))}
-  <path class="ln" d="M140 111H206" {m}/>
-  {box(210, 86, 150, 50, "LLM", L(T("decides the next step", "wählt den nächsten Schritt")), cls="box hl")}
-  <path class="ln hl" d="M285 86V45H446" {ma}/>
-  {box(450, 20, 160, 50, L(T("Act", "Handeln")), L(T("call a tool", "ein Werkzeug aufrufen")))}
-  <path class="ln hl" d="M530 70V148" {ma}/>
-  {box(450, 152, 160, 50, L(T("Observe", "Beobachten")), L(T("read the result", "das Ergebnis lesen")))}
-  <path class="ln hl" d="M450 177H285V140" {ma}/>
-  <text x="392" y="115" text-anchor="middle" class="s a">↻ {L(T("loop", "Schleife"))}</text>
-  <path class="ln dash" d="M610 45H656"/>
-  <text x="666" y="30" class="s">{L(T("TOOLS", "WERKZEUGE"))}</text>
-  <text x="666" y="49">{L(T("read and write files", "Dateien lesen und schreiben"))}</text><text x="666" y="67">{L(T("run code and tests", "Code und Tests ausführen"))}</text>
-  <text x="666" y="85">{L(T("search the web", "im Web suchen"))}</text><text x="666" y="103">{L(T("call APIs", "APIs aufrufen"))}</text>
-  <path class="ln" d="M220 136L150 196" {m}/>
-  <text x="120" y="210" text-anchor="middle" class="t">{L(T("done", "fertig"))}</text>
-  <text x="120" y="226" text-anchor="middle" class="s">{L(T("when the goal is reached", "wenn das Ziel erreicht ist"))}</text>
-</svg>'''
-    return fig(svg, T("An agent is a loop: the LLM chooses a step, a tool carries it out, the result goes back to the LLM. Who decides the next step is what separates an agent from a fixed workflow.",
-                      "Ein Agent ist eine Schleife: Das LLM wählt einen Schritt, ein Werkzeug führt ihn aus, das Ergebnis geht zurück an das LLM. Wer den nächsten Schritt bestimmt, unterscheidet einen Agenten von einem festen Workflow."), lang)
-
-
-def dia_harness(lang):
-    """Agent = model + harness: everything around the model that makes it a working agent."""
-    L = lambda x: x[lang]
-    m = 'marker-end="url(#hna)"'
-    parts = [
-        (190, 44, T("Instructions", "Anweisungen"), T("system prompt, rules", "System-Prompt, Regeln")),
-        (355, 44, T("Tools", "Werkzeuge"), T("files, terminal, web", "Dateien, Terminal, Web")),
-        (520, 44, T("The loop", "Die Schleife"), T("act, observe, repeat", "handeln, prüfen, weiter")),
-        (190, 210, T("Context & memory", "Kontext & Gedächtnis"), T("what the model sees", "was das Modell sieht")),
-        (355, 210, T("Guardrails", "Leitplanken"), T("permissions, sandbox", "Rechte, Sandbox")),
-        (520, 210, T("Checks", "Prüfungen"), T("tests, linter, parser", "Tests, Linter, Parser")),
+    levels = [
+        (T("Artificial intelligence", "Künstliche Intelligenz"), T("research on machines that act and react intelligently", "Forschung an Maschinen, die intelligent handeln und reagieren")),
+        (T("Machine learning", "Machine Learning"), T("algorithms that learn from data and generalise to unseen data", "Algorithmen, die aus Daten lernen und auf Ungesehenes verallgemeinern")),
+        (T("Deep learning", "Deep Learning"), T("machine learning with neural networks", "Machine Learning mit neuronalen Netzen")),
+        (T("Generative AI", "Generative KI"), T("creates new content from learned patterns", "erzeugt neue Inhalte aus gelernten Mustern")),
+        (T("LLMs", "LLMs"), T("large language models: read and write text", "große Sprachmodelle: lesen und schreiben Text")),
     ]
-    comp = "".join(box(x, y, 150, 46, L(a), L(b)) for x, y, a, b in parts)
-    svg = f'''<svg class="dia" viewBox="0 0 860 290" role="img" aria-label="{L(T("A harness around the model: instructions, tools, the agent loop, context and memory, guardrails and checks. The user gives the task; the harness acts on the environment", "Ein Harness um das Modell: Anweisungen, Werkzeuge, die Agenten-Schleife, Kontext und Gedächtnis, Leitplanken und Prüfungen. Der Nutzer gibt die Aufgabe; der Harness wirkt auf die Umgebung"))}">
-  {_arrow_defs("hna")}
-  <rect class="zone" x="172" y="26" width="516" height="246" rx="6"/>
-  <text x="184" y="18" class="s a">HARNESS — {L(T("everything except the model", "alles außer dem Modell"))}</text>
-  {comp}
-  {box(355, 124, 150, 54, L(T("Model", "Modell")), "LLM", cls="box hl")}
-  <path class="ln dash" d="M430 90V122"/><path class="ln dash" d="M430 180V208"/>
-  <path class="ln dash" d="M330 90L370 122"/><path class="ln dash" d="M530 90L490 122"/>
-  <path class="ln dash" d="M330 208L370 180"/><path class="ln dash" d="M530 208L490 180"/>
-  {box(0, 126, 130, 50, L(T("You", "Sie")), L(T("the task", "die Aufgabe")))}
-  <path class="ln" d="M130 151H168" {m}/>
-  <path class="ln" d="M692 151H726" marker-start="url(#hna)" {m}/>
-  {box(730, 126, 130, 50, L(T("Environment", "Umgebung")), L(T("code, files, apps", "Code, Dateien, Apps")))}
-</svg>'''
-    return fig(svg, T("Agent = model + harness. The model brings the language and the judgement; the harness brings everything else. Claude Code, Codex and Cursor are harnesses — with the same model inside they can still perform very differently.",
-                      "Agent = Modell + Harness. Das Modell bringt Sprache und Urteilsvermögen, der Harness alles andere. Claude Code, Codex und Cursor sind Harnesses — mit demselben Modell darin können sie trotzdem sehr unterschiedlich gut arbeiten."), lang)
-
-
-def dia_ai_mde(lang):
-    """Slide 67: AI-driven MDE — the LLM writes the model, a deterministic generator the app."""
-    L = lambda x: x[lang]
-    m, ma = 'marker-end="url(#ama)"', 'marker-end="url(#amaa)"'
-    svg = f'''<svg class="dia" viewBox="0 0 860 190" role="img" aria-label="{L(T("AI-driven MDE: an informal domain description becomes a class diagram via few-shot prompting and an LLM; a deterministic generator turns the model into a complete application", "AI-Driven MDE: Aus einer informellen Domänenbeschreibung wird per Few-Shot-Prompting und LLM ein Klassendiagramm; ein deterministischer Generator macht daraus eine vollständige Anwendung"))}">
-  {_arrow_defs("ama")}
-  <rect class="zone" x="140" y="30" width="250" height="110" rx="4"/><text x="152" y="22" class="s a">AI-DRIVEN</text>
-  <rect class="zone" x="530" y="30" width="330" height="110" rx="4"/><text x="542" y="22" class="s">{L(T("DETERMINISTIC MDE", "DETERMINISTISCHES MDE"))}</text>
-  {box(0, 60, 116, 50, L(T("Description", "Beschreibung")), L(T("informal", "informell")))}
-  <path class="ln" d="M116 85H156" {m}/>
-  {box(160, 60, 90, 50, "Few-shot")}
-  <path class="ln" d="M250 85H270" {m}/>
-  {box(274, 60, 100, 50, "LLM", cls="box hl")}
-  <path class="ln hl" d="M374 85H412" {ma}/>
-  {box(416, 55, 100, 60, L(T("Model", "Modell")), L(T("class diagram", "Klassendiagramm")), cls="box hl")}
-  <path class="ln" d="M516 85H556" {m}/>
-  {box(560, 60, 120, 50, "Generator", "MontiGem")}
-  <path class="ln" d="M680 85H716" {m}/>
-  {box(720, 60, 124, 50, L(T("Application", "Anwendung")), L(T("web app", "Web-App")))}
-  <text x="466" y="160" text-anchor="middle" class="s">{L(T("the model can be read, checked and changed", "das Modell lässt sich lesen, prüfen und ändern"))}</text>
-</svg>'''
-    return fig(svg, T("The LLM only does what it is good at — turning language into a model. Everything after the model is deterministic, tested generator code. The model in between is the point where people can check what the AI understood.",
-                      "Das LLM macht nur, was es gut kann — Sprache in ein Modell übersetzen. Alles nach dem Modell ist deterministischer, getesteter Generator-Code. Das Modell dazwischen ist die Stelle, an der Menschen prüfen können, was die KI verstanden hat."), lang)
+    parts = []
+    for k, (name, _) in enumerate(levels):
+        x, y, w, h = 4 + k * 18, 4 + k * 38, 352 - k * 36, 292 - k * 46
+        last = k == len(levels) - 1
+        parts.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{14 - k * 2}" class="{"umb-in" if last else "umb"}"/>')
+        parts.append(f'<text x="{x + w / 2}" y="{y + 22}" text-anchor="middle" class="t{" a" if last else ""}">{L(name)}</text>')
+    parts.append(f'<text x="121" y="226" text-anchor="end" class="s">{L(T("e.g.", "z. B."))}</text>'
+                 '<circle cx="152" cy="222" r="25" class="box"/><text x="152" y="226" text-anchor="middle" class="s">ChatGPT</text>'
+                 '<circle cx="214" cy="222" r="25" class="box"/><text x="214" y="226" text-anchor="middle" class="s">Copilot</text>')
+    svg = f'<svg class="dia" viewBox="0 0 360 300" role="img" aria-label="{L(T("Artificial intelligence as an umbrella term: machine learning, deep learning, generative AI and LLMs nested inside each other", "Künstliche Intelligenz als Sammelbegriff: Machine Learning, Deep Learning, generative KI und LLMs ineinander geschachtelt"))}">{"".join(parts)}</svg>'
+    dl = "".join(f'<dt class="mono{" a" if k == len(levels) - 1 else ""}">{L(n)}</dt><dd>{L(d)}</dd>' for k, (n, d) in enumerate(levels))
+    from article_common import source_line
+    cap = T("AI is an umbrella term. What is meant today is usually its innermost part: large language models.",
+            "KI ist ein Sammelbegriff. Gemeint ist heute meist der innerste Teil: große Sprachmodelle.")
+    return (f'<figure class="media art-fig umb-fig"><div class="umb-row"><div class="umb-art">{svg}</div><dl class="umb-dl">{dl}</dl></div>'
+            f'<figcaption class="mono">{cap[lang]}{source_line(None, lang)}</figcaption></figure>')
 
 
 def glossary(lang):
-    """A handful of words that come up whenever LLMs are discussed."""
+    """The words around the model that chapter 01 did not need yet."""
     L = lambda x: x[lang]
     terms = [
-        ("Token", T(f"A piece of text the model reads and writes: a word, part of a word or a punctuation mark. GPT-3 knows about 50,000 different tokens; only a few thousand of them are whole words {ref(8)}.",
-                    f"Ein Stück Text, das das Modell liest und schreibt: ein Wort, ein Wortteil oder ein Satzzeichen. GPT-3 kennt rund 50.000 verschiedene Tokens; nur einige Tausend davon sind ganze Wörter {ref(8)}.")),
         ("Prompt", T("Everything the model gets as input: the instructions (system prompt), the conversation so far, attached documents.",
                      "Alles, was das Modell als Eingabe bekommt: die Anweisungen (System-Prompt), das bisherige Gespräch, angehängte Dokumente.")),
         (T("Context window", "Kontextfenster"), T("How many tokens the model can take in at once. Whatever does not fit, it does not see.",
                                                 "Wie viele Tokens das Modell auf einmal aufnehmen kann. Was nicht hineinpasst, sieht es nicht.")),
-        (T("Temperature", "Temperatur"), T("How adventurous the choice of the next token is. At 0 it is always the most likely one; higher values bring variety — and more mistakes.",
-                                           "Wie mutig das nächste Token gewählt wird. Bei 0 immer das wahrscheinlichste; höhere Werte bringen Abwechslung — und mehr Fehler.")),
         ("Few-shot", T("Examples of questions and answers in the prompt that show the model what is wanted — without training it again.",
                        "Beispiele für Fragen und Antworten im Prompt, die dem Modell zeigen, was gewünscht ist — ohne es neu zu trainieren.")),
         ("Fine-tuning", T("Training an existing model further on one’s own data. Needs good data and hardware, and the result stays fixed until the next training.",
@@ -581,9 +494,263 @@ def glossary(lang):
     return '<dl class="gloss">' + "".join(f'<dt class="mono">{L(k) if isinstance(k, dict) else k}</dt><dd>{L(v)}</dd>' for k, v in terms) + "</dl>"
 
 
+def dia_rag(lang):
+    """Slide 59: retrieval-augmented generation, numbered 1–5 in the order of a question. The question text (not
+    its vector) goes into the prompt; the index is built beforehand. 360 wide: fits a phone as it is."""
+    L = lambda x: x[lang]
+    m, ma = 'marker-end="url(#rga)"', 'marker-end="url(#rgaa)"'
+    num = lambda x, y, n: f'<text x="{x}" y="{y}" class="s a">0{n}</text>'
+    svg = f'''<svg class="dia" viewBox="0 0 360 352" role="img" aria-label="{L(T("RAG: 1 the question is 2 turned into a vector, 3 the index returns the nearest chunks, 4 the question text and the chunks form the prompt, 5 the LLM answers with sources. The index of document chunks is built beforehand.", "RAG: 1 Die Frage wird 2 in einen Vektor übersetzt, 3 der Index liefert die nächstgelegenen Abschnitte, 4 Fragetext und Abschnitte bilden den Prompt, 5 das LLM antwortet mit Quellen. Der Index der Dokumentabschnitte wird vorher gebaut."))}">
+  {_arrow_defs("rga")}
+  {num(0, 12, 1)}{box(0, 18, 150, 50, L(T("Question", "Frage")), L(T("from the user", "vom Nutzer")))}
+  <path class="ln" d="M150 43H206" {m}/>
+  {num(210, 12, 2)}{box(210, 18, 150, 50, "Embedding", L(T("question → vector", "Frage → Vektor")))}
+  <path class="ln" d="M285 68V100" {m}/>
+  {num(210, 98, 3)}{box(210, 104, 150, 50, L(T("Search", "Suche")), L(T("nearest chunks", "nächste Abschnitte")))}
+  <path class="ln dash-opt" d="M285 206V158" {m}/>
+  {box(210, 210, 150, 62, L(T("Index", "Index")), L(T("built beforehand:", "vorher gebaut:")), cls="box dashbox", sub2=L(T("chunks → vectors", "Abschnitte → Vektoren")))}
+  <path class="ln" d="M210 129H120V200" {m}/>
+  <text class="s halo" x="165" y="122" text-anchor="middle">{L(T("chunks", "Abschnitte"))}</text>
+  <path class="ln" d="M40 68V200" {m}/>
+  <text class="s halo" x="46" y="140">{L(T("the text", "der Text"))}</text>
+  {num(0, 198, 4)}{box(0, 204, 150, 50, "Prompt", L(T("question + chunks", "Frage + Abschnitte")))}
+  <path class="ln" d="M75 254V286" {m}/>
+  {num(0, 284, 5)}{box(0, 290, 150, 50, "LLM", L(T("answers", "antwortet")), cls="box hl")}
+  <path class="ln hl" d="M150 315H206" {ma}/>
+  {box(210, 290, 150, 50, L(T("Answer", "Antwort")), L(T("with sources", "mit Quellen")))}
+</svg>'''
+    return side_fig(svg, 360, T("Retrieval-augmented generation: search first, then hand the LLM the question together with what was found. The vector is only used for the search; the prompt gets the text.",
+                                "Retrieval-Augmented Generation: erst suchen, dann dem LLM die Frage zusammen mit den Fundstellen geben. Der Vektor dient nur der Suche; in den Prompt kommt der Text."),
+                    lang, source=src("after", _RK["lewis"]))
+
+
+# The agent trace: "fix the failing test" in the library code of part 1 (fictional, but a typical run).
+AG_STEPS = [  # (action, tool call, observation)
+    (T("run the tests", "Tests ausführen"), "pytest", T("1 failed: test_loan_due_date", "1 fehlgeschlagen: test_loan_due_date")),
+    (T("read the test", "den Test lesen"), "tests/test_loan.py", T("expects: due = lent + 14 days", "erwartet: fällig = verliehen + 14 Tage")),
+    (T("read the code", "den Code lesen"), "src/loan.py", T("LOAN_DAYS = 7", "LOAN_DAYS = 7")),
+    (T("edit the code", "den Code ändern"), "LOAN_DAYS = 14", T("file saved", "Datei gespeichert")),
+    (T("run the tests", "Tests ausführen"), "pytest", T("12 passed", "12 bestanden")),
+]
+
+
+def dia_agent(lang):
+    """An agent as a stepped trace: the loop on the left lights up Act or Observe, the trace on the right grows
+    (assets/ai4se.js, SiteDemo.stepper)."""
+    L = lambda x: x[lang]
+    m, ma = 'marker-end="url(#aga)"', 'marker-end="url(#agaa)"'
+    svg = f'''<svg class="dia ag-loop" viewBox="0 0 360 214" role="img" aria-label="{L(T("The agent loop: a goal goes to the LLM, which decides the next step; a tool carries it out; the result goes back to the LLM; when the goal is reached, the loop ends.", "Die Agenten-Schleife: Ein Ziel geht an das LLM, das den nächsten Schritt wählt; ein Werkzeug führt ihn aus; das Ergebnis geht zurück an das LLM; ist das Ziel erreicht, endet die Schleife."))}">
+  {_arrow_defs("aga")}
+  <text x="20" y="18" class="s">{L(T("GOAL", "ZIEL"))}</text><text x="20" y="34">{L(T("“fix the failing test”", "„behebe den roten Test“"))}</text>
+  <path class="ln" d="M60 42V76" {m}/>
+  <g class="ag-n" data-n="llm">{box(20, 80, 130, 46, "LLM", L(T("picks a step", "wählt den Schritt")), cls="box")}</g>
+  <path class="ln ag-e" data-e="act" d="M150 96H180V33H206" {m}/>
+  <g class="ag-n" data-n="act">{box(210, 10, 140, 46, L(T("Act", "Handeln")), L(T("a tool runs", "ein Werkzeug läuft")))}</g>
+  <path class="ln ag-e" data-e="obs" d="M280 56V146" {m}/>
+  <g class="ag-n" data-n="obs">{box(210, 150, 140, 46, L(T("Observe", "Beobachten")), L(T("read the result", "Ergebnis lesen")))}</g>
+  <path class="ln ag-e" data-e="back" d="M210 173H115V130" {m}/>
+  <text x="214" y="118" class="s a">↻ {L(T("loop", "Schleife"))}</text>
+  <path class="ln ag-e" data-e="done" d="M50 126V186" {m}/>
+  <g class="ag-n" data-n="done"><text x="50" y="204" text-anchor="middle" class="t">{L(T("done", "fertig"))} ✓</text></g>
+</svg>'''
+    rows = "".join(f'<li><span class="ag-act"><b>{L(a)}</b> <code>{html.escape(c)}</code></span><span class="ag-obs">→ {L(o)}</span></li>' for a, c, o in AG_STEPS)
+    data = {"n": len(AG_STEPS), "words": {k: L(v) for k, v in dict(
+        goal=T("The goal arrives; the LLM decides what to do first.", "Das Ziel kommt an; das LLM entscheidet, was zuerst zu tun ist."),
+        act=T("Act: the LLM calls a tool", "Handeln: Das LLM ruft ein Werkzeug auf"), obs=T("Observe: the result goes back to the LLM", "Beobachten: Das Ergebnis geht zurück an das LLM"),
+        done=T("All tests pass — the goal is reached, the loop ends.", "Alle Tests grün — das Ziel ist erreicht, die Schleife endet."),
+        step=T("step", "Schritt"), of=T("of", "von")).items()}}
+    inner = (f'<div class="ag-stage"><div class="ag-art">{svg}</div><div class="ag-side"><span class="k mono">{L(T("THE TRACE", "DER VERLAUF"))}</span>'
+             f'<ol class="ag-trace mono">{rows}</ol><p class="ag-say mono" aria-live="polite"></p></div></div>{controls(lang)}')
+    return demo("ag", data, inner, T(
+        "An agent is a loop: the LLM chooses a step, a tool carries it out, the result goes back to the LLM. Who decides the next step is what separates an agent from a fixed workflow.",
+        "Ein Agent ist eine Schleife: Das LLM wählt einen Schritt, ein Werkzeug führt ihn aus, das Ergebnis geht zurück an das LLM. Wer den nächsten Schritt bestimmt, unterscheidet einen Agenten von einem festen Workflow."), lang,
+        source=src("illustrative", note=T("a typical run, shortened", "ein typischer Lauf, gekürzt")))
+
+
+def dia_harness(lang):
+    """Agent = model + harness: everything around the model. The loop is drawn as a ring around the model.
+    360 wide: fits a phone as it is."""
+    L = lambda x: x[lang]
+    m = 'marker-end="url(#hna)"'
+    svg = f'''<svg class="dia" viewBox="0 0 360 470" role="img" aria-label="{L(T("A harness around the model: instructions, tools, context, checks and guardrails; the loop runs around the model. The user gives the task; the harness acts on the environment.", "Ein Harness um das Modell: Anweisungen, Werkzeuge, Kontext, Prüfungen und Leitplanken; die Schleife läuft um das Modell. Der Nutzer gibt die Aufgabe; der Harness wirkt auf die Umgebung."))}">
+  {_arrow_defs("hna")}
+  {box(110, 0, 140, 44, L(T("You", "Sie")), L(T("the task", "die Aufgabe")))}
+  <path class="ln" d="M180 44V58" {m}/>
+  <rect class="zone" x="0" y="62" width="360" height="346" rx="6"/>
+  <text x="12" y="82" class="s a halo on-tile">HARNESS · {L(T("everything except the model", "alles außer dem Modell"))}</text>
+  {box(12, 96, 160, 46, L(T("Instructions", "Anweisungen")), L(T("system prompt, rules", "System-Prompt, Regeln")))}
+  {box(188, 96, 160, 46, L(T("Tools", "Werkzeuge")), L(T("files, terminal, web", "Dateien, Terminal, Web")))}
+  <circle cx="180" cy="236" r="64" class="ln hl dash-opt"/>
+  <text x="180" y="200" text-anchor="middle" class="s a">↻ {L(T("the loop", "die Schleife"))}</text>
+  {box(124, 214, 112, 44, L(T("Model", "Modell")), "LLM", cls="box hl")}
+  <text x="180" y="318" text-anchor="middle" class="s halo on-tile">{L(T("act · observe · repeat", "handeln · prüfen · weiter"))}</text>
+  {box(12, 213, 96, 46, L(T("Context", "Kontext")), L(T("what it sees", "was es sieht")))}
+  {box(252, 213, 96, 46, L(T("Checks", "Prüfungen")), L(T("tests, linter", "Tests, Linter")))}
+  {box(100, 344, 160, 46, L(T("Guardrails", "Leitplanken")), L(T("permissions, sandbox", "Rechte, Sandbox")))}
+  <path class="ln" d="M180 412V422" marker-start="url(#hna)" {m}/>
+  {box(110, 426, 140, 44, L(T("Environment", "Umgebung")), L(T("code, files, apps", "Code, Dateien, Apps")))}
+</svg>'''
+    return side_fig(svg, 360, T("Agent = model + harness. The model brings the language and the judgement; the harness brings everything else. Claude Code, Codex and Cursor are harnesses — with the same model inside they can still perform very differently.",
+                                "Agent = Modell + Harness. Das Modell bringt Sprache und Urteilsvermögen, der Harness alles andere. Claude Code, Codex und Cursor sind Harnesses — mit demselben Modell darin können sie trotzdem sehr unterschiedlich gut arbeiten."), lang,
+                    source=src("after", _RK["trivedy"]))
+
+
+# =====================================================================
+# 03 · Making output reliable (case study)
+# =====================================================================
+
+def dia_pipeline(lang, stage):
+    """Slides 46 + 67 merged: description → (few-shot) LLM → model → parser ✓ / ✗ with the error message →
+    generator → application. Stage 1 (#check) greys out the generator part; stage 2 (#app) shows all of it.
+    360 wide: fits a phone as it is."""
+    L = lambda x: x[lang]
+    m, ma = 'marker-end="url(#pp' + str(stage) + ')"', 'marker-end="url(#pp' + str(stage) + 'a)"'
+    later = ' class="pp-later"' if stage == 1 else ""
+    svg = f'''<svg class="dia pp" viewBox="0 0 360 470" role="img" aria-label="{L(T("Pipeline: an informal description and a few example pairs go to the LLM, which writes a class diagram; a parser checks it and sends it back with the error message if it is invalid; a valid model goes to a generator, which produces the web application.", "Pipeline: Eine informelle Beschreibung und einige Beispielpaare gehen an das LLM, das ein Klassendiagramm schreibt; ein Parser prüft es und schickt es bei Fehlern mit der Fehlermeldung zurück; ein gültiges Modell geht an einen Generator, der die Web-Anwendung erzeugt."))}">
+  {_arrow_defs("pp" + str(stage))}
+  {box(0, 0, 190, 60, L(T("Description", "Beschreibung")), L(T("“A library lends books", "„Eine Bibliothek verleiht")), sub2=L(T("to its members.”", "Bücher an Mitglieder.“")))}
+  <path class="ln" d="M95 60V84" {m}/>
+  {box(240, 88, 120, 50, L(T("Examples", "Beispiele")), L(T("few-shot pairs", "Few-Shot-Paare")))}
+  <path class="ln" d="M240 104H194" {m}/>
+  {box(0, 88, 190, 50, "LLM", L(T("writes the model", "schreibt das Modell")), cls="box hl")}
+  <path class="ln hl" d="M95 138V164" {ma}/>
+  {box(0, 168, 190, 56, L(T("Model", "Modell")), L(T("class diagram · CD4A", "Klassendiagramm · CD4A")), cls="box hl")}
+  <text x="232" y="194" class="s">{L(T("people can read", "Menschen können es"))}</text><text x="232" y="208" class="s">{L(T("and check it", "lesen und prüfen"))}</text>
+  <path class="ln" d="M95 224V250" {m}/>
+  {box(0, 254, 190, 50, "Parser", L(T("valid?", "gültig?")))}
+  <path class="ln dash-opt" d="M190 279H216V122H194" {m}/>
+  <text x="224" y="270" class="s a">✗ {L(T("error message", "Fehlermeldung"))}</text>
+  <text x="224" y="284" class="s">{L(T("→ try again", "→ neuer Versuch"))}</text>
+  <path class="ln hl" d="M95 304V330" {ma}/><text x="104" y="322" class="t a">✓</text>
+  <g{later}>
+    {box(0, 334, 190, 50, "Generator", "MontiGem")}
+    <text x="232" y="356" class="s">{L(T("deterministic,", "deterministisch,"))}</text><text x="232" y="370" class="s">{L(T("tested code", "getesteter Code"))}</text>
+    <path class="ln" d="M95 384V410" {m}/>
+    {box(0, 414, 190, 50, L(T("Application", "Anwendung")), L(T("web app", "Web-App")))}
+  </g>
+</svg>'''
+    if stage == 1:
+        cap = T("Free text becomes a model in a modelling language. A few example pairs teach the LLM the language; a parser — not the LLM — decides whether the result can be used. The generator part follows in section 3.4.",
+                "Aus Freitext wird ein Modell in einer Modellierungssprache. Einige Beispielpaare bringen dem LLM die Sprache bei; ein Parser — nicht das LLM — entscheidet, ob das Ergebnis verwendbar ist. Der Generator-Teil folgt in Abschnitt 3.4.")
+        return side_fig(svg, 360, cap, lang, source=src("after", "BDMN+24"))
+    cap = T("The whole pipeline. The LLM only turns language into a model; everything after the model is deterministic, tested generator code.",
+            "Die ganze Pipeline. Das LLM übersetzt nur Sprache in ein Modell; alles nach dem Modell ist deterministischer, getesteter Generator-Code.")
+    return side_fig(svg, 360, cap, lang, source=src("after", "NMR24"))
+
+
+# Grammar masking, stepped: first JSON (every developer knows it), then CD4A (the case study). Each step:
+# (state before, state after, candidates (token, p, allowed by the grammar), chosen token). Greedy: the chosen
+# token is the most likely allowed one (checked below).
+GM = {
+    "json": {
+        "states": {"start": (T("before the first token", "vor dem ersten Token"), T("{  (the grammar asks for an object)", "{  (die Grammatik verlangt ein Objekt)")),
+                   "key": (T("in the object › a key", "im Objekt › ein Schlüssel"), T('a key in "…"  ·  }', 'ein Schlüssel in "…"  ·  }')),
+                   "val": (T("after a key › a value", "nach einem Schlüssel › ein Wert"), T('"text"  ·  number  ·  true / false  ·  null  ·  {  ·  [', '"Text"  ·  Zahl  ·  true / false  ·  null  ·  {  ·  [')),
+                   "next": (T("after a value › more, or close", "nach einem Wert › weiter oder schließen"), T(",  ·  }", ",  ·  }")),
+                   "key2": (T("after a comma › a key", "nach einem Komma › ein Schlüssel"), T('a key in "…"  (no } after a comma)', 'ein Schlüssel in "…"  (kein } nach einem Komma)')),
+                   "done": (T("the object is closed", "das Objekt ist geschlossen"), T("only the end", "nur noch das Ende")),
+                   "end": (T("✓ valid JSON", "✓ gültiges JSON"), T("—", "—"))},
+        "steps": [("start", "key", [("Here", .41, 0), ("```json", .27, 0), ("{", .22, 1), ("Sure", .07, 0), ("[", .03, 0)], "{"),
+                  ("key", "val", [("title:", .38, 0), ('"title":', .35, 1), ("'title':", .14, 0), ('"name":', .08, 1), ("}", .05, 1)], '"title":'),
+                  ("val", "next", [('"Dune"', .62, 1), ("Dune", .21, 0), ("'Dune'", .09, 0), ("null", .05, 1), ("unknown", .03, 0)], '"Dune"'),
+                  ("next", "key2", [(",", .71, 1), ("}", .20, 1), (";", .05, 0), (".", .04, 0)], ","),
+                  ("key2", "val", [('"pages":', .52, 1), ('"author":', .31, 1), ("pages:", .12, 0), ("}", .05, 0)], '"pages":'),
+                  ("val", "next", [("412", .48, 1), ('"412"', .30, 1), ("four", .12, 0), ("~400", .06, 0), ("NaN", .04, 0)], "412"),
+                  ("next", "done", [("<|END|>", .45, 0), ("}", .33, 1), (",", .17, 1), ("//", .05, 0)], "}"),
+                  ("done", "end", [("```", .52, 0), ("<|END|>", .30, 1), ("This", .13, 0), (",", .05, 0)], "<|END|>")]},
+    "cd4a": {
+        "states": {0: (T("before the first token", "vor dem ersten Token"), "classdiagram"),
+                   1: (T("after classdiagram › a name", "nach classdiagram › ein Name"), T("a name", "ein Name")),
+                   2: (T("after the name › {", "nach dem Namen › {"), "{"),
+                   3: (T("in the diagram › class, or }", "im Diagramm › class oder }"), "class  ·  }"),
+                   4: (T("after class › a name", "nach class › ein Name"), T("a name", "ein Name")),
+                   5: (T("after the class name › {", "nach dem Klassennamen › {"), "{"),
+                   6: (T("in a class › a type, or }", "in einer Klasse › ein Typ oder }"), T("a type  ·  }", "ein Typ  ·  }")),
+                   7: (T("after a type › a name", "nach einem Typ › ein Name"), T("a name", "ein Name")),
+                   8: (T("after a name › ;", "nach einem Namen › ;"), ";"),
+                   9: (T("all braces closed › the end", "alle Klammern zu › das Ende"), "<|END|>"),
+                   10: (T("✓ the model parses", "✓ das Modell parst"), "—")},
+        "steps": [(0, 1, [("Here", .38, 0), ("classdiagram", .30, 1), ("```", .16, 0), ("Sure", .10, 0), ("class", .06, 0)], "classdiagram"),
+                  (1, 2, [("Library", .52, 1), ("{", .18, 0), (":", .12, 0), ('"Library"', .10, 0), ("City", .08, 1)], "Library"),
+                  (2, 3, [("{", .64, 1), ("(", .17, 0), (":", .11, 0), ("->", .05, 0), (";", .03, 0)], "{"),
+                  (3, 4, [("class", .46, 1), ("Book", .24, 0), ("table", .14, 0), ("<!--", .09, 0), ("}", .07, 1)], "class"),
+                  (4, 5, [("Book", .78, 1), ("{", .10, 0), ("(", .06, 0), (":", .04, 0), ("Books", .02, 1)], "Book"),
+                  (5, 6, [("(", .41, 0), ("{", .39, 1), (":", .10, 0), ("->", .06, 0), (";", .04, 0)], "{"),
+                  (6, 7, [("-", .34, 0), ("String", .30, 1), ("+", .14, 0), ("int", .12, 1), ("}", .10, 1)], "String"),
+                  (7, 8, [("title", .72, 1), (":", .12, 0), ("=", .08, 0), ("[", .05, 0), (";", .03, 0)], "title"),
+                  (8, 6, [(",", .38, 0), (";", .36, 1), ("=", .12, 0), (":", .08, 0), ("}", .06, 0)], ";"),
+                  (6, 3, [("}", .48, 1), ("int", .22, 1), ("String", .14, 1), ("-", .10, 0), ("<!--", .06, 0)], "}"),
+                  (3, 9, [("<|END|>", .44, 0), ("}", .31, 1), ("class", .17, 1), ("```", .05, 0), ("Here", .03, 0)], "}"),
+                  (9, 10, [("<|END|>", .58, 1), ("```", .20, 0), ("This", .14, 0), ("}", .05, 0), ("class", .03, 0)], "<|END|>")]},
+}
+for _g in GM.values():
+    for _a, _b, _c, _pick in _g["steps"]:
+        assert abs(sum(p for _, p, _ in _c) - 1) < 1e-9 and _pick == max((c for c in _c if c[2]), key=lambda c: c[1])[0], (_a, _pick)
+        assert _a in _g["states"] and _b in _g["states"]
+assert GM["json"]["steps"][0][2][0][2] == 0 and GM["json"]["steps"][-2][2][0][0] == "<|END|>"   # the mask matters at the start and the end
+
+
+def dia_grammar_mask(lang):
+    """Slides 48–52: grammar masking, stepped (assets/ai4se.js): the LLM proposes, the grammar removes, the most
+    likely remaining token is appended. Two grammars: JSON first, CD4A (the library model) as the case study.
+    No automaton drawing: a "where am I" line and the allowed tokens say the same in words, and fit a phone."""
+    L = lambda x: x[lang]
+    v = lambda x: L(x) if isinstance(x, dict) else x
+    data = {"g": {name: {"states": {str(s): [v(a), v(b)] for s, (a, b) in g["states"].items()},
+                         "steps": [{"from": str(a), "to": str(b), "cands": [[t, p, bool(ok)] for t, p, ok in c], "pick": pick} for a, b, c, pick in g["steps"]]}
+                  for name, g in GM.items()},
+            "words": {k: L(x) for k, x in dict(
+                p0=T("1 · The LLM proposes the next token. It knows nothing about the grammar.", "1 · Das LLM schlägt das nächste Token vor. Von der Grammatik weiß es nichts."),
+                p1=T("2 · The grammar removes what cannot follow here; the most likely remaining token is appended.", "2 · Die Grammatik streicht, was hier nicht folgen kann; das wahrscheinlichste verbleibende Token wird angehängt."),
+                would=T("Without the mask the model would have written", "Ohne Maske hätte das Modell geschrieben"),
+                masked=T("removed", "gestrichen"),
+                agree=T("Here the most likely token was allowed anyway.", "Hier war das wahrscheinlichste Token ohnehin erlaubt."),
+                where=T("where", "wo"), allowed=T("allowed here", "hier erlaubt"), stack=T("open braces", "offene Klammern"), none=T("none", "keine"),
+                step=T("token", "Token"), of=T("of", "von")).items()}}
+    chips = (f'<button type="button" class="first" aria-pressed="true" data-g="json">JSON</button>'
+             f'<button type="button" aria-pressed="false" data-g="cd4a">{L(T("CD4A · the library", "CD4A · die Bibliothek"))}</button>')
+    inner = f'''<div class="gm-head"><span class="k mono">{L(T("GRAMMAR", "GRAMMATIK"))}</span><span class="chips">{chips}</span></div>
+<div class="gm-stage">
+  <div class="gm-code"><span class="k mono">{L(T("THE OUTPUT SO FAR", "DIE AUSGABE BIS HIER"))}</span><pre class="mono"><code></code><span class="nt-cur" aria-hidden="true">▌</span></pre>
+    <p class="gm-status mono"><span class="gm-where"></span><span class="gm-allowed"></span><span class="gm-stack"></span></p></div>
+  <div class="gm-cands"><span class="k mono">{L(T("NEXT-TOKEN CANDIDATES", "KANDIDATEN FÜR DAS NÄCHSTE TOKEN"))}</span><ol class="bars mono"></ol><p class="gm-phase mono" aria-live="polite"></p></div>
+</div>{controls(lang)}'''
+    return demo("gm", data, inner, T(
+        "Constrained decoding, token by token: the LLM proposes, the grammar removes what cannot follow, the most likely remaining token is appended (here always the top one; sampling works the same way). The model can only stop when every brace is closed.",
+        "Constrained Decoding, Token für Token: Das LLM schlägt vor, die Grammatik streicht, was nicht folgen kann, das wahrscheinlichste verbleibende Token wird angehängt (hier immer das oberste; mit Ziehen funktioniert es genauso). Aufhören kann das Modell erst, wenn jede Klammer geschlossen ist."), lang,
+        source=src("illustrative", note=T("made-up probabilities", "ausgedachte Wahrscheinlichkeiten")))
+
+
+MASK_ROWS = [("Llama 3 8B · 4-bit", 416, 991, 5.71, 918, 991, 74.10), ("Phi-3 Mini · 4-bit", 357, 976, 4.63, 849, 976, 138.29),
+             ("Gemma 7B · 4-bit", 2, 658, 2.46, 612, 658, 54.20), ("Mistral 7B · 3-bit", 190, 905, 4.89, 836, 905, 73.59)]
+_without = [a / b * 100 for _, a, b, *_ in MASK_ROWS]
+_with = [c / d * 100 for *_, c, d, _ in MASK_ROWS]
+_slower = [t1 / t0 for *_, t0, _, _, t1 in MASK_ROWS]
+assert round(min(_with)) == 87 and round(max(_with)) == 93                 # text: "87 to 93 %"
+assert round(min(_without), 1) == .3 and round(max(_without)) == 42        # text: "0.3 to 42 %"
+assert round(min(_slower)) == 13 and round(max(_slower)) == 30             # text: "13 to 30 times slower"
+
+
+def masking_table(lang):
+    """Slide 53 / [NRR24]: share of parsing CD4A models, without and with grammar masking. Gemma is the hero row."""
+    L = lambda x: x[lang]
+    fmt = (lambda n: f"{n:,.1f}".replace(",", "X").replace(".", ",").replace("X", ".")) if lang == "de" else (lambda n: f"{n:,.1f}")
+    body = "".join(f'<tr{" class=\"hero\"" if name.startswith("Gemma") else ""}><td>{name}</td><td class="n">{fmt(a / b * 100)} %</td><td class="n hl">{fmt(c / d * 100)} %</td><td class="n faint">{fmt(t0)} s → {fmt(t1)} s</td></tr>'
+                   for name, a, b, t0, c, d, t1 in MASK_ROWS)
+    head = (f'<tr><th>{L(T("Model", "Modell"))}</th><th class="n">{L(T("valid without mask", "gültig ohne Maske"))}</th>'
+            f'<th class="n">{L(T("valid with mask", "gültig mit Maske"))}</th><th class="n">{L(T("time per model", "Zeit pro Modell"))}</th></tr>')
+    from article_common import source_line
+    cap = T("Share of generated class diagrams that parse, for about 1,000 modelling tasks from a third-semester exam. Gemma goes from almost never to 93 %. For comparison, GPT-4o without masking: 76 % (100 tasks).",
+            "Anteil der erzeugten Klassendiagramme, die parsen, für rund 1.000 Modellierungsaufgaben aus einer Klausur im dritten Semester. Gemma springt von fast nie auf 93 %. Zum Vergleich GPT-4o ohne Masking: 76 % (100 Aufgaben).")
+    return (f'<figure class="media art-fig"><div class="tbl-wrap"><table class="tbl mono mask-tbl">{head}{body}</table></div>'
+            f'<figcaption class="mono">{cap[lang]}{source_line(src("data", "NRR24"), lang)}</figcaption></figure>')
+
+
 def curious(lang, body, title=None):
-    """A collapsed box for the curious: depth that the main text does without."""
-    t = (title or T("For the curious", "Für Neugierige"))[lang]
+    """A collapsed box for the curious: depth that the main text does without. The summary is always
+    "For the curious · <topic>": pass the topic only as title (a T()); without a title only the eyebrow shows."""
+    k = T("For the curious", "Für Neugierige")[lang]
+    t = f'<span class="cu-k">{k}</span>' + (f'<span class="cu-t">{title[lang]}</span>' if title else "")
     return f'<details class="curious"><summary class="mono">{t}</summary>{body[lang]}</details>'
 
 
@@ -604,197 +771,174 @@ def body(lang, A):
             ("MontiCore Expert", "https://chatgpt.com/g/g-Pgayc5wzx-monticore-expert", T("questions on MontiCore", "Fragen zu MontiCore"))]
     tries = "".join(f'<li><a href="{u}" target="_blank" rel="noopener">{n} ↗</a><span class="mono faint">{L(d)}</span></li>' for n, u, d in gpts)
     kennel = ('classdiagram ' + L(T("KennelModel", "HundehüttenModell")) + ' {\n  class ' + L(T("Kennel", "Hundehütte")) + ' {\n    String ' + L(T("location", "standort")) + ';\n    double ' + L(T("width", "breite")) + ';\n    double ' + L(T("length", "länge")) + ';\n    double ' + L(T("height", "höhe")) + ';\n  }\n  class ' + L(T("Dog", "Hund")) + ' {\n    String name;\n    String ' + L(T("breed", "rasse")) + ';\n    int ' + L(T("age", "alter")) + ';\n  }\n  association [1] ' + L(T("Kennel", "Hundehütte")) + ' -> (' + L(T("resident", "bewohner")) + ') ' + L(T("Dog", "Hund")) + ' [*];\n}')
-    S = []          # (id, level, heading, html): level 2 = chapter (listed at the top), 3 = sub chapter, 0 = no heading
+    ex2024 = L(T("2024 example", "Beispiel von 2024"))
+    hook = ('{\n  "Book":   { "title": "string", "pages": "int" },\n  "Member": { "name": "string" },\n  "Loan":   { "due": "date", "book": "Book" }\n'
+            + '<span class="hook-miss">' + L(T("  ← one closing brace short", "  ← eine schließende Klammer fehlt")) + '</span>')
+    S = []          # (id, level, heading, html[, nav]): level 2 = chapter, 3 = sub chapter, 1 = closing chapter, 0 = no heading
     S.append(("intro", 0, None, L(T(
-        f"""<p>Artificial intelligence is not a new topic. As early as 1950, Alan Turing introduced what would later be called the Turing test in his paper <i>Computing Machinery and Intelligence</i> {ref(1)}. Less than a decade later, the first neural networks followed {ref(2)}.</p>
-<blockquote class="epigraph"><p>I propose to consider the question, “Can machines think?”</p><footer class="mono">Alan M. Turing · Computing Machinery and Intelligence, 1950</footer></blockquote>
-<p>It took several more decades until 2017 laid the foundations for large language models (LLMs) {ref(3)}. Because they handle natural language so well, LLMs can be used for almost anything. You need not be an AI specialist or a computer scientist to work with them: an LLM places hardly any restrictions on its input and grasps its meaning remarkably well.</p>""",
-        f"""<p>Künstliche Intelligenz ist kein neues Thema. Schon 1950 stellt Alan Turing in seinem Aufsatz <i>Computing Machinery and Intelligence</i> {ref(1)} den später nach ihm benannten Turing-Test vor. Kein Jahrzehnt später folgen die ersten neuronalen Netze {ref(2)}.</p>
-<blockquote class="epigraph"><p>I propose to consider the question, “Can machines think?”</p><footer class="mono">Alan M. Turing · Computing Machinery and Intelligence, 1950</footer></blockquote>
-<p>Es dauert wiederum einige Jahrzehnte, bis 2017 die Grundlagen für große Sprachmodelle (Large Language Models, LLMs) gelegt werden {ref(3)}. Weil sie natürliche Sprache so gut verarbeiten, sind LLMs sehr vielseitig einsetzbar. Man muss weder KI-Spezialist noch Informatiker sein, um mit ihnen zu arbeiten: Ein LLM stellt kaum Anforderungen an die Eingabe und erfasst ihre Bedeutung erstaunlich gut.</p>"""))
-        + chat(lang, [("user", L(T("Why are ghosts such bad liars?", "Warum können Gespenster so schlecht lügen?"))),
-                      ("ChatGPT", L(T("Because you can see right through them!", "Weil sie leicht zu durchschauen sind!")))], "GPT-4 · " + L(T("April 2024", "April 2024")))
-        + L(T("<p>Three questions follow, and they give this article its three parts: how does such a model work? Which terms do you need to talk about it — up to agents and harnesses? And where can we put it to productive use in software engineering, with models?</p>",
-              "<p>Daraus ergeben sich drei Fragen, und sie geben diesem Artikel seine drei Teile: Wie funktioniert so ein Modell? Welche Begriffe braucht man, um darüber zu sprechen — bis hin zu Agenten und Harnesses? Und wo können wir es in der Softwareentwicklung produktiv einsetzen, mit Modellen?</p>"))))
+        """<p>Ask a chatbot for the data model of a small library app — books, members, loans — as JSON. What comes back looks right at first glance. Hand it to a program, and sometimes it fails: a closing brace is missing, a key has lost its quotes, or a friendly sentence comes before the JSON.</p>""",
+        """<p>Bitten Sie einen Chatbot um das Datenmodell einer kleinen Bibliotheks-App — Bücher, Mitglieder, Ausleihen — als JSON. Was zurückkommt, sieht auf den ersten Blick richtig aus. Gibt man es einem Programm, scheitert es manchmal: Eine schließende Klammer fehlt, ein Schlüssel hat seine Anführungszeichen verloren, oder vor dem JSON steht ein freundlicher Satz.</p>"""))
+        + f'<figure class="media art-fig hook"><pre class="art-pre mono">{hook}</pre><figcaption class="mono">{L(T("Almost right is not good enough for a program.", "Fast richtig reicht einem Programm nicht."))}<span class="src">{L(T("Illustrative", "Illustrativ"))}</span></figcaption></figure>'
+        + L(T("""<p>This article answers three questions about it. How does a language model produce such text? Why is it sometimes wrong — and just as confident when it is? And how do we make its output reliably right, so that a program, such as the generators of <a href="research-mde.html">part 1</a>, can build on it?</p>""",
+              """<p>Dieser Artikel beantwortet drei Fragen dazu. Wie erzeugt ein Sprachmodell solchen Text? Warum liegt es manchmal falsch — und klingt dabei genauso sicher? Und wie machen wir seine Ausgabe verlässlich richtig, sodass ein Programm, etwa die Generatoren aus <a href="research-mde.html">Teil 1</a>, darauf aufbauen kann?</p>"""))))
 
-    # ---------------- 01 How an LLM works ----------------
-    S.append(("llm", 2, T("How an LLM works", "Wie ein LLM funktioniert"), L(T(
-        "<p>An LLM is a neural network that has learned one thing extremely well: to continue a text. Everything else — answering, translating, writing code — follows from that.</p>",
-        "<p>Ein LLM ist ein neuronales Netz, das eine Sache außerordentlich gut gelernt hat: einen Text fortzusetzen. Alles andere — antworten, übersetzen, Code schreiben — folgt daraus.</p>"))))
-    S.append(("neural", 3, T("How a neural network decides", "Wie ein neuronales Netz entscheidet"), L(T(
-        "<p>The basis of every LLM is a neural network. The idea is easiest to see with a picture: is this a dog or a cat? The network does not see a dog, only pixel values. Each pixel is an input; each input is connected to neurons with a weight; each neuron adds up its weighted inputs and passes the result through an activation function to the next layer. At the end, two output neurons compete — “dog” and “cat”. During training, the weights are adjusted over many examples until the right neuron wins.</p>",
-        "<p>Die Grundlage jedes LLMs ist ein neuronales Netz. Am einfachsten sieht man die Idee an einem Bild: Ist das ein Hund oder eine Katze? Das Netz sieht keinen Hund, nur Pixelwerte. Jeder Pixel ist eine Eingabe; jede Eingabe ist über ein Gewicht mit Neuronen verbunden; jedes Neuron summiert seine gewichteten Eingaben und gibt das Ergebnis über eine Aktivierungsfunktion an die nächste Schicht weiter. Am Ende konkurrieren zwei Ausgabeneuronen — „Hund“ und „Katze“. Beim Training werden die Gewichte über viele Beispiele so angepasst, bis das richtige Neuron gewinnt.</p>"))
+    # ---------------- 01 What an LLM does ----------------
+    S.append(("llm", 2, T("What an LLM does", "Was ein LLM tut"), L(T(
+        "<p>An LLM — a large language model — has learned one thing extremely well: to continue a text. Answering, translating and writing code all follow from that. This chapter goes from the outside in: first what you see in the chat window, then what happens inside.</p>",
+        "<p>Ein LLM — ein großes Sprachmodell (Large Language Model) — hat eine Sache außerordentlich gut gelernt: einen Text fortzusetzen. Antworten, übersetzen, Code schreiben — alles folgt daraus. Dieses Kapitel geht von außen nach innen: erst, was man im Chatfenster sieht, dann, was darin passiert.</p>"))))
+    S.append(("tokens", 3, T("One token at a time", "Token für Token"), L(T(
+        f"<p>To answer, an LLM does one thing over and over: given the text so far, it computes how likely each possible next piece of text is. Such a piece is called a <i>token</i> — a word, part of a word or a punctuation mark. One token is drawn, appended, and the whole text goes in again {r('wolfram')}:</p>",
+        f"<p>Um zu antworten, macht ein LLM immer wieder nur eines: Zum bisherigen Text berechnet es, wie wahrscheinlich jedes mögliche nächste Textstück ist. So ein Stück heißt <i>Token</i> — ein Wort, ein Wortteil oder ein Satzzeichen. Ein Token wird gezogen, angehängt, und der ganze Text geht erneut hinein {r('wolfram')}:</p>"))
+        + dia_next_token(lang)
+        + L(T("<p>Why not always take the most likely token? Because then the text tends to become flat and repetitive; a little randomness makes it livelier. The price: the same prompt can give different answers, and nothing in the output says <i>why</i> a token was chosen. The <i>temperature</i> sets how much randomness there is — turn it up, and the variety grows, first in the wording, then in the facts.</p>",
+              "<p>Warum nicht immer das wahrscheinlichste Token? Weil der Text dann eher flach und repetitiv wird; ein wenig Zufall macht ihn lebendiger. Der Preis: Derselbe Prompt kann unterschiedliche Antworten liefern, und nichts in der Ausgabe verrät, <i>warum</i> ein Token gewählt wurde. Die <i>Temperatur</i> regelt, wie viel Zufall im Spiel ist — dreht man sie hoch, wächst die Vielfalt, erst in der Formulierung, dann in den Fakten.</p>"))
+        + curious(lang, T(f"""<ul class="pts"><li><b>Where tokens come from.</b> The vocabulary is not designed by hand. <i>Byte-pair encoding</i> starts from single characters and keeps merging the most frequent neighbouring pair into a new token {r('sennrich')}. Frequent words end up as one token, rare ones as several pieces. That is also why LLMs are clumsy at counting letters: they never see the letters.</li><li><b>Temperature.</b> The model actually outputs a score per token; the probabilities come from them by a <i>softmax</i>, after dividing every score by the temperature. Below 1 the likely tokens get even likelier; above 1 the distribution flattens and rare tokens get a chance. At temperature 0 the most likely token is always taken.</li><li><b>Top-k and top-p.</b> Most systems also cut off the long tail before drawing: only the k best tokens, or only the smallest set whose probabilities add up to p (“nucleus sampling”) {r('holtzman')}. That keeps the variety of sampling without the occasional absurd token. The demo above keeps only the candidates it shows.</li></ul>""",
+                          f"""<ul class="pts"><li><b>Woher die Tokens kommen.</b> Das Vokabular entwirft niemand von Hand. <i>Byte-Pair-Encoding</i> beginnt mit einzelnen Zeichen und verschmilzt immer wieder das häufigste benachbarte Paar zu einem neuen Token {r('sennrich')}. Häufige Wörter werden ein Token, seltene mehrere Stücke. Deshalb tun sich LLMs auch schwer, Buchstaben zu zählen: Sie sehen die Buchstaben nie.</li><li><b>Temperatur.</b> Eigentlich gibt das Modell pro Token einen Wert aus; die Wahrscheinlichkeiten entstehen daraus per <i>Softmax</i>, nachdem jeder Wert durch die Temperatur geteilt wurde. Unter 1 werden die wahrscheinlichen Tokens noch wahrscheinlicher; über 1 wird die Verteilung flacher, und seltene Tokens bekommen eine Chance. Bei Temperatur 0 wird immer das wahrscheinlichste Token genommen.</li><li><b>Top-k und Top-p.</b> Die meisten Systeme schneiden vor dem Ziehen außerdem den langen Schwanz ab: nur die k besten Tokens, oder nur die kleinste Menge, deren Wahrscheinlichkeiten zusammen p ergeben („Nucleus Sampling“) {r('holtzman')}. So bleibt die Vielfalt des Ziehens, ohne gelegentliches absurdes Token. Die Demo oben zieht nur unter den gezeigten Kandidaten.</li></ul>"""),
+                  T("Tokens and sampling", "Tokens und Ziehen"))))
+    S.append(("embeddings", 3, T("Words become numbers: embeddings", "Aus Wörtern werden Zahlen: Embeddings"), L(T(
+        "<p>Inside, the model works with numbers, not words. Every token becomes a vector — a long list of numbers — called an <i>embedding</i>. Embeddings are learned so that words with similar meaning end up close together:</p>",
+        "<p>Im Inneren arbeitet das Modell mit Zahlen, nicht mit Wörtern. Jedes Token wird zu einem Vektor — einer langen Zahlenliste —, dem <i>Embedding</i>. Embeddings werden so gelernt, dass Wörter mit ähnlicher Bedeutung nah beieinander landen:</p>"))
+        + dia_embeddings(lang)
+        + L(T("<p>The same works for whole sentences: a sentence about a happy dog and one about a playful hound land close together, although they share no word. That makes <i>semantic search</i> possible — finding a passage by what it means, not by its exact words. Chapter 02 builds on it.</p>",
+              "<p>Das funktioniert auch für ganze Sätze: Ein Satz über einen fröhlichen Hund und einer über einen verspielten Vierbeiner landen nah beieinander, obwohl sie kein Wort teilen. Das ermöglicht <i>semantische Suche</i> — eine Stelle nach ihrer Bedeutung finden, nicht nach ihren genauen Wörtern. Kapitel 02 baut darauf auf.</p>"))
+        + curious(lang, T(f"""<ul class="pts"><li><b>How many dimensions?</b> The figure has two; real embeddings have hundreds to thousands — GPT-3 works with 12,288 numbers per token {r('brown')}. Nobody chose what each number means; the axes are whatever the training found useful.</li><li><b>Close means similar.</b> Closeness is usually measured as the angle between two vectors (cosine similarity), not their distance — a long and a short text on the same topic point the same way.</li><li><b>Arithmetic with meaning.</b> In word embeddings of 2013, the vector of <i>king</i> minus <i>man</i> plus <i>woman</i> landed closest to <i>queen</i> {r('mikolov')}.</li></ul>""",
+                          f"""<ul class="pts"><li><b>Wie viele Dimensionen?</b> Die Abbildung hat zwei; echte Embeddings haben Hunderte bis Tausende — GPT-3 arbeitet mit 12.288 Zahlen pro Token {r('brown')}. Niemand hat festgelegt, was jede Zahl bedeutet; die Achsen sind, was das Training nützlich fand.</li><li><b>Nah heißt ähnlich.</b> Nähe misst man meist als Winkel zwischen zwei Vektoren (Kosinus-Ähnlichkeit), nicht als Abstand — ein langer und ein kurzer Text zum selben Thema zeigen in dieselbe Richtung.</li><li><b>Rechnen mit Bedeutung.</b> In Wort-Embeddings von 2013 lag der Vektor <i>king</i> minus <i>man</i> plus <i>woman</i> am nächsten an <i>queen</i> {r('mikolov')}.</li></ul>"""),
+                  T("Dimensions and distance", "Dimensionen und Abstand")), T("Embeddings", "Embeddings")))
+    S.append(("neural", 3, T("Inside: a neural network", "Im Inneren: ein neuronales Netz"), L(T(
+        f"<p>What turns those numbers into the next token is a neural network. The idea is older than it looks — the first one, the perceptron, dates from 1958 {r('rosenblatt')} — and easiest to see with a picture: is this a dog or a cat?</p><p>The network does not see a dog, only pixel values, one number per input. Every connection has a <i>weight</i>: a number saying how much one input counts. Each neuron adds up its weighted inputs; if the sum is negative, it stays silent. At the end, two output neurons compete.</p>",
+        f"<p>Was aus diesen Zahlen das nächste Token macht, ist ein neuronales Netz. Die Idee ist älter, als sie aussieht — das erste, das Perzeptron, stammt von 1958 {r('rosenblatt')} — und am einfachsten an einem Bild zu sehen: Ist das ein Hund oder eine Katze?</p><p>Das Netz sieht keinen Hund, nur Pixelwerte, eine Zahl pro Eingabe. Jede Verbindung hat ein <i>Gewicht</i>: eine Zahl, die sagt, wie viel eine Eingabe zählt. Jedes Neuron summiert seine gewichteten Eingaben; ist die Summe negativ, bleibt es still. Am Ende konkurrieren zwei Ausgabeneuronen.</p>"))
         + dia_neural_net(lang, A)
-        + L(T(f"<p>For scale: the roundworm <i>C. elegans</i> gets by with 302 neurons and about 7,000 synaptic connections. GPT-3 has 175 billion weights {ref(8)}; current LLMs are on the order of a trillion.</p>",
-              f"<p>Zum Vergleich: Der Fadenwurm <i>C. elegans</i> kommt mit 302 Neuronen und rund 7.000 synaptischen Verbindungen aus. GPT-3 hat 175 Milliarden Gewichte {ref(8)}; aktuelle LLMs liegen in der Größenordnung von einer Billion.</p>"))
-        + curious(lang, T(f"""<ul class="pts"><li><b>How the weights move.</b> After each example the network compares its output with the right answer. <i>Backpropagation</i> works out, layer by layer from the back, how much each weight contributed to the error {ref(13)}; every weight is then nudged a tiny step in the direction that makes the error smaller (gradient descent). Repeat that billions of times.</li><li><b>Pre-training.</b> An LLM needs no labelled pictures: the right answer is simply the next token of a real text. That is why it can learn from almost everything ever written {ref(5)}.</li><li><b>Becoming an assistant.</b> A pre-trained model only continues text. Chat models get a second phase: people rank answers, a reward model learns those preferences, and the LLM is tuned towards them (RLHF). In the InstructGPT study, people preferred the answers of a tuned model with 1.3 billion weights over those of GPT-3 with 175 billion {ref(14)}.</li></ul>""",
-                          f"""<ul class="pts"><li><b>Wie sich die Gewichte bewegen.</b> Nach jedem Beispiel vergleicht das Netz seine Ausgabe mit der richtigen Antwort. <i>Backpropagation</i> rechnet Schicht für Schicht von hinten aus, wie viel jedes Gewicht zum Fehler beigetragen hat {ref(13)}; dann wird jedes Gewicht ein winziges Stück in die Richtung verschoben, die den Fehler kleiner macht (Gradientenabstieg). Das Ganze milliardenfach.</li><li><b>Pre-Training.</b> Ein LLM braucht keine beschrifteten Bilder: Die richtige Antwort ist einfach das nächste Token eines echten Textes. Deshalb kann es aus fast allem lernen, was je geschrieben wurde {ref(5)}.</li><li><b>Vom Textfortsetzer zum Assistenten.</b> Ein vortrainiertes Modell setzt nur Text fort. Chat-Modelle bekommen eine zweite Phase: Menschen bewerten Antworten, ein Belohnungsmodell lernt diese Vorlieben, und das LLM wird darauf hin angepasst (RLHF). In der InstructGPT-Studie zogen Menschen die Antworten eines so angepassten Modells mit 1,3 Milliarden Gewichten denen von GPT-3 mit 175 Milliarden vor {ref(14)}.</li></ul>"""))))
-    S.append(("genai", 3, T("Generative AI and the transformer", "Generative KI und der Transformer"), L(T(
-        """<p>Generative AI means systems trained to create content that is hard to tell apart from human work — text, images, music and even code. Examples are GPT-4 (Generative Pretrained Transformer) for text, DALL-E for images and Codex for programming. All of them rest on the transformer architecture.</p>
-<p>Two aspects make the difference. First, the neural network is trained on text in a way that captures not only the position of words but how they relate to each other. That lets a GPT resolve references — including implicit ones:</p>""",
-        """<p>Generative KI meint Systeme, die darauf trainiert sind, Inhalte zu erzeugen, die von menschlichen kaum zu unterscheiden sind — Texte, Bilder, Musik und sogar Code. Beispiele sind GPT-4 (Generative Pretrained Transformer) für Text, DALL-E für Bilder und Codex für die Programmierung. Sie alle beruhen auf der Transformer-Architektur.</p>
-<p>Zwei Aspekte sind ausschlaggebend. Erstens wird das neuronale Netz so auf Texten trainiert, dass es nicht nur die Position der Wörter erfasst, sondern auch ihren Bezug zueinander. Dadurch kann ein GPT Bezüge auflösen — auch implizite:</p>"""))
-        + chat(lang, [("user", L(T("There is a car and a carriage. She is blue. What colour is the car?", "Es gibt ein Auto und eine Kutsche. Sie ist blau. Welche Farbe hat das Auto?"))),
-                      ("ChatGPT", L(T("“She is blue” refers to one of the two objects. Since “she” usually refers to a feminine noun, I would look at the gender of the two nouns … only “the carriage” is feminine. So I would interpret that the carriage is blue — the colour of the car is not given.",
-                                      "Die Information „sie ist blau“ bezieht sich auf eines der beiden Objekte. Da „sie“ typischerweise für weibliche Substantive verwendet wird, würde ich nach dem Genus der beiden Nomen schauen … nur „die Kutsche“ ist weiblich. Daher würde ich interpretieren, dass die Kutsche blau ist — die Farbe des Autos wurde nicht angegeben.")))],
-               "GPT-4 · " + L(T("April 2024, shortened; the example only works in German, where “Kutsche” is feminine", "April 2024, gekürzt")))
-        + dia_transformer(lang)
-        + L(T("<p>The second aspect is the sheer amount of training. LLMs are trained on enormous amounts of data and therefore handle the nuances of human language very well. Input may be ungrammatical, misspelt and colloquial — the model has seen all of that before.</p>",
-              "<p>Der zweite Aspekt ist der schiere Umfang des Trainings. LLMs werden auf enormen Datenmengen trainiert und verarbeiten die Nuancen menschlicher Sprache deshalb sehr gut. Eingaben dürfen grammatikalisch ungenau, voller Rechtschreibfehler und umgangssprachlich sein — das Modell kennt all das aus seinen Trainingsdaten.</p>"))
+        + L(T(f"<p>Training adjusts the weights over many examples until the right output wins. For scale: the roundworm <i>C. elegans</i> gets by with 302 neurons; GPT-3 has 175 billion weights {r('brown')}.</p>",
+              f"<p>Training passt die Gewichte über viele Beispiele an, bis die richtige Ausgabe gewinnt. Zum Vergleich: Der Fadenwurm <i>C. elegans</i> kommt mit 302 Neuronen aus; GPT-3 hat 175 Milliarden Gewichte {r('brown')}.</p>"))
+        + curious(lang, T(f"""<ul class="pts"><li><b>How the weights move.</b> After each example the network compares its output with the right answer. <i>Backpropagation</i> works out, layer by layer from the back, how much each weight contributed to the error {r('rumelhart')}; every weight is then nudged a tiny step in the direction that makes the error smaller (gradient descent). Repeat that billions of times.</li><li><b>Pre-training.</b> An LLM needs no labelled pictures: the right answer is simply the next token of a real text. That is why it can learn from almost everything ever written.</li><li><b>Becoming an assistant.</b> A pre-trained model only continues text. Chat models get a second phase: people rank answers, a reward model learns those preferences, and the LLM is tuned towards them (RLHF). In the InstructGPT study, people preferred the answers of a tuned model with 1.3 billion weights over those of GPT-3 with 175 billion {r('ouyang')}.</li></ul>""",
+                          f"""<ul class="pts"><li><b>Wie sich die Gewichte bewegen.</b> Nach jedem Beispiel vergleicht das Netz seine Ausgabe mit der richtigen Antwort. <i>Backpropagation</i> rechnet Schicht für Schicht von hinten aus, wie viel jedes Gewicht zum Fehler beigetragen hat {r('rumelhart')}; dann wird jedes Gewicht ein winziges Stück in die Richtung verschoben, die den Fehler kleiner macht (Gradientenabstieg). Das Ganze milliardenfach.</li><li><b>Pre-Training.</b> Ein LLM braucht keine beschrifteten Bilder: Die richtige Antwort ist einfach das nächste Token eines echten Textes. Deshalb kann es aus fast allem lernen, was je geschrieben wurde.</li><li><b>Vom Textfortsetzer zum Assistenten.</b> Ein vortrainiertes Modell setzt nur Text fort. Chat-Modelle bekommen eine zweite Phase: Menschen bewerten Antworten, ein Belohnungsmodell lernt diese Vorlieben, und das LLM wird darauf hin angepasst (RLHF). In der InstructGPT-Studie zogen Menschen die Antworten eines so angepassten Modells mit 1,3 Milliarden Gewichten denen von GPT-3 mit 175 Milliarden vor {r('ouyang')}.</li></ul>"""),
+                  T("How the weights are learned", "Wie die Gewichte gelernt werden")), T("Neural network", "Neuronales Netz")))
+    S.append(("attention", 3, T("What made it work: attention and scale", "Was den Durchbruch brachte: Attention und Größe"), L(T(
+        f"<p>Which earlier words matter for the next one? In 2017 a new architecture, the <i>transformer</i>, made that question its core {r('vaswani')}: every token gets to look at every earlier token and weigh how much it matters. This is called <i>attention</i>. It is what lets a model resolve references like this one, where a single word decides what “it” means:</p>",
+        f"<p>Welche früheren Wörter zählen für das nächste? 2017 machte eine neue Architektur, der <i>Transformer</i>, diese Frage zu ihrem Kern {r('vaswani')}: Jedes Token darf auf jedes frühere Token schauen und abwägen, wie wichtig es ist. Das heißt <i>Attention</i>. Damit löst ein Modell Bezüge wie diesen auf, bei dem ein einziges Wort entscheidet, was „er“ meint:</p>"))
+        + dia_attention(lang)
+        + L(T("<p>A GPT repeats this step many times over, in layers. In plain words it does three things:</p>",
+              "<p>Ein GPT wiederholt diesen Schritt viele Male, in Schichten. In einfachen Worten tut es drei Dinge:</p>"))
+        + dia_transformer_simple(lang)
+        + L(T("<p>The second ingredient is scale. LLMs are trained on enormous amounts of text, so they handle the nuances of language very well. Input may be ungrammatical, misspelt and colloquial — the model has seen all of that before:</p>",
+              "<p>Die zweite Zutat ist die Größe. LLMs werden auf enormen Textmengen trainiert und verarbeiten die Nuancen der Sprache deshalb sehr gut. Eingaben dürfen grammatikalisch ungenau, voller Rechtschreibfehler und umgangssprachlich sein — das Modell kennt all das aus seinen Trainingsdaten:</p>"))
         + chat(lang, [("user", L(T("Correct the spelling and grammar of this sentence: “Modle-drivn sofware developmnt a very exiting topic is!!”",
                                    "Überführe den folgenden Satz in korrekte Rechtschreibung und Grammatik: „Modelgetibene Softwär Enticklunk ein sehr spannendes Thema ist!!“"))),
-                      ("GPT-4", L(T("“Model-driven software development is a very exciting topic!”", "„Modellgetriebene Softwareentwicklung ist ein sehr spannendes Thema!“")))], "GPT-4 · " + L(T("April 2024", "April 2024")))
-        + curious(lang, T(f"""<ul class="pts"><li><b>What attention computes.</b> Every token is turned into three vectors: a <i>query</i> (what am I looking for?), a <i>key</i> (what do I offer?) and a <i>value</i> (what do I pass on?). A token compares its query with the keys of all earlier tokens; the better they match, the more of their value it takes in {ref(3)}. That is how “she” can find the carriage.</li><li><b>Many heads, many layers.</b> Several such attention “heads” run side by side, each free to learn a different kind of relation, and the layers are stacked — 96 of them in GPT-3, each 12,288 numbers wide {ref(5)}.</li><li><b>The context window.</b> Because every token looks at every earlier one, the work grows with the square of the text length {ref(3)}. So a model reads only a limited number of tokens at once — 2,048 for GPT-3 {ref(5)}, hundreds of thousands for current models. Whatever does not fit, the model does not see.</li></ul>""",
-                          f"""<ul class="pts"><li><b>Was Attention berechnet.</b> Jedes Token wird in drei Vektoren übersetzt: eine <i>Query</i> (wonach suche ich?), einen <i>Key</i> (was biete ich an?) und einen <i>Value</i> (was gebe ich weiter?). Ein Token vergleicht seine Query mit den Keys aller früheren Tokens; je besser sie passen, desto mehr von deren Value nimmt es auf {ref(3)}. So findet „sie“ die „Kutsche“.</li><li><b>Viele Köpfe, viele Schichten.</b> Mehrere solcher Attention-„Köpfe“ arbeiten nebeneinander, jeder kann eine andere Art von Bezug lernen, und die Schichten sind gestapelt — 96 bei GPT-3, jede 12.288 Zahlen breit {ref(5)}.</li><li><b>Das Kontextfenster.</b> Weil jedes Token auf jedes frühere schaut, wächst der Aufwand mit dem Quadrat der Textlänge {ref(3)}. Ein Modell liest deshalb nur eine begrenzte Zahl von Tokens auf einmal — 2.048 bei GPT-3 {ref(5)}, Hunderttausende bei aktuellen Modellen. Was nicht hineinpasst, sieht das Modell nicht.</li></ul>"""))))
-    S.append(("tokens", 3, T("One token at a time", "Token für Token"), L(T(
-        f"<p>To produce an answer, a GPT does one thing, over and over: given the text so far, it computes how likely each possible next word is — more precisely the next text fragment, a <i>token</i>. One is drawn, appended, and the whole text goes in again {ref(8)}:</p>",
-        f"<p>Um eine Antwort zu erzeugen, macht ein GPT immer wieder nur eines: Zum bisherigen Text berechnet es, wie wahrscheinlich jedes mögliche nächste Wort ist — genauer: das nächste Textelement, ein <i>Token</i>. Eines wird gezogen, angehängt, und der ganze Text geht erneut hinein {ref(8)}:</p>"))
-        + dia_next_token(lang)
-        + L(T(f"<p>Why not always take the most likely token? Because then, as Stephen Wolfram observes, the text tends to become flat and repetitive; a little randomness makes it livelier {ref(8)}. The price: the same prompt can give different answers. GPTs are therefore neither transparent — you cannot trace how an output came about — nor deterministic.</p>",
-              f"<p>Warum nicht immer das wahrscheinlichste Token? Weil der Text dann, wie Stephen Wolfram beobachtet, eher flach und repetitiv wird; ein wenig Zufall macht ihn lebendiger {ref(8)}. Der Preis: Derselbe Prompt kann unterschiedliche Antworten liefern. GPTs sind deshalb weder transparent — man kann nicht nachvollziehen, wie eine Ausgabe zustande kam — noch deterministisch.</p>"))
-        + curious(lang, T(f"""<ul class="pts"><li><b>Where tokens come from.</b> The vocabulary is not designed by hand. <i>Byte-pair encoding</i> starts from single characters and keeps merging the most frequent neighbouring pair into a new token {ref(15)}. Frequent words end up as one token, rare ones as several pieces. That is also why LLMs are clumsy at counting letters: they never see the letters.</li><li><b>Temperature.</b> The model actually outputs a score per token; the probabilities come from them by a softmax, after dividing every score by the temperature. Below 1 the likely tokens get even likelier; above 1 the distribution flattens and rare tokens get a chance. At temperature 0 the most likely token is always taken.</li><li><b>Top-k and top-p.</b> Most systems also cut off the long tail before drawing: only the k best tokens, or only the smallest set whose probabilities add up to p (“nucleus sampling”) {ref(16)}. That keeps the variety of sampling without the occasional absurd token.</li></ul>""",
-                          f"""<ul class="pts"><li><b>Woher die Tokens kommen.</b> Das Vokabular entwirft niemand von Hand. <i>Byte-Pair-Encoding</i> beginnt mit einzelnen Zeichen und verschmilzt immer wieder das häufigste benachbarte Paar zu einem neuen Token {ref(15)}. Häufige Wörter werden ein Token, seltene mehrere Stücke. Deshalb tun sich LLMs auch schwer, Buchstaben zu zählen: Sie sehen die Buchstaben nie.</li><li><b>Temperatur.</b> Eigentlich gibt das Modell pro Token einen Wert aus; die Wahrscheinlichkeiten entstehen daraus per Softmax, nachdem jeder Wert durch die Temperatur geteilt wurde. Unter 1 werden die wahrscheinlichen Tokens noch wahrscheinlicher; über 1 wird die Verteilung flacher, und seltene Tokens bekommen eine Chance. Bei Temperatur 0 wird immer das wahrscheinlichste Token genommen.</li><li><b>Top-k und Top-p.</b> Die meisten Systeme schneiden vor dem Ziehen außerdem den langen Schwanz ab: nur die k besten Tokens, oder nur die kleinste Menge, deren Wahrscheinlichkeiten zusammen p ergeben („Nucleus Sampling“) {ref(16)}. So bleibt die Vielfalt des Ziehens, ohne gelegentliches absurdes Token.</li></ul>"""))))
-    S.append(("hallucinations", 3, T("Hallucinations", "Halluzinationen"), L(T(
-        """<p>LLMs are built on a stochastic model. So an LLM does not necessarily give the correct answer, but the most plausible one. As long as the requested information lies within the training data, the most plausible answer is often also the right one; the further outside the training data you go, the more likely it is that the LLM presents a wrong answer very plausibly.</p>
-<p>Hallucinations are hard to spot, because they are hard to tell apart from correct statements: they always fit the context of the question and rarely contain obvious errors. The following example shows a mistake any human sees at once — and the model does not. Nothing in the answer reveals its uncertainty.</p>""",
-        """<p>LLMs beruhen auf einem stochastischen Modell. Ein LLM gibt deshalb nicht zwingend die korrekte Antwort, sondern die plausibelste. Solange die gefragte Information innerhalb der Trainingsdaten liegt, ist die plausibelste Antwort oft auch die richtige; je weiter man sich aber außerhalb der Trainingsdaten bewegt, desto wahrscheinlicher präsentiert das LLM eine falsche Antwort sehr plausibel.</p>
-<p>Halluzinationen sind schwer zu erkennen, weil sie sich kaum von korrekten Aussagen unterscheiden: Sie passen immer gut in den Kontext der Frage und enthalten selten offensichtliche Fehler. Das folgende Beispiel zeigt einen Fehler, den ein Mensch sofort sieht — das Modell nicht. Nichts an der Antwort verrät ihre Unsicherheit.</p>"""))
-        + chat(lang, [("user", L(T("Create an image with exactly 17 blue dots.", "Erstelle ein Bild mit genau 17 blauen Punkten."))),
-                      ("GPT-4", L(T("Here is the image with exactly 17 blue dots on a white background.", "Hier ist das Bild mit genau 17 blauen Punkten auf weißem Hintergrund."))
-                       + f'<img class="chat-img" src="{A}assets/ai4se/dots.webp" alt="{L(T("Generated image with considerably more than 17 blue dots", "Generiertes Bild mit deutlich mehr als 17 blauen Punkten"))}" width="260" height="260" loading="lazy">'),
-                      ("user", L(T("How many blue dots are in the image?", "Wie viele blaue Punkte sind in dem Bild?"))),
-                      ("GPT-4", L(T("The image contains exactly 17 blue dots on a white background.", "Das Bild enthält genau 17 blaue Punkte auf weißem Hintergrund.")))], "GPT-4 · " + L(T("April 2024", "April 2024")))
-        + L(T(f"<p>Reasoning is just as fragile. “Alice has 5 sisters and 3 brothers. How many sisters does a brother of Alice have?” — state-of-the-art models answered this correctly only a fraction of the time {ref(7)}. LLMs imitate language very well, but they have no concept of logic of their own. Tools close part of the gap: code interpreters, function calls, APIs. An LLM that uses such tools in a loop is called an <a href=\"#agent\">agent</a>.</p>",
-              f"<p>Genauso brüchig ist das Schlussfolgern. „Alice hat 5 Schwestern und 3 Brüder. Wie viele Schwestern hat ein Bruder von Alice?“ — aktuelle Modelle beantworteten das nur in einem Bruchteil der Fälle richtig {ref(7)}. LLMs imitieren Sprache sehr gut, haben aber selbst kein Konzept von Logik. Werkzeuge schließen einen Teil der Lücke: Code-Interpreter, Function Calls, APIs. Ein LLM, das solche Werkzeuge in einer Schleife einsetzt, nennt man <a href=\"#agent\">Agent</a>.</p>"))
-        + curious(lang, T(f"""<p>Why does a model not simply say “I don’t know”? One answer: training and evaluation reward guessing. In a test that scores right answers and gives nothing for “I don’t know”, a guess is always the better bet — for students in an exam and for language models in a benchmark. Kalai et al. argue that hallucinations follow from exactly this, and that fewer of them need different scoring: wrong answers must cost more than an honest “I don’t know” {ref(17)}. The 17 dots add a second cause: the image model and the language model are separate, and the language model does not look at what was actually drawn.</p>""",
-                          f"""<p>Warum sagt ein Modell nicht einfach „Weiß ich nicht“? Eine Antwort: Training und Bewertung belohnen das Raten. In einem Test, der richtige Antworten zählt und für „Weiß ich nicht“ nichts gibt, ist Raten immer die bessere Wette — für Studierende in der Klausur wie für Sprachmodelle im Benchmark. Kalai et al. argumentieren, dass Halluzinationen genau daraus folgen und dass es für weniger davon eine andere Bewertung braucht: Falsche Antworten müssen mehr kosten als ein ehrliches „Weiß ich nicht“ {ref(17)}. Die 17 Punkte zeigen eine zweite Ursache: Bildmodell und Sprachmodell sind getrennt, und das Sprachmodell schaut nicht nach, was tatsächlich gezeichnet wurde.</p>"""))))
+                      ("GPT-4", L(T("“Model-driven software development is a very exciting topic!”", "„Modellgetriebene Softwareentwicklung ist ein sehr spannendes Thema!“")))], f"GPT-4 · {ex2024}")
+        + curious(lang, T(f"""{dia_transformer('en')}<ul class="pts"><li><b>What attention computes.</b> Every token is turned into three vectors: a <i>query</i> (what am I looking for?), a <i>key</i> (what do I offer?) and a <i>value</i> (what do I pass on?). A token compares its query with the keys of all earlier tokens; the better they match, the more of their value it takes in. That is how “big” finds the trophy.</li><li><b>Many heads, many layers.</b> Several such attention “heads” run side by side, each free to learn a different kind of relation, and the layers are stacked — 96 of them in GPT-3, each 12,288 numbers wide.</li><li><b>The context window.</b> Because every token looks at every earlier one, the work grows with the square of the text length. So a model reads only a limited number of tokens at once — 2,048 for GPT-3, hundreds of thousands for current models. Whatever does not fit, the model does not see.</li></ul>""",
+                          f"""{dia_transformer('de')}<ul class="pts"><li><b>Was Attention berechnet.</b> Jedes Token wird in drei Vektoren übersetzt: eine <i>Query</i> (wonach suche ich?), einen <i>Key</i> (was biete ich an?) und einen <i>Value</i> (was gebe ich weiter?). Ein Token vergleicht seine Query mit den Keys aller früheren Tokens; je besser sie passen, desto mehr von deren Value nimmt es auf. So findet „groß“ den Pokal.</li><li><b>Viele Köpfe, viele Schichten.</b> Mehrere solcher Attention-„Köpfe“ arbeiten nebeneinander, jeder kann eine andere Art von Bezug lernen, und die Schichten sind gestapelt — 96 bei GPT-3, jede 12.288 Zahlen breit.</li><li><b>Das Kontextfenster.</b> Weil jedes Token auf jedes frühere schaut, wächst der Aufwand mit dem Quadrat der Textlänge. Ein Modell liest deshalb nur eine begrenzte Zahl von Tokens auf einmal — 2.048 bei GPT-3, Hunderttausende bei aktuellen Modellen. Was nicht hineinpasst, sieht das Modell nicht.</li></ul>"""),
+                  T("Inside the transformer", "Im Inneren des Transformers")), T("Attention", "Attention")))
+    S.append(("hallucinations", 3, T("Plausible, not true: hallucinations", "Plausibel, nicht wahr: Halluzinationen"), L(T(
+        f"""<p>An LLM picks the most <i>plausible</i> continuation, not the <i>true</i> one. As long as the answer is well covered by the training data, the plausible answer is usually right. The further you go beyond it, the more likely the model presents a wrong answer — just as fluently as a right one.</p>
+<p>For developers the best-documented case is code that imports packages that do not exist. A study generated 576,000 code samples in Python and JavaScript with 16 models: on average, at least 5.2 % of the packages that commercial models referenced did not exist, and 21.7 % for open-source models — 205,474 different invented names {r('spracklen')}. Anyone can register such a name in a package registry and put malicious code behind it.</p>
+<p>Reasoning is just as fragile. “Alice has 5 sisters and 3 brothers. How many sisters does a brother of Alice have?” — the best models of 2024 often got this wrong {r('alice')}. Tools close part of the gap: a code interpreter, a lookup in the package index, a test run. An LLM that uses tools in a loop is an <a href="#agent">agent</a>.</p>""",
+        f"""<p>Ein LLM wählt die <i>plausibelste</i> Fortsetzung, nicht die <i>wahre</i>. Solange die Antwort gut in den Trainingsdaten abgedeckt ist, ist die plausible Antwort meist richtig. Je weiter man darüber hinausgeht, desto wahrscheinlicher präsentiert das Modell eine falsche Antwort — genauso flüssig wie eine richtige.</p>
+<p>Für Entwickler ist der am besten belegte Fall Code, der Pakete importiert, die es nicht gibt. Eine Studie erzeugte mit 16 Modellen 576.000 Code-Beispiele in Python und JavaScript: Im Schnitt existierten mindestens 5,2 % der Pakete, auf die kommerzielle Modelle verwiesen, gar nicht, bei Open-Source-Modellen 21,7 % — 205.474 verschiedene erfundene Namen {r('spracklen')}. Jeder kann so einen Namen in einem Paketverzeichnis registrieren und Schadcode dahinterlegen.</p>
+<p>Genauso brüchig ist das Schlussfolgern. „Alice hat 5 Schwestern und 3 Brüder. Wie viele Schwestern hat ein Bruder von Alice?“ — die besten Modelle von 2024 lagen hier oft falsch {r('alice')}. Werkzeuge schließen einen Teil der Lücke: ein Code-Interpreter, ein Blick ins Paketverzeichnis, ein Testlauf. Ein LLM, das Werkzeuge in einer Schleife einsetzt, ist ein <a href="#agent">Agent</a>.</p>"""))
+        + curious(lang, T(f"""<p>Why does a model not simply say “I don’t know”? One answer: training and evaluation reward guessing. In a test that scores right answers and gives nothing for “I don’t know”, a guess is always the better bet — for students in an exam and for language models in a benchmark. Kalai et al. argue that hallucinations follow from exactly this, and that fewer of them need different scoring: wrong answers must cost more than an honest “I don’t know” {r('kalai')}.</p>""",
+                          f"""<p>Warum sagt ein Modell nicht einfach „Weiß ich nicht“? Eine Antwort: Training und Bewertung belohnen das Raten. In einem Test, der richtige Antworten zählt und für „Weiß ich nicht“ nichts gibt, ist Raten immer die bessere Wette — für Studierende in der Klausur wie für Sprachmodelle im Benchmark. Kalai et al. argumentieren, dass Halluzinationen genau daraus folgen und dass es für weniger davon eine andere Bewertung braucht: Falsche Antworten müssen mehr kosten als ein ehrliches „Weiß ich nicht“ {r('kalai')}.</p>"""),
+                  T("Why models guess", "Warum Modelle raten"))
+        + L(T("""<div class="take"><span class="k mono">THREE THINGS TO KEEP</span><ul class="pts"><li>An LLM writes one token at a time, each one drawn from a probability distribution.</li><li>Plausible is not true: expect confident mistakes, especially beyond the training data.</li><li>Because it writes token by token, every single token can be checked — chapter 03 uses exactly that.</li></ul></div>""",
+              """<div class="take"><span class="k mono">DREI DINGE ZUM MITNEHMEN</span><ul class="pts"><li>Ein LLM schreibt Token für Token, jedes aus einer Wahrscheinlichkeitsverteilung gezogen.</li><li>Plausibel ist nicht wahr: Rechnen Sie mit selbstsicheren Fehlern, besonders jenseits der Trainingsdaten.</li><li>Weil es Token für Token schreibt, lässt sich jedes einzelne Token prüfen — genau das nutzt Kapitel 03.</li></ul></div>""")),
+        T("Hallucinations", "Halluzinationen")))
 
-    # ---------------- 02 Basic terms ----------------
-    S.append(("terms", 2, T("Basic terms", "Grundbegriffe"), L(T(
-        "<p>Talk about AI quickly fills up with words. Here are the ones you need — from the umbrella term down to agents and harnesses.</p>",
-        "<p>Gespräche über KI füllen sich schnell mit Begriffen. Hier sind die, die man braucht — vom Sammelbegriff bis zu Agenten und Harnesses.</p>"))))
-    S.append(("umbrella", 3, T("AI is an umbrella term", "KI ist ein Sammelbegriff"), L(T(
-        "<p>“Artificial intelligence” is a very broad and loosely defined term. Besides neural networks, even simple decision trees are often called AI. Machine learning narrows it down to algorithms that learn from data; deep learning to those that use neural networks; generative AI to systems that create new content. Large language models are the innermost circle — and the one this article is about.</p>",
-        "<p>„Künstliche Intelligenz“ ist ein sehr allgemeiner und unscharf definierter Überbegriff. Neben neuronalen Netzen werden auch einfache Entscheidungsbäume gern als KI bezeichnet. Machine Learning grenzt das auf Algorithmen ein, die aus Daten lernen; Deep Learning auf solche, die neuronale Netze nutzen; generative KI auf Systeme, die neue Inhalte erzeugen. Große Sprachmodelle sind der innerste Kreis — und um den geht es in diesem Artikel.</p>")) + dia_ai_terms(lang)))
-    S.append(("words", 3, T("Words around the model", "Begriffe rund um das Modell"), glossary(lang)))
-    S.append(("embeddings", 3, "Embeddings", L(T(
-        f"<p>Inside, an LLM does not work with words but with vectors — long lists of numbers. These <i>embeddings</i> are learned so that words and texts with similar meaning end up close together, in a kind of meaning space {ref(8)}:</p>",
-        f"<p>Im Inneren arbeitet ein LLM nicht mit Wörtern, sondern mit Vektoren — langen Zahlenlisten. Diese <i>Embeddings</i> werden so gelernt, dass Wörter und Texte mit ähnlicher Bedeutung nah beieinander landen, in einer Art Bedeutungsraum {ref(8)}:</p>"))
-        + dia_embeddings(lang)
-        + L(T("<p>That makes semantic search possible: users describe their problem and get the matching content, without having to know which terms to search for.</p>",
-              "<p>Das ermöglicht semantische Suche: Nutzer umschreiben ihr Problem und erhalten passende Inhalte, ohne wissen zu müssen, nach welchen Begriffen sie suchen müssten.</p>"))
-        + curious(lang, T(f"""<ul class="pts"><li><b>How many dimensions?</b> The figure has two; real embeddings have hundreds to thousands — GPT-3 works with 12,288 numbers per token {ref(5)}. Nobody chose what each number means; the axes are whatever the training found useful.</li><li><b>Close means similar.</b> Closeness is usually measured as the angle between two vectors (cosine similarity), not their distance — a long and a short text on the same topic point the same way.</li><li><b>Arithmetic with meaning.</b> Directions in the space can carry meaning. In word embeddings of 2013, the vector of <i>king</i> minus <i>man</i> plus <i>woman</i> landed closest to <i>queen</i> {ref(18)}.</li></ul>""",
-                          f"""<ul class="pts"><li><b>Wie viele Dimensionen?</b> Die Abbildung hat zwei; echte Embeddings haben Hunderte bis Tausende — GPT-3 arbeitet mit 12.288 Zahlen pro Token {ref(5)}. Niemand hat festgelegt, was jede Zahl bedeutet; die Achsen sind, was das Training nützlich fand.</li><li><b>Nah heißt ähnlich.</b> Nähe misst man meist als Winkel zwischen zwei Vektoren (Kosinus-Ähnlichkeit), nicht als Abstand — ein langer und ein kurzer Text zum selben Thema zeigen in dieselbe Richtung.</li><li><b>Rechnen mit Bedeutung.</b> Richtungen im Raum können Bedeutung tragen. In Wort-Embeddings von 2013 lag der Vektor <i>king</i> minus <i>man</i> plus <i>woman</i> am nächsten an <i>queen</i> {ref(18)}.</li></ul>"""))))
-    S.append(("rag", 3, "Retrieval-augmented generation (RAG)", L(T(
-        "<p>An LLM only knows what was in its training data. To let it answer from your own documents, you do not train it again — you search first and hand it what you found. Combined with semantic search, this is retrieval-augmented generation:</p>",
-        "<p>Ein LLM weiß nur, was in seinen Trainingsdaten stand. Damit es aus eigenen Dokumenten antwortet, trainiert man es nicht neu — man sucht zuerst und gibt ihm, was man gefunden hat. Zusammen mit semantischer Suche ergibt das Retrieval-Augmented Generation:</p>"))
+    # ---------------- 02 Around the model ----------------
+    S.append(("around", 2, T("Building around the model", "Was um das Modell herum entsteht"), L(T(
+        "<p>A model alone turns text into text. Most of what makes AI useful in practice is built around it: search, tools, loops and checks. First, the vocabulary.</p>",
+        "<p>Ein Modell allein verwandelt Text in Text. Das meiste, was KI in der Praxis nützlich macht, entsteht drumherum: Suche, Werkzeuge, Schleifen und Prüfungen. Zuerst die Begriffe.</p>")), T("Around the model", "Rund um das Modell")))
+    S.append(("umbrella", 3, T("The vocabulary", "Die Begriffe"),
+        '<blockquote class="epigraph"><p>I propose to consider the question, “Can machines think?”</p><footer class="mono">Alan M. Turing · Computing Machinery and Intelligence, 1950</footer></blockquote>'
+        + L(T(f"<p>The question is older than computers as we know them {r('turing')}, and “artificial intelligence” has stayed a broad and loosely defined term: even simple decision trees are often called AI. Machine learning narrows it to algorithms that learn from data, deep learning to those that use neural networks, generative AI to systems that create new content. Large language models are the innermost circle:</p>",
+              f"<p>Die Frage ist älter als Computer, wie wir sie kennen {r('turing')}, und „Künstliche Intelligenz“ ist ein breiter, unscharf definierter Begriff geblieben: Auch einfache Entscheidungsbäume werden gern KI genannt. Machine Learning grenzt das auf Algorithmen ein, die aus Daten lernen; Deep Learning auf solche mit neuronalen Netzen; generative KI auf Systeme, die neue Inhalte erzeugen. Große Sprachmodelle sind der innerste Kreis:</p>"))
+        + dia_ai_terms(lang)
+        + L(T("<p>And four words that come up whenever LLMs are used:</p>", "<p>Und vier Begriffe, die beim Arbeiten mit LLMs immer wieder fallen:</p>"))
+        + glossary(lang)))
+    S.append(("rag", 3, T("RAG: give it your documents", "RAG: eigene Dokumente mitgeben"), L(T(
+        f"<p>An LLM only knows what was in its training data. To let it answer from your own documents, you do not train it again — you search first and hand it what you found. Combined with the semantic search of chapter 01, this is <i>retrieval-augmented generation</i> (RAG) {r('lewis')}:</p>",
+        f"<p>Ein LLM weiß nur, was in seinen Trainingsdaten stand. Damit es aus eigenen Dokumenten antwortet, trainiert man es nicht neu — man sucht zuerst und gibt ihm, was man gefunden hat. Zusammen mit der semantischen Suche aus Kapitel 01 ergibt das <i>Retrieval-Augmented Generation</i> (RAG) {r('lewis')}:</p>"))
         + dia_rag(lang)
-        + curious(lang, T(f"""<ul class="pts"><li><b>Before the first question.</b> The documents are cut into chunks of a few paragraphs, each chunk is turned into an embedding, and the embeddings go into a vector index.</li><li><b>At every question.</b> The question is embedded the same way; the index returns the nearest chunks; they are pasted into the prompt together with the instruction to answer from them and to name the source. The name and the idea go back to Lewis et al. {ref(20)}.</li><li><b>Where it goes wrong.</b> Mostly in the search, not in the model: chunks cut in the wrong place, a question that uses other words than the documents, a table that loses its structure. Many systems therefore combine semantic search with plain keyword search and let a second model re-rank the hits.</li></ul>""",
-                          f"""<ul class="pts"><li><b>Vor der ersten Frage.</b> Die Dokumente werden in Abschnitte von ein paar Absätzen zerlegt, jeder Abschnitt wird in ein Embedding übersetzt, und die Embeddings kommen in einen Vektorindex.</li><li><b>Bei jeder Frage.</b> Die Frage wird genauso eingebettet; der Index liefert die nächstgelegenen Abschnitte; sie werden in den Prompt kopiert, zusammen mit der Anweisung, daraus zu antworten und die Quelle zu nennen. Name und Idee gehen auf Lewis et al. zurück {ref(20)}.</li><li><b>Wo es schiefgeht.</b> Meist bei der Suche, nicht beim Modell: Abschnitte an der falschen Stelle geschnitten, eine Frage mit anderen Wörtern als die Dokumente, eine Tabelle, die ihre Struktur verliert. Viele Systeme kombinieren deshalb semantische Suche mit einfacher Stichwortsuche und lassen ein zweites Modell die Treffer neu sortieren.</li></ul>"""))))
-    S.append(("agent", 3, T("What is an agent?", "Was ist ein Agent?"),
+        + L(T("<p>Users can describe their problem in their own words and still find the right passage. <a href=\"projects-se-chatty.html\">SE-Chatty</a>, a chatbot on lecture material, works this way.</p>",
+              "<p>Nutzer können ihr Problem in eigenen Worten beschreiben und finden trotzdem die passende Stelle. <a href=\"projects-se-chatty.html\">SE-Chatty</a>, ein Chatbot zu Vorlesungsmaterial, arbeitet so.</p>"))
+        + curious(lang, T("""<ul class="pts"><li><b>Before the first question.</b> The documents are cut into chunks of a few paragraphs, each chunk is turned into an embedding, and the embeddings go into a vector index.</li><li><b>At every question.</b> The question is embedded the same way; the index returns the nearest chunks; they are pasted into the prompt together with the question and the instruction to answer from them and to name the source.</li><li><b>Where it goes wrong.</b> Mostly in the search, not in the model: chunks cut in the wrong place, a question that uses other words than the documents, a table that loses its structure. Many systems therefore combine semantic search with plain keyword search and let a second model re-rank the hits.</li></ul>""",
+                          """<ul class="pts"><li><b>Vor der ersten Frage.</b> Die Dokumente werden in Abschnitte von ein paar Absätzen zerlegt, jeder Abschnitt wird in ein Embedding übersetzt, und die Embeddings kommen in einen Vektorindex.</li><li><b>Bei jeder Frage.</b> Die Frage wird genauso eingebettet; der Index liefert die nächstgelegenen Abschnitte; sie werden in den Prompt kopiert, zusammen mit der Frage und der Anweisung, daraus zu antworten und die Quelle zu nennen.</li><li><b>Wo es schiefgeht.</b> Meist bei der Suche, nicht beim Modell: Abschnitte an der falschen Stelle geschnitten, eine Frage mit anderen Wörtern als die Dokumente, eine Tabelle, die ihre Struktur verliert. Viele Systeme kombinieren deshalb semantische Suche mit einfacher Stichwortsuche und lassen ein zweites Modell die Treffer neu sortieren.</li></ul>"""),
+                  T("Chunks, index, re-ranking", "Abschnitte, Index, Neusortierung")), T("RAG", "RAG")))
+    S.append(("agent", 3, T("Agents: tools in a loop", "Agenten: Werkzeuge in einer Schleife"),
         definition(T("Agent", "Agent"), T("An AI agent is a language model that uses tools in a loop to reach a goal — and decides for itself which step comes next.",
                                           "Ein KI-Agent ist ein Sprachmodell, das in einer Schleife Werkzeuge einsetzt, um ein Ziel zu erreichen — und dabei selbst entscheidet, welcher Schritt als Nächstes kommt."), lang)
-        + L(T(f"<p>A chatbot answers a question and stops. An agent gets a goal, plans, acts — reads a file, runs a search, edits code —, looks at the result and decides what to do next, until the goal is reached. Simon Willison puts it in one line: “An LLM agent runs tools in a loop to achieve a goal.” {ref(10)}</p><p>Anthropic draws the line against <i>workflows</i>: in a workflow, LLMs and tools follow paths a programmer laid down in advance; in an agent, the LLM directs its own process and its use of tools {ref(9)}. That makes agents flexible — and harder to predict.</p>",
-              f"<p>Ein Chatbot beantwortet eine Frage und hört auf. Ein Agent bekommt ein Ziel, plant, handelt — liest eine Datei, sucht im Web, ändert Code —, betrachtet das Ergebnis und entscheidet, was als Nächstes zu tun ist, bis das Ziel erreicht ist. Simon Willison fasst das in einem Satz: „An LLM agent runs tools in a loop to achieve a goal.“ {ref(10)}</p><p>Anthropic grenzt Agenten von <i>Workflows</i> ab: Im Workflow folgen LLMs und Werkzeuge Pfaden, die ein Programmierer vorher festgelegt hat; im Agenten steuert das LLM seinen Ablauf und seinen Werkzeuggebrauch selbst {ref(9)}. Das macht Agenten flexibel — und schwerer vorherzusagen.</p>"))
-        + dia_agent(lang)))
-    S.append(("harness", 3, T("What is a harness?", "Was ist ein Harness?"),
+        + L(T(f"<p>A chatbot answers a question and stops. An agent gets a goal, acts — reads a file, runs the tests, edits code —, looks at the result and decides what to do next, until the goal is reached. Simon Willison puts it in one line: “An LLM agent runs tools in a loop to achieve a goal.” {r('willison')}</p>",
+              f"<p>Ein Chatbot beantwortet eine Frage und hört auf. Ein Agent bekommt ein Ziel, handelt — liest eine Datei, führt die Tests aus, ändert Code —, betrachtet das Ergebnis und entscheidet, was als Nächstes zu tun ist, bis das Ziel erreicht ist. Simon Willison fasst das in einem Satz: „An LLM agent runs tools in a loop to achieve a goal.“ {r('willison')}</p>"))
+        + dia_agent(lang)
+        + L(T(f"<p>Anthropic draws the line against <i>workflows</i>: in a workflow, LLMs and tools follow paths a programmer laid down in advance; in an agent, the LLM directs its own process and its use of tools {r('anthropic')}. That makes agents flexible — and harder to predict.</p>",
+              f"<p>Anthropic grenzt Agenten von <i>Workflows</i> ab: Im Workflow folgen LLMs und Werkzeuge Pfaden, die ein Programmierer vorher festgelegt hat; im Agenten steuert das LLM seinen Ablauf und seinen Werkzeuggebrauch selbst {r('anthropic')}. Das macht Agenten flexibel — und schwerer vorherzusagen.</p>")), T("Agents", "Agenten")))
+    S.append(("harness", 3, T("Harness: everything except the model", "Harness: alles außer dem Modell"),
         definition("Harness", T("A harness is all the software around a language model that turns it into a working agent — everything in the agent except the model itself.",
                                 "Ein Harness ist die gesamte Software rund um ein Sprachmodell, die daraus einen arbeitsfähigen Agenten macht — alles am Agenten außer dem Modell selbst."), lang)
-        + L(T(f"""<p>The word comes from the harness of a horse. The horse brings the strength, but only the harness — collar, reins, the cart behind — turns that strength into directed, useful work. A language model on its own can only turn text into text. The harness runs the loop of gathering context, acting, checking the result and going again, and around it provides:</p>
-<ul class="pts"><li><b>instructions</b> — the system prompt and the rules of the project,</li><li><b>tools</b> — files, a terminal, a browser, web search,</li><li><b>context and memory</b> — what the model gets to see, summarised when the context window fills up,</li><li><b>guardrails</b> — permissions, a sandbox, what needs a person’s approval,</li><li><b>checks</b> — tests, linters, parsers that tell the model when it went wrong.</li></ul>
-<p>Hence the short formula: <i>agent = model + harness</i> {ref(12)}. Claude Code, Codex and Cursor are harnesses. Part of the harness comes built in; teams add their own on top — project rules, extra tools, their own checks. Birgitta Böckeler sorts these additions into <i>guides</i>, which steer the agent before it acts, and <i>sensors</i>, which observe afterwards and help it correct itself {ref(11)}.</p>""",
-              f"""<p>Das Wort kommt vom Geschirr eines Pferdes. Das Pferd bringt die Kraft, aber erst das Geschirr — Kummet, Zügel, der Wagen dahinter — macht daraus gelenkte, nützliche Arbeit. Ein Sprachmodell allein kann nur Text in Text verwandeln. Der Harness führt die Schleife aus Kontext sammeln, handeln, Ergebnis prüfen und weitermachen, und stellt drumherum bereit:</p>
-<ul class="pts"><li><b>Anweisungen</b> — den System-Prompt und die Regeln des Projekts,</li><li><b>Werkzeuge</b> — Dateien, ein Terminal, einen Browser, Websuche,</li><li><b>Kontext und Gedächtnis</b> — was das Modell zu sehen bekommt, zusammengefasst, wenn das Kontextfenster voll wird,</li><li><b>Leitplanken</b> — Berechtigungen, eine Sandbox, was die Freigabe eines Menschen braucht,</li><li><b>Prüfungen</b> — Tests, Linter, Parser, die dem Modell sagen, wann es danebenlag.</li></ul>
-<p>Daher die kurze Formel: <i>Agent = Modell + Harness</i> {ref(12)}. Claude Code, Codex und Cursor sind Harnesses. Ein Teil des Harness ist eingebaut; Teams ergänzen ihren eigenen — Projektregeln, zusätzliche Werkzeuge, eigene Prüfungen. Birgitta Böckeler teilt diese Ergänzungen in <i>Guides</i>, die den Agenten steuern, bevor er handelt, und <i>Sensoren</i>, die danach beobachten und ihm helfen, sich selbst zu korrigieren {ref(11)}.</p>"""))
+        + L(T(f"""<p>The word comes from the harness of a horse. The horse brings the strength, but only the harness — collar, reins, the cart behind — turns that strength into directed, useful work. A language model on its own can only turn text into text. The harness runs the loop of gathering context, acting, checking the result and going again, and around it provides instructions, tools, context, guardrails and checks. Hence the short formula: <i>agent = model + harness</i>.</p>""",
+              f"""<p>Das Wort kommt vom Geschirr eines Pferdes. Das Pferd bringt die Kraft, aber erst das Geschirr — Kummet, Zügel, der Wagen dahinter — macht daraus gelenkte, nützliche Arbeit. Ein Sprachmodell allein kann nur Text in Text verwandeln. Der Harness führt die Schleife aus Kontext sammeln, handeln, Ergebnis prüfen und weitermachen, und stellt drumherum Anweisungen, Werkzeuge, Kontext, Leitplanken und Prüfungen bereit. Daher die kurze Formel: <i>Agent = Modell + Harness</i>.</p>"""))
         + dia_harness(lang)
-        + L(T("<p>For anyone building with AI, this is the practical lesson: much of what makes an agent good or bad sits in the harness, not in the model. <a href=\"projects-esaca.html\">ESACA</a>, the project I work on, is such a harness for companies — coding agents inside the company’s own perimeter. And the next chapter shows two harness parts for models: a parser as a sensor, a grammar as a guide.</p>",
-              "<p>Für alle, die mit KI bauen, ist das die praktische Lehre: Vieles, was einen Agenten gut oder schlecht macht, steckt im Harness, nicht im Modell. <a href=\"projects-esaca.html\">ESACA</a>, das Projekt, an dem ich arbeite, ist so ein Harness für Unternehmen — Coding-Agenten innerhalb der eigenen Infrastruktur. Und das nächste Kapitel zeigt zwei Harness-Bausteine für Modelle: einen Parser als Sensor, eine Grammatik als Guide.</p>"))))
+        + L(T(f"""<p>Part of the harness comes built in; teams add their own on top — project rules, extra tools, their own checks. Birgitta Böckeler sorts these additions into <i>guides</i>, which steer the agent before it acts, and <i>sensors</i>, which observe afterwards and help it correct itself {r('boeckeler')}.</p>
+<p>For anyone building with AI, this is the practical lesson: much of what makes an agent good or bad sits in the harness, not in the model. <a href="projects-esaca.html">ESACA</a>, the project I work on, is such a harness for companies — coding agents inside the company’s own perimeter. And the next chapter shows two harness parts for models: a parser as a sensor, a grammar as a guide.</p>""",
+              f"""<p>Ein Teil des Harness ist eingebaut; Teams ergänzen ihren eigenen — Projektregeln, zusätzliche Werkzeuge, eigene Prüfungen. Birgitta Böckeler teilt diese Ergänzungen in <i>Guides</i>, die den Agenten steuern, bevor er handelt, und <i>Sensoren</i>, die danach beobachten und ihm helfen, sich selbst zu korrigieren {r('boeckeler')}.</p>
+<p>Für alle, die mit KI bauen, ist das die praktische Lehre: Vieles, was einen Agenten gut oder schlecht macht, steckt im Harness, nicht im Modell. <a href="projects-esaca.html">ESACA</a>, das Projekt, an dem ich arbeite, ist so ein Harness für Unternehmen — Coding-Agenten innerhalb der eigenen Infrastruktur. Und das nächste Kapitel zeigt zwei Harness-Bausteine für Modelle: einen Parser als Sensor, eine Grammatik als Guide.</p>""")), T("Harness", "Harness")))
 
-    # ---------------- 03 LLMs and models ----------------
-    S.append(("mde", 2, T("LLMs and model-driven engineering", "LLMs und modellgetriebene Entwicklung"), L(T(
-        f"""<p>Software engineering is a complex discipline with many hurdles: programming skills, experience in system modelling, domain knowledge and a lot of coordination between the stakeholders of the platform being built. Generative AI can already take over parts of this work and speed development up {ref(4)}. Assistants such as GitHub Copilot help programmers write parts of the source code. Far fewer approaches deal with modelling and generating whole systems.</p>
-<p>Generative methods can create systems, or parts of them, from textual models: a generator reads a model and produces source code from it. Depending on what the code is for, different modelling languages fit — class diagrams for data structures, sequence diagrams for processes. What models, DSLs and generators are is explained in <a href="research-mde.html">part 1 of this series</a>.</p>""",
-        f"""<p>Softwareentwicklung ist eine komplexe Disziplin mit vielen Einstiegshürden: Programmierkenntnisse, Erfahrung in der Systemmodellierung, Domänenwissen und viel Abstimmung zwischen den Stakeholdern der zu entwickelnden Plattform. Generative KI kann uns schon heute Teile dieser Arbeit abnehmen und die Entwicklung beschleunigen {ref(4)}. Assistenten wie GitHub Copilot unterstützen Programmierer beim Schreiben von Teilen des Quellcodes. Deutlich weniger Ansätze befassen sich mit der Modellierung und Generierung ganzer Systeme.</p>
-<p>Generative Methoden können aus textuellen Modellen Systeme oder Teile davon erzeugen: Ein Generator liest ein Modell und erzeugt daraus Quellcode. Je nachdem, wofür der Code gedacht ist, passen unterschiedliche Modellierungssprachen — Klassendiagramme für Datenstrukturen, Sequenzdiagramme für Abläufe. Was Modelle, DSLs und Generatoren sind, erklärt <a href="research-mde.html">Teil 1 dieser Reihe</a>.</p>"""))))
+    # ---------------- 03 Making output reliable ----------------
+    S.append(("mde", 2, T("Making output reliable: LLMs and models", "Verlässliche Ausgaben: LLMs und Modelle"), L(T(
+        """<p>Copilot-style assistants write lines of code. This chapter goes one level up: the LLM writes the <i>model</i>, and a generator writes the code. What models, languages and generators are is explained in <a href="research-mde.html">part 1</a>; here the question is how to make the LLM’s part reliable. The example is the one from part 1: a small library with books, members and loans.</p>""",
+        """<p>Assistenten wie Copilot schreiben Codezeilen. Dieses Kapitel geht eine Ebene höher: Das LLM schreibt das <i>Modell</i>, und ein Generator schreibt den Code. Was Modelle, Sprachen und Generatoren sind, erklärt <a href="research-mde.html">Teil 1</a>; hier geht es darum, wie der Teil des LLMs verlässlich wird. Das Beispiel ist das aus Teil 1: eine kleine Bibliothek mit Büchern, Mitgliedern und Ausleihen.</p>""")), T("LLMs and models", "LLMs und Modelle")))
     S.append(("models", 3, T("Language models that write models", "Sprachmodelle, die Modelle schreiben"), L(T(
-        f"""<p>Defining good models takes knowledge: of modelling concepts, of the syntax of the modelling language and of the use case. LLMs can help most with the first two. With prompt engineering we can teach an LLM a modelling language {cite("BDMN+24")} {cite("NMR24")} — combining few-shot learning {ref(5)}, retrieval-augmented generation {ref(6)} and instructions to turn natural-language input into a textual model in the language of our choice.</p>""",
-        f"""<p>Gute Modelle zu definieren erfordert Vorwissen: über Modellierungskonzepte, über die Syntax der Modellierungssprache und über den Anwendungsfall. LLMs können vor allem bei den ersten beiden helfen. Mit Prompt Engineering können wir einem LLM eine Modellierungssprache beibringen {cite("BDMN+24")} {cite("NMR24")} — mit einer Kombination aus Few-Shot-Learning {ref(5)}, Retrieval-Augmented Generation {ref(6)} und Instruktionen, die natürlichsprachliche Eingaben in ein textuelles Modell in der Sprache unserer Wahl übersetzen.</p>"""))
+        f"""<p>A modelling language is a language like any other, so you can teach it to an LLM without retraining: put a few example models into the prompt (few-shot) and let it look up the language reference when it needs it (RAG) {cite("BDMN+24")}. The examples here use <b>CD4A</b>, a compact text notation for UML class diagrams (see <a href="research-mde.html">part 1</a>). In 2024 we built custom GPTs this way; here is one of their answers, from before the library became our example:</p>""",
+        f"""<p>Eine Modellierungssprache ist eine Sprache wie jede andere, also kann man sie einem LLM ohne neues Training beibringen: einige Beispielmodelle in den Prompt geben (Few-Shot) und es bei Bedarf in der Sprachreferenz nachschlagen lassen (RAG) {cite("BDMN+24")}. Die Beispiele hier nutzen <b>CD4A</b>, eine kompakte Textnotation für UML-Klassendiagramme (siehe <a href="research-mde.html">Teil 1</a>). 2024 haben wir so eigene GPTs gebaut; hier eine ihrer Antworten, aus der Zeit, bevor die Bibliothek unser Beispiel wurde:</p>"""))
         + chat(lang, [("user", L(T("Create a simple model of a dog kennel", "Erzeuge mir ein einfaches Modell einer Hundehütte"))),
-                      ("CD4A Model Creator", f"<pre><code>{kennel}</code></pre>")], "CD4A Model Creator")
+                      ("CD4A Model Creator", f"<pre><code>{kennel}</code></pre>")], L(T(f"custom GPT “CD4A Model Creator” · {ex2024}", f"eigenes GPT „CD4A Model Creator“ · {ex2024}")))
         + L(T("<p>Try the assistants yourself:</p>", "<p>Probieren Sie die Assistenten selbst aus:</p>"))
         + f'<ul class="tries">{tries}</ul>'
-        + L(T("<p>LLMs tuned for a modelling language can do more than create new models: they can change existing ones, or extract a model from a picture. A model sketched on a whiteboard can be photographed and turned into proper syntax.</p><p>What makes this reliable is what happens <i>after</i> the LLM. A parser checks every model; an invalid one goes back with the error message:</p>",
-              "<p>LLMs, die auf eine Modellierungssprache angepasst sind, können mehr als neue Modelle erstellen: Sie können bestehende Modelle anpassen oder ein Modell aus einem Bild extrahieren. Ein am Whiteboard skizziertes Modell lässt sich fotografieren und in die passende Syntax überführen.</p><p>Verlässlich wird das erst durch das, was <i>nach</i> dem LLM passiert. Ein Parser prüft jedes Modell; ein ungültiges geht mit der Fehlermeldung zurück:</p>"))
-        + dia_formalize(lang)))
-    S.append(("masking", 3, T("Constrained decoding: grammar masking", "Constrained Decoding: Grammar Masking"), L(T(
-        f"<p>Even better is to not let invalid models arise at all. An LLM writes <a href=\"#tokens\">one token at a time</a> — so at every step, before a token is chosen, the grammar of the modelling language can filter the candidates. This is grammar masking {cite('NRR24')}:</p>",
-        f"<p>Noch besser ist es, ungültige Modelle gar nicht erst entstehen zu lassen. Ein LLM schreibt <a href=\"#tokens\">Token für Token</a> — also kann die Grammatik der Modellierungssprache bei jedem Schritt die Kandidaten filtern, bevor eines gewählt wird. Das ist Grammar Masking {cite('NRR24')}:</p>"))
-        + dia_grammar_mask(lang) + masking_table(lang)
-        + L(T("<p>Small open models running locally then produce valid models more than nine times out of ten — instead of between almost never and four times out of ten. The price is runtime. Masking needs access to the token probabilities, which is why it works with open models running on one’s own hardware.</p>",
-              "<p>Kleine, lokal laufende offene Modelle liefern dann in mehr als neun von zehn Fällen gültige Modelle — statt zwischen fast nie und vier von zehn Mal. Der Preis ist die Laufzeit. Masking braucht Zugriff auf die Token-Wahrscheinlichkeiten; deshalb funktioniert es mit offenen Modellen auf der eigenen Hardware.</p>"))
-        + curious(lang, T(f"""<ul class="pts"><li><b>Why it is a guarantee.</b> A parser afterwards can only reject; the mask decides beforehand. If every chosen token keeps the text a valid beginning of a model, and the model may only stop when the text is complete, the result is syntactically valid by construction — not just likely to be {cite('NRR24')} {ref(19)}.</li><li><b>Tokens do not match the grammar.</b> A token can contain half a keyword, or a brace plus a space plus the next name. So the mask cannot simply look up grammar symbols; it checks for every candidate whether its characters can continue the text so far. Doing that fast for tens of thousands of tokens at every step is the engineering part.</li><li><b>Syntax, not meaning.</b> The mask ensures the model parses. Whether the classes are the right ones, or whether a referenced class exists at all, still needs checks afterwards — and the model can be pushed into valid but awkward text when it “wanted” something else.</li><li><b>Hosted models.</b> Several API providers now offer a narrower form on their side: output that is guaranteed to follow a JSON schema.</li></ul>""",
-                          f"""<ul class="pts"><li><b>Warum es eine Garantie ist.</b> Ein Parser danach kann nur ablehnen; die Maske entscheidet vorher. Wenn jedes gewählte Token den Text als gültigen Anfang eines Modells erhält und das Modell nur aufhören darf, wenn der Text vollständig ist, ist das Ergebnis per Konstruktion syntaktisch gültig — nicht nur wahrscheinlich {cite('NRR24')} {ref(19)}.</li><li><b>Tokens passen nicht zur Grammatik.</b> Ein Token kann ein halbes Schlüsselwort enthalten, oder eine Klammer plus Leerzeichen plus den nächsten Namen. Die Maske kann deshalb nicht einfach Grammatiksymbole nachschlagen; sie prüft für jeden Kandidaten, ob seine Zeichen den bisherigen Text fortsetzen können. Das bei jedem Schritt für Zehntausende Tokens schnell zu tun, ist der Ingenieursteil.</li><li><b>Syntax, nicht Bedeutung.</b> Die Maske sorgt dafür, dass das Modell parst. Ob die Klassen die richtigen sind oder eine referenzierte Klasse überhaupt existiert, braucht weiter Prüfungen danach — und das Modell kann in gültigen, aber ungeschickten Text gedrängt werden, wenn es eigentlich etwas anderes „wollte“.</li><li><b>Gehostete Modelle.</b> Mehrere API-Anbieter bieten inzwischen eine engere Form auf ihrer Seite an: Ausgaben, die garantiert einem JSON-Schema folgen.</li></ul>"""))))
-    S.append(("app", 3, T("From a sentence to an application", "Vom Satz zur Anwendung"), L(T(
-        f"""<p>Put together with model-driven engineering, this goes all the way: users describe their domain informally, an LLM derives the class diagrams, and a generator such as <a href="research-mde.html#montigem">MontiGem</a> turns them into a complete information system {cite("NMR24")} {cite("Net24")}.</p>""",
-        f"""<p>Zusammen mit modellgetriebener Softwareentwicklung reicht das bis zum Ende: Nutzer beschreiben ihre Domäne informell, ein LLM leitet daraus Klassendiagramme ab, und ein Generator wie <a href="research-mde.html#montigem">MontiGem</a> macht daraus ein vollständiges Informationssystem {cite("NMR24")} {cite("Net24")}.</p>"""))
-        + dia_ai_mde(lang)
-        + L(T(f"<p>Models help far beyond generating software artefacts. Requirements can be translated from natural language into a formal language a computer can analyse; contradictions and redundancies found there can be translated back into natural language by an LLM. And because a generated model can be analysed and checked, many sources of error are ruled out before a single line of code exists {cite('NKR+25')}.</p>",
-              f"<p>Modelle helfen weit über die Generierung von Software-Artefakten hinaus. Anforderungen lassen sich aus natürlicher Sprache in eine formale, vom Computer analysierbare Sprache übersetzen; dort gefundene Widersprüche und Redundanzen kann ein LLM wieder in natürliche Sprache zurückübersetzen. Und weil sich ein generiertes Modell analysieren und prüfen lässt, lassen sich viele Fehlerquellen ausschließen, bevor auch nur eine Zeile Code existiert {cite('NKR+25')}.</p>"))))
+        + L(T(f"<p>LLMs tuned for a modelling language can do more than create new models: they can change existing ones, or turn a whiteboard sketch into proper syntax. When they edit, though, they sometimes change things nobody asked for — and sometimes repair errors along the way {cite('NKR+25')}. Either way, something has to check the result.</p>",
+              f"<p>LLMs, die auf eine Modellierungssprache angepasst sind, können mehr als neue Modelle erstellen: Sie können bestehende ändern oder eine Whiteboard-Skizze in die passende Syntax überführen. Beim Ändern ändern sie allerdings manchmal Dinge, nach denen niemand gefragt hat — und reparieren manchmal nebenbei Fehler {cite('NKR+25')}. So oder so muss etwas das Ergebnis prüfen.</p>")), T("Models from LLMs", "Modelle vom LLM")))
+    S.append(("check", 3, T("Check afterwards: the parser", "Danach prüfen: der Parser"), L(T(
+        "<p>What makes this reliable is what happens <i>after</i> the LLM. A parser — the same one the generator uses — checks every model. If it fails, the model goes back to the LLM together with the parser’s error message, and the LLM tries again:</p>",
+        "<p>Verlässlich wird das erst durch das, was <i>nach</i> dem LLM passiert. Ein Parser — derselbe, den der Generator nutzt — prüft jedes Modell. Scheitert es, geht das Modell mit der Fehlermeldung des Parsers zurück an das LLM, und das LLM versucht es erneut:</p>"))
+        + dia_pipeline(lang, 1)
+        + L(T("<p>This is the harness idea from chapter 02, applied to models: the parser is a <i>sensor</i>. It catches every syntax error — but only afterwards, and every new attempt costs time.</p>",
+              "<p>Das ist die Harness-Idee aus Kapitel 02, angewandt auf Modelle: Der Parser ist ein <i>Sensor</i>. Er findet jeden Syntaxfehler — aber erst hinterher, und jeder neue Versuch kostet Zeit.</p>")), T("The parser", "Der Parser")))
+    S.append(("masking", 3, T("Prevent upfront: constrained decoding", "Vorab verhindern: Constrained Decoding"), L(T(
+        "<p>Better still is to never let an invalid model arise. An LLM writes <a href=\"#tokens\">one token at a time</a>, so before each token is chosen, a grammar can remove every candidate that cannot follow at this point. This is called <i>constrained decoding</i>. It is easiest to see with JSON: after an opening brace, only a quoted key or a closing brace may follow.</p>",
+        "<p>Noch besser ist es, ungültige Modelle gar nicht erst entstehen zu lassen. Ein LLM schreibt <a href=\"#tokens\">Token für Token</a> — also kann eine Grammatik vor jedem Token jeden Kandidaten streichen, der an dieser Stelle nicht folgen kann. Das heißt <i>Constrained Decoding</i>. Am einfachsten sieht man es an JSON: Nach einer öffnenden Klammer darf nur ein Schlüssel in Anführungszeichen oder eine schließende Klammer folgen.</p>"))
+        + dia_grammar_mask(lang)
+        + L(T(f"<p>The CD4A tab shows the same mechanism with the grammar of a modelling language, building the <code>Book</code> class of the library. For nested braces the grammar keeps a count of what is still open — exactly where LLMs are weak: even ChatGPT has trouble closing brackets correctly in long texts {r('wolfram')}.</p>",
+              f"<p>Der Reiter CD4A zeigt denselben Mechanismus mit der Grammatik einer Modellierungssprache und baut die Klasse <code>Book</code> der Bibliothek. Für verschachtelte Klammern führt die Grammatik Buch darüber, was noch offen ist — genau dort sind LLMs schwach: Selbst ChatGPT hat Mühe, Klammern in langen Texten richtig zu schließen {r('wolfram')}.</p>"))
+        + L(T(f"<p><b>Case study: grammar masking for CD4A.</b> We tried this with small open models that run on a single computer, on about 1,000 modelling tasks {cite('NRR24')}:</p>",
+              f"<p><b>Fallstudie: Grammar Masking für CD4A.</b> Wir haben das mit kleinen offenen Modellen ausprobiert, die auf einem einzelnen Rechner laufen, an rund 1.000 Modellierungsaufgaben {cite('NRR24')}:</p>"))
+        + masking_table(lang)
+        + L(T("<p>With the mask, all four models write valid models in 87 to 93 % of the cases, instead of 0.3 to 42 % without. The price is time: 13 to 30 times slower per model.</p>",
+              "<p>Mit der Maske schreiben alle vier Modelle in 87 bis 93 % der Fälle gültige Modelle, statt 0,3 bis 42 % ohne. Der Preis ist die Zeit: 13- bis 30-mal langsamer pro Modell.</p>"))
+        + L(T(f"<p>The mask needs control over the decoding loop. With open models you have it yourself. Hosted APIs now do part of it on their side: several can guarantee output that follows a JSON schema, and OpenAI’s API also accepts a context-free grammar for custom tools {r('openai-cfg')}.</p>",
+              f"<p>Die Maske braucht Kontrolle über die Schleife, die Token für Token erzeugt. Bei offenen Modellen hat man sie selbst. Gehostete APIs übernehmen inzwischen einen Teil davon: Mehrere garantieren Ausgaben nach einem JSON-Schema, und die API von OpenAI nimmt für eigene Werkzeuge auch eine kontextfreie Grammatik an {r('openai-cfg')}.</p>"))
+        + curious(lang, T(f"""<ul class="pts"><li><b>Why it is a guarantee.</b> A parser afterwards can only reject; the mask decides beforehand. If every chosen token keeps the text a valid beginning, and the model may only stop when the text is complete, the result is syntactically valid by construction — not just likely to be {r('geng')}.</li><li><b>Tokens do not match the grammar.</b> A token can contain half a keyword, or a brace plus a space plus the next name. So the mask cannot simply look up grammar symbols; it checks for every candidate whether its characters can continue the text so far. Doing that fast for tens of thousands of tokens at every step is the engineering part.</li><li><b>Syntax, not meaning.</b> The mask ensures the model parses. Whether the classes are the right ones, or whether a referenced class exists at all, still needs checks afterwards — and the model can be pushed into valid but awkward text when it “wanted” something else.</li></ul>""",
+                          f"""<ul class="pts"><li><b>Warum es eine Garantie ist.</b> Ein Parser danach kann nur ablehnen; die Maske entscheidet vorher. Wenn jedes gewählte Token den Text als gültigen Anfang erhält und das Modell nur aufhören darf, wenn der Text vollständig ist, ist das Ergebnis per Konstruktion syntaktisch gültig — nicht nur wahrscheinlich {r('geng')}.</li><li><b>Tokens passen nicht zur Grammatik.</b> Ein Token kann ein halbes Schlüsselwort enthalten, oder eine Klammer plus Leerzeichen plus den nächsten Namen. Die Maske kann deshalb nicht einfach Grammatiksymbole nachschlagen; sie prüft für jeden Kandidaten, ob seine Zeichen den bisherigen Text fortsetzen können. Das bei jedem Schritt für Zehntausende Tokens schnell zu tun, ist der Ingenieursteil.</li><li><b>Syntax, nicht Bedeutung.</b> Die Maske sorgt dafür, dass das Modell parst. Ob die Klassen die richtigen sind oder eine referenzierte Klasse überhaupt existiert, braucht weiter Prüfungen danach — und das Modell kann in gültigen, aber ungeschickten Text gedrängt werden, wenn es eigentlich etwas anderes „wollte“.</li></ul>"""),
+                  T("Why the mask is a guarantee", "Warum die Maske eine Garantie ist")), T("Constrained decoding", "Constrained Decoding")))
+    S.append(("app", 3, T("From model to application", "Vom Modell zur Anwendung"), L(T(
+        f"""<p>Put together with model-driven engineering, this goes all the way: users describe their domain informally, an LLM derives the class diagram, the parser or the mask makes sure it is valid, and a generator such as <a href="research-mde.html#montigem">MontiGem</a> turns it into a complete web application {cite("Net24")}:</p>""",
+        f"""<p>Zusammen mit modellgetriebener Softwareentwicklung reicht das bis zum Ende: Nutzer beschreiben ihre Domäne informell, ein LLM leitet das Klassendiagramm ab, Parser oder Maske sorgen dafür, dass es gültig ist, und ein Generator wie <a href="research-mde.html#montigem">MontiGem</a> macht daraus eine vollständige Web-Anwendung {cite("Net24")}:</p>"""))
+        + dia_pipeline(lang, 2)
+        + L(T("<p>The LLM only does what it is good at: turning language into a model. Everything after the model is deterministic, tested code. And the model in between is the place where people can check what the AI understood — before a single line of code exists.</p>",
+              "<p>Das LLM macht nur, was es gut kann: Sprache in ein Modell übersetzen. Alles nach dem Modell ist deterministischer, getesteter Code. Und das Modell dazwischen ist die Stelle, an der Menschen prüfen können, was die KI verstanden hat — bevor auch nur eine Zeile Code existiert.</p>"))))
     S.append(("summary", 1, T("In short", "Kurz gesagt"), L(T(
-        "<p>AI cannot replace a developer yet; it is best seen as a tool that speeds up the development process. Everything it produces needs checking and validation — it cannot be used blindly. That checking belongs in the harness, and where AI meets models it becomes possible: the model is the place where language turns into something a machine can verify.</p>",
-        "<p>KI kann einen Entwickler noch nicht ersetzen; sie ist am besten als Werkzeug zu verstehen, das den Entwicklungsprozess beschleunigt. Alles, was sie erzeugt, braucht Prüfung und Validierung — blind einsetzen lässt sie sich nicht. Diese Prüfung gehört in den Harness, und wo KI auf Modelle trifft, wird sie möglich: Das Modell ist die Stelle, an der aus Sprache etwas wird, das eine Maschine verifizieren kann.</p>"))))
-    out, n = [], 0
-    for sid, level, head, html_ in S:
-        name = L(head) if isinstance(head, dict) else head
-        if level == 2:                                      # a numbered chapter
-            n += 1
-            out.append(f'      <section class="art-sec art-ch"><h2 id="{sid}"><span class="mono">0{n}</span>{name}</h2>{html_}</section>')
-        elif level == 1:                                    # the closing words: a chapter heading without a number
-            out.append(f'      <section class="art-sec art-ch"><h2 id="{sid}">{name}</h2>{html_}</section>')
-        else:
-            h = f'<h3 id="{sid}">{name}</h3>' if head else ""
-            out.append(f'      <section class="art-sec">{h}{html_}</section>')
-    toc = "".join(f'<a href="#{sid}">{L(head)}</a>' for sid, level, head, _ in S if level == 2)
-    refs = "".join(f'<li id="ref-{k}">{r}</li>' for k, r in enumerate(REFS, 1))
-    return toc, NL.join(out), refs
-
-
-def series_line(lang):
-    """Part 2 of the series with the MDE article (mde.py renders the same line)."""
-    from mde import series
-    return series(lang, FILE)
+        """<ul class="pts"><li>An LLM continues text, one token at a time, each drawn from a probability distribution.</li><li>It writes the plausible text, not the true one — expect confident mistakes, such as packages that do not exist.</li><li>RAG, agents and harnesses are built around the model; much of an agent’s quality sits in the harness.</li><li>Checking belongs in the harness: tests, linters, parsers.</li><li>A grammar can make syntactic validity a guarantee instead of a hope — at the price of runtime.</li></ul>
+<div class="fit"><div><span class="k mono">WORTH IT WHEN</span><ul class="pts"><li>the output is in a formal language — JSON, a DSL, code — that a parser or a grammar can check</li><li>a program builds on the output</li></ul></div><div><span class="k mono">SOMETHING ELSE IS ENOUGH WHEN</span><ul class="pts"><li>the text is for people only: then a careful human review does the job</li></ul></div></div>""",
+        """<ul class="pts"><li>Ein LLM setzt Text fort, Token für Token, jedes aus einer Wahrscheinlichkeitsverteilung gezogen.</li><li>Es schreibt den plausiblen Text, nicht den wahren — rechnen Sie mit selbstsicheren Fehlern, etwa Paketen, die es nicht gibt.</li><li>RAG, Agenten und Harnesses entstehen rund um das Modell; viel von der Qualität eines Agenten steckt im Harness.</li><li>Prüfen gehört in den Harness: Tests, Linter, Parser.</li><li>Eine Grammatik kann syntaktische Gültigkeit zur Garantie machen statt zur Hoffnung — um den Preis der Laufzeit.</li></ul>
+<div class="fit"><div><span class="k mono">LOHNT SICH, WENN</span><ul class="pts"><li>die Ausgabe in einer formalen Sprache vorliegt — JSON, eine DSL, Code —, die ein Parser oder eine Grammatik prüfen kann</li><li>ein Programm auf der Ausgabe aufbaut</li></ul></div><div><span class="k mono">ETWAS ANDERES REICHT, WENN</span><ul class="pts"><li>der Text nur für Menschen ist: Dann reicht eine sorgfältige Durchsicht durch einen Menschen</li></ul></div></div>"""))))
+    refs = "".join(f'<li id="ref-{k}">{t}</li>' for k, (_, t) in enumerate(REFS, 1))
+    return None, article_common.sections(S, lang), refs
 
 
 def page(lang):
-    """Returns (file, title, description, body, scripts) for build.py."""
-    L = lambda x: x[lang]
+    """Returns (file, title, description, body, scripts) for build.py; header, literature and series end come from
+    article_common (the same for all four parts)."""
     A = "../" if lang == "de" else ""
-    toc, sections, refs = body(lang, A)
-    html_ = f'''
-    <header class="page proj">
-      <a class="back mono" href="research.html">← {L(T("research", "Forschung"))}</a>
-      <div class="section-head">
-        <h1><span class="mono">02</span>AI-driven Software Engineering</h1>
-        <span class="mono faint">{L(T("article · 2024, revised 2026", "Artikel · 2024, überarbeitet 2026"))}</span>
-      </div>
-      <p class="lead">{L(T("What is this “new” AI, how does it work — and where does it actually help in building software? An introduction from neurons to agents and <em>language models that write models</em>.",
-                          "Was ist diese „neue“ KI, wie funktioniert sie — und wo hilft sie beim Bauen von Software wirklich? Eine Einführung vom Neuron über Agenten bis zu <em>Sprachmodellen, die Modelle schreiben</em>."))}</p>
-      {series_line(lang)}
-      <nav class="chapters mono" aria-label="{L(T("Chapters", "Kapitel"))}">{toc}</nav>
-    </header>
-    {article_art.hero_ai4se(lang)}
-    <article class="article">
-{sections}
-      <section class="art-sec art-refs">
-        <h2 id="literature">{L(T("Literature", "Literatur"))}</h2>
-        <ol class="refs mono">{refs}</ol>
-        <div class="group mono">{L(T("My papers on the topic", "Eigene Arbeiten zum Thema"))}</div>
-        <ol class="pubs">
-{pub_list(lang, OWN)}
-        </ol>
-      </section>
-    </article>
-'''
-    desc = T("AI-driven software engineering: how LLMs work, what agents and harnesses are, and how LLMs can write models that generators turn into software — an article by Lukas Netz.",
-             "KI-getriebene Softwareentwicklung: wie LLMs funktionieren, was Agenten und Harnesses sind und wie LLMs Modelle schreiben, aus denen Generatoren Software machen — ein Artikel von Lukas Netz.")
-    return FILE, T("AI-driven Software Engineering", "AI-driven Software Engineering"), desc, html_, f'<script src="{A}assets/ai4se.js"></script>\n'
+    _, sections, refs = body(lang, A)
+    lead = T("How does a language model produce text, why is it sometimes confidently wrong — and how do we make its output reliable enough for software to build on? From tokens to agents to <em>language models that write models</em>.",
+             "Wie erzeugt ein Sprachmodell Text, warum liegt es manchmal selbstsicher falsch — und wie wird seine Ausgabe verlässlich genug, dass Software darauf aufbauen kann? Von Tokens über Agenten bis zu <em>Sprachmodellen, die Modelle schreiben</em>.")
+    desc = T("AI-driven software engineering: how LLMs work, what agents and harnesses are, and how parsers and grammars make LLM output reliable enough for generators — an article by Lukas Netz.",
+             "KI-getriebene Softwareentwicklung: wie LLMs funktionieren, was Agenten und Harnesses sind und wie Parser und Grammatiken LLM-Ausgaben verlässlich genug für Generatoren machen — ein Artikel von Lukas Netz.")
+    return article_common.page(lang, FILE, sections, refs, OWN, article_art.hero_ai4se(lang), lead, desc,
+                               article_common.scripts(lang, "ai4se", css=True))

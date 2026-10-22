@@ -9,6 +9,9 @@ Plain static HTML/CSS/JS, bilingual: English at `/`, German at `/de/`. No framew
 |---|---|
 | `_build/build.py` | **Generator** for all pages (EN + DE) — edit content here, not in the HTML. Text pairs are `T("english", "deutsch")`. |
 | `_build/project_*.py` | Project sub pages (imported by build.py). |
+| `_build/mde.py`, `ai4se.py`, `dt.py`, `ea.py` (+ `*_figs.py`) | The article series, parts 1–4. Their frame (header, series line, literature, next part, cards) comes from `_build/article_common.py`. |
+| `_build/STYLE.md` | **Style guide and helper API for the article series** — read it before touching an article, a figure or a demo. |
+| `assets/demo-common.js` | Shared demo helpers (`window.SiteDemo`: stepper, height lock, autoplay rule), loaded by every article. |
 | `*.html`, `de/*.html` | Generated output — committed, never edited by hand. |
 | `assets/pubs.js` | **The publication list** (single source of truth for papers). |
 | `assets/site.js`, `assets/style.css` | Shared JS / CSS. |
@@ -68,6 +71,7 @@ per paper. All of it is static and goes stale. To refresh:
 ## Conventions
 
 - Keep EN and DE in sync — every visible text is a `T(en, de)` pair.
+- Articles: follow `_build/STYLE.md` (figure canvas, type, strokes, colours, controls, autoplay, citations).
 - Style: minimal, small type, lots of whitespace, one accent colour; light theme by default, dark/auto toggle.
 - Images: keep full-size photos ≤ ~2000 px; grid thumbnails in `assets/photos/thumbs/` (340 px high).
 - Commit messages: short imperative summary of what changed for the visitor.

@@ -26,38 +26,6 @@ def _arrow(x1, y, x2, cls="ln hl"):
     return f'<path class="{cls}" d="M{x1} {y}H{x2}"/><path class="{cls}" d="M{x2 - 7} {y - 6}L{x2} {y}L{x2 - 7} {y + 6}"/>'
 
 
-def hero_mde(lang):
-    """A textual model and its class diagram → the generator (gears) → database, server and browser."""
-    L = lambda en, de: en if lang == "en" else de
-    code = ["classdiagram Bank {", "  class Account {", "    String name;", "    int balance;", "  }",
-            "  association [1]", "    Accountant -> Account [*];", "}"]
-    code_svg = "".join(f'<text class="hc" x="52" y="{66 + 15 * k}">{l.replace("<", "&lt;").replace(">", "&gt;")}</text>' for k, l in enumerate(code))
-    uml = ('<rect class="box" x="270" y="52" width="104" height="54" rx="2"/><path class="ln" d="M270 72H374"/><text class="t" x="322" y="67" text-anchor="middle">Accountant</text>'
-           '<text x="280" y="90">bank</text>'
-           '<rect class="box hl" x="270" y="140" width="104" height="62" rx="2"/><path class="ln" d="M270 160H374"/><text class="t" x="322" y="155" text-anchor="middle">Account</text>'
-           '<text x="280" y="178">name</text><text x="280" y="194">balance</text>'
-           '<path class="ln" d="M322 106V140"/><text class="s" x="330" y="120">1</text><text class="s" x="330" y="136">*</text>')
-    gears = (f'<path class="gearbig" d="{gear(500, 122, 46, 12)}"/><circle class="hub" cx="500" cy="122" r="13"/>'
-             f'<path class="gearsmall" d="{gear(556, 72, 26, 9, math.pi / 9)}"/><circle class="hub2" cx="556" cy="72" r="7"/>')
-    db = ('<path class="box" d="M650 42v40c0 7 22 12 48 12s48-5 48-12v-40"/><ellipse class="box" cx="698" cy="42" rx="48" ry="12"/>'
-          '<path class="ln" d="M650 58c0 7 22 12 48 12s48-5 48-12"/>')
-    server = ('<rect class="box" x="650" y="112" width="96" height="24" rx="2"/><rect class="box" x="650" y="140" width="96" height="24" rx="2"/>'
-              '<circle class="dot" cx="662" cy="124" r="2.5"/><circle class="dot" cx="662" cy="152" r="2.5"/><path class="ln" d="M676 124H730M676 152H720"/>')
-    browser = ('<rect class="box hl" x="770" y="38" width="74" height="150" rx="4"/><path class="ln" d="M770 52H844"/>'
-               '<circle class="dot" cx="778" cy="45" r="2"/><rect class="hfill" x="778" y="60" width="58" height="10" rx="1"/>'
-               '<path class="ln" d="M778 84H836M778 98H836M778 112H836M778 126H836"/>'
-               '<rect class="box" x="778" y="140" width="58" height="12" rx="1"/><rect class="box" x="778" y="158" width="58" height="12" rx="1"/>')
-    labels = (f'<text class="s" x="40" y="26">{L("THE MODEL", "DAS MODELL")}</text><text class="s" x="452" y="26">GENERATOR</text>'
-              f'<text class="s" x="650" y="26">{L("THE APPLICATION", "DIE ANWENDUNG")}</text>'
-              f'<text class="s" x="650" y="182">{L("database · server", "Datenbank · Server")}</text><text class="s" x="770" y="204">browser</text>')
-    body = (f'<rect class="zone" x="0" y="0" width="860" height="220" rx="6"/>'
-            f'<rect class="box" x="40" y="40" width="200" height="150" rx="3"/>{code_svg}'
-            f'<path class="ln dash" d="M240 115H262"/>{uml}'
-            f'{_arrow(388, 122, 444)}{gears}{_arrow(560, 122, 636)}'
-            f'<path class="ln hl" d="M600 122V70H640"/><path class="ln hl" d="M600 122V176H640"/>{db}{server}{browser}{labels}')
-    return (f'<figure class="art-hero" aria-hidden="true"><svg class="dia hero" viewBox="0 0 860 220">{body}</svg></figure>')
-
-
 def hero_ai4se(lang):
     """A question → a neural network → the probability of the next token → the answer, one token at a time."""
     L = lambda en, de: en if lang == "en" else de
@@ -79,7 +47,25 @@ def hero_ai4se(lang):
             f'<text class="s" x="40" y="26">PROMPT</text><text class="s" x="262" y="26">{L("THE MODEL", "DAS MODELL")}</text>'
             f'<text class="s" x="540" y="26">{L("THE NEXT TOKEN", "DAS NÄCHSTE TOKEN")}</text>'
             f'<text class="a" x="470" y="192" text-anchor="middle">{L("“The capital is Paris”", "„Die Hauptstadt ist Paris“")}▌</text>')
-    return (f'<figure class="art-hero" aria-hidden="true"><svg class="dia hero" viewBox="0 0 860 220">{body}</svg></figure>')
+    # phones: prompt, model and next token stacked; the wide drawing would shrink its labels to about 5 px
+    tl = [(140, [180, 215, 250]), (195, [162, 197, 232, 267]), (250, [180, 215, 250]), (300, [197, 232])]
+    t_edges = "".join(f'<path class="ln nn" d="M{x1} {a}L{x2} {b}"/>' for (x1, ys1), (x2, ys2) in zip(tl, tl[1:]) for a in ys1 for b in ys2)
+    t_nodes = "".join(f'<circle class="box{" hl" if (x, y) == (300, 197) else ""}" cx="{x}" cy="{y}" r="{9 if x == 300 else 7}"/>' for x, ys in tl for y in ys)
+    t_nodes += '<circle class="hfill" cx="300" cy="197" r="5"/>'
+    t_bars = "".join(f'<text class="{"t" if k == 0 else ""}" x="150" y="{352 + k * 28}" text-anchor="end">{t}</text>'
+                     f'<rect class="{"hfill" if k == 0 else "gbar"}" x="162" y="{342 + k * 28}" width="{max(4, p * 200):.0f}" height="12" rx="2"/>'
+                     for k, (t, p) in enumerate(toks))
+    tall = (f'<rect class="zone" x="0" y="0" width="430" height="500" rx="6"/>'
+            f'<text class="s" x="24" y="28">PROMPT</text>'
+            f'<rect class="box" x="24" y="40" width="250" height="62" rx="12"/><path class="box" d="M48 102l-8 14 20-14"/>'
+            f'<text x="40" y="66">{q}</text><text x="40" y="86">{q2}</text>'
+            f'<text class="s" x="24" y="146">{L("THE MODEL", "DAS MODELL")}</text>{t_edges}{t_nodes}'
+            f'<path class="ln hl" d="M300 270V300"/><path class="ln hl" d="M294 294L300 300L306 294"/>'
+            f'<text class="s" x="24" y="318">{L("THE NEXT TOKEN", "DAS NÄCHSTE TOKEN")}</text>{t_bars}'
+            f'<path class="ln hl dash" d="M{162 + toks[0][1] * 200 + 6:.0f} 348H404V71H284"/><path class="ln hl" d="M290 65L282 71L290 77"/>'
+            f'<text class="a" x="24" y="472">{L("“The capital is Paris”", "„Die Hauptstadt ist Paris“")}▌</text>')
+    return (f'<figure class="art-hero" aria-hidden="true"><svg class="dia hero hero-wide" viewBox="0 0 860 220">{body}</svg>'
+            f'<svg class="dia hero hero-tall" viewBox="0 0 430 500">{tall}</svg></figure>')
 
 
 def hero_dt(lang):
@@ -97,7 +83,7 @@ def hero_dt(lang):
         return (f'<g class="glyph imm" transform="translate({ox} {oy}) scale({sx})">{imm_parts(sensors=True, out=True)}</g>'
                 + callout(17, 112, P(0, 0)[0], below - 12, L("control cabinet", "Schaltschrank"), "start")
                 + callout(136.5, 84, P(136.5, 0)[0], below, L("clamping unit · mould", "Schließeinheit · Form"))
-                + callout(250, 84, P(250, 0)[0], below, L("injection unit", "Spritzeinheit"))
+                + callout(250, 84, P(250, 0)[0] - 6, below, L("injection unit", "Spritzeinheit"), "start")
                 + callout(151, 6, P(151, 0)[0] - 22, oy - 16, L("user interface", "Bedienoberfläche"))
                 + callout(202, 22, P(202, 0)[0] + 18, oy - 16, L("hopper", "Trichter")))
 
@@ -106,8 +92,8 @@ def hero_dt(lang):
         tabs = [L("monitor", "Monitor"), L("predict", "Prognose"), L("assist", "Assistenz"), L("control", "Steuerung")]
         tw = (w - 28 - 18) / 4
         return (f'<rect class="box hl" x="{x}" y="{y}" width="{w}" height="170" rx="8"/>'
-                + "".join(f'<rect class="{"hfill" if k == 0 else "box"}" x="{x + 14 + k * (tw + 6):.1f}" y="{y + 14}" width="{tw:.1f}" height="18" rx="2"/>'
-                          f'<text class="s{" on" if k == 0 else ""}" x="{x + 14 + k * (tw + 6) + tw / 2:.1f}" y="{y + 27}" text-anchor="middle">{t}</text>' for k, t in enumerate(tabs))
+                + "".join(f'<rect class="box{" hl" if k == 0 else ""}" x="{x + 14 + k * (tw + 6):.1f}" y="{y + 14}" width="{tw:.1f}" height="18" rx="2"/>'
+                          f'<text class="s{" a" if k == 0 else ""}" x="{x + 14 + k * (tw + 6) + tw / 2:.1f}" y="{y + 27}" text-anchor="middle">{t}</text>' for k, t in enumerate(tabs))
                 + "".join(f'<rect class="box" x="{x + 16 + k * 6}" y="{y + 52 + k * 8}" width="104" height="30" rx="2"/>' for k in range(3))
                 + f'<text class="s" x="{x + 38}" y="{y + 87}">{L("machine · mould", "Maschine · Form")}</text>'
                 + "".join(f'<rect class="box" x="{x + w - 146}" y="{y + 52 + k * 22}" width="132" height="16" rx="8"/><text class="s" x="{x + w - 136}" y="{y + 63 + k * 22}">{t}</text>'

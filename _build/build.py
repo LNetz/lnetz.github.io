@@ -19,6 +19,7 @@ import dt_figs
 import ea
 import ea_figs
 import article_art
+import article_common
 
 import project_pages
 
@@ -32,6 +33,7 @@ def T(en, de):
 
 # the topic card's link to part 3, only once that article is published (article_art.DT_PUBLISHED)
 DT_LINK = T(' <a class="int" href="research-dt.html">An introduction →</a>', ' <a class="int" href="research-dt.html">Eine Einführung →</a>') if article_art.DT_PUBLISHED else {"en": "", "de": ""}
+EA_LINK = T(' <a class="int" href="research-ea.html">An introduction →</a>', ' <a class="int" href="research-ea.html">Eine Einführung →</a>') if article_art.EA_PUBLISHED else {"en": "", "de": ""}
 
 
 
@@ -280,41 +282,8 @@ def row(label, title, text, role="", links=(), anchor=None):
         </li>'''
 
 
-# The article series on the research page: cards with a small drawing each (accent = the key idea),
-# set apart from the plain rows of the community and talks lists.
-ARTICLE_THUMBS = {
-    # a class diagram → a generator (two interlocking gears) → three generated pages
-    "mde": '''<rect class="b" x="14" y="30" width="62" height="58" rx="2"/><path d="M14 46H76M22 58H62M22 70H54"/>
-      <path class="a" d="M80 64H102"/><path class="a" d="M96 58L102 64L96 70"/>
-      <path class="a gear" d="M140.7 61.1L144.9 61.7L144.9 66.3L140.7 66.9L139.1 71.3L141.9 74.3L139.0 77.9L135.4 75.7L131.4 78.0L131.6 82.2L127.0 83.0L125.7 79.0L121.1 78.2L118.6 81.5L114.6 79.2L116.2 75.3L113.1 71.7L109.1 72.6L107.5 68.3L111.2 66.3L111.2 61.7L107.5 59.7L109.1 55.4L113.1 56.3L116.2 52.7L114.6 48.8L118.6 46.5L121.1 49.8L125.7 49.0L127.0 45.0L131.6 45.8L131.4 50.0L135.4 52.3L139.0 50.1L141.9 53.7L139.1 56.7Z"/><circle class="a" cx="126" cy="64" r="5"/>
-      <path class="gear" d="M158.3 41.7L161.0 43.3L159.5 46.5L156.5 45.4L153.9 47.6L154.3 50.7L150.8 51.5L149.8 48.5L146.5 47.7L144.3 50.0L141.5 47.8L143.2 45.1L141.8 42.1L138.6 41.8L138.6 38.2L141.8 37.9L143.2 34.9L141.5 32.2L144.3 30.0L146.5 32.3L149.8 31.5L150.8 28.5L154.3 29.3L153.9 32.4L156.5 34.6L159.5 33.5L161.0 36.7L158.3 38.3Z"/><circle cx="150" cy="40" r="3"/>
-      <path class="a" d="M150 64H170"/><path class="a" d="M164 58L170 64L164 70"/>
-      <rect class="b" x="176" y="22" width="50" height="34" rx="2"/><rect class="b" x="182" y="44" width="50" height="34" rx="2"/><rect class="b f" x="188" y="66" width="44" height="30" rx="2"/>
-      <path d="M194 76H224M194 84H216"/>''',
-    # a machine ⇄ its twin (dt_figs.thumb_dt)
-    "dt": dt_figs.thumb_dt(),
-    # a population on the toy wind-farm site and its stepped best-fitness curve (ea_figs.thumb_ea)
-    "ea": ea_figs.thumb_ea(),
-    # a small neural network → the probability of the next token
-    "ai4se": '''<path d="M24 34L70 26M24 34L70 58M24 34L70 90M24 84L70 26M24 84L70 58M24 84L70 90M70 26L116 44M70 58L116 44M70 90L116 44M70 26L116 76M70 58L116 76M70 90L116 76"/>
-      <circle class="b" cx="24" cy="34" r="6"/><circle class="b" cx="24" cy="84" r="6"/><circle class="b" cx="70" cy="26" r="6"/><circle class="b" cx="70" cy="58" r="6"/><circle class="b" cx="70" cy="90" r="6"/>
-      <circle class="b f" cx="116" cy="44" r="7"/><circle class="b" cx="116" cy="76" r="7"/>
-      <path class="a" d="M128 59H146"/><path class="a" d="M140 53L146 59L140 65"/>
-      <rect class="f" x="156" y="28" width="68" height="9" rx="1"/><rect class="g" x="156" y="45" width="22" height="9" rx="1"/><rect class="g" x="156" y="62" width="12" height="9" rx="1"/><rect class="g" x="156" y="79" width="7" height="9" rx="1"/>''',
-}
-
-
-def article_card(lang, part, year, href, title, text, thumb, figures):
-    L = lambda x: x[lang] if isinstance(x, dict) else x
-    return f'''        <li>
-          <a href="{href}">
-            <svg class="thumb" viewBox="0 0 240 118" aria-hidden="true">{ARTICLE_THUMBS[thumb]}</svg>
-            <span class="meta mono">{L(T("Part", "Teil"))} {part} · {year}</span>
-            <span class="title">{L(title)}</span>
-            <span class="text">{L(text)}</span>
-            <span class="more mono">{figures} {L(T("interactive figures", "interaktive Abbildungen"))} · {L(T("read", "lesen"))} →</span>
-          </a>
-        </li>'''
+# The article series on the research page: cards with a small drawing each (accent = the key idea) come from
+# article_common.cards() — names, dates, teasers and the thumbnails live in article_common.SERIES.
 
 
 # =====================================================================
@@ -605,13 +574,16 @@ def research(lang):
             L(T("Dataset", "Datensatz")), golden_links),
     ]
     talks = [row(d, ten if lang == "en" else tde, ven if lang == "en" else vde) for d, ten, tde, ven, vde in TALKS]
+    # in the order of the article series (MDE, AI4SE, DT, EA), then the topic without an article
     themes = [
-        T(("LLMs for modeling", "Model synthesis in DSLs, grammar masking for syntactically valid output, how LLMs corrupt and repair textual models. <a class=\"int\" href=\"research-ai4se.html\">An introduction →</a>"),
-          ("LLMs für die Modellierung", "Modellsynthese in DSLs, Grammar Masking für syntaktisch valide Ausgaben, wie LLMs textuelle Modelle beschädigen und reparieren. <a class=\"int\" href=\"research-ai4se.html\">Eine Einführung →</a>")),
         T(("Model-driven engineering", "Generators and DSLs that stay maintainable when the model evolves. <a class=\"int\" href=\"research-mde.html\">An introduction →</a>"),
           ("Modellgetriebene Entwicklung", "Generatoren und DSLs, die wartbar bleiben, wenn sich das Modell weiterentwickelt. <a class=\"int\" href=\"research-mde.html\">Eine Einführung →</a>")),
+        T(("LLMs for modeling", "Model synthesis in DSLs, grammar masking for syntactically valid output, how LLMs corrupt and repair textual models. <a class=\"int\" href=\"research-ai4se.html\">An introduction →</a>"),
+          ("LLMs für die Modellierung", "Modellsynthese in DSLs, Grammar Masking für syntaktisch valide Ausgaben, wie LLMs textuelle Modelle beschädigen und reparieren. <a class=\"int\" href=\"research-ai4se.html\">Eine Einführung →</a>")),
         T(("Low-code &amp; digital twins", "Generating customized low-code platforms and cockpits for digital twins." + DT_LINK["en"]),
           ("Low-Code &amp; digitale Zwillinge", "Generierung maßgeschneiderter Low-Code-Plattformen und Cockpits für digitale Zwillinge." + DT_LINK["de"])),
+        T(("Evolutionary algorithms", "Genetic algorithms for the energy management of plug-in hybrid cars and for wind-farm layouts — and how finely to discretise gene parameters." + EA_LINK["en"]),
+          ("Evolutionäre Algorithmen", "Genetische Algorithmen für das Energiemanagement von Plug-in-Hybridfahrzeugen und für Windpark-Layouts — und wie fein man Genparameter diskretisieren sollte." + EA_LINK["de"])),
         T(("Information systems", "From model-driven prototype to full-size enterprise application — and retrofitting generation into existing systems."),
           ("Informationssysteme", "Vom modellgetriebenen Prototyp zur vollwertigen Unternehmensanwendung — und die nachträgliche Einführung von Generierung in bestehende Systeme.")),
     ]
@@ -640,10 +612,7 @@ def research(lang):
 
       <div class="group mono" id="articles">{L(T("Articles", "Artikel"))}</div>
       <ul class="articles">
-{article_card(lang, 1, "2026", mde.FILE, T("Model-Driven Software Engineering", "Modellgetriebene Softwareentwicklung"), T("What models, DSLs and generators are — and how MontiGem and CD2GUI turn one class diagram into a running web application.", "Was Modelle, DSLs und Generatoren sind — und wie MontiGem und CD2GUI aus einem Klassendiagramm eine laufende Webanwendung machen."), "mde", 7)}
-{article_card(lang, 2, "2024 — 2026", ai4se.FILE, T("AI-driven Software Engineering", "KI-getriebene Softwareentwicklung"), T("How a language model arrives at its answer, what agents and harnesses are — and how LLMs write models that a generator turns into software.", "Wie ein Sprachmodell zu seiner Antwort kommt, was Agenten und Harnesses sind — und wie LLMs Modelle schreiben, aus denen ein Generator Software macht."), "ai4se", 3)}
-{"" if not article_art.DT_PUBLISHED else article_card(lang, 3, "2026", dt.FILE, T("Digital Twins", "Digitale Zwillinge"), T("What a digital twin is — and what it is not: the chair’s definition, digital shadows, how a twin acts, and how to build twins with models.", "Was ein digitaler Zwilling ist — und was nicht: die Definition des Lehrstuhls, digitale Schatten, wie ein Zwilling handelt und wie man Zwillinge mit Modellen baut."), "dt", 5)}
-{"" if not article_art.EA_PUBLISHED else article_card(lang, 4, "2015 — 2026", ea.FILE, T("Evolutionary Algorithms", "Evolutionäre Algorithmen"), T("What evolutionary and genetic algorithms are, where they sit next to machine learning, and how selection, crossover and mutation work — on a toy wind farm.", "Was evolutionäre und genetische Algorithmen sind, wo sie neben maschinellem Lernen stehen und wie Selektion, Crossover und Mutation funktionieren — an einem Spielzeug-Windpark."), "ea", 9)}
+{article_common.cards(lang)}
       </ul>
 
       <div class="group mono" id="community">Community</div>
