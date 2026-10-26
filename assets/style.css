@@ -1775,3 +1775,17 @@ details.curious summary:hover .cu-t { color: var(--accent); }
 
 /* back-to-top hides while an interactive figure is under it (site.js) */
 .to-top.over-demo { opacity: 0; pointer-events: none; }
+
+/* share links: a small link icon after every heading and caption of an article, shown on hover or focus; its label
+   is the short anchor (mde-2, mde-2.1, mde-f3), a click copies the link (site.js) */
+.article .share { display: inline-flex; align-items: center; gap: 4px; margin-left: 8px; vertical-align: 1px;
+                  font: 400 11px/1 var(--mono); letter-spacing: .01em; color: var(--ink-3); text-decoration: none;
+                  white-space: nowrap; opacity: 0; transition: opacity .15s, color .15s; }
+.article .share svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; }
+.article .share::after { content: "[" attr(data-share) "]"; }
+.article .share[data-done]::after { content: attr(data-done) " ✓"; color: var(--accent); }
+.article :is(h2, h3):hover .share, .article figure:hover .share, .article .share:focus-visible,
+.article .share[data-done] { opacity: 1; }
+.article .share:hover { color: var(--accent); }
+.article .share-at { scroll-margin-top: 44px; }
+@media (hover: none) { .article .share { opacity: .5; padding: 10px; margin: -10px -10px -10px -2px; } .article .share::after { content: none; } }

@@ -107,3 +107,6 @@ between steps or presets must use them too.
   "Literature" are entries of their own.
 - On phones the bar shows `ABBR · 02 Chapter`; anchors land below the sticky bar (`html{scroll-padding-top}`).
 - The back-to-top button steps aside while a `figure.demo` is under it.
+- Share links: `article_common.share_links()` gives every h2/h3 and every captioned figure a short anchor
+  (`mde-2`, `mde-2.1`, `mde-f3`; AI4SE uses `ai-`) and a link icon shown on hover. A click copies the URL.
+  An anchor inside a closed "for the curious" box opens the box. The numbers follow the article's order.

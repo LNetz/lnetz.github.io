@@ -351,12 +351,72 @@ def scripts(lang, name, css=False):
             + f'<script src="{A}assets/demo-common.js"></script>\n<script src="{A}assets/{name}.js"></script>\n')
 
 
+# ---------------------------------------------------------------------------------------------------------------
+# Share links: every chapter, sub chapter and figure gets a short anchor to pass on — mde-2 (chapter 02), mde-2.1
+# (its first sub chapter), mde-f3 (third figure) — and a small link icon that shows on hover; site.js copies the
+# link on click. The labels follow the order of the article, so they move when chapters or figures are added.
+# ---------------------------------------------------------------------------------------------------------------
+_SHARE = {"AI4SE": "ai"}
+_SHARE_ICON = ('<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2'
+               'M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg>')
+
+
+def share_links(lang, file, html_):
+    e = entry(file)
+    p = _SHARE.get(e["abbr"], e["abbr"].lower())
+    what = {"sec": T("section", "Abschnitt")[lang], "fig": T("figure", "Abbildung")[lang]}
+    ch, sub, fig = 0, 0, 0
+
+    def link(key, kind):
+        return (f'<a class="share" href="#{key}" data-share="{key}" aria-label="{T("Copy link to", "Link kopieren:")[lang]} '
+                f'{what[kind]} {key}">{_SHARE_ICON}</a>')
+
+    def heading(m):
+        nonlocal ch, sub
+        tag, attrs, num, inner = m.group(1), m.group(2), m.group(3), m.group(4)
+        sid = re.search(r'id="([^"]+)"', attrs).group(1)
+        if sid == "literature":
+            return m.group(0)
+        if tag == "h2":
+            ch, sub = (int(num), 0) if num else (ch, sub)
+            key = f"{p}-{ch}" if num else f"{p}-{sid}"
+        else:
+            sub += 1
+            key = f"{p}-{ch}.{sub}"
+        lead = f'<span class="mono">{num}</span>' if num else ""
+        return f'<{tag}{attrs}>{lead}<span class="share-at" id="{key}"></span>{inner}{link(key, "sec")}</{tag}>'
+
+    html_ = re.sub(r'<(h[23])( id="[^"]+"[^>]*)>(?:<span class="mono">(\d+)</span>)?(.*?)</\1>', heading, html_, flags=re.S)
+
+    # figures: id on the <figure>, the link at the end of its caption (nested figures are left alone)
+    out, pos = [], 0
+    for m in re.finditer(r'<figure( class="([^"]*)")?[^>]*>', html_):
+        if m.start() < pos or "art-hero" in (m.group(2) or ""):
+            continue
+        end = html_.find("</figure>", m.end())
+        body = html_[m.end():end]
+        cap = body.rfind("</figcaption>")
+        if end < 0 or "<figure" in body or cap < 0:
+            continue
+        s = body.rfind('<span class="src"', body.rfind("<figcaption", 0, cap), cap)
+        cap = s if s >= 0 else cap                                   # before the source line, if there is one
+        fig += 1
+        key = f"{p}-f{fig}"
+        out.append(html_[pos:m.start()])
+        out.append(m.group(0)[:-1] + f' id="{key}">' + body[:cap] + link(key, "fig") + body[cap:])
+        pos = end
+    out.append(html_[pos:])
+    return "".join(out)
+
+
 def page(lang, file, sections_html, refs, own, hero, lead, desc, script):
     """The whole article page for build.py: returns (file, title, description, body, scripts).
     sections_html: the rendered sections (sections()); refs: '<li id="ref-n">…</li>' items in the module's numbering;
     own: keys of own papers that may be cited; hero: the hero figure html; lead: T() with the lead sentence."""
     body_html, lit = _literature(lang, file, sections_html, refs, own)
-    html_ = f'''{header(lang, file, body_html + lit, lead)}
+    head = header(lang, file, body_html + lit, lead)
+    body_html = share_links(lang, file, body_html)
+    html_ = f'''{head}
     {hero}
     <article class="article">
 {body_html}

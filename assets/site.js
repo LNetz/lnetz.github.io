@@ -976,3 +976,37 @@ if (window.SiteDemo) document.querySelectorAll(".art-sec input[type=range]").for
   // Esc inside the game (it has the focus) arrives as a message
   addEventListener("message", e => { if (e.origin === location.origin && e.data && e.data.type === "game:close") close(); });
 })();
+
+// Share links on articles (a.share after headings and captions, built by article_common.share_links): a click copies
+// the link to that section or figure and says so for a moment. An anchor inside a closed "for the curious" box opens it.
+(() => {
+  const links = document.querySelectorAll(".article a.share");
+  if (!links.length) return;
+  const done = document.documentElement.lang === "de" ? "kopiert" : "copied";
+  const copy = text => navigator.clipboard?.writeText(text).catch(() => fallback(text)) ?? fallback(text);
+  const fallback = text => {
+    const t = Object.assign(document.createElement("textarea"), { value: text });
+    t.style.cssText = "position:fixed;opacity:0";
+    document.body.append(t);
+    t.select();
+    try { document.execCommand("copy"); } catch (_) {}
+    t.remove();
+  };
+  links.forEach(a => a.addEventListener("click", e => {
+    if (e.button || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    const url = location.origin + location.pathname + a.hash;
+    copy(url);
+    history.replaceState(null, "", a.hash);
+    a.dataset.done = done;
+    clearTimeout(a._t);
+    a._t = setTimeout(() => delete a.dataset.done, 1600);
+  }));
+  const reveal = () => {
+    const el = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    const box = el && el.closest("details:not([open])");
+    if (box) { box.open = true; el.scrollIntoView(); }
+  };
+  reveal();
+  addEventListener("hashchange", reveal);
+})();
