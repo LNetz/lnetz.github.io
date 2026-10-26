@@ -1852,3 +1852,9 @@ h2.group { font-weight: 400; }
 
 /* Keep the ESACA mark transparent; use gray strokes on light surfaces. */
 :root:not([data-theme="dark"]) img[src$="/esaca.svg"] { content: url("logos/esaca-light.svg"); }
+
+/* Compact photo orientation control; the two outlines overlap in All mode. */
+.lightbox .orientation svg { display: block; }
+.orientation[data-format="portrait"] .format-landscape, .orientation[data-format="landscape"] .format-portrait { display: none; }
+.orientation[data-format="portrait"] .format-portrait { x: 7px; y: 3px; }
+.orientation[data-format="landscape"] .format-landscape { x: 4px; y: 7px; width: 16px; }

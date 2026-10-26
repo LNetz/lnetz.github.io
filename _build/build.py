@@ -796,7 +796,6 @@ SERIES = [  # (anchor, name, note, photos)
         P("land_00", 1800, 1012, T("Turquoise sea breaking on rocks, seen from above", "Türkisfarbenes Meer bricht an Felsen, von oben"), A_("Surf", "Brandung")),
         P("land_10", 1800, 1013, T("Small boat drawing a wake across turquoise water, seen from above", "Kleines Boot zieht eine Spur durch türkisfarbenes Wasser, von oben"), A_("Boat", "Boot")),
         P("land_08", 1800, 1012, T("Turquoise river winding through dense forest, seen from above", "Türkisfarbener Fluss durch dichten Wald, von oben"), A_("River", "Fluss")),
-        P("land_19", 2000, 1125, T("Lakeshore of Chicago at night, seen from high above", "Seeufer von Chicago bei Nacht, von hoch oben"), T("Lakeshore, Chicago", "Seeufer, Chicago")),
         P("land_20", 2000, 1122, T("Light trails along the lakeshore road at night, seen from above", "Lichtspuren entlang der Uferstraße bei Nacht, von oben"), T("Lake Shore Drive, Chicago", "Lake Shore Drive, Chicago")),
         P("land_21", 2000, 1125, T("Street grid of Chicago lit up at night, seen from above", "Erleuchtetes Straßenraster von Chicago bei Nacht, von oben"), T("Grid, Chicago", "Raster, Chicago")),
         P("land_09", 2400, 655, T("Panorama of a city at night from the air", "Nachtpanorama einer Stadt aus der Luft"), T("City at night, panorama", "Stadt bei Nacht, Panorama")),
@@ -841,7 +840,6 @@ SERIES = [  # (anchor, name, note, photos)
         P("peop_20", 1638, 2048, T("Dog licking the face of a woman in a cap, black and white", "Hund leckt das Gesicht einer Frau mit Kappe, schwarzweiß"), T("Kiss", "Kuss")),
         P("peop_27", 1333, 2000, T("Father kissing his laughing baby, on white", "Vater küsst sein lachendes Baby, vor Weiß"), T("Father", "Vater")),
         P("peop_28", 2000, 1333, T("Young couple looking at each other under blossoming branches", "Junges Paar sieht sich unter blühenden Zweigen an"), T("Blossom", "Blüte")),
-        P("peop_29", 1333, 2000, T("Newborn held in two hands, gripping a finger", "Neugeborenes in zwei Händen, greift nach einem Finger"), T("Newborn", "Neugeboren")),
         P("peop_35", 1920, 1280, T("Hands forming a heart on a pregnant belly, black and white", "Hände formen ein Herz auf einem Babybauch, schwarzweiß"), T("Expecting", "Erwartung")),
         P("peop_25", 1332, 2000, T("Wedding couple in an arched doorway, black and white", "Hochzeitspaar in einem Torbogen, schwarzweiß"), T("Archway", "Torbogen")),
         P("peop_23", 1920, 1280, T("Woman in profile, lit from the side against black", "Frau im Profil, seitlich beleuchtet vor Schwarz"), T("Side light", "Seitenlicht")),
@@ -963,6 +961,7 @@ def main():
     <span class="tools">
       <svg class="progress" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/></svg>
       <button type="button" class="play" aria-pressed="false"><i aria-hidden="true">▶</i> <span>{L(T("slideshow", "Diashow"))}</span></button>
+      <button type="button" class="orientation" data-format="all" aria-label="{L(T("Photo orientation filter: All formats", "Bildformat filtern: Alle Formate"))}" title="{L(T("All formats", "Alle Formate"))}"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><rect class="format-portrait" x="5" y="3" width="10" height="16" rx="1"/><rect class="format-landscape" x="8" y="10" width="14" height="10" rx="1"/></svg></button>
       <button type="button" class="fs"><i aria-hidden="true">⤢</i> <span>{L(T("full screen", "Vollbild"))}</span></button>
       <button type="button" class="close">{L(T("close", "schließen"))} ×</button>
     </span>

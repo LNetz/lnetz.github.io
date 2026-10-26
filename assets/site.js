@@ -311,7 +311,21 @@ const overlayFocus = (() => {
   let i = -1, opener = null, busy = false, queued = null;
 
   const srcOf = n => { const im = figs[n].querySelector("img"); return im.dataset.full ? new URL(im.dataset.full, location.href).href : im.src; };   // full size, not the grid thumbnail
-  const wrap = n => (n + figs.length) % figs.length;
+  let orientation = "all";
+  const eligible = n => {
+    const photo = figs[n].querySelector("img");
+    const aspect = Number(photo.getAttribute("width")) / Number(photo.getAttribute("height"));
+    return orientation === "all" || (orientation === "portrait" ? aspect < 0.87 && aspect > 1 / 2.1 : aspect > 1.15 && aspect < 2.1);
+  };
+  const wrap = n => {
+    const dir = n < i ? -1 : 1;
+    let candidate = (n % figs.length + figs.length) % figs.length;
+    for (let k = 0; k < figs.length; k++) {
+      if (eligible(candidate)) return candidate;
+      candidate = (candidate + dir + figs.length) % figs.length;
+    }
+    return Math.max(0, i);
+  };
   // resolves once the image is downloaded *and* decoded, so a transition never waits for decoding
   const load = src => new Promise((ok, fail) => {
     const im = new Image();
@@ -445,9 +459,16 @@ const overlayFocus = (() => {
         // A separate, fine contour pass runs ahead along the same connected travel map.
         // Multiplying time (rather than subtracting an offset) preserves the point origin.
         float lineAge = u_progress * 1.48 - arrival;
-        float lineFront = smoothstep(0.0, 0.045, lineAge);
-        float fineContour = smoothstep(0.22, 0.82, edge);
-        float lineOpacity = 0.62 * fineContour * lineFront * (1.0 - mixF);
+        float lineFront = smoothstep(0.0, 0.075, lineAge);
+        // A broader derivative gives a feathered stroke instead of a crisp pixel edge.
+        vec2 brush = 1.8 / u_res;
+        float bx = lumTo(uv + vec2(brush.x, 0.0)) - lumTo(uv - vec2(brush.x, 0.0));
+        float by = lumTo(uv + vec2(0.0, brush.y)) - lumTo(uv - vec2(0.0, brush.y));
+        float softEdge = smoothstep(0.035, 0.42, length(vec2(bx, by)) * u_kEdge);
+        // Stationary variation in pressure: no animated shimmer or shaking of the photo.
+        float pressure = 0.78 + 0.22 * (0.5 + 0.5 * snoise(nuv * 58.0));
+        float fineContour = mix(edge, softEdge, 0.78) * pressure;
+        float lineOpacity = 0.48 * fineContour * lineFront * (1.0 - mixF);
         col = mix(col, b.rgb, lineOpacity);
       }
       gl_FragColor = vec4(col, 1.0);
@@ -699,7 +720,8 @@ const overlayFocus = (() => {
   // ---------- navigation ----------
   const caption = n => {
     const fig = figs[n];
-    count.textContent = `${n + 1} / ${figs.length}`;
+    const visible = figs.map((_, k) => k).filter(eligible);
+    count.textContent = (visible.indexOf(n) + 1) + " / " + visible.length;
     title.textContent = [...fig.querySelectorAll("figcaption span")].map(s => s.textContent).filter(Boolean).join("  ·  ");
     img.alt = fig.querySelector("img").alt;
   };
@@ -844,6 +866,20 @@ const overlayFocus = (() => {
   lb.querySelector(".close").addEventListener("click", stop(close));
   playBtn.addEventListener("click", stop(() => setPlaying(!playing)));
   fsBtn.addEventListener("click", stop(toggleFs));
+  const orientationBtn = lb.querySelector(".orientation");
+  orientationBtn.addEventListener("click", stop(() => {
+    if (busy) return;
+    const options = ["all", "portrait", "landscape"];
+    orientation = options[(options.indexOf(orientation) + 1) % options.length];
+    const de = document.documentElement.lang === "de";
+    const formatLabel = (de ? {all:"Alle Formate",portrait:"Hochkant",landscape:"Querformat"} : {all:"All formats",portrait:"Portrait",landscape:"Landscape"})[orientation];
+    orientationBtn.setAttribute("aria-label", (de ? "Bildformat filtern: " : "Photo orientation filter: ") + formatLabel);
+    orientationBtn.title = formatLabel;
+    orientationBtn.dataset.format = orientation;
+    const destination = wrap(i);
+    if (destination !== i) go(destination, 1); else { caption(i); preload(i); schedule(); }
+    poke();
+  }));
 
   // "slideshow" on the gallery page: start at the first photo, full screen where available
   document.querySelectorAll("[data-slideshow]").forEach(b => b.addEventListener("click", () => {
@@ -853,7 +889,8 @@ const overlayFocus = (() => {
   }));
 
   // Swipe. With WebGL the transition follows the finger (or a dragged mouse): the dissolve front
-  // moves as far as you pull. Releasing past a third of the way, or with a quick flick, completes
+  // uses the same image-guided ink and contour reveal as the buttons, scrubbed directly by distance.
+  // Releasing past a third of the way, or with a quick flick, completes
   // it; otherwise it springs back. Without WebGL (or with reduced motion) a swipe simply moves on.
   // A plain tap/click on the backdrop or photo closes (see the click handler below).
   let sx = null, swiped = false, drag = null, trail = [];   // trail: recent [time, x] for the flick speed
@@ -875,7 +912,7 @@ const overlayFocus = (() => {
       const toIm = ready.get(srcOf(n)) || thumbReady(n);
       if (!toIm) return;                                // nothing decoded yet: plain swipe on release
       try {
-        drag = { dir, n, src: ready.has(srcOf(n)) ? srcOf(n) : thumbOf(n), h: prepare(img, toIm, dir), p: 0 };
+        drag = { dir, n, src: ready.has(srcOf(n)) ? srcOf(n) : thumbOf(n), h: prepare(img, toIm, dir, true), p: 0 };
       } catch (_) { glFailed = true; return; }           // e.g. file:// — plain swipes from now on
       busy = true;
       clearTimeout(timer);
@@ -898,7 +935,11 @@ const overlayFocus = (() => {
     drag = null;
     const speed = (-(e.clientX - x0) * d.dir) / Math.max(dt, 1);   // px/ms over the last ~100 ms
     if (e.type === "pointerup" && (d.p > 0.33 || (speed > 0.5 && d.p > 0.05))) {
-      await run(d.h, d.p, 1, 120 + DURATION * 0.55 * (1 - d.p), easeOut);
+      // Continue at the recent gesture speed, with a short bounded settle on release.
+      const travel = canvas.clientWidth * 0.75;
+      const velocity = Math.max(0.18, speed);
+      const remainingMs = (1 - d.p) * travel / velocity;
+      await run(d.h, d.p, 1, Math.max(90, Math.min(650, remainingMs)), easeOut);
       i = d.n;
       caption(i);
       img.src = d.src;
