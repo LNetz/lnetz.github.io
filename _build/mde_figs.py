@@ -766,9 +766,9 @@ def fig_three_languages(lang):
     """F6: three languages, one screen (CSS :has() hover). After GLM+24 Fig.9 and BGK+24 Listing 2. Fictional data."""
     L = lambda x: x[lang]
     gui = 'webpage Books(all Book b) {\n  card {\n    head { label "Books" }\n    body {\n      datatable { rows <b {\n        column "Title", title\n        column "Pages", pages\n}}}}}'
-    codes = [("data", T("DATA", "DATEN"), "CD4A", "class Book {\n  String title;\n  int pages;\n}"),
+    codes = [("data", T("DATA", "DATEN"), "CD4A", "classdiagram Library {\n  class Book {\n    String title;\n    int pages;\n  }\n}"),
              ("page", T("PAGE", "SEITE"), "GUI-DSL", gui),
-             ("rule", T("RULE", "REGEL"), "OCL/P", "context Book inv atLeastOnePage:\n  pages > 0;")]
+             ("rule", T("RULE", "REGEL"), "OCL/P", "ocl LibraryRules {\n  context Book inv atLeastOnePage:\n    pages > 0;\n}")]
     boxes = "".join(f'<div class="f6-code" data-k="{k}" tabindex="0"><span class="k mono">{L(a)} · {b}</span><pre class="mono">{esc(c)}</pre></div>' for k, a, b, c in codes)
     mock = f'''<div class="f6-page" aria-hidden="true">
   <div class="gp-card f6-reg" data-k="page"><div class="gp-head">{L(T("Books", "Bücher"))}</div><div class="gp-body">
@@ -784,9 +784,9 @@ def fig_chain(lang):
     """F9: from a sentence to an application, the toolchain of Net24 (Fig.2.4): ① LLM → ② CD2GUI → ③ MontiGem.
     The numbers are links; pointing at one dims what it does not touch (CSS :has())."""
     L = lambda x: x[lang]
-    model = "class Book {\n  String title;\n  int pages; }\nclass Member {\n  String name; }\nclass Loan {\n  Date due; }\nassociation\nMember -> Loan [*];\nassociation\nLoan -> Book [1];"
+    model = "class Book {\n  String title;\n  int pages; }\nclass Member {\n  String name; }\nclass Loan {\n  Date due; }\nassociation\nMember -> Loan [*];\nassociation\nLoan -> Book [1];\n…"
     panes = [("1", T("INFORMAL DESCRIPTION", "INFORMELLE BESCHREIBUNG"), f'<p class="f9-bubble">{L(T("“Create a model for a library that lends books to its members.”", "„Erstelle ein Modell für eine Bibliothek, die Bücher an ihre Mitglieder verleiht.“"))}</p>', T("domain expert", "Domänenexpertin")),
-             ("1 2", T("DOMAIN MODEL", "DOMÄNENMODELL"), f'<pre class="mono">{esc(model)}</pre>', T("modeller · may merge own models", "Modelliererin · kann eigene Modelle einfügen")),
+             ("1 2", T("DOMAIN MODEL · EXCERPT", "DOMÄNENMODELL · AUSZUG"), f'<pre class="mono">{esc(model)}</pre>', T("modeller · may merge own models", "Modelliererin · kann eigene Modelle einfügen")),
              ("2 3", T("APPLICATION MODELS", "ANWENDUNGSMODELLE"), '<p class="mono">BookOverview.gui<br>BookDetails.gui<br>MemberDetails.gui<br>…<br>Dashboard.gui</p>', T("pages, rules, roles", "Seiten, Regeln, Rollen")),
              ("3", T("GENERATED APPLICATION", "GENERIERTE ANWENDUNG"), f'<p class="f9-stack mono"><span class="g">{L(T("generated", "generiert"))}</span><span>{L(T("runtime environment", "Laufzeitumgebung"))}</span><span class="h">{L(T("hand-written (TOP)", "handgeschrieben (TOP)"))}</span></p>', T("programmer", "Programmiererin"))]
     steps = [("1", "LLM", "research-ai4se.html#models"), ("2", "CD2GUI", "#cd2gui"), ("3", "MontiGem", "#whygen")]
@@ -796,5 +796,5 @@ def fig_chain(lang):
         if k < 3:
             n, name, href = steps[k]
             out += f'<a class="f9-step mono" data-k="{n}" href="{href}"><b>{"①②③"[k]}</b>{name}</a>'
-    return (f'<figure class="media art-fig"><div class="f9">{out}</div><figcaption class="mono">{L(T("<b>AI only in step 1.</b> An LLM turns the description into a class diagram; everything after the model — CD2GUI and MontiGem — is deterministic, repeatable and checkable. Point at a step to see what it touches; click it to read more.", "<b>KI nur in Schritt 1.</b> Ein LLM macht aus der Beschreibung ein Klassendiagramm; alles nach dem Modell — CD2GUI und MontiGem — ist deterministisch, wiederholbar und prüfbar. Zeigen Sie auf einen Schritt, um zu sehen, was er berührt; ein Klick führt zur Erklärung."))}'
+    return (f'<figure class="media art-fig"><div class="f9">{out}</div><figcaption class="mono">{L(T("<b>AI only in step 1.</b> An LLM turns the description into a class diagram; everything after the model — CD2GUI and MontiGem — is deterministic and repeatable, which makes it testable; whether the result is right still depends on the model, the transformations, the templates and the runtime. Point at a step to see what it touches; click it to read more.", "<b>KI nur in Schritt 1.</b> Ein LLM macht aus der Beschreibung ein Klassendiagramm; alles nach dem Modell — CD2GUI und MontiGem — ist deterministisch und wiederholbar und damit testbar; ob das Ergebnis stimmt, hängt trotzdem von Modell, Transformationen, Templates und Laufzeitumgebung ab. Zeigen Sie auf einen Schritt, um zu sehen, was er berührt; ein Klick führt zur Erklärung."))}'
             f'{source_line(src("after", "Net24", where="Fig. 2.4"), lang)}</figcaption></figure>')
