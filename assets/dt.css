@@ -107,3 +107,4 @@ figure.demo .dia text.s { font-size: 10.8px; }
 @media (max-width: 760px) { .ro-grid { grid-template-columns: minmax(0, 1fr); } }
 .anat-def .nw { white-space: nowrap; }
 .lp-row .approve { white-space: nowrap; flex: none; }
+.anat .part:focus-visible { outline: 1px solid var(--accent); outline-offset: 3px; }

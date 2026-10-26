@@ -15,6 +15,40 @@ const I18N = {
 };
 const UI = I18N[document.documentElement.lang] || I18N.en;
 
+// One focus boundary for the mobile sheet, photo dialog and game dialog.
+const overlayFocus = (() => {
+  let active = null, saved = [];
+  const focusable = () => [...active.querySelectorAll('a[href],button,input,select,textarea,iframe,[tabindex]')]
+    .filter(el => el.tabIndex >= 0 && !el.disabled && !el.closest('[inert]') && el.getClientRects().length);
+  const release = target => {
+    if (target !== active) return;
+    saved.forEach(([el, wasInert]) => { el.inert = wasInert; });
+    saved = []; active = null;
+  };
+  document.addEventListener('keydown', e => {
+    if (!active || e.key !== 'Tab') return;
+    const items = focusable(), first = items[0], last = items.at(-1);
+    if (!first) { e.preventDefault(); active.focus(); return; }
+    if (!active.contains(document.activeElement) || (e.shiftKey && document.activeElement === first) || (!e.shiftKey && document.activeElement === last)) {
+      e.preventDefault(); (e.shiftKey ? last : first).focus();
+    }
+  }, true);
+  return {
+    activate(target) {
+      if (active === target) return;
+      if (active) release(active);
+      active = target;
+      for (let node = target; node.parentElement && node !== document.body; node = node.parentElement) {
+        for (const sibling of node.parentElement.children) {
+          if (sibling === node || /^(SCRIPT|STYLE|LINK)$/.test(sibling.tagName)) continue;
+          saved.push([sibling, sibling.inert]); sibling.inert = true;
+        }
+      }
+    },
+    release
+  };
+})();
+
 // ---- chapters of this page in the index column, under the active page ----
 // Taken from the page's own chapter markers (nav.chapters; an article lists its numbered chapters, "In short" and
 // "Literature"). On an article, the sub chapters (h3[id]) of the chapter being read open below it; a long h3 can
@@ -99,6 +133,9 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
     document.body.classList.toggle("menu-open", open);    // locks page scroll behind the sheet
     btn.setAttribute("aria-expanded", open);
     btn.textContent = open ? label[1] : label[0];
+    if (open) { index.setAttribute("role", "dialog"); index.setAttribute("aria-modal", "true"); index.setAttribute("aria-label", label[0]); }
+    else { index.removeAttribute("role"); index.removeAttribute("aria-modal"); index.removeAttribute("aria-label"); }
+    if (open) overlayFocus.activate(index); else overlayFocus.release(index);
   };
   btn.addEventListener("click", () => set(!index.classList.contains("open")));
   index.querySelectorAll(".menu a").forEach(a => a.addEventListener("click", () => set(false)));
@@ -169,13 +206,13 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
     };
     const nIn = m.c.length + m.co.length, nOut = m.r.length + m.ro.length;
     if (!nIn && !nOut) return "";
-    return `<div class="mini mono" role="button" tabindex="0" data-key="${key}" title="${UI.miniTitle(nIn, nOut)}">
+    return `<div class="mini mono" role="button" tabindex="0" data-key="${key}" aria-label="${UI.miniTitle(nIn, nOut)}" title="${UI.miniTitle(nIn, nOut)}">
             <svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true">${side(m.c, m.co, -1)}${side(m.r, m.ro, 1)}<circle cx="${cx}" cy="${cy}" r="3.4" class="me"/><circle cx="${cx}" cy="${cy}" r="5.6" class="ring"/></svg>
             <span>← ${nIn}</span><span>${nOut} →</span>
           </div>`;
   };
 
-  root.innerHTML = years.map(y => `
+  if (!root.querySelector('li')) root.innerHTML = years.map(y => `
     <div class="year">
       <div class="y mono">${y}</div>
       <ol class="pubs">${pubs.filter(p => p.year === y).map(p => `
@@ -190,6 +227,10 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
         </li>`).join("")}
       </ol>
     </div>`).join("");
+  else root.querySelectorAll('li[id^="pub-"]').forEach(li => {
+    const markup = mini(li.id.slice(4));
+    if (markup) li.insertAdjacentHTML('beforeend', markup);
+  });
 
   // the list is built here, after the browser looked for #pub-<key>: jump to it now
   const target = location.hash.startsWith("#pub-") && document.getElementById(decodeURIComponent(location.hash.slice(1)));
@@ -213,16 +254,31 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
   const count = document.getElementById("pub-count");
   if (count) count.textContent = `${PUBS.length} ${UI.pubs}`;
 
+  const search = document.getElementById('pub-search'), results = document.getElementById('pub-results');
+  let selected = 'all';
+  const normalize = value => value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const filter = () => {
+    const query = normalize(search?.value.trim() || '');
+    let shown = 0;
+    root.querySelectorAll('li[id^="pub-"]').forEach(li => {
+      const match = (selected === 'all' || li.dataset.tags.split(' ').includes(selected)) && normalize(li.textContent + ' ' + (li.closest('.year')?.querySelector('.y')?.textContent || '')).includes(query);
+      li.hidden = !match; if (match) shown++;
+    });
+    root.querySelectorAll('.year').forEach(y => y.classList.toggle('empty', !y.querySelector('li:not([hidden])')));
+    if (results) results.textContent = document.documentElement.lang === 'de' ? `${shown} von ${pubs.length} Publikationen` : `${shown} of ${pubs.length} publications`;
+    const empty = document.getElementById('pub-empty'); if (empty) empty.hidden = shown > 0;
+  };
+  search?.addEventListener('input', filter);
   document.querySelectorAll(".filters button[data-f]").forEach(btn => {
     const f = btn.dataset.f;
     const n = f === "all" ? PUBS.length : PUBS.filter(p => p.tags.includes(f)).length;
     btn.insertAdjacentHTML("beforeend", `<span class="n">${n}</span>`);
     btn.addEventListener("click", () => {
       document.querySelectorAll(".filters button[data-f]").forEach(b => b.setAttribute("aria-pressed", b === btn));
-      root.querySelectorAll("li").forEach(li => li.hidden = f !== "all" && !li.dataset.tags.split(" ").includes(f));
-      root.querySelectorAll(".year").forEach(y => y.classList.toggle("empty", !y.querySelector("li:not([hidden])")));
+      selected = f; filter();
     });
   });
+  filter();
 })();
 
 // ---- photo lightbox with a noise-dissolve between photos ----
@@ -609,6 +665,7 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
     img.style.opacity = "1";
     sharpen(i);
     lb.classList.add("open");
+    overlayFocus.activate(lb);
     document.body.style.overflow = "hidden";
     lb.focus();
     preload(i);
@@ -617,6 +674,7 @@ const UI = I18N[document.documentElement.lang] || I18N.en;
     setPlaying(false);
     if (document.fullscreenElement) exitFs();
     lb.classList.remove("open", "morphing", "idle");
+    overlayFocus.release(lb);
     document.body.style.overflow = "";
     queued = null;
     if (opener) opener.focus();
@@ -945,6 +1003,7 @@ if (window.SiteDemo) document.querySelectorAll(".art-sec input[type=range]").for
   const close = () => {
     if (!box || !box.classList.contains("open")) return;
     box.classList.remove("open");
+    overlayFocus.release(box);
     document.body.style.overflow = "";
     if (opener) opener.focus();
   };
@@ -964,6 +1023,7 @@ if (window.SiteDemo) document.querySelectorAll(".art-sec input[type=range]").for
       box.addEventListener("click", e => { if (e.target === box) close(); });   // click beside the game
     }
     box.classList.add("open");
+    overlayFocus.activate(box);
     document.body.style.overflow = "hidden";
     setTimeout(() => frame.focus(), 60);                // keys (1–7, R) go straight to the game
   };

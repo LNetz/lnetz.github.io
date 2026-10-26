@@ -3,12 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <title>Research — Lukas Netz</title>
   <meta name="description" content="Research and publications of Lukas Netz on model-driven engineering and large language models.">
   <meta property="og:title" content="Research — Lukas Netz">
   <meta property="og:description" content="Research and publications of Lukas Netz on model-driven engineering and large language models.">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="en_US">
+  <meta property="og:url" content="https://lnetz.github.io/research.html">
+  <meta property="og:image" content="https://lnetz.github.io/assets/photos/banner-lecture.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://lnetz.github.io/research.html">
   <link rel="alternate" hreflang="en" href="research.html">
   <link rel="alternate" hreflang="de" href="de/research.html">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
@@ -43,8 +48,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/style.css">
+<noscript><style>.menu-toggle,.site-search,.search-label,.filters button,.map-options,.map-list{display:none!important}.index .menu{display:flex!important;position:static!important}.index{position:static!important}</style></noscript>
 </head>
 <body id="top">
+<a class="skip-link" href="#main">Skip to content</a>
 <div class="backdrop" aria-hidden="true"></div>
 <div class="frame">
 
@@ -88,12 +95,12 @@
   </aside>
 
   <!-- ============ content ============ -->
-  <main>
+  <main id="main" tabindex="-1">
 
     <header class="page">
       <div class="section-head">
         <h1><span class="mono">02</span>Research</h1>
-        <span class="mono faint" id="pub-count"></span>
+        <span class="mono faint" id="pub-count">32 publications</span>
       </div>
       <div class="page-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 13.5H5l3.5 6.5L13.5 4h8"/><path d="M14.5 10l5 6"/><path d="M19.5 10l-5 6"/></svg></div>
       <p class="lead">I research how <em>large language models</em> and <em>model-driven engineering</em> can make each other better: LLMs that write valid models, and models that keep LLM output in check.</p>
@@ -102,23 +109,23 @@
         <div><dt>h-index</dt><dd>14</dd></div>
         <div><dt>i10-index</dt><dd>17</dd></div>
       </dl>
-      <p class="facts-note mono"><a href="https://scholar.google.com/citations?user=5mVkoWsAAAAJ&amp;hl=en" target="_blank" rel="noopener">Google Scholar ↗</a> · as of 10 / 2026</p>
+      <p class="facts-note mono"><a href="https://scholar.google.com/citations?user=5mVkoWsAAAAJ&amp;hl=en" target="_blank" rel="noopener">Google Scholar ↗</a> · as of 10 / 2026</p><nav class="research-routes" aria-label="Explore research"><a href="#articles"><b>Understand the ideas →</b><span>Four introductions with interactive examples.</span></a><a href="#publications"><b>Find a publication →</b><span>Search papers by title, author or year.</span></a><a href="#citation-map"><b>Explore the connections →</b><span>Follow references and citations, as a map or a list.</span></a></nav>
       <nav class="chapters mono" aria-label="Chapters">
         <a href="#topics">Topics</a><a href="#articles">Articles</a><a href="#community">Community</a><a href="#talks">Talks</a><a href="#citation-map">Citation map</a><a href="#publications">Publications</a>
       </nav>
     </header>
     <figure class="banner"><picture><source media="(max-width: 600px)" srcset="assets/photos/banner-lecture-m.jpg" width="1200" height="900"><img src="assets/photos/banner-lecture.jpg" alt="Lukas Netz lecturing in a large RWTH Aachen lecture hall" width="1659" height="532"></picture><figcaption class="mono">Guest lecture, Software Engineering course · RWTH Aachen · 12 / 2024</figcaption></figure>
     <section>
-      <div class="group mono" id="topics">Topics</div>
+      <h2 class="group mono" id="topics">Topics</h2>
       <div class="themes">
-        <div><h4>Model-driven engineering</h4><p>Generators and DSLs that stay maintainable when the model evolves. <a class="int" href="research-mde.html">An introduction →</a></p></div>
-        <div><h4>LLMs for modeling</h4><p>Model synthesis in DSLs, grammar masking for syntactically valid output, how LLMs corrupt and repair textual models. <a class="int" href="research-ai4se.html">An introduction →</a></p></div>
-        <div><h4>Low-code &amp; digital twins</h4><p>Generating customized low-code platforms and cockpits for digital twins. <a class="int" href="research-dt.html">An introduction →</a></p></div>
-        <div><h4>Evolutionary algorithms</h4><p>Genetic algorithms for the energy management of plug-in hybrid cars and for wind-farm layouts — and how finely to discretise gene parameters. <a class="int" href="research-ea.html">An introduction →</a></p></div>
-        <div><h4>Information systems</h4><p>From model-driven prototype to full-size enterprise application — and retrofitting generation into existing systems.</p></div>
+        <div><h3>Model-driven engineering</h3><p>Generators and DSLs that stay maintainable when the model evolves. <a class="int" href="research-mde.html">An introduction →</a></p></div>
+        <div><h3>LLMs for modeling</h3><p>Model synthesis in DSLs, grammar masking for syntactically valid output, how LLMs corrupt and repair textual models. <a class="int" href="research-ai4se.html">An introduction →</a></p></div>
+        <div><h3>Low-code &amp; digital twins</h3><p>Generating customized low-code platforms and cockpits for digital twins. <a class="int" href="research-dt.html">An introduction →</a></p></div>
+        <div><h3>Evolutionary algorithms</h3><p>Genetic algorithms for the energy management of parallel hybrid cars and for wind-farm layouts — and how finely to discretise gene parameters. <a class="int" href="research-ea.html">An introduction →</a></p></div>
+        <div><h3>Information systems</h3><p>From model-driven prototype to full-size enterprise application — and retrofitting generation into existing systems.</p></div>
       </div>
 
-      <div class="group mono" id="articles">Articles</div>
+      <h2 class="group mono" id="articles">Articles</h2>
       <ul class="articles">
         <li>
           <a href="research-mde.html">
@@ -168,7 +175,7 @@
         </li>
       </ul>
 
-      <div class="group mono" id="community">Community</div>
+      <h2 class="group mono" id="community">Community</h2>
       <ul class="rows">
         <li>
           <div class="mono faint">2026</div>
@@ -209,7 +216,7 @@
         </li>
       </ul>
 
-      <div class="group mono" id="talks">Invited talks</div>
+      <h2 class="group mono" id="talks">Invited talks</h2>
       <ul class="rows tight">
         <li>
           <div class="mono faint">12 / 2025</div>
@@ -262,11 +269,12 @@
         </li>
       </ul>
 
-      <div class="group mono" id="citation-map">Citation map</div>
+      <h2 class="group mono" id="citation-map">Citation map</h2>
       <div class="map-wrap" id="map-wrap" data-src="assets/citations.js" data-src-in="assets/citedby.js">
       <p class="map-lead" data-lead="out">My papers, the work they cite and — fainter — what that work builds on. <em>Colour</em> is the topic, a <em>ring</em> marks work from RWTH Software Engineering, size follows citations.</p>
       <p class="map-lead" data-lead="in" hidden>The other way round: who cites my papers and — fainter — who cites those. <em>Colour</em> is the topic, a <em>ring</em> marks work from RWTH Software Engineering, size follows citations. Data: OpenAlex, which knows fewer citations than Google Scholar.</p>
       <div class="map-legend mono">
+        <details class="map-options"><summary>Topics and advanced filters</summary>
         <div class="filters" role="group" aria-label="Topics">
           <button type="button" data-topic="llm" aria-pressed="true" style="--c:#3b5bff;--c2:#8c9bff"><i></i><span>LLMs</span></button>
           <button type="button" data-topic="mde" aria-pressed="true" style="--c:#0f9488;--c2:#3cc7b8"><i></i><span>model-driven engineering</span></button>
@@ -275,27 +283,35 @@
           <button type="button" data-topic="a11y" aria-pressed="true" style="--c:#d6336c;--c2:#f0729b"><i></i><span>accessibility</span></button>
           <button type="button" data-topic="ga" aria-pressed="true" style="--c:#6f9a1f;--c2:#a6cf55"><i></i><span>control &amp; optimization</span></button>
           <button type="button" data-topic="other" aria-pressed="true" style="--c:#a3a39d;--c2:#6d6d68"><i></i><span>other</span></button>
+          <button type="button" class="ring-key own" data-only="own" aria-pressed="false"><i></i><span>my papers</span></button>
+          <button type="button" class="ring-key" data-only="se" aria-pressed="false"><i></i><span>SE RWTH</span></button>
+          <button type="button" data-hop2 aria-pressed="true">2nd hop</button>
         </div>
+        </details>
         <div class="filters">
           <button type="button" data-dir="out" aria-pressed="true">cites →</button>
           <button type="button" data-dir="in" aria-pressed="false">← cited by</button>
           <span class="sep" aria-hidden="true">·</span>
           <button type="button" data-view="2" aria-pressed="false">2D</button>
           <button type="button" data-view="3" aria-pressed="true">3D</button>
-          <button type="button" class="ring-key own" data-only="own" aria-pressed="false"><i></i><span>my papers</span></button>
-          <button type="button" class="ring-key" data-only="se" aria-pressed="false"><i></i><span>SE RWTH</span></button>
-          <button type="button" data-hop2 aria-pressed="true">2nd hop</button>
           <button type="button" data-zoom="in" aria-label="Zoom in">+</button>
           <button type="button" data-zoom="out" aria-label="Zoom out">−</button>
           <button type="button" data-fit>fit</button>
           <button type="button" data-fs aria-pressed="false"><span>⤢</span> full screen</button>
         </div>
       </div>
+      <p id="map-status" class="mono faint" role="status">The map loads when it comes into view.</p>
+      <button id="map-retry" class="mono" type="button" hidden>Try loading the map again</button>
       <div class="map" id="map">
         <canvas aria-label="Citation graph" role="img"></canvas>
         <div class="map-tip" hidden></div>
         <button type="button" class="map-pause mono" hidden>❚❚</button>
       </div>
+      <details class="map-list"><summary class="mono">Search papers in the map · keyboard-accessible list</summary>
+        <label class="search-label" for="map-search">Search by title, author or year</label>
+        <input id="map-search" class="site-search" type="search" disabled>
+        <p id="map-list-count" class="mono faint" role="status"></p><ol id="map-paper-list"></ol>
+      </details>
       <details class="mono faint map-note">
         <summary>How to read and use the map</summary>
         <p>Hover or tap a paper for details, click to pin it. Drag to turn (3D) or move (2D) the map; zoom with + −, Ctrl + scroll or a pinch; double-click to fit. My papers / SE RWTH in the legend show only those.</p>
@@ -304,7 +320,10 @@
       </details>
       </div>
 
-      <div class="group mono" id="publications">Publications</div>
+      <h2 class="group mono" id="publications">Publications</h2>
+      <label class="search-label" for="pub-search">Search publications</label>
+      <input class="site-search" id="pub-search" type="search" placeholder="Title, author or year">
+      <p class="mono faint" id="pub-results" role="status"></p>
       <div class="filters mono" role="group" aria-label="Filter publications">
         <button type="button" data-f="all" aria-pressed="true">all</button>
         <button type="button" data-f="llm" aria-pressed="false">llm</button>
@@ -315,7 +334,264 @@
         <button type="button" data-f="ga" aria-pressed="false">genetic algorithms</button>
       </div>
 
-      <div id="pubs"></div>
+      <p id="pub-empty" hidden>No matching publications. Try another search or choose all topics.</p>
+      <div id="pubs"><div class="year"><h3 class="y mono">2026</h3><ol class="pubs">        <li id="pub-KNMR26" data-tags="llm mde">
+          <span class="key mono">KNMR26</span>
+          <div>
+            <div class="t">From Unfinished to Done: Bridging the MDE Implementation Gap with Constrained LLMs</div>
+            <div class="a">J. C. Kirchhof, <b>L. Netz</b>, D. Mertens, B. Rumpe</div>
+            <div class="v mono">MODELS 2026</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22From%20Unfinished%20to%20Done%3A%20Bridging%20the%20MDE%20Implementation%20Gap%20with%20Constrained%20LLMs%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://doi.org/10.1145/3822455.3830316" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>        <li id="pub-MNR+26" data-tags="mde a11y">
+          <span class="key mono">MNR+26</span>
+          <div>
+            <div class="t">Addressing Visual Impairments with Model-Driven Engineering: A Systematic Literature Review</div>
+            <div class="a">J. Michael, <b>L. Netz</b>, B. Rumpe, I. Müller, J. Grundy, S. Wickramathilaka, H. Khalajzadeh</div>
+            <div class="v mono">ACM Transactions on Software Engineering and Methodology (TOSEM)</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22Addressing%20Visual%20Impairments%20with%20Model-Driven%20Engineering%3A%20A%20Systematic%20Literature%20Review%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://arxiv.org/pdf/2510.06483" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.1145/3803865" target="_blank" rel="noopener">doi ↗</a><a href="https://arxiv.org/abs/2510.06483" target="_blank" rel="noopener">arXiv ↗</a></div>
+          </div>
+        </li></ol></div><div class="year"><h3 class="y mono">2025</h3><ol class="pubs">        <li id="pub-Net25" data-tags="llm mde">
+          <span class="key mono">Net25</span>
+          <div>
+            <div class="t">Mit KI-getriebener Modellierung zu besserer Softwareentwicklung?<span class="flag mono">Article</span></div>
+            <div class="a"><b>L. Netz</b></div>
+            <div class="v mono">JavaSPEKTRUM 03/2025</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22Mit%20KI-getriebener%20Modellierung%20zu%20besserer%20Softwareentwicklung%3F%22" target="_blank" rel="noopener">scholar ↗</a></div>
+          </div>
+        </li>        <li id="pub-NMR25" data-tags="llm mde">
+          <span class="key mono">NMR25</span>
+          <div>
+            <div class="t">AI-based and Model-driven Methods to Guide Citizens through Processes in the Public Sector</div>
+            <div class="a"><b>L. Netz</b>, J. Michael, B. Rumpe</div>
+            <div class="v mono">STAF 2025 Workshops, CEUR Vol-4122</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22AI-based%20and%20Model-driven%20Methods%20to%20Guide%20Citizens%20through%20Processes%20in%20the%20Public%20Sector%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://www.se-rwth.de/publications/AI-based-and-Model-driven-Methods-to-Guide-Citizens-through-Processes-in-the-Public-Sector.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.18154/rwth-2026-01917" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>        <li id="pub-VNG+25" data-tags="mde">
+          <span class="key mono">VNG+25</span>
+          <div>
+            <div class="t">Toward a Community-Curated Golden Dataset of UML Models</div>
+            <div class="a">C. Verbruggen, <b>L. Netz</b>, P.-L. Glaser, M. Scholz, C. Huemer, M. Calamo, B. Rumpe, M. Snoeck, D. Bork</div>
+            <div class="v mono">MODELS-C 2025, pp. 43–50</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22Toward%20a%20Community-Curated%20Golden%20Dataset%20of%20UML%20Models%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://www.se-rwth.de/publications/Toward-a-Community-Curated-Golden-Dataset-of-UML-Models.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.1109/MODELS-C68889.2025.00012" target="_blank" rel="noopener">doi ↗</a><a href="https://golden-uml-modelset.vercel.app/search" target="_blank" rel="noopener">dataset ↗</a></div>
+          </div>
+        </li>        <li id="pub-NKR+25" data-tags="llm mde">
+          <span class="key mono">NKR+25</span>
+          <div>
+            <div class="t">Unintended Changes: How LLMs Corrupt and Correct Textual Models</div>
+            <div class="a"><b>L. Netz</b>, F. Kampe, J. Reimer, B. Rumpe</div>
+            <div class="v mono">MODELS-C 2025, pp. 636–645</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22Unintended%20Changes%3A%20How%20LLMs%20Corrupt%20and%20Correct%20Textual%20Models%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://www.se-rwth.de/publications/Unintended-Changes-How-LLMs-Corrupt-and-Correct-Textual-Models.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.1109/MODELS-C68889.2025.00087" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>        <li id="pub-BNR+25" data-tags="mde">
+          <span class="key mono">BNR+25</span>
+          <div>
+            <div class="t">Semantic Analysis of Domain Model Evolution in Model-Driven Software Development</div>
+            <div class="a">C. Buschhaus, <b>L. Netz</b>, B. Rumpe, M. Stachon, S. Stüber</div>
+            <div class="v mono">MODELS-C 2025, pp. 99–103</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22Semantic%20Analysis%20of%20Domain%20Model%20Evolution%20in%20Model-Driven%20Software%20Development%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://www.se-rwth.de/publications/Semantic-Analysis-of-Domain-Model-Evolution-in-Model-Driven-Software-Development.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.1109/MODELS-C68889.2025.00023" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>        <li id="pub-BKM+25" data-tags="mde a11y">
+          <span class="key mono">BKM+25</span>
+          <div>
+            <div class="t">Inclusive Model-Driven Engineering for Accessible Software</div>
+            <div class="a">D. Bork, S. Klikovitz, J. Michael, <b>L. Netz</b>, B. Rumpe</div>
+            <div class="v mono">MODELS 2025, pp. 253–259</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22Inclusive%20Model-Driven%20Engineering%20for%20Accessible%20Software%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://www.se-rwth.de/publications/Inclusive-Model-Driven-Engineering-for-Accessible-Software.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.1109/MODELS67397.2025.00030" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li></ol></div><div class="year"><h3 class="y mono">2024</h3><ol class="pubs">        <li id="pub-Net24" data-tags="mde eis">
+          <span class="key mono">Net24</span>
+          <div>
+            <div class="t">Model-Driven Method for the Development of Full-Size Web-Based Information Systems<span class="flag mono">Dissertation</span></div>
+            <div class="a"><b>L. Netz</b></div>
+            <div class="v mono">Aachener Informatik-Berichte SE, Vol. 55, Shaker Verlag</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22Model-Driven%20Method%20for%20the%20Development%20of%20Full-Size%20Web-Based%20Information%20Systems%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://www.se-rwth.de/phdtheses/Diss-Netz-Model-Driven-Method-for-the-Development-of-Full-Size-Web-Based-Information-Systems.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.2370/9783844098334" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>        <li id="pub-NRR24" data-tags="llm mde">
+          <span class="key mono">NRR24</span>
+          <div>
+            <div class="t">Using Grammar Masking to Ensure Syntactic Validity in LLM-based Modeling Tasks</div>
+            <div class="a"><b>L. Netz</b>, J. Reimer, B. Rumpe</div>
+            <div class="v mono">MDE Intelligence, MODELS Companion ’24, pp. 570–577</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22Using%20Grammar%20Masking%20to%20Ensure%20Syntactic%20Validity%20in%20LLM-based%20Modeling%20Tasks%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://www.se-rwth.de/publications/Using-Grammar-Masking-to-Ensure-Syntactic-Validity-in-LLM-based-Modeling-Tasks.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.1145/3652620.3687805" target="_blank" rel="noopener">doi ↗</a><a href="https://arxiv.org/abs/2407.06146" target="_blank" rel="noopener">arXiv ↗</a></div>
+          </div>
+        </li>        <li id="pub-CMNR24" data-tags="mde">
+          <span class="key mono">CMNR24</span>
+          <div>
+            <div class="t">Teaching Model-Driven Low-Code Development Platforms</div>
+            <div class="a">J. Charles, J. Michael, <b>L. Netz</b>, B. Rumpe</div>
+            <div class="v mono">Educators Symposium, MODELS Companion ’24, pp. 115–122</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22Teaching%20Model-Driven%20Low-Code%20Development%20Platforms%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://www.se-rwth.de/publications/Teaching-Model-Driven-Low-Code-Development-Platforms.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.1145/3652620.3687778" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>        <li id="pub-KKN+24" data-tags="mde">
+          <span class="key mono">KKN+24</span>
+          <div>
+            <div class="t">Applied Model-Based Co-Development for Zero-Emission Flight Systems Based on SysML</div>
+            <div class="a">H. Kausch, K. Koppes, <b>L. Netz</b>, P. O’Brien, M. Pfeiffer, D. Raco, M. Radny, A. Rath, R. Richstein, B. Rumpe</div>
+            <div class="v mono">DLRK 2024</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22Applied%20Model-Based%20Co-Development%20for%20Zero-Emission%20Flight%20Systems%20Based%20on%20SysML%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://www.se-rwth.de/publications/Applied-Model-Based-Co-Development-for-Zero-Emission-Flight-Systems-Based-on-SysML.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.25967/630489" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>        <li id="pub-BDMN+24" data-tags="llm mde">
+          <span class="key mono">BDMN+24</span>
+          <div>
+            <div class="t">Combining Retrieval-Augmented Generation and Few-Shot Learning for Model Synthesis of Uncommon DSLs</div>
+            <div class="a">N. Baumann, J. S. Diaz, J. Michael, <b>L. Netz</b>, H. Nqiri, J. Reimer, B. Rumpe</div>
+            <div class="v mono">Modellierung 2024 Workshopband, pp. 1–15</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22Combining%20Retrieval-Augmented%20Generation%20and%20Few-Shot%20Learning%20for%20Model%20Synthesis%20of%20Uncommon%20DSLs%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://www.se-rwth.de/publications/Combining-Retrieval-Augmented-Generation-and-Few-Shot-Learning-for-Model-Synthesis-of-Uncommon-DSLs.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.18420/modellierung2024-ws-007" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>        <li id="pub-NMR24" data-tags="llm mde eis">
+          <span class="key mono">NMR24</span>
+          <div>
+            <div class="t">From Natural Language to Web Applications: Using Large Language Models for Model-Driven Software Engineering</div>
+            <div class="a"><b>L. Netz</b>, J. Michael, B. Rumpe</div>
+            <div class="v mono">Modellierung 2024, pp. 179–195</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22From%20Natural%20Language%20to%20Web%20Applications%3A%20Using%20Large%20Language%20Models%20for%20Model-Driven%20Software%20Engineering%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://www.se-rwth.de/publications/From-Natural-Language-to-Web-Applications-Using-Large-Language-Models-for-Model-Driven-Software-Engineering.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.18420/modellierung2024_018" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>        <li id="pub-GLM+24" data-tags="eis">
+          <span class="key mono">GLM+24</span>
+          <div>
+            <div class="t">Modeling Financial, Project and Staff Management: A Case Report from the MaCoCo Project</div>
+            <div class="a">A. Gerasimov, P. Letmathe, J. Michael, <b>L. Netz</b>, B. Rumpe</div>
+            <div class="v mono">EMISA Journal, Vol. 19</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22Modeling%20Financial%2C%20Project%20and%20Staff%20Management%3A%20A%20Case%20Report%20from%20the%20MaCoCo%20Project%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://www.se-rwth.de/publications/Modeling-Financial-Project-and-Staff-Management-A-Case-Report-from-the-MaCoCo-Project.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.18417/emisa.19.3" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>        <li id="pub-BGK+24" data-tags="mde eis">
+          <span class="key mono">BGK+24</span>
+          <div>
+            <div class="t">Lessons Learned from Applying Model-Driven Engineering in 5 Domains: The Success Story of the MontiGem Generator Framework</div>
+            <div class="a">C. Buschhaus, A. Gerasimov, J. C. Kirchhof, J. Michael, <b>L. Netz</b>, B. Rumpe, S. Stüber</div>
+            <div class="v mono">Science of Computer Programming, Vol. 232</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22Lessons%20Learned%20from%20Applying%20Model-Driven%20Engineering%20in%205%20Domains%3A%20The%20Success%20Story%20of%20the%20MontiGem%20Generator%20Framework%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://www.se-rwth.de/publications/Lessons-learned-from-applying-model-driven-engineering-in-5-domains-The-success-story-of-the-MontiGem-generator-framework.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.1016/j.scico.2023.103033" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li></ol></div><div class="year"><h3 class="y mono">2023</h3><ol class="pubs">        <li id="pub-FHM+23" data-tags="twin">
+          <span class="key mono">FHM+23</span>
+          <div>
+            <div class="t">Sustainable Digital Twin Engineering for the Internet of Production</div>
+            <div class="a">S. Fur, M. Heithoff, J. Michael, <b>L. Netz</b>, J. Pfeiffer, B. Rumpe, A. Wortmann</div>
+            <div class="v mono">Springer, pp. 101–121</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22Sustainable%20Digital%20Twin%20Engineering%20for%20the%20Internet%20of%20Production%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://www.se-rwth.de/publications/Sustainable-Digital-Twin-Engineering-for-the-Internet-of-Production.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.1007/978-981-99-0252-1_4" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li></ol></div><div class="year"><h3 class="y mono">2022</h3><ol class="pubs">        <li id="pub-MNN+22" data-tags="twin mde">
+          <span class="key mono">MNN+22</span>
+          <div>
+            <div class="t">Generating Digital Twin Cockpits for Parameter Management in the Engineering of Wind Turbines</div>
+            <div class="a">J. Michael, I. Nachmann, <b>L. Netz</b>, B. Rumpe, S. Stüber</div>
+            <div class="v mono">Modellierung 2022, pp. 33–48</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22Generating%20Digital%20Twin%20Cockpits%20for%20Parameter%20Management%20in%20the%20Engineering%20of%20Wind%20Turbines%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://www.se-rwth.de/publications/Generating-Digital-Twin-Cockpits-for-Parameter-Management-in-the-Engineering-of-Wind-Turbines.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.18420/modellierung2022-012" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>        <li id="pub-DHM+22" data-tags="twin mde">
+          <span class="key mono">DHM+22</span>
+          <div>
+            <div class="t">Generating Customized Low-Code Development Platforms for Digital Twins</div>
+            <div class="a">M. Dalibor, M. Heithoff, J. Michael, <b>L. Netz</b>, J. Pfeiffer, B. Rumpe, S. Varga, A. Wortmann</div>
+            <div class="v mono">Journal of Computer Languages, Vol. 70</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22Generating%20Customized%20Low-Code%20Development%20Platforms%20for%20Digital%20Twins%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://www.se-rwth.de/publications/Generating-Customized-Low-Code-Development-Platforms-for-Digital-Twins.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.1016/j.cola.2022.101117" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li></ol></div><div class="year"><h3 class="y mono">2021</h3><ol class="pubs">        <li id="pub-DGM+21" data-tags="mde eis">
+          <span class="key mono">DGM+21</span>
+          <div>
+            <div class="t">A Methodology for Retrofitting Generative Aspects in Existing Applications</div>
+            <div class="a">I. Drave, A. Gerasimov, J. Michael, <b>L. Netz</b>, B. Rumpe, S. Varga</div>
+            <div class="v mono">Journal of Object Technology, Vol. 20</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22A%20Methodology%20for%20Retrofitting%20Generative%20Aspects%20in%20Existing%20Applications%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://www.se-rwth.de/publications/A-Methodology-for-Retrofitting-Generative-Aspects-in-Existing-Applications.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.5381/jot.2021.20.2.a7" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>        <li id="pub-GMNR21" data-tags="mde eis">
+          <span class="key mono">GMNR21</span>
+          <div>
+            <div class="t">Agile Generator-Based GUI Modeling for Information Systems</div>
+            <div class="a">A. Gerasimov, J. Michael, <b>L. Netz</b>, B. Rumpe</div>
+            <div class="v mono">Modelling to Program (M2P), Springer, pp. 113–126</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22Agile%20Generator-Based%20GUI%20Modeling%20for%20Information%20Systems%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://www.se-rwth.de/publications/Agile-Generator-Based-GUI-Modeling-for-Information-Systems.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.1007/978-3-030-72696-6_5" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li></ol></div><div class="year"><h3 class="y mono">2020</h3><ol class="pubs">        <li id="pub-GMN+20" data-tags="mde eis">
+          <span class="key mono">GMN+20</span>
+          <div>
+            <div class="t">Continuous Transition from Model-Driven Prototype to Full-Size Real-World Enterprise Information Systems</div>
+            <div class="a">A. Gerasimov, J. Michael, <b>L. Netz</b>, B. Rumpe, S. Varga</div>
+            <div class="v mono">AMCIS 2020, pp. 1–10</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22Continuous%20Transition%20from%20Model-Driven%20Prototype%20to%20Full-Size%20Real-World%20Enterprise%20Information%20Systems%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://www.se-rwth.de/publications/Continuous-Transition-from-Model-Driven-Prototype-to-Full-Size-Real-World-Enterprise-Information-Systems.pdf" target="_blank" rel="noopener">pdf ↗</a></div>
+          </div>
+        </li>        <li id="pub-AMN+20b" data-tags="mde">
+          <span class="key mono">AMN+20b</span>
+          <div>
+            <div class="t">Model-Based Software Engineering at RWTH Aachen University</div>
+            <div class="a">K. Adam, J. Michael, <b>L. Netz</b>, B. Rumpe, S. Varga</div>
+            <div class="v mono">40 Years EMISA, LNI P-304, pp. 183–188</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22Model-Based%20Software%20Engineering%20at%20RWTH%20Aachen%20University%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://www.se-rwth.de/publications/Model-Based-Software-Engineering-at-RWTH-Aachen-University.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.18154/rwth-2020-06172" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>        <li id="pub-AMN+20a" data-tags="eis">
+          <span class="key mono">AMN+20a</span>
+          <div>
+            <div class="t">Enterprise Information Systems in Academia and Practice: Lessons Learned from a MBSE Project</div>
+            <div class="a">K. Adam, J. Michael, <b>L. Netz</b>, B. Rumpe, S. Varga</div>
+            <div class="v mono">40 Years EMISA, LNI P-304, pp. 59–66</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22Enterprise%20Information%20Systems%20in%20Academia%20and%20Practice%3A%20Lessons%20Learned%20from%20a%20MBSE%20Project%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://www.se-rwth.de/publications/Enterprise-Information-Systems-in-Academia-and-Practice-Lessons-learned-from-a-MBSE-Project.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.18154/rwth-2020-06175" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>        <li id="pub-GHK+20" data-tags="mde eis">
+          <span class="key mono">GHK+20</span>
+          <div>
+            <div class="t">Generated Enterprise Information Systems: MDSE for Maintainable Co-Development of Frontend and Backend</div>
+            <div class="a">A. Gerasimov, P. Heuser, H. Ketteniß, P. Letmathe, J. Michael, <b>L. Netz</b>, B. Rumpe, S. Varga</div>
+            <div class="v mono">Modellierung 2020 Companion, pp. 22–30</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22Generated%20Enterprise%20Information%20Systems%3A%20MDSE%20for%20Maintainable%20Co-Development%20of%20Frontend%20and%20Backend%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://www.se-rwth.de/publications/Generated-Enterprise-Information-Systems-MDSE-for-Maintainable-Co-Development-of-Frontend-and-Backend.pdf" target="_blank" rel="noopener">pdf ↗</a></div>
+          </div>
+        </li></ol></div><div class="year"><h3 class="y mono">2019</h3><ol class="pubs">        <li id="pub-MNRV19" data-tags="mde">
+          <span class="key mono">MNRV19</span>
+          <div>
+            <div class="t">Towards Privacy-Preserving IoT Systems Using Model Driven Engineering</div>
+            <div class="a">J. Michael, <b>L. Netz</b>, B. Rumpe, S. Varga</div>
+            <div class="v mono">MODELS 2019 Workshop MDE4IoT, CEUR, pp. 595–614</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22Towards%20Privacy-Preserving%20IoT%20Systems%20Using%20Model%20Driven%20Engineering%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://www.se-rwth.de/publications/Towards-Privacy-Preserving-IoT-Systems-Using-Model-Driven-Engineering.pdf" target="_blank" rel="noopener">pdf ↗</a></div>
+          </div>
+        </li></ol></div><div class="year"><h3 class="y mono">2018</h3><ol class="pubs">        <li id="pub-ANV+18" data-tags="eis">
+          <span class="key mono">ANV+18</span>
+          <div>
+            <div class="t">Model-Based Generation of Enterprise Information Systems</div>
+            <div class="a">K. Adam, <b>L. Netz</b>, S. Varga, J. Michael, B. Rumpe, P. Heuser, P. Letmathe</div>
+            <div class="v mono">EMISA’18, CEUR Vol. 2097, pp. 75–79</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22Model-Based%20Generation%20of%20Enterprise%20Information%20Systems%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://www.se-rwth.de/publications/Model-Based-Generation-of-Enterprise-Information-Systems.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.18154/rwth-2019-00745" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li></ol></div><div class="year"><h3 class="y mono">2017</h3><ol class="pubs">        <li id="pub-Net17" data-tags="ga">
+          <span class="key mono">Net17</span>
+          <div>
+            <div class="t">Analysis on Discretization of Gene Parameters in Evolutionary Algorithms<span class="flag mono">Master’s thesis</span></div>
+            <div class="a"><b>L. Netz</b></div>
+            <div class="v mono">Master’s thesis, RWTH Aachen, Theory of Hybrid Systems</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22Analysis%20on%20Discretization%20of%20Gene%20Parameters%20in%20Evolutionary%20Algorithms%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://ths.rwth-aachen.de/wp-content/uploads/sites/4/netz_master.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://ths.rwth-aachen.de/theses/" target="_blank" rel="noopener">theses ↗</a></div>
+          </div>
+        </li></ol></div><div class="year"><h3 class="y mono">2015</h3><ol class="pubs">        <li id="pub-NWN+15" data-tags="ga">
+          <span class="key mono">NWN+15</span>
+          <div>
+            <div class="t">A Genetic Algorithm based Control Strategy for the Energy Management Problem in PHEVs</div>
+            <div class="a">J. Nellen, B. Wolters, <b>L. Netz</b>, S. Geulen, E. Ábrahám</div>
+            <div class="v mono">GCAI 2015, EPiC Series in Computing</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22A%20Genetic%20Algorithm%20based%20Control%20Strategy%20for%20the%20Energy%20Management%20Problem%20in%20PHEVs%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://easychair.org/publications/open/6CD4" target="_blank" rel="noopener">pdf ↗</a><a href="https://doi.org/10.29007/md3x" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>        <li id="pub-GJN+15a" data-tags="ga">
+          <span class="key mono">GJN+15a</span>
+          <div>
+            <div class="t">Learning-based Control Strategies for Hybrid Electric Vehicles</div>
+            <div class="a">S. Geulen, M. Joševski, J. Nellen, J. Fuchs, <b>L. Netz</b>, B. Wolters, D. Abel, E. Ábrahám, W. Unger</div>
+            <div class="v mono">IEEE Conference on Control Applications (CCA) 2015</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22Learning-based%20Control%20Strategies%20for%20Hybrid%20Electric%20Vehicles%22" target="_blank" rel="noopener">scholar ↗</a><a href="https://doi.org/10.1109/CCA.2015.7320858" target="_blank" rel="noopener">doi ↗</a></div>
+          </div>
+        </li>        <li id="pub-GJN+15b" data-tags="ga">
+          <span class="key mono">GJN+15b</span>
+          <div>
+            <div class="t">Online Lernen als Kontrollstrategie in Hybridfahrzeugen</div>
+            <div class="a">S. Geulen, M. Joševski, J. Nellen, J. Fuchs, <b>L. Netz</b>, B. Wolters, E. Ábrahám, W. Unger, D. Abel</div>
+            <div class="v mono">VDI/VDE AUTOREG 2015, VDI-Berichte 2233, pp. 101–112</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22Online%20Lernen%20als%20Kontrollstrategie%20in%20Hybridfahrzeugen%22" target="_blank" rel="noopener">scholar ↗</a></div>
+          </div>
+        </li>        <li id="pub-Net15" data-tags="">
+          <span class="key mono">Net15</span>
+          <div>
+            <div class="t">Using Horner Schemes to Improve the Efficiency and Precision of Interval Constraint Propagation<span class="flag mono">Bachelor’s thesis</span></div>
+            <div class="a"><b>L. Netz</b></div>
+            <div class="v mono">Bachelor’s thesis, RWTH Aachen, Theory of Hybrid Systems</div>
+            <div class="plinks mono"><a href="https://scholar.google.com/scholar?q=%22Using%20Horner%20Schemes%20to%20Improve%20the%20Efficiency%20and%20Precision%20of%20Interval%20Constraint%20Propagation%22" target="_blank" rel="noopener">scholar ↗</a><a href="http://ths.rwth-aachen.de/wp-content/uploads/sites/4/teaching/theses/netz_bachelor.pdf" target="_blank" rel="noopener">pdf ↗</a><a href="https://ths.rwth-aachen.de/theses/" target="_blank" rel="noopener">theses ↗</a></div>
+          </div>
+        </li></ol></div></div>
     </section>
 
     <footer class="mono">

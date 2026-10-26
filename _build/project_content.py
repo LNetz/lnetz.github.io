@@ -355,7 +355,7 @@ std::cout &lt;&lt; *algorithm-&gt;getHighestFitnessChromosome() &lt;&lt; std::en
 
 PROJECTS = [
     dict(
-        slug="esaca", name="ESACA", when=T("since 2026", "seit 2026"), logo="esaca.png",
+        slug="esaca", name="ESACA", when=T("since 2026", "seit 2026"), logo="esaca.svg",
         desc=T("ESACA — a sovereign, on-premises platform for agentic coding in regulated organisations.",
                "ESACA — eine souveräne On-Premises-Plattform für agentisches Programmieren in regulierten Organisationen."),
         lead=T("AI coding agents are fast — and they read code, run commands and send data wherever they like. ESACA lets <em>regulated organisations</em> use them anyway: inside their own data centre, under their own rules.",
@@ -513,7 +513,7 @@ PROJECTS = [
         ],
     ),
     dict(
-        slug="ford", name=T("Ford Pro tool tracking", "Ford Pro Werkzeugverfolgung"), when="2020 — 2022", mark="FORD",
+        slug="ford", name=T("Ford Pro tool tracking", "Ford Pro Werkzeugverfolgung"), when="2020 — 2022", logo="ford.png",
         desc=T("Ford Pro tool tracking — a pilot with Ford Research &amp; Innovation Center Aachen: tools tracked across vans and job sites, web app generated with MontiGem.",
                "Ford Pro Werkzeugverfolgung — ein Pilot mit dem Ford Research &amp; Innovation Center Aachen: Werkzeuge über Transporter und Baustellen verfolgt, Webanwendung mit MontiGem generiert."),
         lead=T("Tradespeople lose tools: left behind on a site, or stolen from the van. Together with Ford we built a system that <em>knows where every tool is</em> — and reminds you before you drive off without it.",
@@ -626,8 +626,8 @@ PROJECTS = [
                 "<p>A genetic algorithm imitates evolution. A population of candidate solutions — chromosomes — is rated by a fitness function; the best are selected, paired, recombined and randomly mutated, and the next generation is formed from the offspring, an elite of the old generation and a few fresh random candidates. Repeated over many generations, the population drifts towards good solutions, even for problems that cannot be solved exactly in reasonable time.</p>",
                 "<p>Ein genetischer Algorithmus ahmt die Evolution nach. Eine Population von Lösungskandidaten — Chromosomen — wird durch eine Fitnessfunktion bewertet; die besten werden ausgewählt, gepaart, rekombiniert und zufällig mutiert, und die nächste Generation entsteht aus den Nachkommen, einer Elite der alten Generation und einigen neuen Zufallskandidaten. Über viele Generationen wandert die Population so zu guten Lösungen, auch bei Problemen, die sich in vernünftiger Zeit nicht exakt lösen lassen.</p>")),
             (T("Where it comes from", "Woher es kommt"), T(
-                "<p>geneial was created at RWTH’s Theory of Hybrid Systems group in the context of the DFG project OASys — online algorithms for the optimal control of hybrid propulsion systems. There it served as the framework for a genetic-algorithm-based control strategy for the energy management of plug-in hybrid vehicles: when should the combustion engine run, when the electric motor?</p>",
-                "<p>geneial entstand am Lehr- und Forschungsgebiet Theorie der hybriden Systeme der RWTH im Kontext des DFG-Projekts OASys — Online-Algorithmen zur optimalen Steuerung hybrider Antriebe. Dort diente es als Framework für eine auf genetischen Algorithmen basierende Steuerungsstrategie für das Energiemanagement von Plug-in-Hybridfahrzeugen: Wann soll der Verbrennungsmotor laufen, wann der Elektromotor?</p>")),
+                "<p>geneial was created at RWTH’s Theory of Hybrid Systems group in the context of the DFG project OASys — online algorithms for the optimal control of hybrid propulsion systems. There it served as the framework for a genetic-algorithm-based control strategy for the energy management of parallel hybrid vehicles: when should the combustion engine run, when the electric motor?</p>",
+                "<p>geneial entstand am Lehr- und Forschungsgebiet Theorie der hybriden Systeme der RWTH im Kontext des DFG-Projekts OASys — Online-Algorithmen zur optimalen Steuerung hybrider Antriebe. Dort diente es als Framework für eine auf genetischen Algorithmen basierende Steuerungsstrategie für das Energiemanagement paralleler Hybridfahrzeuge: Wann soll der Verbrennungsmotor laufen, wann der Elektromotor?</p>")),
             (T("The library", "Die Bibliothek"), lambda lang, A: T(
                 "<p>geneial is a template-based C++11 library. Each stage of the loop in the figure above — stopping criteria, selection, coupling, crossover, choosing, mutation, replacement — is an operator with its own builder, so users plug in their own chromosome types, operators and fitness functions. Fitness evaluation can run multi-threaded, and observers and bookkeepers make runs analysable. The project comes with a CMake build, Boost unit tests, benchmarks, Doxygen documentation and CI. A minimal run:</p>",
                 "<p>geneial ist eine template-basierte C++11-Bibliothek. Jede Stufe des Kreislaufs aus der Abbildung oben — Abbruchkriterien, Selektion, Kopplung, Crossover, Auswahl, Mutation, Ersetzung — ist ein Operator mit eigenem Builder; eigene Chromosomentypen, Operatoren und Fitnessfunktionen lassen sich einstecken. Die Fitnessbewertung kann mehrfädig laufen, Observer und Bookkeeper machen Läufe auswertbar. Dazu gehören ein CMake-Build, Boost-Unit-Tests, Benchmarks, Doxygen-Dokumentation und CI. Ein minimaler Lauf:</p>")[lang]

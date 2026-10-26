@@ -16,5 +16,12 @@ createServer(async (req, res) => {
     const body = await readFile(file);
     res.writeHead(200, { "Content-Type": types[extname(file).toLowerCase()] || "application/octet-stream", "Cache-Control": "no-store" });
     res.end(body);
-  } catch { res.writeHead(404); res.end("not found"); }
+  } catch {
+    try {
+      const file = req.url.startsWith('/de/') ? join(root, 'de', '404.html') : join(root, '404.html');
+      const body = await readFile(file);
+      res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
+      res.end(body);
+    } catch { res.writeHead(404); res.end('not found'); }
+  }
 }).listen(port, "127.0.0.1", () => console.log(`serving ${root} on http://127.0.0.1:${port}`));

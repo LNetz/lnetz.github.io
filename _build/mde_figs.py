@@ -567,9 +567,9 @@ def _d3_files(attrs):
     return {
         "table": ["CREATE TABLE book (", "  id BIGINT PRIMARY KEY"] + [f"  , {n} {D3_SQL[t]}" for t, n in attrs] + [");"],
         "data": ["@Entity", "public class Book {"] + [f"  private {t} {n};" for t, n in attrs] + [getter(t, n) for t, n in attrs] + ["}"],
-        "command": ["public class BookUpdate extends Command {", "  private long id;"] + [f"  private {t} {n};" for t, n in attrs] + ["}"],
+        "command": ["public class BookUpdate extends Command {", "  private long id;"] + [f"  private {t} {n};" for t, n in attrs] + ["", "  public boolean checkPermission(User user) {", "    return user.canUpdate(Book.class, id);", "  }", "", "  public BookDTO doAction() {", "    Book book = repository.find(id);"] + [f"    book.set{cap(n)}({n});" for t, n in attrs] + ["    repository.save(book);", "    return BookDTO.from(book);", "  }", "}"],
         "dto": ["public class BookDTO extends DTO {", "  private long id;"] + [f"  private {t} {n};" for t, n in attrs] + ["}"],
-        "ts": ["export interface Book {", "  id: number;"] + [f"  {n}: {D3_TS[t]};" for t, n in attrs] + ["}"],
+        "ts": ["export class BookModel {", "  id!: number;"] + [f"  {n}!: {D3_TS[t]};" for t, n in attrs] + ["", "  async load(id: number): Promise<void> {", "    const dto = await commands.execute(", "      new BookLoadCommand(id));", "    Object.assign(this, dto);", "  }", "}"],
         "form": ['<form class="book">'] + [widget(t, n) for t, n in attrs] + ["  <button>save</button>", "</form>"],
     }
 
@@ -578,9 +578,9 @@ D3_TEMPLATES = {
     "table": ["CREATE TABLE ${class.name?lower_case} (", "  id BIGINT PRIMARY KEY", "<#list class.attributes as a>", "  , ${a.name} ${sqlType(a)}", "</#list>", ");"],
     "data": ["@Entity", "public class ${class.name} {", "<#list class.attributes as a>", "  private ${a.type} ${a.name};", "</#list>", "<#list class.attributes as a>",
              "  public ${a.type} ${getter(a)}() { return ${a.name}; }", "</#list>", "}"],
-    "command": ["public class ${class.name}Update extends Command {", "  private long id;", "<#list class.attributes as a>", "  private ${a.type} ${a.name};", "</#list>", "}"],
+    "command": ["public class ${class.name}Update extends Command {", "  private long id;", "<#list class.attributes as a>", "  private ${a.type} ${a.name};", "</#list>", "", "  public boolean checkPermission(User user) {", "    return user.canUpdate(${class.name}.class, id);", "  }", "", "  public ${class.name}DTO doAction() {", "    ${class.name} entity = repository.find(id);", "<#list class.attributes as a>", "    entity.set${a.name?cap_first}(${a.name});", "</#list>", "    repository.save(entity);", "    return ${class.name}DTO.from(entity);", "  }", "}"],
     "dto": ["public class ${class.name}DTO extends DTO {", "  private long id;", "<#list class.attributes as a>", "  private ${a.type} ${a.name};", "</#list>", "}"],
-    "ts": ["export interface ${class.name} {", "  id: number;", "<#list class.attributes as a>", "  ${a.name}: ${tsType(a)};", "</#list>", "}"],
+    "ts": ["export class ${class.name}Model {", "  id!: number;", "<#list class.attributes as a>", "  ${a.name}!: ${tsType(a)};", "</#list>", "", "  async load(id: number): Promise<void> {", "    const dto = await commands.execute(", "      new ${class.name}LoadCommand(id));", "    Object.assign(this, dto);", "  }", "}"],
     "form": ['<form class="${class.name?lower_case}">', "<#list class.attributes as a>", "  ${widget(a)}", "</#list>", "  <button>save</button>", "</form>"],
 }
 
@@ -606,9 +606,9 @@ def demo_files(lang):
     L = lambda x: x[lang]
     tiers = [("table", T("Table", "Tabelle"), T("rows on disk", "Zeilen auf der Platte"), "db"),
              ("data", T("Data class", "Datenklasse"), T("the server's object", "das Objekt im Server"), "server"),
-             ("command", T("API action", "API-Aktion"), T("“Command”: one call the browser may make", "„Command“: ein Aufruf, den der Browser machen darf"), "server"),
+             ("command", T("API action", "API-Aktion"), T("Command: permission check and execution", "Command: Berechtigungsprüfung und Ausführung"), "server"),
              ("dto", "DTO", T("the package between server and browser", "das Paket zwischen Server und Browser"), "server"),
-             ("ts", T("TS model", "TS-Modell"), T("the browser's copy", "die Kopie im Browser"), "browser"),
+             ("ts", T("TS model", "TS-Modell"), T("browser data and loading via a command", "Browserdaten und Laden über einen Command"), "browser"),
              ("form", T("Form", "Formular"), T("what the user sees", "was die Nutzerin sieht"), "browser")]
     states, prev = [], None
     for k in range(len(D3_ADD) + 1):

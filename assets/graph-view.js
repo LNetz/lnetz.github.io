@@ -5,6 +5,30 @@
 // Two views of the same graph: 3D (turns slowly, drag turns it) and 2D (drag moves it).
 // Ctrl + wheel / pinch / the +− buttons zoom; a plain wheel scrolls the page. Full screen on request.
 // The data (~0.8 MB) is only fetched once the map comes near the screen, so the page itself stays light.
+const citationLoads = new Map();
+function loadCitationData(inn, retryAction) {
+  const box = document.getElementById('map-wrap'), status = document.getElementById('map-status'), retry = document.getElementById('map-retry');
+  const de = document.documentElement.lang === 'de', key = inn ? 'GRAPH_IN' : 'GRAPH';
+  status.textContent = de ? 'Zitationsdaten werden geladen …' : 'Loading citation data …';
+  retry.hidden = true;
+  if (!citationLoads.has(key)) citationLoads.set(key, window[key] ? Promise.resolve(window[key]) : new Promise((resolve, reject) => {
+    const sc = document.createElement('script');
+    sc.src = inn ? box.dataset.srcIn : box.dataset.src;
+    sc.onload = () => window[key] ? resolve(window[key]) : reject(new Error('Missing citation data'));
+    sc.onerror = () => { sc.remove(); reject(new Error('Citation data request failed')); };
+    document.head.appendChild(sc);
+  }));
+  return citationLoads.get(key).then(data => {
+    status.textContent = de ? `${data.nodes.length} Arbeiten geladen.` : `${data.nodes.length} papers loaded.`;
+    return data;
+  }).catch(error => {
+    citationLoads.delete(key);
+    status.textContent = de ? 'Die Zitationsdaten konnten nicht geladen werden. Die Publikationsliste bleibt verfügbar.' : 'Citation data could not be loaded. The publication list is still available.';
+    retry.hidden = false; retry.onclick = retryAction;
+    throw error;
+  });
+}
+
 (() => {
   const wrap = document.getElementById("map"), box = document.getElementById("map-wrap");
   if (!wrap || !box) return;
@@ -12,14 +36,12 @@
     if (window.researchMapFocus) window.researchMapFocus(e.detail.key, e.detail.inn);
     else window.researchMapPending = e.detail;          // picked up once the map has started
   });
-  const start = () => { if (window.GRAPH) initResearchMap(window.GRAPH, false); };
+  const start = () => loadCitationData(false, start).then(data => initResearchMap(data, false)).catch(() => {});
   if (window.GRAPH) { start(); return; }
   const io = new IntersectionObserver(([e]) => {
     if (!e.isIntersecting) return;
     io.disconnect();
-    const sc = document.createElement("script");
-    sc.src = box.dataset.src; sc.onload = start;
-    document.head.appendChild(sc);
+    start();
   }, { rootMargin: "800px 0px" });
   io.observe(box);
 
@@ -315,13 +337,13 @@ function initResearchMap(G, startIn) {
     if (y + r.height > H - 8) y = py - r.height - pad;
     placeTip(x, y);
   }
-  let tx = 0, ty = 0;
+  let tx = 0, ty = 0, paperOpener = null;
   const placeTip = (x, y) => {
     const r = tip.getBoundingClientRect();
     tx = Math.max(8, Math.min(x, W - r.width - 8)); ty = Math.max(8, Math.min(y, H - r.height - 8));
     tip.style.transform = `translate(${tx}px, ${ty}px)`;
   };
-  const unpin = () => { pinned = hover = null; tip.hidden = true; tip.classList.remove("pinned"); draw(); wake(); };
+  const unpin = () => { const restore = tip.contains(document.activeElement); pinned = hover = null; tip.hidden = true; tip.classList.remove("pinned"); draw(); wake(); if (restore && paperOpener?.isConnected) paperOpener.focus(); };
   // a pinned card can be closed (×) and dragged out of the way
   tip.addEventListener("click", e => { if (e.target.closest(".tip-x")) unpin(); });
   let tipDrag = null;
@@ -402,7 +424,7 @@ function initResearchMap(G, startIn) {
     zoomAt(e.offsetX, e.offsetY, Math.exp(-Math.max(-100, Math.min(100, e.deltaY)) * 0.002));
   }, { passive: false });
   canvas.addEventListener("dblclick", fit);
-  addEventListener("keydown", e => { if (e.key === "Escape" && pinned) { pinned = hover = null; tip.hidden = true; draw(); wake(); } });
+  addEventListener("keydown", e => { if (e.key === "Escape" && pinned) unpin(); });
 
   // legend: topics toggle, second hop toggle, zoom, fit
   document.querySelectorAll("[data-topic]").forEach(b => b.addEventListener("click", () => {
@@ -429,14 +451,17 @@ function initResearchMap(G, startIn) {
     pinned = hover = null; tip.hidden = true;
     document.querySelectorAll("[data-dir]").forEach(b => b.setAttribute("aria-pressed", (b.dataset.dir === "in") === inn));
     box.querySelectorAll("[data-lead]").forEach(p => p.hidden = (p.dataset.lead === "in") !== inn);
-    resize(); fit(); wake();
+    resize(); fit(); wake(); renderPaperList();
   };
+  let directionRequest = 0;
   const switchDir = (inn, then) => {
+    const request = ++directionRequest;
     if (inn === dirIn) return then?.();
     if (inn ? window.GRAPH_IN : window.GRAPH) { setDir(inn); return then?.(); }
-    const sc = document.createElement("script");
-    sc.src = inn ? box.dataset.srcIn : box.dataset.src; sc.onload = () => { setDir(inn); then?.(); };
-    document.head.appendChild(sc);
+    loadCitationData(inn, () => switchDir(inn, then)).then(() => {
+      if (request !== directionRequest) return;
+      setDir(inn); then?.();
+    }).catch(() => {});
   };
   document.querySelectorAll("[data-dir]").forEach(b => b.addEventListener("click", () => switchDir(b.dataset.dir === "in")));
   // from the publication list: show one of my papers — in the middle, pinned, its card open
@@ -453,6 +478,37 @@ function initResearchMap(G, startIn) {
     showTip(n, sx[n.i], sy[n.i]);
   });
   if (window.researchMapPending) { const p = window.researchMapPending; window.researchMapPending = null; window.researchMapFocus(p.key, p.inn); }
+  // The same graph data, navigable without picking a dot on a canvas.
+  const paperSearch = document.getElementById('map-search'), paperList = document.getElementById('map-paper-list');
+  function renderPaperList() {
+    const query = (paperSearch?.value || '').trim().toLocaleLowerCase();
+    const matches = N.filter(n => `${n.t} ${n.a || ''} ${n.y || ''}`.toLocaleLowerCase().includes(query));
+    const shown = matches.slice(0, 30);
+    paperList.replaceChildren();
+    for (const n of shown) {
+      const li = document.createElement('li'), b = document.createElement('button'), meta = document.createElement('span');
+      b.type = 'button'; b.textContent = n.t;
+      b.addEventListener('click', () => {
+        paperOpener = b;
+        only = null; off.clear(); showHop2 = true;
+        document.querySelectorAll('[data-only]').forEach(x => x.setAttribute('aria-pressed', false));
+        document.querySelectorAll('[data-topic]').forEach(x => x.setAttribute('aria-pressed', true));
+        hopBtn?.setAttribute('aria-pressed', true);
+        zoom = 1.6; ox = oy = 0; draw(); ox = W / 2 - sx[n.i]; oy = H / 2 - sy[n.i];
+        pinned = hover = n; draw(); showTip(n, sx[n.i], sy[n.i]);
+        tip.querySelector('a,button')?.focus({ preventScroll: true });
+      });
+      meta.className = 'mono faint'; meta.textContent = [n.y, n.a].filter(Boolean).join(' · ');
+      li.append(b, meta);
+      const href = n.d ? `https://doi.org/${n.d}` : n.pdf || n.u;
+      if (href && /^https?:\/\//.test(href)) {
+        const a = document.createElement('a'); a.href = href; a.textContent = de ? 'Quelle ↗' : 'source ↗'; a.className = 'mono'; li.append(a);
+      }
+      paperList.append(li);
+    }
+    document.getElementById('map-list-count').textContent = de ? `${shown.length} von ${matches.length} Treffern. Suche verfeinern, um weitere Arbeiten zu finden.` : `${shown.length} of ${matches.length} matches. Refine the search to find more papers.`;
+  }
+  if (paperSearch) { paperSearch.disabled = false; paperSearch.addEventListener('input', renderPaperList); renderPaperList(); }
   document.querySelectorAll("[data-view]").forEach(b => b.setAttribute("aria-pressed", b.dataset.view === String(dims)));
   showPause();
 

@@ -52,8 +52,20 @@
       c.addEventListener("blur", () => light(pinned));
     });
     parts.forEach(p => {
+      const key = keysOf(p)[0];
+      const clause = clauses.find(c => c.dataset.k === key);
+      p.setAttribute("tabindex", "0");
+      p.setAttribute("role", "button");
+      p.setAttribute("aria-label", clause?.textContent || key);
       p.addEventListener("pointerenter", () => light(keysOf(p)[0]));
       p.addEventListener("pointerleave", () => light(pinned));
+      p.addEventListener("focus", () => light(key));
+      p.addEventListener("blur", () => light(pinned));
+      const pin = () => { pinned = pinned === key ? null : key; light(pinned); };
+      p.addEventListener("click", pin);
+      p.addEventListener("keydown", e => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pin(); }
+      });
     });
     const say = i => { verdict.textContent = presets[i].verdict; };
     const set = i => {

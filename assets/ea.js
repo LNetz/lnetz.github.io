@@ -273,6 +273,14 @@
       const q = p.matrixTransform(svg.getScreenCTM().inverse());
       child = [clamp((q.x - 4) / S), clamp(1 - (q.y - 4) / S)]; spot = "free"; press(chips, null); draw();
     });
+    svg.setAttribute("tabindex", "0");
+    svg.addEventListener("keydown", e => {
+      const delta = { ArrowLeft: [-.01, 0], ArrowRight: [.01, 0], ArrowUp: [0, .01], ArrowDown: [0, -.01] }[e.key];
+      if (!delta) return;
+      e.preventDefault();
+      child = child.map((v, i) => clamp(v + delta[i] * (e.shiftKey ? 10 : 1)));
+      spot = "free"; press(chips, null); draw();
+    });
     resample(); draw();
     SD.lock(sayEl, Object.keys(d.words.say), k => { sayEl.textContent = d.words.say[k]; }, () => spot);
   }

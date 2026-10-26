@@ -299,6 +299,7 @@
 /* the runtime bars */
 .dia .bar-g { fill: var(--accent); }
 .dia .bar-c { fill: var(--c-rest); }
+.mu-svg:focus-visible { outline: 1px solid var(--accent); outline-offset: 3px; }
 
 /* phones: half-width figures shrink to ~0.9; keep labels at the 10 px floor */
 @media (max-width: 600px) {

@@ -195,8 +195,8 @@ def fig_lifespans(lang):
         return f'<svg class="dia lifespans" viewBox="0 0 {W} {bottom + 34}" style="max-width:{W}px" role="img" aria-label="{aria}">{out}</svg>'
 
     svg = _pair(chart(784, 196, 5.2, False), chart(358, 8, 2.96, True))
-    return fig(svg, T(f"<b>Systems that outlive their software.</b> Grey: how long the original system lives. Accent: software support periods of {SUPPORT} years — as long as Microsoft supported Windows 10 {r('W10')}. A bridge sees about five of them; its twin has to survive every one. Estimates of the lifespans vary between sources.",
-                      f"<b>Systeme, die ihre Software überleben.</b> Grau: wie lange das Originalsystem lebt. Akzent: Software-Supportzeiten von {SUPPORT} Jahren — so lange hat Microsoft Windows 10 unterstützt {r('W10')}. Eine Brücke erlebt etwa fünf davon; ihr Zwilling muss jede überstehen. Die Schätzungen der Lebensdauern schwanken je nach Quelle."), lang,
+    return fig(svg, T(f"<b>Systems that outlive their software.</b> Grey: how long the original system lives. Accent: software support periods of {SUPPORT} years — as long as Microsoft supported Windows 10 {r('W10')}. These repeated Windows 10-length windows illustrate maintenance planning, not a measured generic software lifetime. A twin may need continuity across several such generations. Estimates of the lifespans vary between sources.",
+                      f"<b>Systeme, die ihre Software überleben.</b> Grau: wie lange das Originalsystem lebt. Akzent: Software-Supportzeiten von {SUPPORT} Jahren — so lange hat Microsoft Windows 10 unterstützt {r('W10')}. Die wiederholten Fenster von Windows-10-Länge veranschaulichen Wartungsplanung, keine gemessene allgemeine Softwarelebensdauer. Ein Zwilling kann Kontinuität über mehrere solche Generationen benötigen. Die Schätzungen der Lebensdauern schwanken je nach Quelle."), lang,
                scroll=False, source=src("after", n("Mic25"), where="p. 2"))
 
 
@@ -264,8 +264,8 @@ def fig_lifecycle(lang):
     aria = L(T("A car model's development twin, the type, during design; at manufacture it is built as three cars, each with a twin of its own that records its tolerance and its battery health over time",
                "Der Entwicklungszwilling eines Automodells, der Typ, im Entwurf; bei der Fertigung wird er als drei Autos gebaut, jedes mit eigenem Zwilling, der seine Toleranz und seinen Batteriezustand über die Zeit festhält"))
     return fig(_pair(wide(), tall()),
-               T(f"<b>One type, many instances — like a class and its objects.</b> During design there is no car yet, so the twin is a <i>development twin</i> of the car model, valid for every car built from it. At manufacture each car gets a twin of its own that takes in its tolerances and, on the road, its wear. Grieves and Vickers call the two the <i>Digital Twin Prototype</i> and the <i>Digital Twin Instance</i> {r('GV17')}.",
-                 f"<b>Ein Typ, viele Exemplare — wie eine Klasse und ihre Objekte.</b> Im Entwurf gibt es noch kein Auto, also ist der Zwilling ein <i>Entwicklungszwilling</i> des Automodells, gültig für jedes daraus gebaute Auto. Bei der Fertigung bekommt jedes Auto einen eigenen Zwilling, der seine Toleranzen und, auf der Straße, seinen Verschleiß aufnimmt. Grieves und Vickers nennen die beiden <i>Digital Twin Prototype</i> und <i>Digital Twin Instance</i> {r('GV17')}."),
+               T(f"<b>One type, many instances — like a class and its objects.</b> The class/object comparison is an analogy, not an implementation requirement. During design there is no car yet, so the twin is a <i>development twin</i> of the car model, valid for every car built from it. When instance twins are provisioned, each can record its own history that takes in its tolerances and, on the road, its wear. Grieves and Vickers call the two the <i>Digital Twin Prototype</i> and the <i>Digital Twin Instance</i> {r('GV17')}.",
+                 f"<b>Ein Typ, viele Exemplare — wie eine Klasse und ihre Objekte.</b> Der Vergleich mit Klasse/Objekt ist eine Analogie, keine Implementierungsvorgabe. Im Entwurf gibt es noch kein Auto, also ist der Zwilling ein <i>Entwicklungszwilling</i> des Automodells, gültig für jedes daraus gebaute Auto. Wenn Instanzzwillinge eingerichtet werden, kann jeder eine eigene Historie führen, der seine Toleranzen und, auf der Straße, seinen Verschleiß aufnimmt. Grieves und Vickers nennen die beiden <i>Digital Twin Prototype</i> und <i>Digital Twin Instance</i> {r('GV17')}."),
                lang, scroll=False, source=src("illustrative", note=T("VINs, tolerances and battery health invented", "Fahrgestellnummern, Toleranzen und Batteriezustand erfunden")))
 
 
@@ -273,7 +273,7 @@ def fig_refarch(lang):
     """The reference architecture that grew out of the self-adaptive loop. After Heithoff et al. [HJM24], Fig. 5.2."""
     L = lambda x: x[lang]
     m = 'marker-end="url(#dtc)"'
-    svg = f'''<svg class="dia refarch" viewBox="0 0 784 226" role="img" aria-label="{L(T("Reference architecture: gateways connect the machine; inside the twin, self-adaptivity services, process-awareness services and an optimiser work on a database; a cockpit connects the users", "Referenzarchitektur: Gateways verbinden die Maschine; im Zwilling arbeiten Selbstadaptivitäts-Services, prozessbewusste Services und ein Optimierer auf einer Datenbank; ein Cockpit verbindet die Nutzer"))}">
+    svg = f'''<svg class="dia refarch" viewBox="0 0 784 274" role="img" aria-label="{L(T("Reference architecture: gateways connect the machine; inside the twin, self-adaptivity services, process-awareness services and an optimiser work on a database; a cockpit connects the users", "Referenzarchitektur: Gateways verbinden die Maschine; im Zwilling arbeiten Selbstadaptivitäts-Services, prozessbewusste Services und ein Optimierer auf einer Datenbank; ein Cockpit verbindet die Nutzer"))}">
   {_arrow_defs("dtc")}
   {_machine(0, 96, .22)}
   <path class="ln" d="M72 110H90" {m}/>
@@ -289,9 +289,15 @@ def fig_refarch(lang):
   <path class="ln" d="M610 110H632" {m}/>
   {box(636, 86, 120, 48, "Cockpit", "UI")}
   <path class="ln" d="M696 134V164" {m}/>{_person(696, 186)}<text class="s" x="696" y="214" text-anchor="middle">{L(T("users", "Nutzer"))}</text>
+  <path class="ln hl" d="M320 136V244H146V138" marker-end="url(#dtca)"/>
+  <path class="ln hl" d="M94 122H72V138H54" marker-end="url(#dtca)"/>
+  <text class="s halo" x="230" y="262">{L(T("authorized commands → gateway → machine", "erlaubte Befehle → Gateway → Maschine"))}</text>
+  <path class="ln" d="M510 146V140M420 162H414M320 146V140"/>
+  <text class="s halo" x="78" y="74">{L(T("telemetry →", "Telemetrie →"))}</text>
+  <path class="ln dash-opt" d="M636 98H614V30H320V34" marker-end="url(#dtc)"/>
 </svg>'''
-    return fig(svg, T("<b>From one loop to many services.</b> The self-adaptive loop — a variant of the classic monitor–analyse–plan–execute loop of self-adaptive systems (MAPE-K) — proved too rigid on its own, so later twins combine it with process-aware services (for example, noticing that opening the clamping unit takes too long), an optimiser and a cockpit.",
-                      "<b>Von einer Schleife zu vielen Services.</b> Die selbstadaptive Schleife — eine Variante der klassischen Schleife selbstadaptiver Systeme aus Überwachen, Analysieren, Planen und Ausführen (MAPE-K) — erwies sich allein als zu starr; spätere Zwillinge kombinieren sie deshalb mit prozessbewussten Services (die etwa bemerken, dass das Öffnen der Schließeinheit zu lange dauert), einem Optimierer und einem Cockpit."),
+    return fig(svg, T("<b>From one loop to many services.</b> Grey arrows: telemetry and data access; accent arrows: authorized commands back through the gateway. The dashed cockpit path permits operator approval. Safety interlocks and authorization remain required. The self-adaptive loop — a variant of the classic monitor–analyse–plan–execute loop of self-adaptive systems (MAPE-K) — proved too rigid on its own, so later twins combine it with process-aware services (for example, noticing that opening the clamping unit takes too long), an optimiser and a cockpit.",
+                      "<b>Von einer Schleife zu vielen Services.</b> Graue Pfeile: Telemetrie und Datenzugriff; Akzentpfeile: erlaubte Befehle zurück über das Gateway. Der gestrichelte Cockpit-Pfad erlaubt Freigaben durch Menschen. Sicherheitsverriegelungen und Berechtigungen bleiben nötig. Die selbstadaptive Schleife — eine Variante der klassischen Schleife selbstadaptiver Systeme aus Überwachen, Analysieren, Planen und Ausführen (MAPE-K) — erwies sich allein als zu starr; spätere Zwillinge kombinieren sie deshalb mit prozessbewussten Services (die etwa bemerken, dass das Öffnen der Schließeinheit zu lange dauert), einem Optimierer und einem Cockpit."),
                lang, source=src("after", n("HJM24"), where="Fig. 5.2", note=T("simplified", "vereinfacht")))
 
 
@@ -301,43 +307,50 @@ def fig_mde4dt(lang):
     m, ma = 'marker-end="url(#dtd)"', 'marker-end="url(#dtda)"'
     from article_art import gear
     aria = L(T("Engineering models such as CAD, SysML or Modelica and domain knowledge become application-specific and application-independent models; generators turn them into the digital twin with its models, shadows, services and cockpit", "Engineering-Modelle wie CAD, SysML oder Modelica und Domänenwissen werden zu anwendungsspezifischen und anwendungsunabhängigen Modellen; Generatoren machen daraus den digitalen Zwilling mit Modellen, Schatten, Services und Cockpit"))
-    svg = f'''<svg class="dia" viewBox="0 0 784 196" role="img" aria-label="{aria}">
+    svg = f'''<svg class="dia" viewBox="0 0 784 292" role="img" aria-label="{aria}">
   {_arrow_defs("dtd")}
   <text class="s" x="0" y="14">{L(T("WHAT EXISTS ALREADY", "WAS SCHON DA IST"))}</text>
   {box(0, 26, 172, 74, L(T("engineering models", "Engineering-Modelle")), "CAD · STEP · SysML", sub2="Modelica · AutomationML")}
   {box(0, 112, 172, 56, L(T("domain knowledge", "Domänenwissen")), L(T("experts, processes", "Fachleute, Prozesse")))}
   <path class="ln" d="M172 63H210" {m}/><path class="ln" d="M172 140H210" {m}/>
-  <text class="s" x="214" y="14">{L(T("MODELS FOR THE TWIN", "MODELLE FÜR DEN ZWILLING"))}</text>
-  {box(214, 26, 184, 60, L(T("application-specific", "anwendungsspezifisch")), L(T("this machine, these sensors", "diese Maschine, Sensoren")))}
+  <text class="s" x="214" y="14">{L(T("MAPPINGS + TWIN MODELS", "MAPPINGS + ZWILLINGSMODELLE"))}</text>
+  {box(214, 26, 184, 60, L(T("application-specific", "anwendungsspezifisch")), L(T("identity · units · ports", "Identität · Einheiten · Ports")))}
   {box(214, 108, 184, 60, L(T("application-independent", "anwendungsunabhängig")), L(T("libraries, architecture", "Bibliotheken, Architektur")))}
   <path class="ln" d="M398 56H418V97H436M398 138H418V97" /><path class="ln hl" d="M418 97H444" {ma}/>
   <path class="gearf" d="{gear(482, 97, 32, 11)}"/><circle class="hubf" cx="482" cy="97" r="10"/><text class="s" x="482" y="150" text-anchor="middle">{L(T("generators", "Generatoren"))}</text>
   <path class="ln hl" d="M520 97H554" {ma}/>
-  <rect class="box hl" x="560" y="20" width="224" height="152" rx="3"/><text class="t" x="576" y="44">{L(T("the digital twin", "der digitale Zwilling"))}</text>
-  <text x="576" y="70">{L(T("models", "Modelle"))}</text><text x="576" y="90">{L(T("digital shadows", "digitale Schatten"))}</text>
+  <rect class="box hl" x="560" y="20" width="224" height="152" rx="3"/><text class="t" x="576" y="44">{L(T("generated components", "generierte Bausteine"))}</text>
+  <text x="576" y="70">{L(T("models", "Modelle"))}</text><text x="576" y="90">{L(T("shadow schemas", "Schatten-Schemata"))}</text>
   <text x="576" y="110">{L(T("services", "Services"))}</text><text x="576" y="130">{L(T("cockpit", "Cockpit"))}</text>
-  <text class="s" x="576" y="158">{L(T("generated, then extended by hand", "generiert, dann von Hand erweitert"))}</text>
+  <text class="s" x="576" y="158">{L(T("schemas / UI / adapter skeletons", "Schemata / UI / Adaptergerüste"))}</text>
+  <path class="ln" d="M672 172V202H398" marker-end="url(#dtd)"/>
+  {box(214, 206, 184, 54, L(T("Deploy + connect", "Betrieb + Anbindung")), L(T("auth · adapters · checks", "Rechte · Adapter · Tests")))}
+  <path class="ln" d="M398 232H556" marker-end="url(#dtd)"/>
+  {box(560, 206, 224, 54, L(T("Original + runtime data", "Original + Laufzeitdaten")), L(T("observations → live shadows", "Messungen → Live-Schatten")))}
+  <text class="s" x="214" y="282">{L(T("RUNTIME: sources and services must be configured and validated", "BETRIEB: Quellen und Services konfigurieren und validieren"))}</text>
 </svg>'''
     from project_content import box as _b
-    t = f'''<svg class="dia" viewBox="0 0 358 452" style="max-width:358px" role="img" aria-label="{aria}">
+    t = f'''<svg class="dia" viewBox="0 0 358 568" style="max-width:358px" role="img" aria-label="{aria}">
   {_arrow_defs("dte")}
   <text class="s" x="0" y="12">{L(T("WHAT EXISTS ALREADY", "WAS SCHON DA IST"))}</text>
   {_b(0, 22, 172, 74, L(T("engineering models", "Engineering-Modelle")), "CAD · STEP · SysML", sub2="Modelica · AutomationML")}
   {_b(186, 22, 172, 74, L(T("domain knowledge", "Domänenwissen")), L(T("experts, processes", "Fachleute, Prozesse")))}
   <path class="ln" d="M86 96V128" marker-end="url(#dte)"/><path class="ln" d="M272 96V128" marker-end="url(#dte)"/>
-  <text class="s" x="0" y="146">{L(T("MODELS FOR THE TWIN", "MODELLE FÜR DEN ZWILLING"))}</text>
+  <text class="s" x="0" y="146">{L(T("MAPPINGS + TWIN MODELS", "MAPPINGS + ZWILLINGSMODELLE"))}</text>
   {_b(0, 156, 172, 60, L(T("application-specific", "anwendungsspezifisch")), L(T("this machine, these sensors", "diese Maschine, Sensoren")))}
   {_b(186, 156, 172, 60, L(T("application-independent", "anwendungsunabhängig")), L(T("libraries, architecture", "Bibliotheken, Architektur")))}
   <path class="ln" d="M86 216V232H272V216M179 232V242"/><path class="ln hl" d="M179 242V250" marker-end="url(#dtea)"/>
   <path class="gearf" d="{gear(179, 282, 26, 11)}"/><circle class="hubf" cx="179" cy="282" r="8"/><text class="s" x="216" y="286">{L(T("generators", "Generatoren"))}</text>
   <path class="ln hl" d="M179 312V330" marker-end="url(#dtea)"/>
-  <rect class="box hl" x="0" y="336" width="358" height="112" rx="3"/><text class="t" x="16" y="358">{L(T("the digital twin", "der digitale Zwilling"))}</text>
-  <text x="16" y="382">{L(T("models · digital shadows", "Modelle · digitale Schatten"))}</text><text x="16" y="402">{L(T("services · cockpit", "Services · Cockpit"))}</text>
-  <text class="s" x="16" y="432">{L(T("generated, then extended by hand", "generiert, dann von Hand erweitert"))}</text>
+  <rect class="box hl" x="0" y="336" width="358" height="112" rx="3"/><text class="t" x="16" y="358">{L(T("generated components", "generierte Bausteine"))}</text>
+  <text x="16" y="382">{L(T("models · shadow schemas", "Modelle · Schatten-Schemata"))}</text><text x="16" y="402">{L(T("services · cockpit", "Services · Cockpit"))}</text>
+  <text class="s" x="16" y="432">{L(T("schemas / UI / adapter skeletons", "Schemata / UI / Adaptergerüste"))}</text>
+  <path class="ln" d="M179 448V464" marker-end="url(#dte)"/>
+  {_b(0, 468, 358, 94, L(T("Deploy + connect to the original", "Betrieb + Anbindung ans Original")), L(T("identity · units · auth · adapters", "Identität · Einheiten · Rechte · Adapter")), sub2=L(T("observations → live shadows · validate services", "Messungen → Live-Schatten · Services prüfen")))}
 </svg>'''
     svg = _pair(svg, t)
-    return fig(svg, T("<b>Do not start from scratch.</b> Much of what a twin needs to know already exists as engineering models. Generating the twin from them reduces the effort and keeps twin and engineering consistent.",
-                      "<b>Nicht bei null anfangen.</b> Vieles, was ein Zwilling wissen muss, existiert schon als Engineering-Modell. Den Zwilling daraus zu generieren, spart Aufwand und hält Zwilling und Engineering konsistent."),
+    return fig(svg, T("<b>Do not start from scratch.</b> Much of what a twin needs to know already exists as engineering models. Transformation and mapping specifications can generate schemas, UI and adapter skeletons. Deployment still needs data sources, identity and unit mappings, authentication, configured connectors, handwritten services and validation; models alone do not supply live shadows.",
+                      "<b>Nicht bei null anfangen.</b> Vieles, was ein Zwilling wissen muss, existiert schon als Engineering-Modell. Transformations- und Mapping-Spezifikationen können Schemata, UI und Adaptergerüste erzeugen. Der Betrieb braucht weiterhin Datenquellen, Identitäts- und Einheitenzuordnungen, Authentifizierung, konfigurierte Konnektoren, handgeschriebene Services und Validierung; Modelle allein liefern keine Live-Schatten."),
                lang, scroll=False, source=src("after", n("Mic25"), where="Fig. 3.1", note=T("simplified", "vereinfacht")))
 
 
@@ -352,14 +365,14 @@ def fig_wind(lang):
     rows = [("MK01", "20", "30"), ("MK12_13", "40", "300"), ("MK2000", "120", "600")]
     tbl = "".join(f"<tr><td>{a}</td><td>{b}</td><td>{c}</td><td><span class=\"pill-o\">{L(T('details', 'Details'))}</span></td></tr>" for a, b, c in rows)
     inner = f'''<div class="wind">
-  <div><span class="k mono">{L(T("1 · THE MODEL: A CLASS DIAGRAM", "1 · DAS MODELL: EIN KLASSENDIAGRAMM"))}</span><pre class="mono">{_code(cd)}</pre></div>
+  <div><span class="k mono">{L(T("1 · MODEL: CD4A EXCERPT", "1 · MODELL: CD4A-AUSZUG"))}</span><pre class="mono">{_code(cd)}</pre></div>
   <div><span class="k mono">{L(T("2 · GENERATED: THE PUMP OVERVIEW", "2 · GENERIERT: DIE PUMPEN-ÜBERSICHT"))}</span>
     <div class="gp-card"><div class="gp-head">Pump</div><div class="gp-body"><table><tr><th>name</th><th>VolumeFlow</th><th>idealPower</th><th></th></tr>{tbl}</table></div></div>
     <span class="k mono" style="margin-top:16px">{L(T("3 · THE TOOLS WRITE BACK (PYTHON API)", "3 · DIE WERKZEUGE SCHREIBEN ZURÜCK (PYTHON-API)"))}</span><pre class="mono">{_code(py)}</pre>
-    <p class="mono wind-rail">draft › review › released › outdated</p></div>
+    <p class="mono wind-rail">{L(T("draft › review › released › outdated (basic lifecycle)", "Entwurf › Prüfung › freigegeben › veraltet (einfacher Lebenszyklus)"))}</p></div>
 </div>'''
-    cap = T("<b>A single source of truth for engineering parameters.</b> The cooling system of a wind turbine as a class diagram (“/” marks a value computed in hand-written code); MontiGem with CD2GUI generates the pages from it; the engineering tools read and write through a Python API; a release status protects what has been agreed.",
-            "<b>Eine einzige Quelle für Engineering-Parameter.</b> Das Kühlsystem einer Windkraftanlage als Klassendiagramm („/“ markiert einen Wert, den handgeschriebener Code berechnet); MontiGem mit CD2GUI generiert daraus die Seiten; die Engineering-Werkzeuge lesen und schreiben über eine Python-API; ein Freigabestatus schützt, was vereinbart ist.")
+    cap = T("<b>A single source of truth for engineering parameters.</b> The cooling system of a wind turbine as a class diagram (“/” marks a value computed in hand-written code); MontiGem with CD2GUI generates the pages from it; the engineering tools read and write through a Python API; the source implements basic release-state tracking and checks for unreleased associated objects, not a full workflow engine. Values shown are example parameters, with no units asserted here. This development prototype did not demonstrate operational shadows or turbine control.",
+            "<b>Eine einzige Quelle für Engineering-Parameter.</b> Das Kühlsystem einer Windkraftanlage als Klassendiagramm („/“ markiert einen Wert, den handgeschriebener Code berechnet); MontiGem mit CD2GUI generiert daraus die Seiten; die Engineering-Werkzeuge lesen und schreiben über eine Python-API; die Quelle implementiert einfache Freigabestatus und Prüfungen nicht freigegebener verknüpfter Objekte, keine vollständige Workflow-Engine. Die Werte sind Beispielparameter; hier werden keine Einheiten behauptet. Der Entwicklungsprototyp demonstrierte keine Betriebsschatten oder Anlagensteuerung.")
     from article_common import source_line
     s = src("after", "MNN+22", where="Figs. 4–5, Listing 2", note=T("shortened", "gekürzt"))
     return f'<figure class="media art-fig">{inner}<figcaption class="mono">{L(cap)}{source_line(s, lang)}</figcaption></figure>'
@@ -427,7 +440,7 @@ def demo_ladder(lang):
         ("model", T("digital model", "digitales Modell"), "manual", "manual", T("No automated data flow in either direction. Example: the CAD model of your car — when the car changes, someone updates the model by hand.", "Kein automatischer Datenfluss, in keine Richtung. Beispiel: das CAD-Modell Ihres Autos — ändert sich das Auto, aktualisiert jemand das Modell von Hand."), ex),
         ("shadow", T("digital shadow", "digitaler Schatten"), "auto", "manual", T("Data flows automatically from the car to the digital object. Example: the app on your phone shows charge level and range, live — but nothing in it changes the car by itself.", "Daten fließen automatisch vom Auto zum digitalen Objekt. Beispiel: Die App auf Ihrem Handy zeigt Ladestand und Reichweite, live — aber nichts darin ändert von sich aus etwas am Auto."), ex),
         ("twin", T("digital twin", "digitaler Zwilling"), "auto", "auto", T("Data also flows back automatically. Example: from the battery data, the twin computes a gentler charging limit and sends it to the car — nobody types it in.", "Daten fließen auch automatisch zurück. Beispiel: Aus den Batteriedaten berechnet der Zwilling ein schonenderes Ladelimit und schickt es ans Auto — niemand tippt es ein."), ex),
-        ("human", T("Kritzinger: shadow · RWTH: twin", "Kritzinger: Schatten · RWTH: Zwilling"), "auto", "human", T("Formula 1: telemetry flows from the car to the pit wall automatically, but the rules allow no data back to the car. Engineers advise the driver, who changes the settings. For Kritzinger that is only a shadow; the RWTH definition counts control through people.", "Formel 1: Telemetrie fließt automatisch vom Auto an die Boxenmauer, aber die Regeln erlauben keine Daten zurück ins Auto. Ingenieure beraten den Fahrer, der die Einstellungen ändert. Für Kritzinger ist das nur ein Schatten; die RWTH-Definition zählt Steuerung über Menschen mit."), f"{r('F1')} · {r('essay')}"),
+        ("human", T("Kritzinger: shadow · RWTH: conditional", "Kritzinger: Schatten · RWTH: bedingt"), "auto", "human", T("Formula 1: telemetry flows from the car to the pit wall automatically, but the rules allow no data back to the car. Engineers advise the driver, who changes the settings. This illustrates mediated intervention, not proof of an implemented twin. Under Kritzinger it is a shadow; RWTH permits control through people if the other operational clauses are met.", "Formel 1: Telemetrie fließt automatisch vom Auto an die Boxenmauer, aber die Regeln erlauben keine Daten zurück ins Auto. Ingenieure beraten den Fahrer, der die Einstellungen ändert. Dies veranschaulicht vermittelte Eingriffe, keinen nachgewiesenen Zwilling. Nach Kritzinger ist es ein Schatten; RWTH erlaubt Steuerung durch Menschen, wenn auch die übrigen Betriebskriterien erfüllt sind."), f"{r('F1')} · {r('essay')}"),
     ]
     data = {"states": [{"id": i, "label": L(lab), "up": up, "down": dn, "quote": L(q), "src": s} for i, lab, up, dn, q, s in states]}
     btn = [T("model", "Modell"), T("shadow", "Schatten"), T("twin", "Zwilling"), T("person in between", "Mensch dazwischen")]
@@ -492,7 +505,7 @@ def demo_anatomy(lang):
         ("cad", T("a CAD file", "eine CAD-Datei"), ["models"], T("Models only — a “digital model” on the ladder. No data from the real car, no services, no way back.", "Nur Modelle — ein „digitales Modell“ auf der Leiter. Keine Daten aus dem echten Auto, keine Services, kein Rückweg.")),
         ("dash", T("the live app", "die Live-App"), ["shadows", "update", "purpose", "cockpit", "original", "info"], T("Charge level and range, shown for one purpose — a digital shadow plus a display. No models, no commands.", "Ladestand und Reichweite, für einen Zweck angezeigt — ein digitaler Schatten plus Anzeige. Keine Modelle, keine Befehle.")),
         ("sim", T("a simulation", "eine Simulation"), ["models", "svc-pred", "software"], T("Models and a service that predicts — but no data from the real car: a twin is “not only a simulation model”.", "Modelle und ein Service, der vorhersagt — aber keine Daten aus dem echten Auto: Ein Zwilling ist „nicht nur ein Simulationsmodell“.")),
-        ("type", T("a car model in design", "ein Automodell im Entwurf"), ["models", "software", "cockpit", "update", "purpose"], T("Models, a cockpit and agreed parameters — but no data from a real car and no commands yet: a development twin, the twin of a type.", "Modelle, ein Cockpit und vereinbarte Parameter — aber keine Daten eines echten Autos und noch keine Befehle: ein Entwicklungszwilling, der Zwilling eines Typs.")),
+        ("type", T("a car model in design", "ein Automodell im Entwurf"), ["models", "software", "cockpit", "update", "purpose"], T("Models, a cockpit and agreed parameters — but no data from a real car and no commands yet: a development twin under a different lifecycle notion. It does not satisfy all operational v2.2 clauses.", "Modelle, ein Cockpit und vereinbarte Parameter — aber keine Daten eines echten Autos und noch keine Befehle: ein Entwicklungszwilling unter einem anderen Lebenszyklusbegriff. Nicht alle Betriebskriterien von v2.2 sind erfüllt.")),
         ("twin", T("the twin", "der Zwilling"), ANATOMY_KEYS + [k for k, _ in SERVICES], T("Everything the definition asks for: models and shadows, kept up to date for a purpose, services that use them, and a way back — information and commands.", "Alles, was die Definition verlangt: Modelle und Schatten, zweckgerichtet aktuell gehalten, Services, die sie nutzen, und ein Rückweg — Informationen und Befehle.")),
     ]
     data = {"presets": [{"id": i, "on": on, "verdict": L(v)} for i, _, on, v in presets]}
@@ -500,8 +513,8 @@ def demo_anatomy(lang):
     inner = f'''<div class="d1-presets chips mono" role="group"><span class="k">{L(T("IS IT A TWIN?", "IST ES EIN ZWILLING?"))}</span>{pbtn}</div>
 <div class="anat-grid">{svg}<div class="anat-side"><p class="anat-def" role="group" aria-label="{L(T("The clauses of the definition", "Die Teile der Definition"))}">{clauses}</p>
 <p class="anat-verdict" aria-live="polite">{L(presets[4][3])}</p></div></div>'''
-    return demo("dt2", data, inner, T("<b>Every clause of the definition is a part of the twin.</b> Point at an underlined clause to find its part — or at a part to find its clause. Then check everyday artefacts: a dashboard is shadows plus a display, a CAD file only the model corner, and a car model in design is the twin of a type.",
-                                      "<b>Jeder Teil der Definition ist ein Teil des Zwillings.</b> Zeigen Sie auf eine unterstrichene Formulierung, um ihren Teil zu finden — oder auf einen Teil, um seine Formulierung zu finden. Dann prüfen Sie Alltagsdinge: Ein Dashboard ist ein Schatten plus Anzeige, eine CAD-Datei nur die Modell-Ecke, und ein Automodell im Entwurf ist der Zwilling eines Typs."),
+    return demo("dt2", data, inner, T("<b>Every clause of the definition is a part of the twin.</b> Point at an underlined clause to find its part — or at a part to find its clause. Then check everyday artefacts: a dashboard is shadows plus a display, a CAD file only the model corner, and a car model in design illustrates the development notion, not full operational compliance.",
+                                      "<b>Jeder Teil der Definition ist ein Teil des Zwillings.</b> Zeigen Sie auf eine unterstrichene Formulierung, um ihren Teil zu finden — oder auf einen Teil, um seine Formulierung zu finden. Dann prüfen Sie Alltagsdinge: Ein Dashboard ist ein Schatten plus Anzeige, eine CAD-Datei nur die Modell-Ecke, und ein Automodell im Entwurf veranschaulicht den Entwicklungsbegriff, nicht die Erfüllung aller Betriebskriterien."),
                 lang, source=src("after", n("HHMR23"), where="Fig. 1", note=T("layout; verdicts ours", "Aufbau; Urteile von uns")))
 
 
@@ -522,8 +535,8 @@ def _shadow_views():
     return [
         dict(q=T("Charge now?", "Jetzt laden?"), rows=[len(rows) - 1], col=2,
              sql=["CREATE VIEW charge_now AS", "  SELECT charge FROM telemetry", "  ORDER BY time DESC LIMIT 1;"],
-             a=T(f"{charge} % — no need to charge yet.", f"{charge} % — noch kein Laden nötig."),
-             note=T("The latest value of one column.", "Der jüngste Wert einer Spalte.")),
+             a=T(f"{charge} % — latest observed charge.", f"{charge} % — zuletzt beobachteter Ladestand."),
+             note=T("The latest value, not a charging recommendation: trip length and battery condition are not modeled. SQL examples use SQLite; telemetry columns are time (same-day HH:MM), km, charge (%), battery (°C).", "Der jüngste Wert, keine Ladeempfehlung: Fahrtlänge und Batteriezustand sind nicht modelliert. Die SQL-Beispiele nutzen SQLite; telemetry enthält time (HH:MM desselben Tages), km, charge (%) und battery (°C).")),
         dict(q=T("Service due?", "Wartung fällig?"), rows=list(range(len(rows))), col=1,
              sql=["CREATE VIEW service_due AS", "  SELECT max(km) >= 30000", "  FROM telemetry;"],
              a=T(f"No — {fmt(km)} km; service at {fmt(SERVICE_AT)} km.", f"Nein — {fmt(km)} km; Wartung bei {fmt(SERVICE_AT)} km."),
@@ -531,7 +544,7 @@ def _shadow_views():
         dict(q=T("Is the battery overheating?", "Überhitzt die Batterie?"), rows=[len(rows) - 2, len(rows) - 1], col=3,
              sql=["CREATE VIEW overheating AS", f"  SELECT min(battery) > {HOT} FROM (", "    SELECT battery FROM telemetry", "    ORDER BY time DESC LIMIT 2);"],
              a=T(f"Yes — the last two readings are {last2[0]} °C and {last2[1]} °C.", f"Ja — die letzten beiden Messwerte sind {last2[0]} °C und {last2[1]} °C."),
-             note=T("The last two values, compared with a threshold.", "Die letzten beiden Werte, mit einer Schwelle verglichen.")),
+             note=T("Two readings against a synthetic 45 °C threshold, not a validated battery diagnosis.", "Zwei Werte gegen eine synthetische Schwelle von 45 °C, keine validierte Batteriediagnose.")),
     ]
 
 
@@ -549,7 +562,7 @@ def demo_shadows(lang):
     buttons = "".join(f'<button type="button" data-v="{k}" class="{"first" if k == 2 else ""}" aria-pressed="{"true" if k == 0 else "false"}">{L(v["q"])}</button>' for k, v in enumerate(views))
     s0 = data["states"][0]
     inner = f'''<div class="d1-presets chips mono" role="group"><span class="k">{L(T("PURPOSE:", "ZWECK:"))}</span>{buttons}</div>
-<div class="sh-grid">{table}<div class="sh-card"><span class="k mono">{L(T("THE SHADOW · A VIEW", "DER SCHATTEN · EINE SICHT"))}</span><pre class="mono">{s0["sql"]}</pre>
+<div class="sh-grid">{table}<div class="sh-card"><span class="k mono">{L(T("SHADOW PROJECTION · SQL ANALOGY", "SCHATTENPROJEKTION · SQL-ANALOGIE"))}</span><pre class="mono">{s0["sql"]}</pre>
 <p class="sh-ans" aria-live="polite">{s0["a"]}</p><p class="sh-note">{s0["note"]}</p></div></div>'''
     return demo("dt3", data, inner, T(f"<b>The same data, three shadows.</b> Each purpose picks other rows and columns of the same raw data and condenses them differently: the latest value, a maximum, the last two readings against a threshold. None of them acts — a shadow answers a question; it can be compared to a view in a database {r('BDJ22')}.",
                                       f"<b>Dieselben Daten, drei Schatten.</b> Jeder Zweck wählt andere Zeilen und Spalten derselben Rohdaten und verdichtet sie anders: der jüngste Wert, ein Maximum, die letzten beiden Messwerte gegen eine Schwelle. Keiner handelt — ein Schatten beantwortet eine Frage; er lässt sich mit einer Sicht in einer Datenbank vergleichen {r('BDJ22')}."),
@@ -586,7 +599,7 @@ def demo_loop(lang):
   <g class="lp" data-c="cpps">{_machine(226, 220, .42)}<text class="s" x="293" y="284" text-anchor="middle">{L(T("the machine", "die Maschine"))}</text><text class="s a lp-temp" x="293" y="299" text-anchor="middle"></text></g>
   {lines}
 </svg>'''
-    hot, cool = L(T("barrel: 524 °C", "Zylinder: 524 °C")), L(T("barrel: 496 °C ✓", "Zylinder: 496 °C ✓"))
+    hot, cool = L(T("T = 524 (illustrative)", "T = 524 (illustrativ)")), L(T("T = 496 (new reading)", "T = 496 (neuer Messwert)"))
     states = [
         (["cpps"], ["lake"], ["// raw readings stream in"], T("The machine streams its raw data into the raw data store.", "Die Maschine schickt ihre Rohdaten in den Rohdatenspeicher."), hot),
         (["dp"], ["lakedp", "dpev"], ["checkTemp@(-1), checkTemp@(0)"], T("The data processor builds the shadow the evaluator needs: the last two temperature readings.", "Der Datenprozessor baut den Schatten, den der Evaluator braucht: die letzten beiden Temperaturwerte."), hot),
@@ -595,7 +608,7 @@ def demo_loop(lang):
         (["re"], [], LOOP_CODE["case"], T("The reasoner finds a case that matches the goal — what to do, and what should be true afterwards.", "Der Reasoner findet einen passenden Fall — was zu tun ist und was danach gelten soll."), hot),
         (["re"], ["reck"], ["HeatingUnit.reduceTemp(targetValue)"], T("Proposal ready.", "Vorschlag fertig."), hot),
         (["ex"], ["reck", "ckex", "excpps"], ["HeatingUnit.reduceTemp(targetValue)   // via a protocol plugin, e.g. OPC UA"], T("The executor sends the command to the machine.", "Der Executor sendet den Befehl an die Maschine."), hot),
-        (["ex", "cpps"], ["cppsex"], ["yields goal.currentValue <= goal.targetValue"], T("Feedback: the goal is reached. The loop runs on with the next readings.", "Rückmeldung: Das Ziel ist erreicht. Die Schleife läuft mit den nächsten Werten weiter."), cool),
+        (["ex", "cpps"], ["cppsex"], ["yields goal.currentValue <= goal.targetValue"], T("A new illustrative sensor reading is stored and the evaluator checks the goal again. Acknowledging the command alone would not prove cooling.", "Ein neuer illustrativer Sensorwert wird gespeichert; der Evaluator prüft das Ziel erneut. Eine Befehlsbestätigung allein würde die Abkühlung nicht belegen."), cool),
     ]
     data = {"steps": [{"c": c, "l": l, "code": _code(code), "say": L(say), "temp": tmp} for c, l, code, say, tmp in states], "hold": 5,
             "words": {k: L(v) for k, v in dict(auto=T("Automatic: nobody is asked; the proposal passes the cockpit.", "Automatisch: Niemand wird gefragt; der Vorschlag läuft am Cockpit vorbei."),
@@ -606,7 +619,7 @@ def demo_loop(lang):
 <div class="lp-row"><button type="button" class="approve mono" disabled>{L(T("approve", "freigeben"))} ✓</button><p class="lp-msg mono"></p></div></div></div>{controls(lang)}'''
     return demo("dt4", data, inner, T(f"<b>The twin’s intelligence is a chain of small, editable models.</b> An event model says when to act, a goal what should become true, a case how to get there. Switch to <i>operator approves</i>: the loop stops at the cockpit until someone releases the proposal — some users do not want automatic execution, for fear of stopping a whole production line because of a wrong setting {r('Mic25')}. The architecture stays the same; one step changes.",
                                       f"<b>Die Intelligenz des Zwillings ist eine Kette kleiner, änderbarer Modelle.</b> Ein Ereignismodell sagt, wann gehandelt wird, ein Ziel, was gelten soll, ein Fall, wie man hinkommt. Schalten Sie auf <i>Bedienerin gibt frei</i>: Die Schleife hält am Cockpit, bis jemand den Vorschlag freigibt — manche Nutzer wollen keine automatische Ausführung, aus Sorge, eine falsche Einstellung könnte eine ganze Produktionslinie stoppen {r('Mic25')}. Die Architektur bleibt gleich; ein Schritt ändert sich."),
-                lang, source=src("after", "DHM+22", where="Figs. 2, 17, 18", note=T("temperatures illustrative", "Temperaturen illustrativ")))
+                lang, source=src("after", "DHM+22", where="Figs. 2, 17, 18", note=T("paper’s toy threshold 500; dimensionless trace, not an industrial temperature recommendation or measured process", "Spielzeugschwelle 500 aus dem Paper; dimensionsloser Ablauf, keine industrielle Temperaturempfehlung oder Prozessmessung")))
 
 
 def _check_loop(states):
@@ -653,9 +666,9 @@ def demo_roles(lang):
 </svg>'''
     _check_features()
     tree = (f'<ul class="feat mono"><li class="root">{L(T("the platform offers", "die Plattform bietet"))}</li>'
-            + "".join(f'<li title="{esc(tip)}"><span>{L(GROUPS[g])}</span>{L(lab)}</li>' for g, _, lab, tip, on in FEATURES if on) + "</ul>")
+            + "".join(f'<li><span>{L(GROUPS[g])}</span>{L(lab)} <small>({esc(tip)})</small></li>' for g, _, lab, tip, on in FEATURES if on) + "</ul>")
     case = LOOP_CODE["case"][:3] + ["  …"]
-    log = [("10:02", T("running", "läuft"), ""), ("10:14", T("overheating", "Überhitzung"), T("barrel set to 500 °C", "Zylinder auf 500 °C gesetzt")), ("10:31", T("running", "läuft"), "")]
+    log = [("10:02", T("running", "läuft"), ""), ("10:14", T("overheating", "Überhitzung"), T("toy trace: target T = 500", "Spielzeugablauf: Ziel T = 500")), ("10:31", T("running", "läuft"), "")]
     cockpit = (f'<div class="gp-card"><div class="gp-head">{L(T("Machine state", "Maschinenzustand"))}</div><div class="gp-body"><table><tr><th>{L(T("time", "Zeit"))}</th><th>{L(T("state", "Zustand"))}</th><th>{L(T("the twin did", "der Zwilling tat"))}</th></tr>'
                + "".join(f'<tr><td>{t}</td><td>{L(s)}</td><td>{L(d) if d else "—"}</td></tr>' for t, s, d in log) + "</table></div></div>")
     panels = [
@@ -668,8 +681,8 @@ def demo_roles(lang):
             "words": {k: L(v) for k, v in dict(step=T("role", "Rolle"), of=T("of", "von")).items()}}
     p0 = data["steps"][0]
     inner = f'''<div class="ro-grid">{svg}<div class="ro-side"><p class="ro-title t">{p0["title"]}</p><p class="ro-text" aria-live="polite">{p0["text"]}</p><div class="ro-html">{p0["html"]}</div></div></div>{controls(lang)}'''
-    return demo("dt5", data, inner, T("<b>Two generators, three roles.</b> First the platform is generated, then the platform produces twins — configured by people who do not write code, with small models that can even change while the twin runs. Hover a choice for its technical name.",
-                                      "<b>Zwei Generatoren, drei Rollen.</b> Erst wird die Plattform generiert, dann erzeugt die Plattform Zwillinge — konfiguriert von Menschen, die keinen Code schreiben, mit kleinen Modellen, die sich sogar ändern lassen, während der Zwilling läuft. Zeigen Sie auf eine Auswahl, um ihren Fachnamen zu sehen."),
+    return demo("dt5", data, inner, T("<b>Two generators, three roles.</b> First the platform is generated, then the platform produces twins — configured by people who do not write code, with small models that can even change while the twin runs. Technical names appear alongside each choice. The cockpit trace is illustrative, with no industrial temperature units asserted.",
+                                      "<b>Zwei Generatoren, drei Rollen.</b> Erst wird die Plattform generiert, dann erzeugt die Plattform Zwillinge — konfiguriert von Menschen, die keinen Code schreiben, mit kleinen Modellen, die sich sogar ändern lassen, während der Zwilling läuft. Die Fachnamen stehen bei jeder Auswahl. Der Cockpit-Ablauf ist illustrativ; industrielle Temperatureinheiten werden nicht behauptet."),
                 lang, source=src("after", "DHM+22", where="Figs. 5, 7, 12, 13", note=T("cockpit values illustrative", "Cockpit-Werte illustrativ")))
 
 

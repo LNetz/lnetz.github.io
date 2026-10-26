@@ -22,6 +22,7 @@ import article_art
 import article_common
 
 import project_pages
+import site_sections
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LANGS = {"en": "", "de": "de"}          # language -> output sub-folder
@@ -84,11 +85,22 @@ def shell(lang, file, title, desc, body, scripts=""):
     L = lambda x: x[lang] if isinstance(x, dict) else x
     A = "../" if lang == "de" else ""                 # path back to the shared assets
     en_url, de_url = (file, f"de/{file}") if lang == "en" else (f"../{file}", file)
+    origin = "https://lnetz.github.io/"
+    route = ("de/" if lang == "de" else "") + ("" if file == "index.html" else file)
+    canonical = origin + route
+    share_image = {"photography.html": "assets/photos/p07.jpg", "projects.html": "assets/projects/macoco-dashboard.jpg", "projects-macoco.html": "assets/projects/macoco-dashboard.jpg", "projects-ford.html": "assets/projects/ford-video.jpg", "projects-add.html": "assets/projects/add-cd2gui-page.jpg", "projects-geneial.html": "assets/projects/geneial-ea-loop.webp", "projects-esaca.html": "assets/logos/esaca.svg"}.get(file, "assets/photos/banner-lecture.jpg")
 
     nav = NL.join(
         f'        <li><a href="{f}"{" class=\"active\" aria-current=\"page\"" if file.split("-")[0].removesuffix(".html") == f.removesuffix(".html") else ""}>'
         f'<span>{n}</span><span>{L(t)}</span></a></li>'
         for f, n, t in PAGES)
+    if file.startswith("research-"):
+        nav = nav.replace(f'<span>{L(T("Research", "Forschung"))}</span></a>',
+                          f'<span>{L(T("Research", "Forschung"))}</span></a><span class="nav-path-separator" aria-hidden="true"> / </span><a class="nav-parent" href="research.html#articles">{L(T("Articles", "Artikel"))}</a>')
+    elif file.startswith("projects-"):
+        project_name = next((p["name"] for p in project_pages.PROJECTS if file == f'projects-{p["slug"]}.html'), title)
+        nav = nav.replace(f'<span>{L(T("Projects", "Projekte"))}</span></a>',
+                          f'<span>{L(T("Projects", "Projekte"))}</span></a><span class="nav-path-separator" aria-hidden="true"> / </span><span class="nav-current">{L(project_name)}</span>')
     social = NL.join(f'      <a href="{u}" target="_blank" rel="noopener">{name} ↗</a>' for name, u in SOCIAL)
     full_title = "Lukas Netz" if file == "index.html" else f"{L(title)} — Lukas Netz"
     foot_icons = "".join(f'<a href="{f}" title="{L(t)}" aria-label="{L(t)}">{ICONS[i]}</a>' for f, i, t in QUICK)
@@ -103,12 +115,17 @@ def shell(lang, file, title, desc, body, scripts=""):
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+{('<base href="' + ('/de/' if lang == 'de' else '/') + '"><meta name="robots" content="noindex">') if file == '404.html' else ''}
   <title>{full_title}</title>
   <meta name="description" content="{L(desc)}">
   <meta property="og:title" content="{full_title}">
   <meta property="og:description" content="{L(desc)}">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="{"en_US" if lang == "en" else "de_DE"}">
+  <meta property="og:url" content="{canonical}">
+  <meta property="og:image" content="{origin}{share_image}">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="{canonical}">
   <link rel="alternate" hreflang="en" href="{en_url}">
   <link rel="alternate" hreflang="de" href="{de_url}">
   <link rel="icon" href="{A}assets/favicon.svg" type="image/svg+xml">
@@ -143,8 +160,10 @@ def shell(lang, file, title, desc, body, scripts=""):
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{A}assets/style.css">
+<noscript><style>.menu-toggle,.site-search,.search-label,.filters button,.map-options,.map-list{{display:none!important}}.index .menu{{display:flex!important;position:static!important}}.index{{position:static!important}}</style></noscript>
 </head>
 <body id="top">
+<a class="skip-link" href="#main">{L(T("Skip to content", "Zum Inhalt springen"))}</a>
 <div class="backdrop" aria-hidden="true"></div>
 <div class="frame">
 
@@ -180,7 +199,7 @@ def shell(lang, file, title, desc, body, scripts=""):
   </aside>
 
   <!-- ============ content ============ -->
-  <main>
+  <main id="main" tabindex="-1">
 {body}
     <footer class="mono">
       <span>© 2026 Lukas Netz.</span>
@@ -344,12 +363,15 @@ def about(lang):
     head = page_head("00", L(T("About", "Über mich")), "",
         L(T("I build software that builds software. My work sits between <em>model-driven engineering</em> and <em>large language models</em>: generators, DSLs and agentic tooling that turn models and intent into full-size, maintainable applications.",
             "Ich baue Software, die Software baut. Meine Arbeit liegt zwischen <em>modellgetriebener Softwareentwicklung</em> und <em>großen Sprachmodellen</em>: Generatoren, DSLs und agentische Werkzeuge, die aus Modellen und Absichten vollwertige, wartbare Anwendungen machen.")),
-        facts, top=EPIGRAPH)
+        facts)
     return f'''
-{head}    <section>{quick_nav(lang)}
+{head}{site_sections.featured(lang)}
+    <nav class="section-routes mono" aria-label="{L(T('Explore', 'Erkunden'))}"><a href="projects.html">{L(T('All projects', 'Alle Projekte'))} →</a><a href="research.html">{L(T('Research and publications', 'Forschung und Publikationen'))} →</a><a href="photography.html">{L(T('Photography', 'Fotografie'))} →</a></nav>
+    <section>
       <div class="bio">
 {NL.join(f"        <p>{L(p)}</p>" for p in bio)}
       </div>
+{EPIGRAPH}
     </section>
 '''
 
@@ -375,7 +397,7 @@ def projects(lang):
         T("European Sovereign Agentic Coding Appliance — a standardised, on-premises platform that runs AI coding agents inside an organisation’s own data centre: sandboxed agents, versionable configuration, a shared hub, benchmarks on your own repositories and a guided ticket-to-reviewed-code workbench. Air-gapped capable, no external API calls.",
           "European Sovereign Agentic Coding Appliance — eine standardisierte On-Premises-Plattform, die KI-Coding-Agenten im eigenen Rechenzentrum betreibt: Agenten in der Sandbox, versionierbare Konfiguration, ein gemeinsamer Hub, Benchmarks auf den eigenen Repositories und eine geführte Workbench vom Ticket bis zum reviewten Code. Air-gapped-fähig, keine externen API-Aufrufe."),
         [T("Agentic coding", "Agentisches Coding"), "On-prem", T("Sovereign AI", "Souveräne KI")],
-        [T("Platform", "Plattform"), "mgm × Fsas"], links=[("esaca.eu", "https://esaca.eu")], logo="esaca.png", page="esaca")
+        [T("Platform", "Plattform"), "mgm × Fsas"], links=[("esaca.eu", "https://esaca.eu")], logo="esaca.svg", page="esaca")
 
     research = [
         S("2018 — 2026", "MaCoCo",
@@ -408,7 +430,7 @@ def projects(lang):
           ["MontiGem", "IoT", T("Industry", "Industrie")], [T("Technical lead", "Technische Leitung"), IND],
           links=[(T("Ford press release", "Ford-Pressemitteilung"), "https://media.ford.com/content/fordmedia/feu/en/news/2022/08/31/ford-pro-tool-tracking-tech-could-save-firms-1000s.html"),
                  (T("RWTH news", "RWTH-Meldung"), "https://www.se-rwth.de/projects/22.09.MontiGem.Ford.Press.Release/")],
-          mark="FORD", page="ford"),
+          logo="ford.png", page="ford"),
         S("2018 — 2022", "Agile Data Development",
           T("Model-driven tooling for a wind-turbine manufacturer (with WZL, MSE and Bewind): integrating agile and plan-driven development with data-based decision support, including generated digital-twin cockpits for parameter management in turbine engineering.",
             "Modellgetriebene Werkzeuge für einen Windkraftanlagenhersteller (mit WZL, MSE und Bewind): Verzahnung agiler und plangetriebener Entwicklung mit datenbasierter Entscheidungsunterstützung, inklusive generierter Digital-Twin-Cockpits für das Parametermanagement in der Anlagenentwicklung."),
@@ -482,28 +504,28 @@ def projects(lang):
     head = page_head("01", L(T("Projects", "Projekte")), L(T(f"{n} entries", f"{n} Einträge")),
         L(T("Software I have built or led — from generator frameworks and production information systems to <em>agentic coding</em> platforms.",
             "Software, die ich gebaut oder geleitet habe — von Generator-Frameworks und produktiven Informationssystemen bis zu Plattformen für <em>agentisches Programmieren</em>.")),
-        chapters + project_pages.timeline(lang, A), top=page_icon("code"))
-    pic = banner(A, "banner-abstract.jpg", L(T("Abstract illustration: a blue spiral and waves of orange light among grids, small panels and fragments of code",
-                                               "Abstrakte Illustration: eine blaue Spirale und Wellen aus orangem Licht zwischen Rastern, kleinen Flächen und Code-Fragmenten")), 1024, 328,
-                 L(T("AI-generated image: AI-based MDE", "KI-generiertes Bild: KI-basierte MDE")))
+        chapters, top=page_icon("code"))
     return f'''
-{head}{pic}    <section>
-      <div class="group mono" id="industry">{L(T("Industry", "Industrie"))} · mgm technology partners</div>
+{head}
+    {project_pages.timeline(lang, A)}
+    {site_sections.featured(lang)}
+    <section>
+      <h2 class="group mono" id="industry">{L(T("Industry", "Industrie"))} · mgm technology partners</h2>
       <ul class="spec">
 {esaca}
       </ul>
 
-      <div class="group mono" id="research-software">{L(T("Research software", "Forschungssoftware"))} · RWTH Aachen</div>
+      <h2 class="group mono" id="research-software">{L(T("Research software", "Forschungssoftware"))} · RWTH Aachen</h2>
       <ul class="spec">
 {NL.join(research)}
       </ul>
 
-      <div class="group mono" id="assistants">{L(T("Assistants", "Assistenten"))} · ChatGPT</div>
+      <h2 class="group mono" id="assistants">{L(T("Assistants", "Assistenten"))} · ChatGPT</h2>
       <ul class="spec">
 {NL.join(gpts)}
       </ul>
 
-      <div class="group mono" id="further">{L(T("Further involvement", "Weitere Mitarbeit"))}</div>
+      <h2 class="group mono" id="further">{L(T("Further involvement", "Weitere Mitarbeit"))}</h2>
       <ul class="rows">
 {NL.join(further)}
       </ul>
@@ -582,8 +604,8 @@ def research(lang):
           ("LLMs für die Modellierung", "Modellsynthese in DSLs, Grammar Masking für syntaktisch valide Ausgaben, wie LLMs textuelle Modelle beschädigen und reparieren. <a class=\"int\" href=\"research-ai4se.html\">Eine Einführung →</a>")),
         T(("Low-code &amp; digital twins", "Generating customized low-code platforms and cockpits for digital twins." + DT_LINK["en"]),
           ("Low-Code &amp; digitale Zwillinge", "Generierung maßgeschneiderter Low-Code-Plattformen und Cockpits für digitale Zwillinge." + DT_LINK["de"])),
-        T(("Evolutionary algorithms", "Genetic algorithms for the energy management of plug-in hybrid cars and for wind-farm layouts — and how finely to discretise gene parameters." + EA_LINK["en"]),
-          ("Evolutionäre Algorithmen", "Genetische Algorithmen für das Energiemanagement von Plug-in-Hybridfahrzeugen und für Windpark-Layouts — und wie fein man Genparameter diskretisieren sollte." + EA_LINK["de"])),
+        T(("Evolutionary algorithms", "Genetic algorithms for the energy management of parallel hybrid cars and for wind-farm layouts — and how finely to discretise gene parameters." + EA_LINK["en"]),
+          ("Evolutionäre Algorithmen", "Genetische Algorithmen für das Energiemanagement paralleler Hybridfahrzeuge und für Windpark-Layouts — und wie fein man Genparameter diskretisieren sollte." + EA_LINK["de"])),
         T(("Information systems", "From model-driven prototype to full-size enterprise application — and retrofitting generation into existing systems."),
           ("Informationssysteme", "Vom modellgetriebenen Prototyp zur vollwertigen Unternehmensanwendung — und die nachträgliche Einführung von Generierung in bestehende Systeme.")),
     ]
@@ -595,44 +617,48 @@ def research(lang):
       <nav class="chapters mono" aria-label="{L(T("Chapters", "Kapitel"))}">
         <a href="#topics">{L(T("Topics", "Themen"))}</a><a href="#articles">{L(T("Articles", "Artikel"))}</a><a href="#community">Community</a><a href="#talks">{L(T("Talks", "Vorträge"))}</a><a href="#citation-map">{L(T("Citation map", "Zitationskarte"))}</a><a href="#publications">{L(T("Publications", "Publikationen"))}</a>
       </nav>'''
-    head = page_head("02", L(T("Research", "Forschung")), "",
+    head = page_head("02", L(T("Research", "Forschung")), L(T(f"{len(project_pages.PUBS)} publications", f"{len(project_pages.PUBS)} Publikationen")),
         L(T("I research how <em>large language models</em> and <em>model-driven engineering</em> can make each other better: LLMs that write valid models, and models that keep LLM output in check.",
             "Ich erforsche, wie <em>große Sprachmodelle</em> und <em>modellgetriebene Softwareentwicklung</em> sich gegenseitig besser machen: LLMs, die valide Modelle schreiben, und Modelle, die LLM-Ausgaben im Zaum halten.")),
-        METRICS[lang] + chapters, count_id=True, top=page_icon("sqrt"))
+        METRICS[lang] + site_sections.research_routes(lang) + chapters, count_id=True, top=page_icon("sqrt"))
     pic = banner(A, "banner-lecture.jpg", L(T("Lukas Netz lecturing in a large RWTH Aachen lecture hall",
                                               "Lukas Netz bei einer Vorlesung in einem großen Hörsaal der RWTH Aachen")), 1659, 532,
                  L(T("Guest lecture, Software Engineering course · RWTH Aachen · 12 / 2024",
                      "Gastvortrag, Vorlesung Softwaretechnik · RWTH Aachen · 12 / 2024")))
     return f'''
 {head}{pic}    <section>
-      <div class="group mono" id="topics">{L(T("Topics", "Themen"))}</div>
+      <h2 class="group mono" id="topics">{L(T("Topics", "Themen"))}</h2>
       <div class="themes">
-{NL.join(f"        <div><h4>{L(t)[0]}</h4><p>{L(t)[1]}</p></div>" for t in themes)}
+{NL.join(f"        <div><h3>{L(t)[0]}</h3><p>{L(t)[1]}</p></div>" for t in themes)}
       </div>
 
-      <div class="group mono" id="articles">{L(T("Articles", "Artikel"))}</div>
+      <h2 class="group mono" id="articles">{L(T("Articles", "Artikel"))}</h2>
       <ul class="articles">
 {article_common.cards(lang)}
       </ul>
 
-      <div class="group mono" id="community">Community</div>
+      <h2 class="group mono" id="community">Community</h2>
       <ul class="rows">
 {NL.join(community)}
       </ul>
 
-      <div class="group mono" id="talks">{L(T("Invited talks", "Eingeladene Vorträge"))}</div>
+      <h2 class="group mono" id="talks">{L(T("Invited talks", "Eingeladene Vorträge"))}</h2>
       <ul class="rows tight">
 {NL.join(talks)}
       </ul>
 
-      <div class="group mono" id="citation-map">{L(T("Citation map", "Zitationskarte"))}</div>
+      <h2 class="group mono" id="citation-map">{L(T("Citation map", "Zitationskarte"))}</h2>
 {map_block(lang)}
-      <div class="group mono" id="publications">{L(T("Publications", "Publikationen"))}</div>
+      <h2 class="group mono" id="publications">{L(T("Publications", "Publikationen"))}</h2>
+      <label class="search-label" for="pub-search">{L(T("Search publications", "Publikationen durchsuchen"))}</label>
+      <input class="site-search" id="pub-search" type="search" placeholder="{L(T('Title, author or year', 'Titel, Autor oder Jahr'))}">
+      <p class="mono faint" id="pub-results" role="status"></p>
       <div class="filters mono" role="group" aria-label="{L(T("Filter publications", "Publikationen filtern"))}">
 {NL.join(f'        <button type="button" data-f="{k}" aria-pressed="{"true" if k == "all" else "false"}">{L(v)}</button>' for k, v in filters)}
       </div>
 
-      <div id="pubs"></div>
+      <p id="pub-empty" hidden>{L(T("No matching publications. Try another search or choose all topics.", "Keine passenden Publikationen. Ändern Sie die Suche oder wählen Sie alle Themen."))}</p>
+      <div id="pubs">{site_sections.publications(lang)}</div>
     </section>
 '''
 
@@ -678,29 +704,38 @@ def map_block(lang):
       <p class="map-lead" data-lead="in" hidden>{L(T("The other way round: who cites my papers and — fainter — who cites those. <em>Colour</em> is the topic, a <em>ring</em> marks work from RWTH Software Engineering, size follows citations. Data: OpenAlex, which knows fewer citations than Google Scholar.",
                                "Andersherum: wer meine Paper zitiert und — blasser — wer diese zitiert. Die <em>Farbe</em> zeigt das Thema, ein <em>Ring</em> markiert Arbeiten der Software Engineering RWTH, die Größe folgt den Zitationen. Daten: OpenAlex, das weniger Zitationen kennt als Google Scholar."))}</p>
       <div class="map-legend mono">
+        <details class="map-options"><summary>{L(T("Topics and advanced filters", "Themen und weitere Filter"))}</summary>
         <div class="filters" role="group" aria-label="{L(T("Topics", "Themen"))}">
 {legend}
+          <button type="button" class="ring-key own" data-only="own" aria-pressed="false"><i></i><span>{L(T("my papers", "meine Paper"))}</span></button>
+          <button type="button" class="ring-key" data-only="se" aria-pressed="false"><i></i><span>SE RWTH</span></button>
+          <button type="button" data-hop2 aria-pressed="true">{L(T("2nd hop", "2. Hop"))}</button>
         </div>
+        </details>
         <div class="filters">
           <button type="button" data-dir="out" aria-pressed="true">{L(T("cites", "zitiert"))} →</button>
           <button type="button" data-dir="in" aria-pressed="false">← {L(T("cited by", "zitiert von"))}</button>
           <span class="sep" aria-hidden="true">·</span>
           <button type="button" data-view="2" aria-pressed="false">2D</button>
           <button type="button" data-view="3" aria-pressed="true">3D</button>
-          <button type="button" class="ring-key own" data-only="own" aria-pressed="false"><i></i><span>{L(T("my papers", "meine Paper"))}</span></button>
-          <button type="button" class="ring-key" data-only="se" aria-pressed="false"><i></i><span>SE RWTH</span></button>
-          <button type="button" data-hop2 aria-pressed="true">{L(T("2nd hop", "2. Hop"))}</button>
           <button type="button" data-zoom="in" aria-label="{L(T("Zoom in", "Vergrößern"))}">+</button>
           <button type="button" data-zoom="out" aria-label="{L(T("Zoom out", "Verkleinern"))}">−</button>
           <button type="button" data-fit>{L(T("fit", "einpassen"))}</button>
           <button type="button" data-fs aria-pressed="false"><span>⤢</span> {L(T("full screen", "Vollbild"))}</button>
         </div>
       </div>
+      <p id="map-status" class="mono faint" role="status">{L(T("The map loads when it comes into view.", "Die Karte lädt, sobald sie in Sicht kommt."))}</p>
+      <button id="map-retry" class="mono" type="button" hidden>{L(T("Try loading the map again", "Karte erneut laden"))}</button>
       <div class="map" id="map">
         <canvas aria-label="{L(T("Citation graph", "Zitationsgraph"))}" role="img"></canvas>
         <div class="map-tip" hidden></div>
         <button type="button" class="map-pause mono" hidden>❚❚</button>
       </div>
+      <details class="map-list"><summary class="mono">{L(T("Search papers in the map · keyboard-accessible list", "Paper in der Karte suchen · tastaturbedienbare Liste"))}</summary>
+        <label class="search-label" for="map-search">{L(T("Search by title, author or year", "Nach Titel, Autor oder Jahr suchen"))}</label>
+        <input id="map-search" class="site-search" type="search" disabled>
+        <p id="map-list-count" class="mono faint" role="status"></p><ol id="map-paper-list"></ol>
+      </details>
       <details class="mono faint map-note">
         <summary>{L(T("How to read and use the map", "Bedienung und Symbole"))}</summary>
         <p>{L(T("Hover or tap a paper for details, click to pin it. Drag to turn (3D) or move (2D) the map; zoom with + −, Ctrl + scroll or a pinch; double-click to fit. My papers / SE RWTH in the legend show only those.",
@@ -876,14 +911,14 @@ def photography(lang):
                "Durch das Spielen mit einem ausgefallen-komplexen Hightech-Instrument, das auf raffinierteste Weise die Grenzen der Physik ausnutzt, kann man die schönsten Momente in einem Bruchteil einer Sekunde für immer festhalten."))}</p>
       </div>'''
     head = page_head("03", L(T("Photography", "Fotografie")), L(T(f"{n} photographs", f"{n} Fotografien")),
-        L(T("Photography has fascinated me from the very first moment. The camera is one of the few tools that lets you not only show a very particular perspective on the world, but also capture and share <em>memories and emotions</em>.",
-            "Die Fotografie hat mich vom ersten Moment an begeistert. Die Kamera ist eines der wenigen Werkzeuge, die es einem ermöglichen, nicht nur einen ganz bestimmten Blickwinkel auf die Welt zu zeigen, sondern auch <em>Erinnerungen und Emotionen</em> einzufangen und zu teilen.")),
-        extra, top=page_icon("camera"))
+        L(T("Landscapes, people and animals, seen through my camera. Start with a selection, or explore the full series below.",
+            "Landschaften, Menschen und Tiere, gesehen durch meine Kamera. Beginnen Sie mit einer Auswahl oder erkunden Sie unten die ganzen Serien.")),
+        "", top=page_icon("camera"))
     pic = banner(A, "about-dolomites.jpg", L(T("Lukas Netz with a camera, looking out over the Dolomites",
                                                "Lukas Netz mit Kamera, Blick über die Dolomiten")), 2400, 769,
                  L(T("Hiking the Alps · 2021", "Wandern in den Alpen · 2021")))
     return f'''
-{head}{pic}
+{head}
     <section>
       <div class="gallery-bar mono">
         <nav class="filters" aria-label="{L(T("Series", "Serien"))}">{nav}</nav>
@@ -891,6 +926,7 @@ def photography(lang):
       </div>
 {NL.join(series(*s) for s in SERIES)}
     </section>
+    <section class="photo-about"><h2 class="group mono">{L(T("Behind the camera", "Hinter der Kamera"))}</h2>{pic}{extra}</section>
 '''
 
 
@@ -957,6 +993,18 @@ def main():
             with open(os.path.join(out, file), "w", encoding="utf8", newline="\n") as fh:
                 fh.write(html)
             print(f"wrote {os.path.join(sub, file) if sub else file}  ({len(html)} bytes)")
+        missing = T('This page could not be found. Choose a section below to continue.', 'Diese Seite wurde nicht gefunden. Wählen Sie einen Bereich, um weiterzulesen.')
+        title404 = T('Page not found', 'Seite nicht gefunden')
+        body404 = page_head('404', title404[lang], '', missing[lang]) + site_sections.research_routes(lang) + f'<p><a href="index.html">{T("Back to About", "Zurück zu Über mich")[lang]} →</a></p>'
+        # Research-route anchors belong to research.html, rather than this recovery page.
+        body404 = body404.replace('href="#', 'href="research.html#')
+        with open(os.path.join(out, '404.html'), 'w', encoding='utf8', newline='\n') as fh:
+            fh.write(shell(lang, '404.html', title404, missing, body404))
+    routes = [f for f, _, _ in PAGES] + ['research-mde.html', 'research-ai4se.html', 'research-dt.html', 'research-ea.html'] + [project_pages.file_of(p['slug']) for p in project_pages.PROJECTS]
+    urls = ['https://lnetz.github.io/' + (sub + '/' if sub else '') + ('' if f == 'index.html' else f) for sub in LANGS.values() for f in routes]
+    sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + '\n'.join(f'<url><loc>{url}</loc></url>' for url in urls) + '\n</urlset>\n'
+    with open(os.path.join(ROOT, 'sitemap.xml'), 'w', encoding='utf8', newline='\n') as fh:
+        fh.write(sitemap)
 
 
 if __name__ == "__main__":

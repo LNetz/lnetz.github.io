@@ -181,3 +181,6 @@
 
 /* the source line under the "worth it when" box */
 .art-sec p.fit-src { margin: -10px 0 20px; font-size: 12px; color: var(--ink-3); }
+
+/* The German label must fit even in the narrow document shapes. */
+html[lang="de"] .lv-el[data-id="cd"] .tt { font-size: 10px; }

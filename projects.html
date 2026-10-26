@@ -3,12 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <title>Projects — Lukas Netz</title>
   <meta name="description" content="Software projects by Lukas Netz: ESACA, MaCoCo, MontiGem, the Golden UML Model Set and more.">
   <meta property="og:title" content="Projects — Lukas Netz">
   <meta property="og:description" content="Software projects by Lukas Netz: ESACA, MaCoCo, MontiGem, the Golden UML Model Set and more.">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="en_US">
+  <meta property="og:url" content="https://lnetz.github.io/projects.html">
+  <meta property="og:image" content="https://lnetz.github.io/assets/projects/macoco-dashboard.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://lnetz.github.io/projects.html">
   <link rel="alternate" hreflang="en" href="projects.html">
   <link rel="alternate" hreflang="de" href="de/projects.html">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
@@ -43,8 +48,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/style.css">
+<noscript><style>.menu-toggle,.site-search,.search-label,.filters button,.map-options,.map-list{display:none!important}.index .menu{display:flex!important;position:static!important}.index{position:static!important}</style></noscript>
 </head>
 <body id="top">
+<a class="skip-link" href="#main">Skip to content</a>
 <div class="backdrop" aria-hidden="true"></div>
 <div class="frame">
 
@@ -88,7 +95,7 @@
   </aside>
 
   <!-- ============ content ============ -->
-  <main>
+  <main id="main" tabindex="-1">
 
     <header class="page">
       <div class="section-head">
@@ -100,6 +107,9 @@
       <nav class="chapters mono" aria-label="Chapters">
         <a href="#industry">Industry</a><a href="#research-software">Research software</a><a href="#assistants">Assistants</a><a href="#further">Further involvement</a>
       </nav>
+    </header>
+
+
       <div class="ll-wrap">
         <div class="lifeline" tabindex="0" role="region" aria-label="Timeline of my projects, scrolls sideways">
           <div class="ll-track" style="height:176px">
@@ -141,13 +151,12 @@
         </div>
         <p class="ll-hint mono" aria-hidden="true">← swipe sideways →</p>
       </div>
-    </header>
-    <figure class="banner"><picture><source media="(max-width: 600px)" srcset="assets/photos/banner-abstract-m.jpg" width="1200" height="900"><img src="assets/photos/banner-abstract.jpg" alt="Abstract illustration: a blue spiral and waves of orange light among grids, small panels and fragments of code" width="1024" height="328"></picture><figcaption class="mono">AI-generated image: AI-based MDE</figcaption></figure>
+    <section class="selected-work" aria-label="Selected work"><h2 class="group mono">Selected work</h2><ul><li><a href="projects-macoco.html"><div class="work-mark" aria-hidden="true"><img src="assets/logos/macoco.png" alt="" loading="lazy" decoding="async" width="100" height="100"></div><div><span class="mono faint">Project lead · in production at RWTH</span><h3>MaCoCo</h3><p>Finances, staff and projects in one model-driven system, used by more than 200 chairs and institutes.</p><span class="mono work-link">Read the case study →</span></div></a></li><li><a href="projects-ford.html"><div class="work-mark" aria-hidden="true"><img src="assets/logos/ford.png" alt="" loading="lazy" decoding="async" width="100" height="100"></div><div><span class="mono faint">Technical lead · industry pilot</span><h3>Ford Pro tool tracking</h3><p>A generated web application connecting tools, vans and job sites. Field-tested by three trade companies.</p><span class="mono work-link">Read the case study →</span></div></a></li><li><a href="projects-esaca.html"><div class="work-mark" aria-hidden="true"><img src="assets/logos/esaca.svg" alt="" loading="lazy" decoding="async" width="100" height="100"></div><div><span class="mono faint">Current work · mgm technology partners</span><h3>ESACA</h3><p>Agentic coding inside the enterprise: an on-premises platform for sandboxed agents and reviewed changes.</p><span class="mono work-link">Read the case study →</span></div></a></li></ul></section>
     <section>
-      <div class="group mono" id="industry">Industry · mgm technology partners</div>
+      <h2 class="group mono" id="industry">Industry · mgm technology partners</h2>
       <ul class="spec">
         <li id="p-esaca">
-          <div class="side"><span class="logo"><img src="assets/logos/esaca.png" alt="" width="48" height="48"></span><span class="mono faint">now</span></div>
+          <div class="side"><span class="logo"><img src="assets/logos/esaca.svg" alt="" width="48" height="48"></span><span class="mono faint">now</span></div>
           <div>
             <h3><a class="int" href="projects-esaca.html">ESACA</a></h3>
             <p class="what">European Sovereign Agentic Coding Appliance — a standardised, on-premises platform that runs AI coding agents inside an organisation’s own data centre: sandboxed agents, versionable configuration, a shared hub, benchmarks on your own repositories and a guided ticket-to-reviewed-code workbench. Air-gapped capable, no external API calls.</p>
@@ -158,7 +167,7 @@
         </li>
       </ul>
 
-      <div class="group mono" id="research-software">Research software · RWTH Aachen</div>
+      <h2 class="group mono" id="research-software">Research software · RWTH Aachen</h2>
       <ul class="spec">
         <li id="p-macoco">
           <div class="side"><span class="logo"><img src="assets/logos/macoco.png" alt="" width="48" height="48"></span><span class="mono faint">2018 — 2026</span></div>
@@ -201,7 +210,7 @@
           <div class="meta mono"><div>Lead developer</div><div>In production</div></div>
         </li>
         <li id="p-ford">
-          <div class="side"><span class="logo mark mono" aria-hidden="true">FORD</span><span class="mono faint">2020 — 2022</span></div>
+          <div class="side"><span class="logo"><img src="assets/logos/ford.png" alt="" width="48" height="48"></span><span class="mono faint">2020 — 2022</span></div>
           <div>
             <h3><a class="int" href="projects-ford.html">Ford Pro tool tracking</a></h3>
             <p class="what">Pilot with the Ford Research &amp; Innovation Center Aachen: an integrated information system that tracks tools and machines across vans and job sites via Bluetooth, GPS and AI — reminders for tools left behind, theft alerts, a live map and search by vehicle or tool. The web application was generated from UML models with MontiGem and field-tested by three trade companies around Cologne.</p>
@@ -252,7 +261,7 @@
         </li>
       </ul>
 
-      <div class="group mono" id="assistants">Assistants · ChatGPT</div>
+      <h2 class="group mono" id="assistants">Assistants · ChatGPT</h2>
       <ul class="spec">
         <li>
           <div class="side"><span class="mono faint">GPT</span></div>
@@ -280,7 +289,7 @@
         </li>
       </ul>
 
-      <div class="group mono" id="further">Further involvement</div>
+      <h2 class="group mono" id="further">Further involvement</h2>
       <ul class="rows">
         <li>
           <div class="mono faint">Automotive</div>
