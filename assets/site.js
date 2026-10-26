@@ -307,7 +307,7 @@ const overlayFocus = (() => {
   // dissolve order weights: side-to-side sweep, brightness areas, contours, static noise
   const INK_DURATION = 1700;      // ms of the ink-drop transition (fast start, slow fill)
   // lines: contours of the incoming photo fade in faintly (lineAlpha) well ahead of the front (lead)
-  const TUNE = { scale: 5.0, edge: 0.08, inkEdge: 0.11, wSweep: 0.75, wShape: 0.55, wEdge: 0.06, wNoise: 0.12, bands: 4.0, kEdge: 2.4, lead: 0.42, lineAlpha: 0.42 };
+  const TUNE = { scale: 5.0, edge: 0.08, inkEdge: 0.035, wSweep: 0.75, wShape: 0.55, wEdge: 0.06, wNoise: 0.12, bands: 4.0, kEdge: 2.4, lead: 0.42, lineAlpha: 0.42 };
   let i = -1, opener = null, busy = false, queued = null;
 
   const srcOf = n => { const im = figs[n].querySelector("img"); return im.dataset.full ? new URL(im.dataset.full, location.href).href : im.src; };   // full size, not the grid thumbnail
@@ -330,7 +330,7 @@ const overlayFocus = (() => {
     #else
     precision mediump float;
     #endif
-    uniform sampler2D u_from, u_to;
+    uniform sampler2D u_from, u_to, u_arrival;
     uniform float u_progress, u_fromAspect, u_toAspect, u_scale, u_dir, u_edge;
     uniform float u_wSweep, u_wShape, u_wEdge, u_wNoise, u_bands, u_kEdge, u_ink, u_lead, u_lineAlpha;
     uniform vec4 u_fromBox, u_toBox;       // where each photo sits on the canvas (uv: x0, y0, x1, y1)
@@ -418,32 +418,38 @@ const overlayFocus = (() => {
       float lo = -u_wEdge - 0.5 * u_wNoise, hi = u_wSweep + u_wShape + 0.5 * u_wNoise;
       tSwipe = (tSwipe - lo) / (hi - lo);
 
-      // ink: a few drops land and bloom outward through water — distance to the nearest drop,
-      // warped by low-frequency noise into tendrils; later drops start a little later
-      float ink = 10.0;
-      vec2 asp = vec2(u_res.x / min(u_res.x, u_res.y), u_res.y / min(u_res.x, u_res.y));
-      float warp = fbm(nuv * 1.6 + u_seed * 7.0) * 0.32 + fbm(nuv * 4.5 - u_seed * 3.0) * 0.08;
-      for (int k = 0; k < 3; k++) {
-        float fk = float(k);
-        vec2 c = vec2(fract(sin(fk * 12.9898 + u_seed.x * 78.233) * 43758.5453),
-                      fract(sin(fk * 39.3468 + u_seed.y * 11.135) * 24634.6345));
-        c = 0.15 + 0.7 * c;
-        ink = min(ink, length((uv - c) * asp) + warp + fk * 0.18);
-      }
-      float tInk = clamp((ink * 1.05 + shapeT * 0.45) / 1.15, 0.0, 1.0);
+      // Connected image-guided travel times; turbulence only touches the moving front.
+      vec4 travel = texture2D(u_arrival, uv);
+      float arrival = travel.r + travel.g / 255.0;
+      float front = 1.0 - smoothstep(0.0, 0.12, abs(arrival - u_progress));
+      float turbulence = snoise(nuv * 13.0 + vec2(u_progress * 3.0, -u_progress * 2.0));
+      float tInk = clamp(arrival + turbulence * 0.012 * front, 0.0, 0.975);
 
       float t = mix(tSwipe, tInk, u_ink);
       float adjusted = u_progress * (1.0 + 2.0 * u_edge) - u_edge;
       float mixF = 1.0 - smoothstep(adjusted - u_edge, adjusted + u_edge, t);
+      if (u_ink > 0.5) {
+        // One interpolated travel-time surface: no delayed grid copies or contour shells.
+        float age = u_progress - arrival;
+        float localSoftness = 0.14 + 0.055 * (0.5 + 0.5 * snoise(nuv * 3.1));
+        mixF = smoothstep(0.0, localSoftness, age);
+        mixF = mix(mixF, 1.0, smoothstep(0.82, 1.0, u_progress));
+      }
       // lines: faint contours of the incoming photo show up long before the front reaches them
       float ahead = 1.0 - smoothstep(adjusted - u_edge, adjusted + u_edge + u_lead, t);
-      mixF = max(mixF, edge * u_lineAlpha * ahead);
+      mixF = max(mixF, edge * u_lineAlpha * ahead * (1.0 - u_ink));
       vec4 a = photo(u_from, uv, u_fromAspect, u_fromBox, u_fromCover);
       vec4 b = photo(u_to, uv, u_toAspect, u_toBox, u_toCover);
       vec3 col = mix(a.rgb, b.rgb, mixF);
-      // watercolour: pigment pools at the wet edge — a soft, slightly darker rim on the front
-      float rim = smoothstep(0.0, 1.0, 1.0 - abs(mixF * 2.0 - 1.0));
-      col *= 1.0 - 0.16 * rim * u_ink * (0.6 + 0.4 * n);
+      if (u_ink > 0.5) {
+        // A separate, fine contour pass runs ahead along the same connected travel map.
+        // Multiplying time (rather than subtracting an offset) preserves the point origin.
+        float lineAge = u_progress * 1.48 - arrival;
+        float lineFront = smoothstep(0.0, 0.045, lineAge);
+        float fineContour = smoothstep(0.22, 0.82, edge);
+        float lineOpacity = 0.62 * fineContour * lineFront * (1.0 - mixF);
+        col = mix(col, b.rgb, lineOpacity);
+      }
       gl_FragColor = vec4(col, 1.0);
     }`;
 
@@ -471,7 +477,7 @@ const overlayFocus = (() => {
       const loc = gl.getAttribLocation(prog, "p");
       gl.enableVertexAttribArray(loc);
       gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-      for (const k of ["from", "to", "progress", "fromAspect", "toAspect", "scale", "dir", "edge", "res", "bg", "wSweep", "wShape", "wEdge", "wNoise", "bands", "kEdge", "ink", "seed", "lead", "lineAlpha", "fromBox", "toBox", "fromCover", "toCover"])
+      for (const k of ["from", "to", "arrival", "progress", "fromAspect", "toAspect", "scale", "dir", "edge", "res", "bg", "wSweep", "wShape", "wEdge", "wNoise", "bands", "kEdge", "ink", "seed", "lead", "lineAlpha", "fromBox", "toBox", "fromCover", "toCover"])
         U[k] = gl.getUniformLocation(prog, "u_" + k);
       gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
       return true;
@@ -516,6 +522,81 @@ const overlayFocus = (() => {
   img.addEventListener("load", fit);
   addEventListener("resize", fit);
 
+  // Low-resolution geodesic arrival map in screen coordinates (including the visible crop).
+  // Dijkstra guarantees one connected origin; edge tangents make travel directional.
+  const arrivalTexture = im => {
+    const w = Math.max(32, Math.round(260 * Math.min(1, canvas.clientWidth / canvas.clientHeight)));
+    const h = Math.max(32, Math.round(180 * Math.min(1, canvas.clientHeight / canvas.clientWidth)));
+    const surface = document.createElement("canvas"); surface.width = w; surface.height = h;
+    const ctx = surface.getContext("2d", { willReadFrequently: true });
+    const [bx, by, ex, ey] = box(im), bw = (ex - bx) * w, bh = (ey - by) * h;
+    const scale = (fills(im) ? Math.max : Math.min)(bw / im.naturalWidth, bh / im.naturalHeight);
+    const iw = im.naturalWidth * scale, ih = im.naturalHeight * scale;
+    const left = bx * w + (bw - iw) / 2, top = (1 - ey) * h + (bh - ih) / 2;
+    ctx.save(); ctx.beginPath(); ctx.rect(bx * w, (1 - ey) * h, bw, bh); ctx.clip();
+    ctx.drawImage(im, left, top, iw, ih); ctx.restore();
+    const pixels = ctx.getImageData(0, 0, w, h).data, size = w * h;
+    const lum = new Float32Array(size), gx = new Float32Array(size), gy = new Float32Array(size);
+    const contrast = new Float32Array(size), valid = new Uint8Array(size);
+    for (let k = 0; k < size; k++) {
+      valid[k] = pixels[k * 4 + 3] > 128 ? 1 : 0;
+      lum[k] = (pixels[k * 4] * .299 + pixels[k * 4 + 1] * .587 + pixels[k * 4 + 2] * .114) / 255;
+    }
+    let maximum = 0;
+    for (let y = 2; y < h - 2; y++) for (let x = 2; x < w - 2; x++) {
+      const k = y * w + x;
+      if (!valid[k] || !valid[k-2] || !valid[k+2] || !valid[k-2*w] || !valid[k+2*w]) continue;
+      gx[k] = (lum[k+1] - lum[k-1] + lum[k+1+w] - lum[k-1+w] + lum[k+1-w] - lum[k-1-w]) / 3;
+      gy[k] = (lum[k+w] - lum[k-w] + lum[k+w+1] - lum[k-w+1] + lum[k+w-1] - lum[k-w-1]) / 3;
+      contrast[k] = Math.hypot(gx[k], gy[k]); maximum = Math.max(maximum, contrast[k]);
+    }
+    // Near-equal strong regions: prefer the one closest to the visible image centre.
+    let origin = -1, nearest = Infinity;
+    for (let k = 0; k < size; k++) if (valid[k] && contrast[k] >= maximum * .9) {
+      const d = ((k % w) / w - .5) ** 2 + (Math.floor(k / w) / h - .5) ** 2;
+      if (d < nearest) { nearest = d; origin = k; }
+    }
+    if (origin < 0) throw new Error("No visible photo pixels");
+    const distance = new Float32Array(size); distance.fill(Infinity); distance[origin] = 0;
+    const heap = [];
+    const push = (k, d) => { let i = heap.length; heap.push([k,d]); while(i) { const p = (i-1)>>1; if(heap[p][1] <= d) break; heap[i]=heap[p]; i=p; } heap[i]=[k,d]; };
+    const pop = () => { const first=heap[0], last=heap.pop(); if(heap.length) { let i=0; while(i*2+1<heap.length) { let c=i*2+1; if(c+1<heap.length && heap[c+1][1]<heap[c][1]) c++; if(heap[c][1]>=last[1]) break; heap[i]=heap[c]; i=c; } heap[i]=last; } return first; };
+    push(origin,0);
+    while(heap.length) {
+      const [k,d] = pop(); if(d !== distance[k]) continue;
+      const x=k%w, y=Math.floor(k/w);
+      for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++) {
+        if(!(dx||dy)||x+dx<0||x+dx>=w||y+dy<0||y+dy>=h) continue;
+        const j=k+dy*w+dx, len=Math.hypot(dx,dy), strength=Math.hypot(gx[j],gy[j]);
+        const tangent = strength > .001 ? Math.abs((-gy[j]*dx+gx[j]*dy)/(strength*len)) : 0;
+        const edge = Math.min(1, strength / Math.max(.012, maximum * .23));
+        // Smooth, irregular permeability: broad currents and smaller deviations.
+        const xx=(x+dx)/w, yy=(y+dy)/h;
+        const current=Math.sin(xx*13.7+Math.sin(yy*9.3)*2.1)*Math.cos(yy*12.1-xx*4.8);
+        const detail=Math.sin(xx*39.1+yy*17.3+Math.sin(yy*23.7));
+        const grain=Math.exp(current*.72+detail*.22);
+        // Strongly favour travel along contours; crossing them still takes time.
+        const along = edge * Math.pow(tangent, 2);
+        const cost = len * grain * (1.55 - 1.40 * along);
+        const next=Math.fround(d+cost); if(next<distance[j]) {distance[j]=next;push(j,next);}
+      }
+    }
+    let far=0; for(let k=0;k<size;k++) if(valid[k]) far=Math.max(far,distance[k]);
+    const out=ctx.createImageData(w,h);
+    for(let k=0;k<size;k++) {
+      const value=Math.round((.95*Math.min(1,distance[k]/Math.max(1,far)))*65025);
+      out.data[k*4]=Math.floor(value/255);out.data[k*4+1]=value%255;
+      // A slightly widened contour channel gives the fingers visible substance.
+      let ridge=0; const x=k%w,y=Math.floor(k/w);
+      for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++) {
+        if(x+dx>=0&&x+dx<w&&y+dy>=0&&y+dy<h) ridge=Math.max(ridge,contrast[k+dy*w+dx]);
+      }
+      out.data[k*4+2]=Math.round(255*Math.min(1,ridge/Math.max(.012,maximum*.23)));
+      out.data[k*4+3]=255;
+    }
+    ctx.putImageData(out,0,0); return texture(surface);
+  };
+
   // Uploads both photos and sets up the shader; returns draw(progress 0..1) and dispose().
   // Used by timed transitions (morph) and by the finger-driven swipe alike. Throws on
   // tainted images (file:// previews) — callers fall back to a cross-fade.
@@ -529,6 +610,9 @@ const overlayFocus = (() => {
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tFrom); gl.uniform1i(U.from, 0);
     gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, tTo); gl.uniform1i(U.to, 1);
+    const tArrival = ink ? arrivalTexture(toIm) : null;
+    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, tTo);
+    gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, tArrival || tTo); gl.uniform1i(U.arrival, 2);
     gl.uniform2f(U.res, canvas.width, canvas.height);
     gl.uniform3f(U.bg, ...pageColour());
     gl.uniform1f(U.fromAspect, fromIm.naturalWidth / fromIm.naturalHeight);
@@ -542,10 +626,10 @@ const overlayFocus = (() => {
     // ink mode (keys, buttons, slideshow): drops bloom out with a wider, softer wet edge
     gl.uniform1f(U.ink, ink ? 1 : 0);
     gl.uniform1f(U.edge, ink ? tune.inkEdge : tune.edge);
-    gl.uniform2f(U.seed, Math.random(), Math.random());       // new drop positions every time
+    gl.uniform2f(U.seed, 0, 0); // deterministic image-guided origin
     const draw = p => { gl.uniform1f(U.progress, p); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); };
     draw(0);
-    return { draw, dispose: () => { gl.deleteTexture(tFrom); gl.deleteTexture(tTo); } };
+    return { draw, dispose: () => { gl.deleteTexture(tFrom); gl.deleteTexture(tTo); if (tArrival) gl.deleteTexture(tArrival); } };
   };
 
   // animate a prepared transition from progress p0 to p1 (eased), resolves when done
@@ -560,8 +644,8 @@ const overlayFocus = (() => {
     requestAnimationFrame(frame);
   });
 
-  // ink in water: much changes at once, then it slowly fills in (exponential ease-out)
-  const easeInk = t => 1 - Math.pow(1 - t, 2.4);
+  // Steady progression preserves the visible contour fingers at normal speed.
+  const easeInk = t => t;
   const morph = async (fromIm, toIm, dir) => {
     const h = prepare(fromIm, toIm, dir, true);
     lb.classList.toggle("fill", fills(toIm));           // caption shade follows the incoming photo
