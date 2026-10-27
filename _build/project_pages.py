@@ -182,7 +182,7 @@ def page(lang, idx):
     head = f'''    <header class="page proj">
       <a class="back mono" href="projects.html">← {L(T("all projects", "alle Projekte"))}</a>
       <div class="section-head">
-        <h1><span class="mono">01</span>{L(p["name"])}</h1>
+        <h1><span class="mono">01</span> {L(p["name"])}</h1>
         <span class="mono faint">{L(p["when"])}</span>
       </div>{logo}
       <p class="lead">{L(p["lead"])}</p>

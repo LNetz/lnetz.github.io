@@ -1,6 +1,8 @@
 """Small shared editorial sections; publication data remain in assets/pubs.js."""
 from html import escape
 from urllib.parse import quote
+import json
+from pathlib import Path
 import project_pages
 
 
@@ -33,6 +35,8 @@ def featured(lang):
 
 def publications(lang):
     pubs = list(project_pages.PUBS.values())
+    source = Path(__file__).with_name("paper-abstracts.json")
+    abstracts = json.loads(source.read_text(encoding="utf8")).get("papers", {}) if source.exists() else {}
     out = []
     for year in sorted({p['year'] for p in pubs}, reverse=True):
         items = []
@@ -43,6 +47,13 @@ def publications(lang):
             item = item.replace(f'id="pub-{p["key"]}"', f'id="pub-{p["key"]}" data-tags="{escape(" ".join(p["tags"]), quote=True)}"')
             url = 'https://scholar.google.com/scholar?q=' + quote('"' + p['title'] + '"')
             item = item.replace('<div class="plinks mono">', f'<div class="plinks mono"><a href="{url}" target="_blank" rel="noopener">scholar ↗</a>')
+            abstract = abstracts.get(p['key'], {})
+            if abstract.get('abstract') and abstract.get('title') == p['title']:
+                label = T('Abstract source', 'Abstract-Quelle')[lang]
+                detail = (f'<details class="pub-abstract"><summary class="mono">Abstract · {escape(abstract.get("language", "en").upper())}</summary>'
+                          f'<p lang="{escape(abstract.get("language", "en"))}">{escape(abstract["abstract"])}</p>'
+                          f'<a class="mono" href="{escape(abstract["source"], quote=True)}" target="_blank" rel="noopener">{label} ↗</a></details>')
+                item = item.replace('<div class="plinks mono">', detail + '<div class="plinks mono">', 1)
             items.append(item)
         out.append(f'<div class="year"><h3 class="y mono">{year}</h3><ol class="pubs">{"".join(items)}</ol></div>')
     return ''.join(out)

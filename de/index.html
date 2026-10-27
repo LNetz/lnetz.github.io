@@ -48,7 +48,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/style.css">
-<noscript><style>.menu-toggle,.site-search,.search-label,.filters button,.map-options,.map-list{display:none!important}.index .menu{display:flex!important;position:static!important}.index{position:static!important}</style></noscript>
+<noscript><style>.menu-toggle,.search-toggle,.global-search,.site-search,.search-label,.filters button,.map-options,.map-list{display:none!important}.index .menu{display:flex!important;position:static!important}.index{position:static!important}</style></noscript>
 </head>
 <body id="top">
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
@@ -65,10 +65,19 @@
         <span class="here mono" aria-hidden="true">Über mich</span>
         <div class="role">Dr. rer. nat.<br>IT-Spezialist<br>mgm technology partners</div>
       </div>
-      <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">Menü</button>
+      <div class="bar-actions">
+        <button class="search-toggle" type="button" id="search-toggle" aria-label="Suche öffnen" aria-controls="menu"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/></svg></button>
+        <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">Menü</button>
+      </div>
     </div>
 
     <div class="menu" id="menu">
+      <form class="global-search" id="global-search" role="search" data-index="../assets/search-de.json">
+        <div class="global-search-field">
+          <input id="global-query" name="q" type="search" maxlength="160" autocomplete="off" placeholder="Suchen…" aria-label="Website durchsuchen" aria-controls="global-results">
+          <button type="submit" aria-label="Suchen"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/></svg></button>
+        </div>
+      </form>
       <nav aria-label="Seiten">
         <ol class="mono">
         <li><a href="index.html" class="active" aria-current="page"><span>00</span><span>Über mich</span></a></li>
@@ -96,10 +105,17 @@
 
   <!-- ============ content ============ -->
   <main id="main" tabindex="-1">
+    <section class="global-results" id="global-results" aria-labelledby="global-search-title" hidden>
+      <div class="section-head"><h1 id="global-search-title" tabindex="-1">Suche</h1><button class="global-search-close mono" type="button">Zurück zur Seite ×</button></div>
+      <p class="global-search-status mono" role="status" aria-live="polite"></p>
+      <ol class="global-search-list"></ol>
+      <button class="global-search-more mono" type="button" hidden>Mehr anzeigen</button>
+      <button class="global-search-retry mono" type="button" hidden>Erneut versuchen</button>
+    </section>
 
     <header class="page">
       <div class="section-head">
-        <h1><span class="mono">00</span>Über mich</h1>
+        <h1><span class="share-at" id="about-1"></span><span class="mono">00</span> Über mich<a class="share global-share" href="#about-1" data-share="about-1" aria-label="Link kopieren: about-1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h1>
         <span class="mono faint"></span>
       </div>
       <p class="lead">Ich baue Software, die Software baut. Meine Arbeit liegt zwischen <em>modellgetriebener Softwareentwicklung</em> und <em>großen Sprachmodellen</em>: Generatoren, DSLs und agentische Werkzeuge, die aus Modellen und Absichten vollwertige, wartbare Anwendungen machen.</p>
@@ -109,7 +125,7 @@
         <div><dt>Fokus</dt><dd>MDE × LLM</dd></div>
       </dl>
     </header>
-<section class="selected-work" aria-label="Ausgewählte Projekte"><h2 class="group mono">Ausgewählte Projekte</h2><ul><li><a href="projects-macoco.html"><div class="work-mark" aria-hidden="true"><img src="../assets/logos/macoco.png" alt="" loading="lazy" decoding="async" width="100" height="100"></div><div><span class="mono faint">Projektleitung · produktiv an der RWTH</span><h3>MaCoCo</h3><p>Finanzen, Personal und Projekte in einem modellgetriebenen System, genutzt von über 200 Lehrstühlen und Instituten.</p><span class="mono work-link">Fallstudie lesen →</span></div></a></li><li><a href="projects-ford.html"><div class="work-mark" aria-hidden="true"><img src="../assets/logos/ford.png" alt="" loading="lazy" decoding="async" width="100" height="100"></div><div><span class="mono faint">Technische Leitung · Industriepilot</span><h3>Ford Pro Werkzeugverfolgung</h3><p>Eine generierte Webanwendung verbindet Werkzeuge, Transporter und Baustellen. Im Feld von drei Handwerksbetrieben getestet.</p><span class="mono work-link">Fallstudie lesen →</span></div></a></li><li><a href="projects-esaca.html"><div class="work-mark" aria-hidden="true"><img src="../assets/logos/esaca.svg" alt="" loading="lazy" decoding="async" width="100" height="100"></div><div><span class="mono faint">Aktuelle Arbeit · mgm technology partners</span><h3>ESACA</h3><p>Agentisches Programmieren im Unternehmen: eine On-Premises-Plattform für Agenten in der Sandbox und geprüfte Änderungen.</p><span class="mono work-link">Fallstudie lesen →</span></div></a></li></ul></section>
+<section class="selected-work" aria-label="Ausgewählte Projekte"><h2 class="group mono"><span class="share-at" id="about-2"></span>Ausgewählte Projekte<a class="share global-share" href="#about-2" data-share="about-2" aria-label="Link kopieren: about-2"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2><ul><li><a href="projects-macoco.html"><div class="work-mark" aria-hidden="true"><img src="../assets/logos/macoco.png" alt="" loading="lazy" decoding="async" width="100" height="100"></div><div><span class="mono faint">Projektleitung · produktiv an der RWTH</span><h3><span class="share-at" id="about-3"></span>MaCoCo</h3><p>Finanzen, Personal und Projekte in einem modellgetriebenen System, genutzt von über 200 Lehrstühlen und Instituten.</p><span class="mono work-link">Fallstudie lesen →</span></div></a></li><li><a href="projects-ford.html"><div class="work-mark" aria-hidden="true"><img src="../assets/logos/ford.png" alt="" loading="lazy" decoding="async" width="100" height="100"></div><div><span class="mono faint">Technische Leitung · Industriepilot</span><h3><span class="share-at" id="about-4"></span>Ford Pro Werkzeugverfolgung</h3><p>Eine generierte Webanwendung verbindet Werkzeuge, Transporter und Baustellen. Im Feld von drei Handwerksbetrieben getestet.</p><span class="mono work-link">Fallstudie lesen →</span></div></a></li><li><a href="projects-esaca.html"><div class="work-mark" aria-hidden="true"><img src="../assets/logos/esaca.svg" alt="" loading="lazy" decoding="async" width="100" height="100"></div><div><span class="mono faint">Aktuelle Arbeit · mgm technology partners</span><h3><span class="share-at" id="about-5"></span>ESACA</h3><p>Agentisches Programmieren im Unternehmen: eine On-Premises-Plattform für Agenten in der Sandbox und geprüfte Änderungen.</p><span class="mono work-link">Fallstudie lesen →</span></div></a></li></ul></section>
     <nav class="section-routes mono" aria-label="Erkunden"><a href="projects.html">Alle Projekte →</a><a href="research.html">Forschung und Publikationen →</a><a href="photography.html">Fotografie →</a></nav>
     <section>
       <div class="bio">
@@ -118,9 +134,9 @@
         <p>2026 habe ich <a href="https://mde-intelligence.github.io/" target="_blank" rel="noopener">MDE Intelligence ↗</a> mitorganisiert, den Workshop zu KI und modellgetriebener Softwareentwicklung auf der MODELS. In meiner Freizeit fotografiere ich gern und fliege Drohne.</p>
       </div>
 
-      <figure class="epigraph">
+      <figure class="epigraph" id="about-f1">
         <blockquote>I propose to consider the question, <span class="nw">“Can machines think?”</span></blockquote>
-        <figcaption class="mono"><span>Alan M. Turing</span><span class="sep"> · </span><span>Computing Machinery and Intelligence, 1950</span></figcaption>
+        <figcaption class="mono"><span>Alan M. Turing</span><span class="sep"> · </span><span>Computing Machinery and Intelligence, 1950</span><a class="share global-share" href="#about-f1" data-share="about-f1" aria-label="Link kopieren: about-f1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></figcaption>
       </figure>
     </section>
 
@@ -132,5 +148,7 @@
   </main>
 </div>
 <script src="../assets/site.js"></script>
+<script src="../assets/search-core.js"></script>
+<script src="../assets/search.js"></script>
 </body>
 </html>

@@ -48,7 +48,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/style.css">
-<noscript><style>.menu-toggle,.site-search,.search-label,.filters button,.map-options,.map-list{display:none!important}.index .menu{display:flex!important;position:static!important}.index{position:static!important}</style></noscript>
+<noscript><style>.menu-toggle,.search-toggle,.global-search,.site-search,.search-label,.filters button,.map-options,.map-list{display:none!important}.index .menu{display:flex!important;position:static!important}.index{position:static!important}</style></noscript>
 </head>
 <body id="top">
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
@@ -65,10 +65,19 @@
         <span class="here mono" aria-hidden="true">ESACA</span>
         <div class="role">Dr. rer. nat.<br>IT-Spezialist<br>mgm technology partners</div>
       </div>
-      <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">Menü</button>
+      <div class="bar-actions">
+        <button class="search-toggle" type="button" id="search-toggle" aria-label="Suche öffnen" aria-controls="menu"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/></svg></button>
+        <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">Menü</button>
+      </div>
     </div>
 
     <div class="menu" id="menu">
+      <form class="global-search" id="global-search" role="search" data-index="../assets/search-de.json">
+        <div class="global-search-field">
+          <input id="global-query" name="q" type="search" maxlength="160" autocomplete="off" placeholder="Suchen…" aria-label="Website durchsuchen" aria-controls="global-results">
+          <button type="submit" aria-label="Suchen"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/></svg></button>
+        </div>
+      </form>
       <nav aria-label="Seiten">
         <ol class="mono">
         <li><a href="index.html"><span>00</span><span>Über mich</span></a></li>
@@ -96,11 +105,18 @@
 
   <!-- ============ content ============ -->
   <main id="main" tabindex="-1">
+    <section class="global-results" id="global-results" aria-labelledby="global-search-title" hidden>
+      <div class="section-head"><h1 id="global-search-title" tabindex="-1">Suche</h1><button class="global-search-close mono" type="button">Zurück zur Seite ×</button></div>
+      <p class="global-search-status mono" role="status" aria-live="polite"></p>
+      <ol class="global-search-list"></ol>
+      <button class="global-search-more mono" type="button" hidden>Mehr anzeigen</button>
+      <button class="global-search-retry mono" type="button" hidden>Erneut versuchen</button>
+    </section>
 
     <header class="page proj">
       <a class="back mono" href="projects.html">← alle Projekte</a>
       <div class="section-head">
-        <h1><span class="mono">01</span>ESACA</h1>
+        <h1><span class="share-at" id="esaca-1"></span><span class="mono">01</span> ESACA<a class="share global-share" href="#esaca-1" data-share="esaca-1" aria-label="Link kopieren: esaca-1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h1>
         <span class="mono faint">seit 2026</span>
       </div>
       <div class="proj-logo"><img src="../assets/logos/esaca.svg" alt="" width="48" height="48"></div>
@@ -109,7 +125,7 @@
       <div class="links-top mono"><a href="https://esaca.eu" target="_blank" rel="noopener">esaca.eu ↗</a></div>
       <p class="art-link mono"><a href="research-ai4se.html#harness"><span>Hintergrund:</span> Teil 2 · KI-getriebene Softwareentwicklung →</a></p>
     </header>
-    <figure class="media"><div class="dia-scroll" style="--vw:760px" tabindex="0"><svg class="dia" viewBox="0 0 760 330" role="img" aria-label="ESACA-Architektur: alles läuft innerhalb der eigenen Infrastruktur">
+    <figure class="media" id="esaca-f1"><div class="dia-scroll" style="--vw:760px" tabindex="0"><svg class="dia" viewBox="0 0 760 330" role="img" aria-label="ESACA-Architektur: alles läuft innerhalb der eigenen Infrastruktur">
   <defs><marker id="ea" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9" fill="none" stroke="currentColor" stroke-width="1.4"/></marker><marker id="eaa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9" fill="none" style="stroke:var(--accent)" stroke-width="1.4"/></marker></defs>
   <rect class="zone line" x="1" y="1" width="598" height="326" rx="4"/>
   <text x="16" y="22" class="s">EIGENES RECHENZENTRUM · ON-PREM ODER AIR-GAPPED</text>
@@ -153,24 +169,24 @@
   <text x="712" y="161" text-anchor="middle" class="s">öffentliche</text>
   <text x="712" y="176" text-anchor="middle" class="s">cloud APIs</text>
 </svg></div>
-      <figcaption class="mono">Agenten, Code, Secrets und Modelle bleiben innerhalb der eigenen Infrastruktur. Der Agent arbeitet in einer Sandbox und sieht nur Platzhalter-Zugangsdaten; ein zweiter Container entscheidet — und protokolliert —, was nach außen darf.</figcaption>
+      <figcaption class="mono">Agenten, Code, Secrets und Modelle bleiben innerhalb der eigenen Infrastruktur. Der Agent arbeitet in einer Sandbox und sieht nur Platzhalter-Zugangsdaten; ein zweiter Container entscheidet — und protokolliert —, was nach außen darf.<a class="share global-share" href="#esaca-f1" data-share="esaca-f1" aria-label="Link kopieren: esaca-f1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></figcaption>
     </figure>
     <section>
       <ul class="story">
         <li>
-          <h2>Das Problem</h2>
+          <h2><span class="share-at" id="esaca-2"></span>Das Problem<a class="share global-share" href="#esaca-2" data-share="esaca-2" aria-label="Link kopieren: esaca-2"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>Banken, Versorger, Behörden und Rüstungszulieferer stehen vor demselben Dilemma. Agentisches Programmieren verspricht große Produktivitätsgewinne, aber ein cloudbasierter Agent kann Quellcode und Secrets an einen fremden Anbieter schicken, Daten löschen oder eine bösartige Erweiterung nachladen — und er bindet die Organisation an das Modell, die Preise und die Roadmap eines Anbieters. Ein Verbot treibt Teams nur in die Schatten-IT, wo niemand misst, was die Agenten wirklich leisten.</p></div>
         </li>
         <li>
-          <h2>Die Idee</h2>
+          <h2><span class="share-at" id="esaca-3"></span>Die Idee<a class="share global-share" href="#esaca-3" data-share="esaca-3" aria-label="Link kopieren: esaca-3"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>ESACA — die <b>European Sovereign Agentic Coding Appliance</b> — ist ein standardisiertes System, das Coding-Agenten in die eigene Infrastruktur holt: on-premises oder vollständig air-gapped, ohne Datenabfluss, ohne externe API-Aufrufe, ohne versteckte Telemetrie. Es ist modellunabhängig und setzt bevorzugt auf souveräne Modelle auf der eigenen Hardware des Kunden. ESACA ist eine Initiative von mgm technology partners und Fsas Technologies, einem Fujitsu-Unternehmen. In den Begriffen meines <a href="research-ai4se.html#harness">Artikels über KI-getriebene Softwareentwicklung</a> ist es ein Harness für Coding-Agenten.</p></div>
         </li>
         <li>
-          <h2>Die Bausteine</h2>
+          <h2><span class="share-at" id="esaca-4"></span>Die Bausteine<a class="share global-share" href="#esaca-4" data-share="esaca-4" aria-label="Link kopieren: esaca-4"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><ul class="pts"><li><b>Sandbox</b> — Agent und Projekt laufen in einem Container, der gesamte ausgehende Verkehr über einen zweiten. Zugriffe sind standardmäßig verboten, der Agent sieht nur Platzhalter-Zugangsdaten, echte Secrets werden erst auf dem Weg nach draußen eingesetzt, jede Entscheidung wird protokolliert.</li><li><b>Konfiguration</b> — eine versionierbare Datei beschreibt die ganze Umgebung: Zugriffsregeln, Agenten, Skills, Plugins, Werkzeuge und Versionen.</li><li><b>Hub</b> — bewährte Konfigurationen werden projektübergreifend geteilt und wiederverwendet.</li><li><b>Benchmark</b> — misst das Gesamtsystem (Agent + Modell + Hardware) auf den eigenen Repositories und trennt harte Metriken wie Builds und Tests von LLM-as-Judge-Bewertungen.</li><li><b>Workbench</b> — ein geführter Weg vom Ticket über den Plan zu Agenten in isolierten Workspaces, mit verpflichtendem menschlichem Review vor dem normalen Merge-Prozess.</li></ul></div>
         </li>
         <li>
-          <h2>Für wen</h2>
+          <h2><span class="share-at" id="esaca-5"></span>Für wen<a class="share global-share" href="#esaca-5" data-share="esaca-5" aria-label="Link kopieren: esaca-5"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>Kritische Infrastruktur und Versorger, die öffentliche Verwaltung und regulierte Branchen wie Verteidigung, Recht und Gesundheitswesen — Organisationen, die unter NIS-2, BaFin, ISO 27001 und DSGVO arbeiten. Der Einstieg erfolgt schrittweise, von Assistenten über Agenten und Multi-Agenten-Workflows bis zur KI-nativen Entwicklung, wobei der Mensch die Entscheidungen trifft.</p></div>
         </li>
       </ul>
@@ -189,5 +205,7 @@
   </main>
 </div>
 <script src="../assets/site.js"></script>
+<script src="../assets/search-core.js"></script>
+<script src="../assets/search.js"></script>
 </body>
 </html>

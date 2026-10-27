@@ -23,6 +23,7 @@ import article_common
 
 import project_pages
 import site_sections
+import search_index
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LANGS = {"en": "", "de": "de"}          # language -> output sub-folder
@@ -83,6 +84,8 @@ def bust(html):
 
 def shell(lang, file, title, desc, body, scripts=""):
     L = lambda x: x[lang] if isinstance(x, dict) else x
+    body = search_index.anchors(body, file, lang)
+    search_index.remember(lang, file, L(title), body)
     A = "../" if lang == "de" else ""                 # path back to the shared assets
     en_url, de_url = (file, f"de/{file}") if lang == "en" else (f"../{file}", file)
     origin = "https://lnetz.github.io/"
@@ -160,7 +163,7 @@ def shell(lang, file, title, desc, body, scripts=""):
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{A}assets/style.css">
-<noscript><style>.menu-toggle,.site-search,.search-label,.filters button,.map-options,.map-list{{display:none!important}}.index .menu{{display:flex!important;position:static!important}}.index{{position:static!important}}</style></noscript>
+<noscript><style>.menu-toggle,.search-toggle,.global-search,.site-search,.search-label,.filters button,.map-options,.map-list{{display:none!important}}.index .menu{{display:flex!important;position:static!important}}.index{{position:static!important}}</style></noscript>
 </head>
 <body id="top">
 <a class="skip-link" href="#main">{L(T("Skip to content", "Zum Inhalt springen"))}</a>
@@ -177,10 +180,19 @@ def shell(lang, file, title, desc, body, scripts=""):
         <span class="here mono" aria-hidden="true">{L(title)}</span>
         <div class="role">Dr. rer. nat.<br>{L(T("IT Specialist", "IT-Spezialist"))}<br>mgm technology partners</div>
       </div>
-      <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">{L(T("menu", "Menü"))}</button>
+      <div class="bar-actions">
+        <button class="search-toggle" type="button" id="search-toggle" aria-label="{L(T("Open search", "Suche öffnen"))}" aria-controls="menu"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/></svg></button>
+        <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">{L(T("menu", "Menü"))}</button>
+      </div>
     </div>
 
     <div class="menu" id="menu">
+      <form class="global-search" id="global-search" role="search" data-index="{A}assets/search-{lang}.json">
+        <div class="global-search-field">
+          <input id="global-query" name="q" type="search" maxlength="160" autocomplete="off" placeholder="{L(T("Search…", "Suchen…"))}" aria-label="{L(T("Search this site", "Website durchsuchen"))}" aria-controls="global-results">
+          <button type="submit" aria-label="{L(T("Search", "Suchen"))}"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/></svg></button>
+        </div>
+      </form>
       <nav aria-label="{L(T("Pages", "Seiten"))}">
         <ol class="mono">
 {nav}
@@ -200,6 +212,13 @@ def shell(lang, file, title, desc, body, scripts=""):
 
   <!-- ============ content ============ -->
   <main id="main" tabindex="-1">
+    <section class="global-results" id="global-results" aria-labelledby="global-search-title" hidden>
+      <div class="section-head"><h1 id="global-search-title" tabindex="-1">{L(T("Search", "Suche"))}</h1><button class="global-search-close mono" type="button">{L(T("Back to page", "Zurück zur Seite"))} ×</button></div>
+      <p class="global-search-status mono" role="status" aria-live="polite"></p>
+      <ol class="global-search-list"></ol>
+      <button class="global-search-more mono" type="button" hidden>{L(T("Show more", "Mehr anzeigen"))}</button>
+      <button class="global-search-retry mono" type="button" hidden>{L(T("Try again", "Erneut versuchen"))}</button>
+    </section>
 {body}
     <footer class="mono">
       <span>© 2026 Lukas Netz.</span>
@@ -209,6 +228,8 @@ def shell(lang, file, title, desc, body, scripts=""):
   </main>
 </div>
 {scripts}<script src="{A}assets/site.js"></script>
+<script src="{A}assets/search-core.js"></script>
+<script src="{A}assets/search.js"></script>
 </body>
 </html>
 '''
@@ -222,7 +243,7 @@ def page_head(n, title, right, lead, extra="", count_id=False, top=""):
     rid = ' id="pub-count"' if count_id else ''
     return f'''    <header class="page">
       <div class="section-head">
-        <h1><span class="mono">{n}</span>{title}</h1>
+        <h1><span class="mono">{n}</span> {title}</h1>
         <span class="mono faint"{rid}>{right}</span>
       </div>{top}
       <p class="lead">{lead}</p>{extra}
@@ -507,7 +528,7 @@ def projects(lang):
         chapters, top=page_icon("code"))
     return f'''
 {head}
-    {project_pages.timeline(lang, A)}
+{project_pages.timeline(lang, A)}
     {site_sections.featured(lang)}
     <section>
       <h2 class="group mono" id="industry">{L(T("Industry", "Industrie"))} · mgm technology partners</h2>
@@ -651,7 +672,7 @@ def research(lang):
 {map_block(lang)}
       <h2 class="group mono" id="publications">{L(T("Publications", "Publikationen"))}</h2>
       <label class="search-label" for="pub-search">{L(T("Search publications", "Publikationen durchsuchen"))}</label>
-      <input class="site-search" id="pub-search" type="search" placeholder="{L(T('Title, author or year', 'Titel, Autor oder Jahr'))}">
+      <input class="site-search" id="pub-search" type="search" placeholder="{L(T('Title, author, year or abstract', 'Titel, Autor, Jahr oder Abstract'))}">
       <p class="mono faint" id="pub-results" role="status"></p>
       <div class="filters mono" role="group" aria-label="{L(T("Filter publications", "Publikationen filtern"))}">
 {NL.join(f'        <button type="button" data-f="{k}" aria-pressed="{"true" if k == "all" else "false"}">{L(v)}</button>' for k, v in filters)}
@@ -999,6 +1020,9 @@ def main():
         body404 = body404.replace('href="#', 'href="research.html#')
         with open(os.path.join(out, '404.html'), 'w', encoding='utf8', newline='\n') as fh:
             fh.write(shell(lang, '404.html', title404, missing, body404))
+    for lang in LANGS:
+        with open(os.path.join(ROOT, "assets", f"search-{lang}.json"), "w", encoding="utf8", newline="\n") as fh:
+            fh.write(search_index.dumps(lang, project_pages.PUBS))
     routes = [f for f, _, _ in PAGES] + ['research-mde.html', 'research-ai4se.html', 'research-dt.html', 'research-ea.html'] + [project_pages.file_of(p['slug']) for p in project_pages.PROJECTS]
     urls = ['https://lnetz.github.io/' + (sub + '/' if sub else '') + ('' if f == 'index.html' else f) for sub in LANGS.values() for f in routes]
     sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + '\n'.join(f'<url><loc>{url}</loc></url>' for url in urls) + '\n</urlset>\n'

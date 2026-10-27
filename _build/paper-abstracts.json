@@ -1,0 +1,291 @@
+{
+  "papers": {
+    "Net25": {
+      "title": "Mit KI-getriebener Modellierung zu besserer Softwareentwicklung?",
+      "status": "no-metadata-id"
+    },
+    "MNR+26": {
+      "title": "Addressing Visual Impairments with Model-Driven Engineering: A Systematic Literature Review",
+      "status": "available",
+      "abstract": "Software applications often pose barriers for users with accessibility needs, e.g., visual impairments. Model-driven engineering (MDE), with its systematic nature of code derivation, offers systematic methods to integrate accessibility concerns into software development while reducing manual effort. This paper presents a systematic literature review on how MDE addresses accessibility for vision impairments. From 447 initially identified papers, 30 primary studies met the inclusion criteria. About two-thirds reference the Web Content Accessibility Guidelines (WCAG), yet their project-specific adaptions and end-user validations hinder wider adoption in MDE. The analyzed studies model user interface structures, interaction and navigation, user capabilities, requirements, and context information. However, only few specify concrete modeling techniques on how to incorporate accessibility needs or demonstrate fully functional systems. Insufficient details on MDE methods, i.e., transformation rules or code templates, hinder the reuse, generalizability, and reproducibility. Furthermore, limited involvement of affected users and limited developer expertise in accessibility contribute to weak empirical validation. Overall, the findings indicate that current MDE research insufficiently supports vision-related accessibility. Our paper concludes with a research agenda outlining how support for vision impairments can be more effectively embedded in MDE processes.",
+      "language": "en",
+      "source": "https://openalex.org/W7140731084",
+      "sourceType": "OpenAlex",
+      "retrieved": "2026-10-27"
+    },
+    "KNMR26": {
+      "title": "From Unfinished to Done: Bridging the MDE Implementation Gap with Constrained LLMs",
+      "status": "available",
+      "abstract": "Model-driven engineering (MDE) excels at ensuring architectural consistency and managing complexity, yet extending generated code skeletons with project-specific business logic often remains a time-consuming manual task. Conversely, large language models (LLMs) offer immense flexibility in coding but may produce vibe-coded results—software that looks correct but fails to adhere to intended architectures and implicit requirements. An open challenge lies in harnessing the adaptability of LLMs to handle implementation details without sacrificing the deterministic correctness of the MDE scaffolding. Previous attempts have largely relied on unconstrained coding assistants or required a human in the loop for interacting with the LLM. To overcome this, we introduce Agentic Gap Filling, a hybrid pipeline where LLM prompts are embedded directly within the model to drive the generation of code skeletons. The generated code contains protected TODO regions, which LLM agents subsequently resolve and a jury of LLM review agents and separate testing agents immediately validate. We integrate this approach into the MontiThings framework, demonstrating a workflow where models define the architecture of a project while artificial intelligence (AI) agents act as developers and reviewers, filling in the logic. This synergy ensures the structural integrity of the generated system while providing the flexibility of LLMs to adapt to various domain requirements. Our evaluation across 32 test configurations demonstrates that this multiagent workflow achieves up to 93.21% functional accuracy after four iterations, while preserving the structural integrity of the generated system.",
+      "language": "en",
+      "source": "https://openalex.org/W7168254872",
+      "sourceType": "OpenAlex",
+      "retrieved": "2026-10-27"
+    },
+    "VNG+25": {
+      "title": "Toward a Community-Curated Golden Dataset of UML Models",
+      "status": "available",
+      "abstract": "Datasets of Unified Modeling Language (UML) models are becoming increasingly valuable for education, empirical research, and tool development in model-driven engineering (MDE) and conceptual modeling. In recent years, several datasets have emerged - mostly compiled through automated crawling of open platforms such as GitHub and GenMyModel. While these efforts have improved access to real-world modeling artifacts, the resulting collections often suffer from serious quality issues: they include syntactically invalid models, semantically incorrect structures, and placeholder or dummy content. Moreover, most models are not accompanied by textual domain descriptions, which are essential for understanding the intent behind the model and assessing its semantic soundness. Therefore these model datasets are far from ideal as a source for modeling exercises or empirical MDE research. This paper presents an initial step toward a community-curated golden dataset of UML models, designed to address these limitations. Our contribution includes i) a curated set of UML models, each paired with a natural language description of the modeled domain requirements, $i i)$ a publicly accessible web platform for exploring and querying the dataset, and $i i i)$ a structured process for community-based contribution and evaluation to support sustainable growth and quality assurance of the dataset. By fostering community involvement and providing high-quality, semantically grounded models, this work lays the foundation for a widely accepted benchmark dataset in UML-based research and education.",
+      "language": "en",
+      "source": "https://openalex.org/W4417250932",
+      "sourceType": "OpenAlex",
+      "retrieved": "2026-10-27"
+    },
+    "NMR25": {
+      "title": "AI-based and Model-driven Methods to Guide Citizens through Processes in the Public Sector",
+      "status": "available",
+      "abstract": "Digitalization of processes in the public sector is a challenging endeavor for citizens: too long or ambiguous forms and unfamiliar terms make it challenging to participate in these processes. What is needed are methods to guide citizens with IT systems through processes in the public sector in a user-centric way. Within this paper, we investigate how to develop web systems that provide citizen-centered guidance in several dimensions: explanatory content, guided navigation, contextual process support, and form completion. Our solution integrates generative AI and model-driven engineering methods to develop web applications for the public sector. This has not only advantages for citizens, but we can also enhance the system maintenance of such systems with these methods. We present the main processes of how to realize such integrated approaches, provide some examples from practice, and discuss open challenges for the approaches.",
+      "language": "en",
+      "source": "https://www.se-rwth.de/publications/AI-based-and-Model-driven-Methods-to-Guide-Citizens-through-Processes-in-the-Public-Sector.pdf#page=1",
+      "sourceType": "PDF",
+      "retrieved": "2026-10-27",
+      "reviewed": true
+    },
+    "NKR+25": {
+      "title": "Unintended Changes: How LLMs Corrupt and Correct Textual Models",
+      "status": "available",
+      "abstract": "This work evaluates to what degree AI-based modeldriven software development approaches may unintentionally alter parts of a model, potentially affecting its semantics, particularly when the model is defined in a domain-specific language unfamiliar to the LLM, and discusses to what degree the perplexity metric can be used to indicate susceptible modeling languages. Although much work has focused on evaluating the correctness of AI-based model creation, it remains important to assess whether and to what extent LLMs introduce unintended modifications in parts of the input model that they are merely expected to reproduce. Previous research has primarily focused on the success of programming and modeling tasks using AI, such as achieving syntactic and semantic correctness. In contrast, this work investigates the side effects of AI usage, specifically the introduction of unintended modifications during iterative modeling processes. We evaluate the likelihood of error introduction in an AI-based modeling approach for uncommon DSLs and use the perplexity-metric to identify error prone elements in the model. We use our own modeling language for class diagrams CD4A, an LLM that is not trained on this DSL and prompt it with simple modeling tasks. Next, we measure additional changes to the model that are not related to the given modeling task. We show that AI-driven Modeling approaches need to also focus on side effects of iterative LLM usage with unfamiliar modeling languages, and demonstrate how these risks can be identified.",
+      "language": "en",
+      "source": "https://openalex.org/W4417250775",
+      "sourceType": "OpenAlex",
+      "retrieved": "2026-10-27"
+    },
+    "BKM+25": {
+      "title": "Inclusive Model-Driven Engineering for Accessible Software",
+      "status": "available",
+      "abstract": "While model-driven engineering (MDE) claims to be a good development approach for cross-cutting concerns, this raises the question of why not every application created with MDE is accessible. Moreover, why are the MDE development processes and the tools themselves not more inclusive? In this vision paper, we sketch an ideal picture of how inclusivity in MDE - considered throughout tools, methods, artifacts, and processes - would intrinsically lead to more accessible software systems. We review the state-of-the-art, discuss current challenges, and present a possible future of inclusive MDE.",
+      "language": "en",
+      "source": "https://openalex.org/W4416677481",
+      "sourceType": "OpenAlex",
+      "retrieved": "2026-10-27"
+    },
+    "Net24": {
+      "title": "Model-Driven Method for the Development of Full-Size Web-Based Information Systems",
+      "status": "available",
+      "abstract": "The implementation of information systems poses a variety of challenges for developers and requires a large number of experts from different application domains. This work presents a methodology in the area of generative model-driven development (MDD) for web-based information systems. The methodology consists of three basic building blocks: LLM4CD, CD2GUI and MontiGem. The first building block LLM4CD is based on generative artificial intelligence (LLMs) and transforms natural language requirements and domain descriptions into class diagrams in CD4A notation. The second building block CD2GUI uses these class diagrams and derives models for user interfaces in GUIDSL notation. The last building block is MontiGem. It uses both types of models to generate a data-centric information system. An important part of this work is the adaptability of the generated artifacts, this mainly concerns the possibility for modelers to adapt the models generated by the AI and CD2GUI, and to adapt and extend the code generated by MontiGem without having to edit the generated code or models directly. This makes iterative work with the methodology possible without discarding adapted code or adapted models. It is precisely this adaptability that facilitates the transition from an underspecified modeled software prototype to a full-size model-driven information system that can be actively used in industry. In addition to the three building blocks, this thesis also presents the domain-specific modeling languages GUI-DSL and CD4A. The methodology is evaluated and discussed both in parts and as a whole. The practical applicability of the methodology is demonstrated using the case study MaCoCo, an information system used by RWTH Aachen University, which serves as a robust benchmark for the validation of the methodology. In addition, other smaller projects are presented that offer a wide range of applications and valuable insights.",
+      "language": "en",
+      "source": "https://www.se-rwth.de/phdtheses/Diss-Netz-Model-Driven-Method-for-the-Development-of-Full-Size-Web-Based-Information-Systems.pdf#page=10",
+      "sourceType": "PDF",
+      "retrieved": "2026-10-27",
+      "reviewed": true
+    },
+    "BNR+25": {
+      "title": "Semantic Analysis of Domain Model Evolution in Model-Driven Software Development",
+      "status": "available",
+      "abstract": "Model-Driven Engineering (MDE) aims to improve the development of software systems by utilizing models as primary source artifacts and leveraging automation, such as model-to-code translation. Since models serve as primary source artifacts, their evolution throughout the development process is a critical concern. To better understand the changes made to models, difference analyses can be employed. However, merely highlighting syntactic differences between subsequent model versions may be insufficient for comprehensively analyzing the history of a domain model in a model-driven development process. We propose an approach that analyzes the differences between subsequent model versions at the abstract syntax level and assesses their implications on the model’s semantics. This approach is integrated into a toolchain that aggregates and visualizes changes across the entire model development history. In this paper, we apply this integrated analysis to the domain model of MaCoCo, a business information system developed using model-driven methods. We utilize the visualization of the aggregated difference analysis to identify anomalies in the evolution of the model and discuss their implications for the development history of MaCoCo.",
+      "language": "en",
+      "source": "https://openalex.org/W4417250714",
+      "sourceType": "OpenAlex",
+      "retrieved": "2026-10-27"
+    },
+    "NRR24": {
+      "title": "Using Grammar Masking to Ensure Syntactic Validity in LLM-based Modeling Tasks",
+      "status": "available",
+      "abstract": "Low-code development platforms (LCDPs) are becoming increasingly important in industry, which confronts us in academic teaching with the challenge of educating students in the basic principles, critical engagement, and evaluation of LCDPs. This leads us to the question, how to teach the usage of different LCDPs during an university course. The short time frame of university-level courses makes it challenging to teach more than only one LCDP. In our teaching approach, students use two different LCDPs and create a web-application with both of them. Firstly, we require the students to define a target application with common modeling languages, next they use the first LCDP, at about half the time they switch to the second LCDP and present their findings of the differences in methodology and development processes at the end. We discuss this approach, show survey results from the participants, and explain lessons learned. This concept allows students critical engagement with LCDPs and model-driven software engineering. Supervisors get an insight into the learnability of each LCDP and how novices adapt to different domain-specific languages and their notations.",
+      "language": "en",
+      "source": "https://openalex.org/W4403935775",
+      "sourceType": "OpenAlex",
+      "retrieved": "2026-10-27"
+    },
+    "CMNR24": {
+      "title": "Teaching Model-Driven Low-Code Development Platforms",
+      "status": "available",
+      "abstract": "We present and evaluate a method called grammar masking, which is used to guide large language models (LLMs) toward producing syntactically correct models for a given context-free grammar. Prompt engineering methods such as few-shot learning or priming can be used to improve the chances of an LLM producing correct syntax, but the more complex the grammar, the more time-consuming and less promising these methods become. Previous work is focused primarily on the usage of either language model training or prompt engineering. In this work, a method is presented that restricts the output to a given grammar using constrained decoding to ensure the output adheres to a valid syntax. We use several domain-specific languages (DSLs) built with MontiCore and task multiple LLMs to produce models with and without constrained decoding. A corresponding parser is used to confirm the syntactic correctness of each model. We show that grammar masking can dramatically improve the modeling capabilities of several LLMs, reducing the need for well-refined prompting while increasing the chance of producing correct models.",
+      "language": "en",
+      "source": "https://openalex.org/W4403935857",
+      "sourceType": "OpenAlex",
+      "retrieved": "2026-10-27"
+    },
+    "KKN+24": {
+      "title": "Applied Model-Based Co-Development for Zero-Emission Flight Systems Based on SysML",
+      "status": "available",
+      "abstract": "In context of the BMWK LuFo Project \"APPLIED MODEL-BASED CO-DEVELOPMENT FOR ZEROEMISSION FLIGHT SYSTEMS\", a model-based methodology applied in avionics is presented. SysML is used as modeling language and for automatic model analysis. A case study on a data link uplink feed system demonstrates our model-based approach for specifying and verifying safety and security properties. The key feature of the underlying formal dataflow theory compared to competitors is that refinement is compositional.",
+      "language": "en",
+      "source": "https://openalex.org/W6964799263",
+      "sourceType": "OpenAlex",
+      "retrieved": "2026-10-27"
+    },
+    "NMR24": {
+      "title": "From Natural Language to Web Applications: Using Large Language Models for Model-Driven Software Engineering",
+      "status": "available",
+      "abstract": "We evaluate the usage of Large Language Models (LLMs) to transform natural language into models of a predefined domain-specific language within the context of model-driven software engineering. In this work we test systematically the reliability and correctness of the developed tooling, to ensure its usability in an automated model-driven engineering context. Up to now, LLMs such as ChatGPT were not sophisticated enough to yield promising results. The new API-Access and the release of GPT-4, enabled us to develop improved tooling that can be evaluated systematically. This paper introduces an approach that can produce a running web application based on simple informal specifications, that is provided by a domain expert with no prior knowledge of any DSL. We extended our toolchain to include ChatGPT and provided the AI with additional DSL-specific contexts in order to receive models that can be further processed. We performed tests to ensure the semantic and syntactic correctness of the created models. This approach shows the potential of LLMs to successfully bridge the gap between domain experts and developers and discusses its current limitations.",
+      "language": "en",
+      "source": "https://openalex.org/W6944394362",
+      "sourceType": "OpenAlex",
+      "retrieved": "2026-10-27"
+    },
+    "GLM+24": {
+      "title": "Modeling Financial, Project and Staff Management: A Case Report from the MaCoCo Project",
+      "status": "available",
+      "abstract": "To obtain more financial freedom, universities and especially their chairs and institutes have to establish a well functioning and reliable financial management and accounting system. Currently, chairs have different technical solutions for these systems, each of which must react individually to external changes and require a high effort to adapt their reports. Thus, they rely on either commercial accounting software, which is not tailored to their specific needs, or standard spreadsheet software making use of complex sheets and cross-references which are error-prone and hard to adapt. We have used domain models and code synthesis methods to create an enterprise information system. This paper shows how models reflect user requirements, evolve with changing requirements and how they impact an agile, model-driven engineering process. The resulting system simplifies the planning of financial management and accounting by university chairs.",
+      "language": "en",
+      "source": "https://openalex.org/W6888043615",
+      "sourceType": "OpenAlex",
+      "retrieved": "2026-10-27"
+    },
+    "BDMN+24": {
+      "title": "Combining Retrieval-Augmented Generation and Few-Shot Learning for Model Synthesis of Uncommon DSLs",
+      "status": "available",
+      "abstract": "We introduce a method that empowers large language models (LLMs) to generate models for domain-specific languages (DSLs) for which the LLM has little to no training data on. Common LLMs such as GPT-4, Llama 2, or Bard are trained on publicly available data and thus have the capability to produce models for well-known modeling languages such as PlantUML, however, they perform worse on lesser-known or unpublished DSLs. Previous work focused on the usage of few-shot learning (FSL) to synthesize models but did not address or evaluate the potential of retrieval-augmented generation (RAG) to provide fitting examples for the FSL-based modeling approach. In this work, we propose a toolchain and test each building block individually: We use the MontiCore Sequence Diagram Language, which GPT-4 has minimal training data on, to assess the extent to which FSL enhances the likelihood of synthesizing an accurate model. Additionally, we evaluate how effectively RAG can identify suitable models for user requests and determine whether GPT-4 can distinguish between requests for a specific model and those for general information. We show that RAG and FSL can be used to enable simple model synthesis for uncommon DSLs, as long as there is a fitting knowledge base that can be accessed to provide the needed examples for the FSL approach.",
+      "language": "en",
+      "source": "https://openalex.org/W6906993523",
+      "sourceType": "OpenAlex",
+      "retrieved": "2026-10-27"
+    },
+    "FHM+23": {
+      "title": "Sustainable Digital Twin Engineering for the Internet of Production",
+      "status": "available",
+      "abstract": "Digital twins are everywhere. They are being used to support the design, operations, and analysis of complex systems in many domains, such as automotive, agriculture, avionics, construction, or medicine, and comprise much information about the systems and processes of the twinned system. Currently, digital twins are designed and engineered ad-hoc, in a piecemeal fashion. This hampers research and application of digital twins. Based on interdisciplinary research in the \"Internet of Production\" excellence cluster, we combine model-driven methods for the sustainable engineering of information systems, software architectures, and software language engineering to systematically engineer digital twins. Within this chapter, we discuss challenges on the road to a systematic engineering of digital twins, present our model-driven approach for the engineering of them as well as possible implementations. Our insights may guide researchers and practitioners to sustainable, planned, and efficient engineering and operations.",
+      "language": "en",
+      "source": "https://www.se-rwth.de/publications/Sustainable-Digital-Twin-Engineering-for-the-Internet-of-Production.pdf#page=1",
+      "sourceType": "PDF",
+      "retrieved": "2026-10-27",
+      "reviewed": true
+    },
+    "MNN+22": {
+      "title": "Generating Digital Twin Cockpits for Parameter Management in the Engineering of Wind Turbines",
+      "status": "available",
+      "abstract": "The complexity of wind energy systems combined with an increased trend towards mass customization require the collaboration of many experts to achieve high quality products. Currently, a major issue arises from the lack of data integration among the different tools used during the engineering process which may cause system failures eventually. Existing tools largely do not support automatic detection and indication of erroneous or contradictory parameter values between artifacts of different tools. Employing a model-driven and functional engineering approach enables to establish an integrated toolchain for the management and visualization of engineering artifacts that consume and produce the data. Within this paper, we present an automatic approach to derive an engineering digital twin for the cooperative development and management of engineering artifacts from functional models of the system under development. We evaluate our approach on the example of a hydraulic pump within the cooling system of a wind turbine. The prototype can be coupled with an existing engineering tool ecosystem. The approach enables to exchange the data produced by engineering artifacts according to a functional system model which facilitates the cooperation between different stakeholders throughout the development process.",
+      "language": "en",
+      "source": "https://openalex.org/W6962724164",
+      "sourceType": "OpenAlex",
+      "retrieved": "2026-10-27"
+    },
+    "BGK+24": {
+      "title": "Lessons Learned from Applying Model-Driven Engineering in 5 Domains: The Success Story of the MontiGem Generator Framework",
+      "status": "available",
+      "abstract": "We report on our success stories in developing and using Model-Driven Engineering (MDE) tools for information systems on real-world projects within different application domains. It is necessary that we ensure the extensibility and adaptability of code generators if we want to reuse them for different domains. Up to now, research on reusing software has been mainly conducted in the software product line community but rarely discussed in the context of code generators. This paper introduces the generation framework MontiGem and shows how it has been used and evolved within five different research and industry projects in the domains of financial management, IoT, energy management, privacy policy, and wind turbine engineering. We have developed the code generator within the first project and further refined it with each of the following projects. This paper describes the projects, shows how MDE helped us in the software engineering process, and discusses the lessons we learned. These examples show how MDE techniques can be successfully applied to the development of information systems in practice, although further requirements have been met over time.",
+      "language": "en",
+      "source": "https://www.se-rwth.de/publications/Lessons-learned-from-applying-model-driven-engineering-in-5-domains-The-success-story-of-the-MontiGem-generator-framework.pdf#page=1",
+      "sourceType": "PDF",
+      "retrieved": "2026-10-27",
+      "reviewed": true
+    },
+    "DGM+21": {
+      "title": "A Methodology for Retrofitting Generative Aspects in Existing Applications",
+      "status": "available",
+      "abstract": "Using model-based approaches and code synthesis to engineer information systems improves agile application development and evolution.However, current research lacks systematic approaches to integrate generative aspects in already existing applications.Existing approaches consider partial aspects of the engineering process, such as software language engineering or generator engineering.However, an overall approach for the model-based reconstruction of existing systems is missing.We propose a set of activities for retrofitting the model-based approach into already existing enterprise information systems.Using our experience in language engineering as well as previous generative practical realizations of applications, we have developed a methodology with three phases: problem analysis and decomposition, domain-specific language engineering and application engineering and operation.We demonstrate its practical application using a real-world enterprise information system as an example.Using our methodology developers can make structured, informed decisions when retrofitting a model-based approach into enterprise information systems.",
+      "language": "en",
+      "source": "https://openalex.org/W3213857236",
+      "sourceType": "OpenAlex",
+      "retrieved": "2026-10-27"
+    },
+    "GMNR21": {
+      "title": "Agile Generator-Based GUI Modeling for Information Systems",
+      "status": "available",
+      "abstract": "We use two code generators for the model-based continuous development of information systems including its graphical user interfaces (GUIs). As our goal is to develop full-size real-world systems for different domains, the continuous and iterative model-based engineering of their GUIs comes along with challenges regarding their extension and modification. These challenges concern models, the languages they are written in and hand-written code. In this work we present four complementary approaches to allow extensions for GUIs that we encounter with the generator-based framework MontiGem to tackle these challenges. We discuss the four approaches in detail and present extensions of the framework in the grammar of the language, via atomic components, via handwritten amendments of generated models and by generating connections between the GUI and data structure models. These techniques can be used to create a flexible DSL for engineering information systems, adaptable for different domains and rapidly changing requirements.",
+      "language": "en",
+      "source": "https://www.se-rwth.de/publications/Agile-Generator-Based-GUI-Modeling-for-Information-Systems.pdf#page=1",
+      "sourceType": "PDF",
+      "retrieved": "2026-10-27",
+      "reviewed": true
+    },
+    "DHM+22": {
+      "title": "Generating Customized Low-Code Development Platforms for Digital Twins",
+      "status": "available",
+      "abstract": "A digital twin improves our use of a cyber-physical system and understanding of its emerging behavior. To this effect, a digital twin is to be developed and configured and potentially also operated by domain experts, who rarely have a professional software engineering background and for whom easy access and support, e.g., in form of low-code platforms are missing. In this paper, we report on an integrated method for the model-driven engineering of low-code development platforms for digital twins that enables domain experts to create and operate digital twins for cyber-physical systems using the most appropriate modeling languages. The foundation of this method is (1) a code generation infrastructure for information systems combined with (2) an extensible base architecture for self-adaptive digital twins and (3) reusable language components for their configuration. Using this method, software engineers first configure the information system with the required modeling languages to generate the low-code development platform for digital twins before domain experts leverage the generated platform to create digital twins. This twostep method facilitates creating tailored low-code development platforms as well as creating and operating customized digital twins for a variety of applications.",
+      "language": "en",
+      "source": "https://www.se-rwth.de/publications/Generating-Customized-Low-Code-Development-Platforms-for-Digital-Twins.pdf#page=1",
+      "sourceType": "PDF",
+      "retrieved": "2026-10-27",
+      "reviewed": true
+    },
+    "AMN+20b": {
+      "title": "Model-Based Software Engineering at RWTH Aachen University",
+      "status": "available",
+      "abstract": "In this article, the Software Engineering Research Group of RWTH Aachen University presents its research aim, research topics and some research highlights that have been researched over the last ten years. Furthermore, the relevance of agile, generative and model-based software engineering methods for the special interest group Enterprise Modelling and Information Systems Architectures (SIG-EMISA) is discussed.",
+      "language": "en",
+      "source": "https://dl.gi.de/server/api/core/bitstreams/c4f9694b-5e57-4b2a-ab07-9da5942dbb6c/content#page=1",
+      "sourceType": "PDF",
+      "retrieved": "2026-10-27",
+      "reviewed": true
+    },
+    "GMN+20": {
+      "title": "Continuous Transition from Model-Driven Prototype to Full-Size Real-World Enterprise Information Systems",
+      "status": "available",
+      "abstract": "In recent years generators have gained more and more impact on current software development methods and help to rapidly create complex software. Nevertheless, developers still must ensure consistency among used models and cannot easily edit or extend the generated code. This paper presents our approach which can be used to create an executable prototype of an Enterprise Information System based only on a data structure model. This prototype, which is still easily adaptable and extendable, can be used for analysis exploration and build a solid foundation for the final system. The presented approach transforms a data structure model to changeable and extendable graphical user interface models. These are defined using a domain-specific language named GuiDSL. In a second step, the data structure model and the GUI models are used to generate the resulting system. This approach allows the developer to generate (a) persistence, (b) basic application logic, (c) transportation layers, and (d) a variety of possible graphical representations (represented as GUI models) for the prototype-based only on a data structure model. Extensions and changes of the GUI are still possible on model and code level. This is possible by synthetization of GUI models and change operations defined in the same domain-specific language. This paper presents our approach and highlights its potential and current limitations.",
+      "language": "en",
+      "source": "https://openalex.org/W3046327867",
+      "sourceType": "OpenAlex",
+      "retrieved": "2026-10-27"
+    },
+    "AMN+20a": {
+      "title": "Enterprise Information Systems in Academia and Practice: Lessons Learned from a MBSE Project",
+      "status": "available",
+      "abstract": "The development of domain-specific information systems, especially web information systems, takes a certain amount of time, needs intensive testing to ensure a certain quality and lacks the consistency of front- and backend. Using model-based strategies for the creation of information systems helps to overcome these problems by fastening the development process, facilitating testing and ensuring consistency-by-construction. In practice, however, they are still rarely used. In this paper, we show that model-based engineering is beneficial for the creation of an enterprise information system and improves the quality of the resulting product. We present the basic functionalities of our Generator for Enterprise Management (MontiGEM) and discuss identified problems and lessons learned in a project in practice. The generator was developed simultaneously with and for an enterprise management system. Our research shows that the use of generative methods and MBSE improves the adaptability and reusability of parts of the application on the one hand but on the other hand, there are still obstacles that slow down its broad application in practice.",
+      "language": "en",
+      "source": "https://dl.gi.de/server/api/core/bitstreams/ff5d075f-ba3a-46c0-9780-f61530dfda4e/content#page=1",
+      "sourceType": "PDF",
+      "retrieved": "2026-10-27",
+      "reviewed": true
+    },
+    "MNRV19": {
+      "title": "Towards Privacy-Preserving IoT Systems Using Model Driven Engineering",
+      "status": "available",
+      "abstract": "Considering the Internet of Things in production processes, the human factor and aspects such as data protection and data transparency are often ignored. However, collecting, storing and processing data is going to be a standard procedure in this domain. This includes data from sensors, machines, and processes as well as individual data about people. Recent approaches such as assistive systems for human-computer and human-machine interaction need more personal data than ever before to provide purposeful, tailored support. For MDE approaches it is important to consider privacy already on model level. This paper discusses a way to create privacy-preserving IoT systems using an MDE approach to support privacy and data transparency. We show the relevance and application on a use case from industrial production processes. Additionally, we discuss abilities for practical realization and its limitation.",
+      "language": "en",
+      "source": "https://www.se-rwth.de/publications/Towards-Privacy-Preserving-IoT-Systems-Using-Model-Driven-Engineering.pdf#page=1",
+      "sourceType": "PDF",
+      "retrieved": "2026-10-27",
+      "reviewed": true
+    },
+    "ANV+18": {
+      "title": "Model-Based Generation of Enterprise Information Systems",
+      "status": "available",
+      "abstract": "Thick clients of client/server-information systems include increasingly more logic which leads to several challenges in the development process: Resulting from the separate development of frontand backend, the risk for inconsistencies between components on the one hand, and communication overhead between developers on the other hand are high. We present an approach which helps to overcome these challenges by using model-driven engineering for the development of data-intensive enterprise information systems. WebDEx was developed as a generator for the creation of such systems. It uses UML/P inspired modelling languages, as models (1) build the base for communication among project members and (2) are used as input for the code generator which ensures consistency by construction. This work relies on an infrastructure created by the language workbench and code generation framework MontiCore. Moreover, this paper presents the practical application of this approach for the agile development of a multi user, adaptable web-application to be used by more than 400 chairs of RWTH Aachen University.",
+      "language": "en",
+      "source": "https://www.se-rwth.de/publications/Model-Based-Generation-of-Enterprise-Information-Systems.pdf#page=1",
+      "sourceType": "PDF",
+      "retrieved": "2026-10-27",
+      "reviewed": true
+    },
+    "GHK+20": {
+      "title": "Generated Enterprise Information Systems: MDSE for Maintainable Co-Development of Frontend and Backend",
+      "status": "available",
+      "abstract": "Universities, like any application domain and industry sector, have to establish a well functioning, reliable management accounting, and financial reporting software system. Currently, chairs have different technical solutions for their financial management such as commercial accounting software tailored to the needs of the central administration as well as the chairs’ own data collections with additional information in other software tools. Previous work did not investigate the use of model-driven software engineering methods for the maintainable development of a full-size real-world enterprise information system. This paper shows the application of model-driven software engineering methods to create this system and support the maintainable co-development of frontend and backend written in different programming languages. We are using a variety of models and modeling languages in addition to an application generator that allows for continuous re-generation. Our approach can be easily adapted to other problem domains to create a functional prototype out of models with minimal manual effort.",
+      "language": "en",
+      "source": "https://www.se-rwth.de/publications/Generated-Enterprise-Information-Systems-MDSE-for-Maintainable-Co-Development-of-Frontend-and-Backend.pdf#page=1",
+      "sourceType": "PDF",
+      "retrieved": "2026-10-27",
+      "reviewed": true
+    },
+    "Net17": {
+      "title": "Analysis on Discretization of Gene Parameters in Evolutionary Algorithms",
+      "status": "no-abstract-in-pdf",
+      "source": "https://ths.rwth-aachen.de/wp-content/uploads/sites/4/netz_master.pdf",
+      "reviewed": true
+    },
+    "NWN+15": {
+      "title": "A Genetic Algorithm based Control Strategy for the Energy Management Problem in PHEVs",
+      "status": "available",
+      "abstract": "Genetic algorithms have been applied to various optimization problems in the past. Our library GeneiAL implements a framework for genetic algorithms specially targeted to the area of hybrid electric vehicles. In a parallel hybrid electric vehicle (PHEV), an internal combustion engine and an electrical motor are coupled on the same axis in parallel. In the area of PHEVs, genetic algorithms have been extensively used for the optimization of parameter tuning of control strategies. We use GeneiAL to control the torque distribution between the engines directly. The objective function of this control strategy minimizes the weighted sum of functions that evaluate the fuel consumption, the battery state of charge, and drivability aspects over a prediction horizon of fixed finite length. We analyze the influence of these weights and different configurations for the genetic algorithm on the computation time, the convergence, and the quality of the optimization result. For promising configurations, we compare the results of our control strategy with common control strategies.",
+      "language": "en",
+      "source": "https://openalex.org/W2564750222",
+      "sourceType": "OpenAlex",
+      "retrieved": "2026-10-27"
+    },
+    "GJN+15a": {
+      "title": "Learning-based Control Strategies for Hybrid Electric Vehicles",
+      "status": "available",
+      "abstract": "Hybrid electric vehicles use control strategies to distribute the torque requested by the driver between the internal combustion engine and the electrical motor. Many different types of control strategies have been proposed, but in general it is impossible to determine which control strategy performs best if the future driving conditions are unknown. In this paper, we introduce two learning-based control strategies which use an arbitrary set of basic control strategies in order to minimize the fuel consumption of the hybrid electric vehicle. Our simulation results show that the fuel consumption of the learning-based control strategies are comparable to the fuel consumption of the best basic control strategy in the set even without a priori knowledge of the driving conditions.",
+      "language": "en",
+      "source": "https://openalex.org/W1894036896",
+      "sourceType": "OpenAlex",
+      "retrieved": "2026-10-27"
+    },
+    "Net15": {
+      "title": "Using Horner Schemes to Improve the Efficiency and Precision of Interval Constraint Propagation",
+      "status": "available",
+      "abstract": "Interval Constraint Propagation (ICP) is a powerful procedure that applies contraction methods to narrow down the solution space of quantifier-free non-linear real arithmetic (QFNRA) problems. However, interval arithmetic suffers from the dependency problem and other effects, that cause over-approximations within basic arithmetic operations, which lower the efficiency and precision of ICP. In this thesis we present an approach to improve the performance of an ICP module within the satisfiability modulo theories (SMT) framework SMT-RAT, a toolbox which allows to compose a SMT solver via custom modules. We improve the contraction via interval propagation and introduce a new data structure for multivariate Horner schemes. By reducing the total amount of mathematical operations and by rearranging polynomials we aim to reduce both the wrapping effect and over-approximation, which is inherent to the used interval arithmetic.",
+      "language": "en",
+      "source": "http://ths.rwth-aachen.de/wp-content/uploads/sites/4/teaching/theses/netz_bachelor.pdf#page=3",
+      "sourceType": "PDF",
+      "retrieved": "2026-10-27",
+      "reviewed": true
+    },
+    "GJN+15b": {
+      "title": "Online Lernen als Kontrollstrategie in Hybridfahrzeugen",
+      "status": "no-abstract"
+    }
+  }
+}

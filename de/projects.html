@@ -48,7 +48,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/style.css">
-<noscript><style>.menu-toggle,.site-search,.search-label,.filters button,.map-options,.map-list{display:none!important}.index .menu{display:flex!important;position:static!important}.index{position:static!important}</style></noscript>
+<noscript><style>.menu-toggle,.search-toggle,.global-search,.site-search,.search-label,.filters button,.map-options,.map-list{display:none!important}.index .menu{display:flex!important;position:static!important}.index{position:static!important}</style></noscript>
 </head>
 <body id="top">
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
@@ -65,10 +65,19 @@
         <span class="here mono" aria-hidden="true">Projekte</span>
         <div class="role">Dr. rer. nat.<br>IT-Spezialist<br>mgm technology partners</div>
       </div>
-      <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">Menü</button>
+      <div class="bar-actions">
+        <button class="search-toggle" type="button" id="search-toggle" aria-label="Suche öffnen" aria-controls="menu"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/></svg></button>
+        <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">Menü</button>
+      </div>
     </div>
 
     <div class="menu" id="menu">
+      <form class="global-search" id="global-search" role="search" data-index="../assets/search-de.json">
+        <div class="global-search-field">
+          <input id="global-query" name="q" type="search" maxlength="160" autocomplete="off" placeholder="Suchen…" aria-label="Website durchsuchen" aria-controls="global-results">
+          <button type="submit" aria-label="Suchen"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/></svg></button>
+        </div>
+      </form>
       <nav aria-label="Seiten">
         <ol class="mono">
         <li><a href="index.html"><span>00</span><span>Über mich</span></a></li>
@@ -96,10 +105,17 @@
 
   <!-- ============ content ============ -->
   <main id="main" tabindex="-1">
+    <section class="global-results" id="global-results" aria-labelledby="global-search-title" hidden>
+      <div class="section-head"><h1 id="global-search-title" tabindex="-1">Suche</h1><button class="global-search-close mono" type="button">Zurück zur Seite ×</button></div>
+      <p class="global-search-status mono" role="status" aria-live="polite"></p>
+      <ol class="global-search-list"></ol>
+      <button class="global-search-more mono" type="button" hidden>Mehr anzeigen</button>
+      <button class="global-search-retry mono" type="button" hidden>Erneut versuchen</button>
+    </section>
 
     <header class="page">
       <div class="section-head">
-        <h1><span class="mono">01</span>Projekte</h1>
+        <h1><span class="share-at" id="projects-1"></span><span class="mono">01</span> Projekte<a class="share global-share" href="#projects-1" data-share="projects-1" aria-label="Link kopieren: projects-1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h1>
         <span class="mono faint">19 Einträge</span>
       </div>
       <div class="page-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 7L2.5 12l5 5"/><path d="M16.5 7l5 5-5 5"/><path d="M14 4.5l-4 15"/></svg></div>
@@ -151,14 +167,14 @@
         </div>
         <p class="ll-hint mono" aria-hidden="true">← seitlich wischen →</p>
       </div>
-    <section class="selected-work" aria-label="Ausgewählte Projekte"><h2 class="group mono">Ausgewählte Projekte</h2><ul><li><a href="projects-macoco.html"><div class="work-mark" aria-hidden="true"><img src="../assets/logos/macoco.png" alt="" loading="lazy" decoding="async" width="100" height="100"></div><div><span class="mono faint">Projektleitung · produktiv an der RWTH</span><h3>MaCoCo</h3><p>Finanzen, Personal und Projekte in einem modellgetriebenen System, genutzt von über 200 Lehrstühlen und Instituten.</p><span class="mono work-link">Fallstudie lesen →</span></div></a></li><li><a href="projects-ford.html"><div class="work-mark" aria-hidden="true"><img src="../assets/logos/ford.png" alt="" loading="lazy" decoding="async" width="100" height="100"></div><div><span class="mono faint">Technische Leitung · Industriepilot</span><h3>Ford Pro Werkzeugverfolgung</h3><p>Eine generierte Webanwendung verbindet Werkzeuge, Transporter und Baustellen. Im Feld von drei Handwerksbetrieben getestet.</p><span class="mono work-link">Fallstudie lesen →</span></div></a></li><li><a href="projects-esaca.html"><div class="work-mark" aria-hidden="true"><img src="../assets/logos/esaca.svg" alt="" loading="lazy" decoding="async" width="100" height="100"></div><div><span class="mono faint">Aktuelle Arbeit · mgm technology partners</span><h3>ESACA</h3><p>Agentisches Programmieren im Unternehmen: eine On-Premises-Plattform für Agenten in der Sandbox und geprüfte Änderungen.</p><span class="mono work-link">Fallstudie lesen →</span></div></a></li></ul></section>
+    <section class="selected-work" aria-label="Ausgewählte Projekte"><h2 class="group mono"><span class="share-at" id="projects-2"></span>Ausgewählte Projekte<a class="share global-share" href="#projects-2" data-share="projects-2" aria-label="Link kopieren: projects-2"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2><ul><li><a href="projects-macoco.html"><div class="work-mark" aria-hidden="true"><img src="../assets/logos/macoco.png" alt="" loading="lazy" decoding="async" width="100" height="100"></div><div><span class="mono faint">Projektleitung · produktiv an der RWTH</span><h3><span class="share-at" id="projects-3"></span>MaCoCo</h3><p>Finanzen, Personal und Projekte in einem modellgetriebenen System, genutzt von über 200 Lehrstühlen und Instituten.</p><span class="mono work-link">Fallstudie lesen →</span></div></a></li><li><a href="projects-ford.html"><div class="work-mark" aria-hidden="true"><img src="../assets/logos/ford.png" alt="" loading="lazy" decoding="async" width="100" height="100"></div><div><span class="mono faint">Technische Leitung · Industriepilot</span><h3><span class="share-at" id="projects-4"></span>Ford Pro Werkzeugverfolgung</h3><p>Eine generierte Webanwendung verbindet Werkzeuge, Transporter und Baustellen. Im Feld von drei Handwerksbetrieben getestet.</p><span class="mono work-link">Fallstudie lesen →</span></div></a></li><li><a href="projects-esaca.html"><div class="work-mark" aria-hidden="true"><img src="../assets/logos/esaca.svg" alt="" loading="lazy" decoding="async" width="100" height="100"></div><div><span class="mono faint">Aktuelle Arbeit · mgm technology partners</span><h3><span class="share-at" id="projects-5"></span>ESACA</h3><p>Agentisches Programmieren im Unternehmen: eine On-Premises-Plattform für Agenten in der Sandbox und geprüfte Änderungen.</p><span class="mono work-link">Fallstudie lesen →</span></div></a></li></ul></section>
     <section>
-      <h2 class="group mono" id="industry">Industrie · mgm technology partners</h2>
+      <h2 class="group mono" id="industry"><span class="share-at" id="projects-6"></span>Industrie · mgm technology partners<a class="share global-share" href="#projects-6" data-share="projects-6" aria-label="Link kopieren: projects-6"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
       <ul class="spec">
         <li id="p-esaca">
           <div class="side"><span class="logo"><img src="../assets/logos/esaca.svg" alt="" width="48" height="48"></span><span class="mono faint">jetzt</span></div>
           <div>
-            <h3><a class="int" href="projects-esaca.html">ESACA</a></h3>
+            <h3><span class="share-at" id="projects-7"></span><a class="int" href="projects-esaca.html">ESACA</a><a class="share global-share" href="#projects-7" data-share="projects-7" aria-label="Link kopieren: projects-7"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h3>
             <p class="what">European Sovereign Agentic Coding Appliance — eine standardisierte On-Premises-Plattform, die KI-Coding-Agenten im eigenen Rechenzentrum betreibt: Agenten in der Sandbox, versionierbare Konfiguration, ein gemeinsamer Hub, Benchmarks auf den eigenen Repositories und eine geführte Workbench vom Ticket bis zum reviewten Code. Air-gapped-fähig, keine externen API-Aufrufe.</p>
             <div class="tags mono"><span>Agentisches Coding</span><span>On-prem</span><span>Souveräne KI</span></div>
             <div class="links mono"><a class="more" href="projects-esaca.html">mehr zum Projekt →</a><a href="https://esaca.eu" target="_blank" rel="noopener">esaca.eu ↗</a></div>
@@ -167,12 +183,12 @@
         </li>
       </ul>
 
-      <h2 class="group mono" id="research-software">Forschungssoftware · RWTH Aachen</h2>
+      <h2 class="group mono" id="research-software"><span class="share-at" id="projects-8"></span>Forschungssoftware · RWTH Aachen<a class="share global-share" href="#projects-8" data-share="projects-8" aria-label="Link kopieren: projects-8"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
       <ul class="spec">
         <li id="p-macoco">
           <div class="side"><span class="logo"><img src="../assets/logos/macoco.png" alt="" width="48" height="48"></span><span class="mono faint">2018 — 2026</span></div>
           <div>
-            <h3><a class="int" href="projects-macoco.html">MaCoCo</a></h3>
+            <h3><span class="share-at" id="projects-9"></span><a class="int" href="projects-macoco.html">MaCoCo</a><a class="share global-share" href="#projects-9" data-share="projects-9" aria-label="Link kopieren: projects-9"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h3>
             <p class="what">Management-Cockpit für das Controlling von Lehrstühlen und Instituten — Finanzen, Personal und Projekte in einem mehrbenutzerfähigen Informationssystem, größtenteils aus MontiCore-DSLs generiert. Gemeinsam mit dem Lehrstuhl für Controlling entwickelt; <b>produktiv im Einsatz an der RWTH</b>, mit begleitender Android-App zur Zeiterfassung.</p>
             <div class="tags mono"><span>MontiGem</span><span>Informationssystem</span><span>Agil</span><span>Android</span></div>
             <div class="links mono"><a class="more" href="projects-macoco.html">mehr zum Projekt →</a><a href="https://www.se-rwth.de/projects/MaCoCo/" target="_blank" rel="noopener">Projekt ↗</a><a href="https://www.controlling.rwth-aachen.de/cms/controlling/forschung/forschungsprojekte/laufende-projekte/~mgaz/macoco-lehrstuhlcontrolling/" target="_blank" rel="noopener">Lehrstuhl Controlling ↗</a><a href="https://play.google.com/store/apps/details?id=macoco.stundenzettel.timetracker&amp;hl=de" target="_blank" rel="noopener">Android-App ↗</a></div>
@@ -182,7 +198,7 @@
         <li id="p-golden-uml">
           <div class="side"><span class="logo"><img src="../assets/logos/uml.png" alt="" width="48" height="48"></span><span class="mono faint">2025</span></div>
           <div>
-            <h3><a class="int" href="projects-golden-uml.html">Golden UML Model Set</a></h3>
+            <h3><span class="share-at" id="projects-10"></span><a class="int" href="projects-golden-uml.html">Golden UML Model Set</a><a class="share global-share" href="#projects-10" data-share="projects-10" aria-label="Link kopieren: projects-10"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h3>
             <p class="what">Ein von der Community kuratierter Datensatz von UML-Modellen, jeweils mit einer natürlichsprachlichen Beschreibung der modellierten Domäne. Gecrawlte Modellsammlungen sind voller ungültiger Platzhalter-Modelle; dieser Datensatz ist geprüft, über eine öffentliche Webplattform durchsuchbar und wächst über einen strukturierten Beitrags- und Review-Prozess — ein Benchmark für UML-Forschung, Lehre und die Evaluation von LLMs.</p>
             <div class="tags mono"><span>Datensatz</span><span>UML</span><span>Benchmark</span><span>Webplattform</span></div>
             <div class="links mono"><a class="more" href="projects-golden-uml.html">mehr zum Projekt →</a><a href="https://golden-uml-modelset.vercel.app/search" target="_blank" rel="noopener">Datensatz erkunden ↗</a><a href="https://doi.org/10.1109/MODELS-C68889.2025.00012" target="_blank" rel="noopener">paper ↗</a></div>
@@ -192,7 +208,7 @@
         <li id="p-se-chatty">
           <div class="side"><span class="logo"><img src="../assets/logos/se-chatty.png" alt="" width="48" height="48"></span><span class="mono faint">2025</span></div>
           <div>
-            <h3><a class="int" href="projects-se-chatty.html">SE-Chatty</a></h3>
+            <h3><span class="share-at" id="projects-11"></span><a class="int" href="projects-se-chatty.html">SE-Chatty</a><a class="share global-share" href="#projects-11" data-share="projects-11" aria-label="Link kopieren: projects-11"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h3>
             <p class="what">Ein Lehrassistent für Dozierende. Mit Skripten, Büchern, Folien und Videos gefüttert, antwortet er mit vorlesungsspezifischer Tiefe, hilft Studierenden mit generierten Fragebögen bei der Prüfungsvorbereitung und zeigt Dozierenden, welche Teile des Stoffs verstanden werden — und welche nicht.</p>
             <div class="tags mono"><span>LLM</span><span>RAG</span><span>Lehre</span></div>
             <div class="links mono"><a class="more" href="projects-se-chatty.html">mehr zum Projekt →</a></div>
@@ -202,7 +218,7 @@
         <li id="p-epha">
           <div class="side"><span class="logo"><img src="../assets/logos/epha.png" alt="" width="48" height="48"></span><span class="mono faint">2024 — 2026</span></div>
           <div>
-            <h3><a class="int" href="projects-epha.html">ePHA</a></h3>
+            <h3><span class="share-at" id="projects-12"></span><a class="int" href="projects-epha.html">ePHA</a><a class="share global-share" href="#projects-12" data-share="projects-12" aria-label="Link kopieren: projects-12"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h3>
             <p class="what">Elektronische Promotions- und Habilitationsauslage. Eine modellgetriebene, mit MontiGem generierte Anwendung, die den Veröffentlichungsprozess von Dissertationen und Habilitationen an der RWTH unterstützt; <b>produktiv im Einsatz</b>.</p>
             <div class="tags mono"><span>MontiGem</span><span>Informationssystem</span></div>
             <div class="links mono"><a class="more" href="projects-epha.html">mehr zum Projekt →</a><a href="https://epha.rwth-aachen.de/" target="_blank" rel="noopener">epha.rwth-aachen.de ↗</a></div>
@@ -212,7 +228,7 @@
         <li id="p-ford">
           <div class="side"><span class="logo"><img src="../assets/logos/ford.png" alt="" width="48" height="48"></span><span class="mono faint">2020 — 2022</span></div>
           <div>
-            <h3><a class="int" href="projects-ford.html">Ford Pro Werkzeugverfolgung</a></h3>
+            <h3><span class="share-at" id="projects-13"></span><a class="int" href="projects-ford.html">Ford Pro Werkzeugverfolgung</a><a class="share global-share" href="#projects-13" data-share="projects-13" aria-label="Link kopieren: projects-13"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h3>
             <p class="what">Pilotprojekt mit dem Ford Research &amp; Innovation Center Aachen: ein integriertes Informationssystem, das Werkzeuge und Maschinen über Transporter und Baustellen hinweg per Bluetooth, GPS und KI verfolgt — Erinnerung an vergessenes Werkzeug, Diebstahlwarnungen, Live-Karte und Suche nach Fahrzeug oder Werkzeug. Die Webanwendung wurde mit MontiGem aus UML-Modellen generiert und von drei Handwerksbetrieben im Raum Köln im Feld getestet.</p>
             <div class="tags mono"><span>MontiGem</span><span>IoT</span><span>Industrie</span></div>
             <div class="links mono"><a class="more" href="projects-ford.html">mehr zum Projekt →</a><a href="https://media.ford.com/content/fordmedia/feu/en/news/2022/08/31/ford-pro-tool-tracking-tech-could-save-firms-1000s.html" target="_blank" rel="noopener">Ford-Pressemitteilung ↗</a><a href="https://www.se-rwth.de/projects/22.09.MontiGem.Ford.Press.Release/" target="_blank" rel="noopener">RWTH-Meldung ↗</a></div>
@@ -222,7 +238,7 @@
         <li id="p-add">
           <div class="side"><span class="logo mark mono" aria-hidden="true">ADD</span><span class="mono faint">2018 — 2022</span></div>
           <div>
-            <h3><a class="int" href="projects-add.html">Agile Data Development</a></h3>
+            <h3><span class="share-at" id="projects-14"></span><a class="int" href="projects-add.html">Agile Data Development</a><a class="share global-share" href="#projects-14" data-share="projects-14" aria-label="Link kopieren: projects-14"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h3>
             <p class="what">Modellgetriebene Werkzeuge für einen Windkraftanlagenhersteller (mit WZL, MSE und Bewind): Verzahnung agiler und plangetriebener Entwicklung mit datenbasierter Entscheidungsunterstützung, inklusive generierter Digital-Twin-Cockpits für das Parametermanagement in der Anlagenentwicklung.</p>
             <div class="tags mono"><span>MontiGem</span><span>Digitaler Zwilling</span><span>Industrie</span></div>
             <div class="links mono"><a class="more" href="projects-add.html">mehr zum Projekt →</a></div>
@@ -232,7 +248,7 @@
         <li id="p-montigem">
           <div class="side"><span class="logo"><img src="../assets/logos/montigem.png" alt="" width="48" height="48"></span><span class="mono faint">2018 — 2024</span></div>
           <div>
-            <h3><a class="int" href="projects-montigem.html">MontiGem</a></h3>
+            <h3><span class="share-at" id="projects-15"></span><a class="int" href="projects-montigem.html">MontiGem</a><a class="share global-share" href="#projects-15" data-share="projects-15" aria-label="Link kopieren: projects-15"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h3>
             <p class="what">Generator-Framework für betriebliche Informationssysteme auf Basis der MontiCore Language Workbench. Klassendiagramme und GUI-Modelle rein, eine vollständige Webanwendung raus — eingesetzt in fünf Domänen, vom Lehrstuhl-Controlling bis zu Digital-Twin-Cockpits.</p>
             <div class="tags mono"><span>MontiCore</span><span>Java</span><span>TypeScript</span><span>Codegenerierung</span></div>
             <div class="links mono"><a class="more" href="projects-montigem.html">mehr zum Projekt →</a></div>
@@ -242,7 +258,7 @@
         <li id="p-geneial">
           <div class="side"><span class="logo"><img src="../assets/logos/geneial.png" alt="" width="48" height="48"></span><span class="mono faint">2012 — 2016</span></div>
           <div>
-            <h3><a class="int" href="projects-geneial.html">geneial</a></h3>
+            <h3><span class="share-at" id="projects-16"></span><a class="int" href="projects-geneial.html">geneial</a><a class="share global-share" href="#projects-16" data-share="projects-16" aria-label="Link kopieren: projects-16"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h3>
             <p class="what">Eine template-basierte C++11-Bibliothek für genetische Algorithmen, entstanden im DFG-Projekt OASys (Online-Algorithmen zur optimalen Steuerung hybrider Antriebe). CMake-Build, Boost-Unit-Tests, Benchmarks und Doxygen-Dokumentation.</p>
             <div class="tags mono"><span>C++11</span><span>Evolutionäre Algorithmen</span><span>MIT</span></div>
             <div class="links mono"><a class="more" href="projects-geneial.html">mehr zum Projekt →</a><a href="https://github.com/geneial/geneial" target="_blank" rel="noopener">github ↗</a><a href="https://ths.rwth-aachen.de/research/projects/oasys/" target="_blank" rel="noopener">OASys ↗</a></div>
@@ -252,7 +268,7 @@
         <li id="p-smt-rat">
           <div class="side"><span class="logo"><img src="../assets/logos/smt-rat.png" alt="" width="48" height="48"></span><span class="mono faint">2015</span></div>
           <div>
-            <h3><a class="int" href="projects-smt-rat.html">SMT-RAT</a></h3>
+            <h3><span class="share-at" id="projects-17"></span><a class="int" href="projects-smt-rat.html">SMT-RAT</a><a class="share global-share" href="#projects-17" data-share="projects-17" aria-label="Link kopieren: projects-17"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h3>
             <p class="what">Ein modularer C++-Werkzeugkasten für SMT-Solving über nichtlinearer reeller Arithmetik, entwickelt am Lehr- und Forschungsgebiet Theorie der hybriden Systeme der RWTH. Ich habe sein Modul für Intervall-Constraint-Propagation um einen Propagations-Kontraktor und multivariate Horner-Schemata erweitert.</p>
             <div class="tags mono"><span>C++</span><span>SMT</span><span>Intervallarithmetik</span></div>
             <div class="links mono"><a class="more" href="projects-smt-rat.html">mehr zum Projekt →</a><a href="https://github.com/ths-rwth/smtrat" target="_blank" rel="noopener">github ↗</a><a href="https://ths-rwth.github.io/smtrat/" target="_blank" rel="noopener">Dokumentation ↗</a></div>
@@ -261,12 +277,12 @@
         </li>
       </ul>
 
-      <h2 class="group mono" id="assistants">Assistenten · ChatGPT</h2>
+      <h2 class="group mono" id="assistants"><span class="share-at" id="projects-18"></span>Assistenten · ChatGPT<a class="share global-share" href="#projects-18" data-share="projects-18" aria-label="Link kopieren: projects-18"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
       <ul class="spec">
         <li>
           <div class="side"><span class="mono faint">GPT</span></div>
           <div>
-            <h3><a href="https://chatgpt.com/g/g-3DkGCDlNM-sysml-v2-model-creator" target="_blank" rel="noopener">SysML v2 Model Creator</a></h3>
+            <h3><span class="share-at" id="projects-19"></span><a href="https://chatgpt.com/g/g-3DkGCDlNM-sysml-v2-model-creator" target="_blank" rel="noopener">SysML v2 Model Creator</a><a class="share global-share" href="#projects-19" data-share="projects-19" aria-label="Link kopieren: projects-19"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h3>
             <p class="what">Erstellt SysML-v2-Modelle aus natürlichsprachlichen Beschreibungen.</p>
           </div>
           <div class="meta mono"><div>SysML v2</div></div>
@@ -274,7 +290,7 @@
         <li>
           <div class="side"><span class="mono faint">GPT</span></div>
           <div>
-            <h3><a href="https://chatgpt.com/g/g-Pgayc5wzx-monticore-expert" target="_blank" rel="noopener">MontiCore Expert</a></h3>
+            <h3><span class="share-at" id="projects-20"></span><a href="https://chatgpt.com/g/g-Pgayc5wzx-monticore-expert" target="_blank" rel="noopener">MontiCore Expert</a><a class="share global-share" href="#projects-20" data-share="projects-20" aria-label="Link kopieren: projects-20"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h3>
             <p class="what">Beantwortet Fragen zu Grammatiken, Symboltabellen und Generatoren in der MontiCore Language Workbench.</p>
           </div>
           <div class="meta mono"><div>MontiCore</div></div>
@@ -282,19 +298,19 @@
         <li>
           <div class="side"><span class="mono faint">GPT</span></div>
           <div>
-            <h3><a href="https://chatgpt.com/g/g-sRnmDgQvW-cd4a-class-diagram-creator" target="_blank" rel="noopener">CD4A Class Diagram Creator</a></h3>
+            <h3><span class="share-at" id="projects-21"></span><a href="https://chatgpt.com/g/g-sRnmDgQvW-cd4a-class-diagram-creator" target="_blank" rel="noopener">CD4A Class Diagram Creator</a><a class="share global-share" href="#projects-21" data-share="projects-21" aria-label="Link kopieren: projects-21"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h3>
             <p class="what">Schreibt Klassendiagramme in CD4A, der Klassendiagrammsprache von MontiCore.</p>
           </div>
           <div class="meta mono"><div>CD4A</div></div>
         </li>
       </ul>
 
-      <h2 class="group mono" id="further">Weitere Mitarbeit</h2>
+      <h2 class="group mono" id="further"><span class="share-at" id="projects-22"></span>Weitere Mitarbeit<a class="share global-share" href="#projects-22" data-share="projects-22" aria-label="Link kopieren: projects-22"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
       <ul class="rows">
         <li>
           <div class="mono faint">Automobil</div>
           <div>
-            <h3>KIMBA <span class="mono faint role">Mitarbeit</span></h3>
+            <h3><span class="share-at" id="projects-23"></span>KIMBA <span class="mono faint role">Mitarbeit</span><a class="share global-share" href="#projects-23" data-share="projects-23" aria-label="Link kopieren: projects-23"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h3>
             <p>KI für das Requirements Engineering in der sicherheitskritischen Fahrzeugentwicklung: KI-basiertes Anforderungsmanagement, automatisierte MBSE-Systemmodellierung und ein digitaler Schatten, der die KI-Komponenten transparent und kontrollierbar macht. Ein vom BMWK gefördertes Konsortium aus elf Partnern unter der Leitung von BMW, 2024 — 2027.</p>
             <div class="links mono"><a href="https://www.kimba-project.com/" target="_blank" rel="noopener">kimba-project.com ↗</a></div>
           </div>
@@ -302,7 +318,7 @@
         <li>
           <div class="mono faint">Luftfahrt</div>
           <div>
-            <h3>AMoBaCoD <span class="mono faint role">Mitarbeit</span></h3>
+            <h3><span class="share-at" id="projects-24"></span>AMoBaCoD <span class="mono faint role">Mitarbeit</span><a class="share global-share" href="#projects-24" data-share="projects-24" aria-label="Link kopieren: projects-24"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h3>
             <p>Angewandtes modellbasiertes Co-Development für emissionsfreie Flugzeugsysteme mit AIRBUS: eine verteilte Arbeitsumgebung für kooperative, SysML-basierte Entwicklung, validiert durch den gemeinsamen Bau eines skalierten Demonstrator-Flugzeugs.</p>
             <div class="links mono"><a href="https://doi.org/10.25967/630489" target="_blank" rel="noopener">paper ↗</a></div>
           </div>
@@ -310,7 +326,7 @@
         <li>
           <div class="mono faint">Datenschutz</div>
           <div>
-            <h3>InviDas <span class="mono faint role">Mitarbeit</span></h3>
+            <h3><span class="share-at" id="projects-25"></span>InviDas <span class="mono faint role">Mitarbeit</span><a class="share global-share" href="#projects-25" data-share="projects-25" aria-label="Link kopieren: projects-25"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h3>
             <p>Interaktive, visuelle Datenräume zur souveränen, datenschutzrechtlichen Entscheidungsfindung: Visualisierungen und Gamification, die Nutzer:innen von Fitness-Wearables zeigen, was ihre Daten preisgeben. BMBF-gefördert, mit GI, Stiftung Digitale Chancen, Garmin und den Universitäten Bremen und Bamberg; die Vergleichsplattform wurde mit MontiGem generiert.</p>
             <div class="links mono"><a href="https://www.iaw.rwth-aachen.de/cms/iaw/forschung/projekte/projekte/~zomrc/invidas/" target="_blank" rel="noopener">Projekt ↗</a></div>
           </div>
@@ -318,7 +334,7 @@
         <li>
           <div class="mono faint">Produktion</div>
           <div>
-            <h3>Internet of Production <span class="mono faint role">Mitarbeit</span></h3>
+            <h3><span class="share-at" id="projects-26"></span>Internet of Production <span class="mono faint role">Mitarbeit</span><a class="share global-share" href="#projects-26" data-share="projects-26" aria-label="Link kopieren: projects-26"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h3>
             <p>DFG-Exzellenzcluster der RWTH: digitale Zwillinge und digitale Schatten, die Daten aus Produktion, Entwicklung und Nutzung domänenübergreifend verfügbar machen. Mein Teil waren generierte Low-Code-Plattformen und Cockpits für digitale Zwillinge.</p>
             <div class="links mono"><a href="https://www.iop.rwth-aachen.de/" target="_blank" rel="noopener">iop.rwth-aachen.de ↗</a></div>
           </div>
@@ -326,7 +342,7 @@
         <li>
           <div class="mono faint">Lehre</div>
           <div>
-            <h3>RWTH Together University <span class="mono faint role">Mitarbeit</span></h3>
+            <h3><span class="share-at" id="projects-27"></span>RWTH Together University <span class="mono faint role">Mitarbeit</span><a class="share global-share" href="#projects-27" data-share="projects-27" aria-label="Link kopieren: projects-27"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h3>
             <p>Die Initiative der RWTH für neue Formen des Lernens, Lehrens und Prüfens — digitale Werkzeuge und KI in der Lehre, interdisziplinäre Studierendenprojekte, eine engere Verbindung von Präsenz- und Digitaluniversität. Gefördert von der Stiftung Innovation in der Hochschullehre.</p>
             <div class="links mono"><a href="https://www.rwth-aachen.de/cms/root/studium/lehre/exzellente-lehre/~bppliy/rwth-together-university-lehren-lerne/" target="_blank" rel="noopener">rwth-aachen.de ↗</a></div>
           </div>
@@ -334,7 +350,7 @@
         <li id="p-blended">
           <div class="mono faint">Lehre</div>
           <div>
-            <h3>Blended-Learning-Videoprojekt <span class="mono faint role">Team</span></h3>
+            <h3><span class="share-at" id="projects-28"></span>Blended-Learning-Videoprojekt <span class="mono faint role">Team</span><a class="share global-share" href="#projects-28" data-share="projects-28" aria-label="Link kopieren: projects-28"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h3>
             <p>Kurzfilme aus der Blended-Learning-Initiative der Informatik der RWTH, die zeigen, wie Technik den Alltag verändert hat — Brief vs. SMS, Straßenkarte vs. GPS, Bibliothek vs. Wikipedia. Mit dem Lehr- und Forschungsgebiet Learning Technologies.</p>
             <div class="links mono"><a href="https://learntech.rwth-aachen.de/go/id/morb/lidx/1" target="_blank" rel="noopener">learntech.rwth-aachen.de ↗</a></div>
           </div>
@@ -350,5 +366,7 @@
   </main>
 </div>
 <script src="../assets/site.js"></script>
+<script src="../assets/search-core.js"></script>
+<script src="../assets/search.js"></script>
 </body>
 </html>

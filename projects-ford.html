@@ -48,7 +48,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/style.css">
-<noscript><style>.menu-toggle,.site-search,.search-label,.filters button,.map-options,.map-list{display:none!important}.index .menu{display:flex!important;position:static!important}.index{position:static!important}</style></noscript>
+<noscript><style>.menu-toggle,.search-toggle,.global-search,.site-search,.search-label,.filters button,.map-options,.map-list{display:none!important}.index .menu{display:flex!important;position:static!important}.index{position:static!important}</style></noscript>
 </head>
 <body id="top">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -65,10 +65,19 @@
         <span class="here mono" aria-hidden="true">Ford Pro tool tracking</span>
         <div class="role">Dr. rer. nat.<br>IT Specialist<br>mgm technology partners</div>
       </div>
-      <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">menu</button>
+      <div class="bar-actions">
+        <button class="search-toggle" type="button" id="search-toggle" aria-label="Open search" aria-controls="menu"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/></svg></button>
+        <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">menu</button>
+      </div>
     </div>
 
     <div class="menu" id="menu">
+      <form class="global-search" id="global-search" role="search" data-index="assets/search-en.json">
+        <div class="global-search-field">
+          <input id="global-query" name="q" type="search" maxlength="160" autocomplete="off" placeholder="Search…" aria-label="Search this site" aria-controls="global-results">
+          <button type="submit" aria-label="Search"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/></svg></button>
+        </div>
+      </form>
       <nav aria-label="Pages">
         <ol class="mono">
         <li><a href="index.html"><span>00</span><span>About</span></a></li>
@@ -96,11 +105,18 @@
 
   <!-- ============ content ============ -->
   <main id="main" tabindex="-1">
+    <section class="global-results" id="global-results" aria-labelledby="global-search-title" hidden>
+      <div class="section-head"><h1 id="global-search-title" tabindex="-1">Search</h1><button class="global-search-close mono" type="button">Back to page ×</button></div>
+      <p class="global-search-status mono" role="status" aria-live="polite"></p>
+      <ol class="global-search-list"></ol>
+      <button class="global-search-more mono" type="button" hidden>Show more</button>
+      <button class="global-search-retry mono" type="button" hidden>Try again</button>
+    </section>
 
     <header class="page proj">
       <a class="back mono" href="projects.html">← all projects</a>
       <div class="section-head">
-        <h1><span class="mono">01</span>Ford Pro tool tracking</h1>
+        <h1><span class="share-at" id="ford-1"></span><span class="mono">01</span> Ford Pro tool tracking<a class="share global-share" href="#ford-1" data-share="ford-1" aria-label="Copy link to ford-1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h1>
         <span class="mono faint">2020 — 2022</span>
       </div>
       <div class="proj-logo"><img src="assets/logos/ford.png" alt="" width="48" height="48"></div>
@@ -109,29 +125,29 @@
       <div class="links-top mono"><a href="https://www.se-rwth.de/projects/22.09.MontiGem.Ford.Press.Release/" target="_blank" rel="noopener">RWTH news ↗</a></div>
       <p class="art-link mono"><a href="research-mde.html"><span>Background:</span> Part 1 · Model-Driven Software Engineering →</a></p>
     </header>
-    <figure class="media">
+    <figure class="media" id="ford-f1">
       <a class="yt frame-16x9" href="https://youtu.be/ODuvZ6AahzI" data-yt="ODuvZ6AahzI" target="_blank" rel="noopener" aria-label="Ford helps businesses keep track of work tools — play video">
         <img src="assets/projects/ford-video.jpg" alt="" width="1280" height="720" loading="lazy">
         <span class="play mono"><i aria-hidden="true">▶</i>play video</span>
       </a>
-      <figcaption class="mono"><b>Ford Europe:</b> “Ford Helps Businesses Keep Track of Work Tools” — the pilot in use at one of the test companies. The video is loaded from YouTube only when you start it.</figcaption>
+      <figcaption class="mono"><b>Ford Europe:</b> “Ford Helps Businesses Keep Track of Work Tools” — the pilot in use at one of the test companies. The video is loaded from YouTube only when you start it.<a class="share global-share" href="#ford-f1" data-share="ford-f1" aria-label="Copy link to ford-f1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></figcaption>
     </figure>
     <section>
       <ul class="story">
         <li>
-          <h2>The problem</h2>
+          <h2><span class="share-at" id="ford-2"></span>The problem<a class="share global-share" href="#ford-2" data-share="ford-2" aria-label="Copy link to ford-2"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>Gardeners, plumbers and renovation crews carry expensive tools and machines in their vans. Tools get left behind on site or stolen, and every loss costs money and working time — searching, re-buying, waiting.</p><div class="stats"><div><b>€450</b><span>lost per van and year</span></div><div><b>€38</b><span>saved per vehicle and month</span></div><div><b>~1 h</b><span>per week saved by workers</span></div><div><b>~2 h</b><span>per week saved by admins</span></div></div><p class="mono faint">Estimates from the field test, RWTH Chair of Marketing.</p></div>
         </li>
         <li>
-          <h2>The system</h2>
+          <h2><span class="share-at" id="ford-3"></span>The system<a class="share global-share" href="#ford-3" data-share="ford-3" aria-label="Copy link to ford-3"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>Every tool gets a small, heat- and water-resistant Bluetooth tag; every vehicle a tracking module that knows which tools are on board and reports their positions via GPS to a central server. If a tool is missing when the van is about to leave, the driver is reminded; if one moves when it shouldn’t, the owner is alerted. A web application shows everything on desktops, phones and a tablet in the vehicle: search by vehicle, storage place, tool type or name, photo tiles of the tools, and a live map of where each one was last seen.</p></div>
         </li>
         <li>
-          <h2>Generated, not hand-written</h2>
+          <h2><span class="share-at" id="ford-4"></span>Generated, not hand-written<a class="share global-share" href="#ford-4" data-share="ford-4" aria-label="Copy link to ford-4"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>The web application was largely generated with our <a href="projects-montigem.html">MontiGem</a> framework from UML models of the data, the user interface and standard behaviour. That made fast iterations possible, and the models became a shared language between Ford’s marketing experts, engineers, designers and the craftspeople. Two extensions grew out of the project and went back into the generator: multi-language support (German for the craftspeople, English for Ford’s managers) with an in-app translation editor, and a driving-safe tablet UI that shows less information while the vehicle is moving, based on its measured acceleration.</p></div>
         </li>
         <li>
-          <h2>Field test</h2>
+          <h2><span class="share-at" id="ford-5"></span>Field test<a class="share global-share" href="#ford-5" data-share="ford-5" aria-label="Copy link to ford-5"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>Three trade companies of different sizes around Cologne — construction and renovation, plumbing, gardening and landscaping — used the system for about eleven months. The application was improved continuously from their feedback and from usage data. Ford presented the results in 2022; the project also taught us where generated web apps reach their limits — patchy mobile coverage on site later led to a native Android app.</p></div>
         </li>
       </ul>
@@ -164,5 +180,7 @@
 </div>
 <script src="assets/project.js"></script>
 <script src="assets/site.js"></script>
+<script src="assets/search-core.js"></script>
+<script src="assets/search.js"></script>
 </body>
 </html>

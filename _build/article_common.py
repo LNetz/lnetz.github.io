@@ -313,7 +313,7 @@ def header(lang, file, html_, lead):
     <header class="page proj art-head" data-abbr="{e["abbr"]}">
       <a class="back mono" href="research.html#articles">← {L(T("all articles", "alle Artikel"))}</a>
       <div class="section-head">
-        <h1><span class="mono">{e["part"]} / {len(parts)}</span>{L(e["long"])}</h1>
+        <h1><span class="mono">{e["part"]} / {len(parts)}</span> {L(e["long"])}</h1>
         <span class="mono faint">{L(T("article", "Artikel"))} · {L(e["date"])}</span>
       </div>
       <p class="lead">{L(lead)}</p>

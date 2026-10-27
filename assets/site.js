@@ -1165,7 +1165,7 @@ if (window.SiteDemo) document.querySelectorAll(".art-sec input[type=range]").for
 // Share links on articles (a.share after headings and captions, built by article_common.share_links): a click copies
 // the link to that section or figure and says so for a moment. An anchor inside a closed "for the curious" box opens it.
 (() => {
-  const links = document.querySelectorAll(".article a.share");
+  const links = document.querySelectorAll("a.share[data-share]");
   if (!links.length) return;
   const done = document.documentElement.lang === "de" ? "kopiert" : "copied";
   const copy = text => navigator.clipboard?.writeText(text).catch(() => fallback(text)) ?? fallback(text);
@@ -1188,9 +1188,16 @@ if (window.SiteDemo) document.querySelectorAll(".art-sec input[type=range]").for
     a._t = setTimeout(() => delete a.dataset.done, 1600);
   }));
   const reveal = () => {
-    const el = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
-    const box = el && el.closest("details:not([open])");
-    if (box) { box.open = true; el.scrollIntoView(); }
+    let el;
+    try { el = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1))); } catch (_) { return; }
+    if (!el) return;
+    let box = el.closest("details:not([open])"), opened = false;
+    while (box) { box.open = true; opened = true; box = box.parentElement.closest("details:not([open])"); }
+    if (el.matches('li[id^="pub-"]')) {
+      const abstract = el.querySelector('.pub-abstract');
+      if (abstract && !abstract.open) { abstract.open = true; opened = true; }
+    }
+    if (opened) el.scrollIntoView();
   };
   reveal();
   addEventListener("hashchange", reveal);

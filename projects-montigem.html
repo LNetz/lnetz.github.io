@@ -48,7 +48,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/style.css">
-<noscript><style>.menu-toggle,.site-search,.search-label,.filters button,.map-options,.map-list{display:none!important}.index .menu{display:flex!important;position:static!important}.index{position:static!important}</style></noscript>
+<noscript><style>.menu-toggle,.search-toggle,.global-search,.site-search,.search-label,.filters button,.map-options,.map-list{display:none!important}.index .menu{display:flex!important;position:static!important}.index{position:static!important}</style></noscript>
 </head>
 <body id="top">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -65,10 +65,19 @@
         <span class="here mono" aria-hidden="true">MontiGem</span>
         <div class="role">Dr. rer. nat.<br>IT Specialist<br>mgm technology partners</div>
       </div>
-      <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">menu</button>
+      <div class="bar-actions">
+        <button class="search-toggle" type="button" id="search-toggle" aria-label="Open search" aria-controls="menu"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/></svg></button>
+        <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">menu</button>
+      </div>
     </div>
 
     <div class="menu" id="menu">
+      <form class="global-search" id="global-search" role="search" data-index="assets/search-en.json">
+        <div class="global-search-field">
+          <input id="global-query" name="q" type="search" maxlength="160" autocomplete="off" placeholder="Search…" aria-label="Search this site" aria-controls="global-results">
+          <button type="submit" aria-label="Search"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/></svg></button>
+        </div>
+      </form>
       <nav aria-label="Pages">
         <ol class="mono">
         <li><a href="index.html"><span>00</span><span>About</span></a></li>
@@ -96,11 +105,18 @@
 
   <!-- ============ content ============ -->
   <main id="main" tabindex="-1">
+    <section class="global-results" id="global-results" aria-labelledby="global-search-title" hidden>
+      <div class="section-head"><h1 id="global-search-title" tabindex="-1">Search</h1><button class="global-search-close mono" type="button">Back to page ×</button></div>
+      <p class="global-search-status mono" role="status" aria-live="polite"></p>
+      <ol class="global-search-list"></ol>
+      <button class="global-search-more mono" type="button" hidden>Show more</button>
+      <button class="global-search-retry mono" type="button" hidden>Try again</button>
+    </section>
 
     <header class="page proj">
       <a class="back mono" href="projects.html">← all projects</a>
       <div class="section-head">
-        <h1><span class="mono">01</span>MontiGem</h1>
+        <h1><span class="share-at" id="montigem-1"></span><span class="mono">01</span> MontiGem<a class="share global-share" href="#montigem-1" data-share="montigem-1" aria-label="Copy link to montigem-1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h1>
         <span class="mono faint">2018 — 2024</span>
       </div>
       <div class="proj-logo"><img src="assets/logos/montigem.png" alt="" width="48" height="48"></div>
@@ -109,7 +125,7 @@
       <div class="links-top mono"><a href="https://monticore.github.io/monticore/" target="_blank" rel="noopener">MontiCore ↗</a></div>
       <p class="art-link mono"><a href="research-mde.html#montigem"><span>Background:</span> Part 1 · Model-Driven Software Engineering →</a></p><p class="art-link mono"><a href="research-ai4se.html#app"><span>Background:</span> Part 2 · AI-Driven Software Engineering →</a></p>
     </header>
-    <figure class="media"><div class="dia-scroll" style="--vw:960px" tabindex="0"><svg class="dia" viewBox="0 0 960 370" role="img" aria-label="MontiGem generator architecture: models are parsed, transformed and printed into a Java back end and an Angular front end; handwritten code extends the generated code">
+    <figure class="media" id="montigem-f1"><div class="dia-scroll" style="--vw:960px" tabindex="0"><svg class="dia" viewBox="0 0 960 370" role="img" aria-label="MontiGem generator architecture: models are parsed, transformed and printed into a Java back end and an Angular front end; handwritten code extends the generated code">
   <defs><marker id="ma" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9" fill="none" stroke="currentColor" stroke-width="1.4"/></marker><marker id="maa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9" fill="none" style="stroke:var(--accent)" stroke-width="1.4"/></marker></defs>
   <text x="0" y="16" class="s">MODELS</text>
   <rect class="box" x="0" y="56" width="128" height="50" rx="3"/><text x="64.0" y="77.0" text-anchor="middle" class="t">GUI models</text><text x="64.0" y="94.0" text-anchor="middle" class="s">one per page</text>
@@ -159,20 +175,20 @@
   <text x="620" y="166" class="s">TS</text>
   <text x="612" y="204" class="s">Java</text>
 </svg></div>
-      <figcaption class="mono"><b>From models to a running application.</b> Each model language has a parser generated by MontiCore; the syntax trees are transformed and printed by FreeMarker templates into an Angular front end and a Java back end. CD2GUI (dashed) can derive the GUI models from the class diagram. Handwritten code lives in separate folders and <i>extends</i> the generated classes (TOP mechanism), so everything can be regenerated at any time. After <a class="cite" href="#Net24">[Net24]</a>, Fig. 7.1.</figcaption>
+      <figcaption class="mono"><b>From models to a running application.</b> Each model language has a parser generated by MontiCore; the syntax trees are transformed and printed by FreeMarker templates into an Angular front end and a Java back end. CD2GUI (dashed) can derive the GUI models from the class diagram. Handwritten code lives in separate folders and <i>extends</i> the generated classes (TOP mechanism), so everything can be regenerated at any time. After <a class="cite" href="#Net24">[Net24]</a>, Fig. 7.1.<a class="share global-share" href="#montigem-f1" data-share="montigem-f1" aria-label="Copy link to montigem-f1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></figcaption>
     </figure>
     <section>
       <ul class="story">
         <li>
-          <h2>The idea</h2>
+          <h2><span class="share-at" id="montigem-2"></span>The idea<a class="share global-share" href="#montigem-2" data-share="montigem-2" aria-label="Copy link to montigem-2"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>Business information systems look different on the surface but are built from the same parts again and again: data classes, persistence, validation, an API, lists, forms and detail pages. Writing these by hand is slow, repetitive and error-prone — and every change to the domain ripples through all layers. MontiGem (MontiCore-based <b>Ge</b>nerator for <b>E</b>nterprise <b>M</b>anagement) generates them instead, from a class diagram for the data, GUI models for the pages and optional OCL constraints for validation.</p></div>
         </li>
         <li>
-          <h2>How it works</h2>
+          <h2><span class="share-at" id="montigem-3"></span>How it works<a class="share global-share" href="#montigem-3" data-share="montigem-3" aria-label="Copy link to montigem-3"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>The generator follows the classic compiler pipeline (figure above). MontiCore-generated parsers turn each model into a syntax tree; model-to-model transformations reshape it into the structure of the target code; FreeMarker templates print it as Java, TypeScript and HTML. For every domain class this yields a JPA data class, a DAO, a builder, a validator, DTOs and the commands of the API — on the server and, identically, on the client. Each GUI model becomes an Angular page. The generic parts — runtime components, styling, authentication with Apache Shiro — come from a hand-written runtime environment that is never regenerated.</p></div>
         </li>
         <li>
-          <h2>Generated and handwritten</h2>
+          <h2><span class="share-at" id="montigem-4"></span>Generated and handwritten<a class="share global-share" href="#montigem-4" data-share="montigem-4" aria-label="Copy link to montigem-4"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>No generator covers everything, so the interesting question is how hand-written code fits in. MontiGem uses the <b>TOP mechanism</b>: if a developer writes a class with the name of a generated one, the generator emits its version as <code>…TOP</code> instead, and the hand-written class extends it. Generated and hand-written code live in separate folders; the whole application can be regenerated at any time without losing a single line.</p><pre><code>// generated, because Account.java exists in the handwritten folder
 public class AccountTOP { … }
 
@@ -183,7 +199,7 @@ public class Account extends AccountTOP {
 }</code></pre></div>
         </li>
         <li>
-          <h2>Five domains</h2>
+          <h2><span class="share-at" id="montigem-5"></span>Five domains<a class="share global-share" href="#montigem-5" data-share="montigem-5" aria-label="Copy link to montigem-5"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>MontiGem grew inside <a href="projects-macoco.html">MaCoCo</a> and was later extracted into a framework of its own — I built its first version together with Simon Varga and Kai Adam. It has since been used in five domains, each of which pushed new features back into the generator:</p><ul class="pts"><li><a href="projects-macoco.html">MaCoCo</a> — financial, staff and project management for university chairs; OCL validation.</li><li><a href="projects-ford.html">Ford</a> — IoT tool tracking; multi-language UIs and a driving-safe tablet view.</li><li><a href="projects-add.html">Agile Data Development</a> — wind-turbine engineering; CD2GUI generates the pages from the class diagram.</li><li>Energy management of buildings, and InviDas — comparing the privacy policies of wearables.</li></ul><p>In <a class="cite" href="#Net24">[Net24]</a>, MontiGem is the last link of a chain: an LLM turns a natural-language description into a class diagram, CD2GUI derives the GUI models, and MontiGem generates the application — from text to a running web app. <a href="research-ai4se.html#app">How that works</a>.</p></div>
         </li>
       </ul>
@@ -287,5 +303,7 @@ public class Account extends AccountTOP {
   </main>
 </div>
 <script src="assets/site.js"></script>
+<script src="assets/search-core.js"></script>
+<script src="assets/search.js"></script>
 </body>
 </html>

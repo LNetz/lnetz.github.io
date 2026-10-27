@@ -48,7 +48,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/style.css">
-<noscript><style>.menu-toggle,.site-search,.search-label,.filters button,.map-options,.map-list{display:none!important}.index .menu{display:flex!important;position:static!important}.index{position:static!important}</style></noscript>
+<noscript><style>.menu-toggle,.search-toggle,.global-search,.site-search,.search-label,.filters button,.map-options,.map-list{display:none!important}.index .menu{display:flex!important;position:static!important}.index{position:static!important}</style></noscript>
 </head>
 <body id="top">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -65,10 +65,19 @@
         <span class="here mono" aria-hidden="true">geneial</span>
         <div class="role">Dr. rer. nat.<br>IT Specialist<br>mgm technology partners</div>
       </div>
-      <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">menu</button>
+      <div class="bar-actions">
+        <button class="search-toggle" type="button" id="search-toggle" aria-label="Open search" aria-controls="menu"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/></svg></button>
+        <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">menu</button>
+      </div>
     </div>
 
     <div class="menu" id="menu">
+      <form class="global-search" id="global-search" role="search" data-index="assets/search-en.json">
+        <div class="global-search-field">
+          <input id="global-query" name="q" type="search" maxlength="160" autocomplete="off" placeholder="Search…" aria-label="Search this site" aria-controls="global-results">
+          <button type="submit" aria-label="Search"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/></svg></button>
+        </div>
+      </form>
       <nav aria-label="Pages">
         <ol class="mono">
         <li><a href="index.html"><span>00</span><span>About</span></a></li>
@@ -96,11 +105,18 @@
 
   <!-- ============ content ============ -->
   <main id="main" tabindex="-1">
+    <section class="global-results" id="global-results" aria-labelledby="global-search-title" hidden>
+      <div class="section-head"><h1 id="global-search-title" tabindex="-1">Search</h1><button class="global-search-close mono" type="button">Back to page ×</button></div>
+      <p class="global-search-status mono" role="status" aria-live="polite"></p>
+      <ol class="global-search-list"></ol>
+      <button class="global-search-more mono" type="button" hidden>Show more</button>
+      <button class="global-search-retry mono" type="button" hidden>Try again</button>
+    </section>
 
     <header class="page proj">
       <a class="back mono" href="projects.html">← all projects</a>
       <div class="section-head">
-        <h1><span class="mono">01</span>geneial</h1>
+        <h1><span class="share-at" id="geneial-1"></span><span class="mono">01</span> geneial<a class="share global-share" href="#geneial-1" data-share="geneial-1" aria-label="Copy link to geneial-1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h1>
         <span class="mono faint">2012 — 2017</span>
       </div>
       <div class="proj-logo"><img src="assets/logos/geneial.png" alt="" width="48" height="48"></div>
@@ -109,22 +125,22 @@
       <div class="links-top mono"><a href="https://github.com/geneial/geneial" target="_blank" rel="noopener">github ↗</a><a href="https://ths.rwth-aachen.de/research/projects/oasys/" target="_blank" rel="noopener">OASys ↗</a></div>
       <p class="art-link mono"><a href="research-ea.html"><span>Background:</span> Part 4 · Evolutionary Algorithms →</a></p>
     </header>
-    <figure class="media">
+    <figure class="media" id="geneial-f1">
       <div class="cutout"><img src="assets/projects/geneial-ea-loop.webp" alt="Cycle diagram of one generation of an evolutionary algorithm: stopping criteria, selection with elitism, coupling, crossover, choosing, mutation and replenishment from the chromosome factory" width="1400" height="1266" loading="lazy"></div>
-      <figcaption class="mono">One generation of an evolutionary algorithm — every box is an exchangeable operator in geneial. From <a class="cite" href="#Net17">[Net17]</a>.</figcaption>
+      <figcaption class="mono">One generation of an evolutionary algorithm — every box is an exchangeable operator in geneial. From <a class="cite" href="#Net17">[Net17]</a>.<a class="share global-share" href="#geneial-f1" data-share="geneial-f1" aria-label="Copy link to geneial-f1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></figcaption>
     </figure>
     <section>
       <ul class="story">
         <li>
-          <h2>The idea</h2>
+          <h2><span class="share-at" id="geneial-2"></span>The idea<a class="share global-share" href="#geneial-2" data-share="geneial-2" aria-label="Copy link to geneial-2"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>A genetic algorithm imitates evolution. A population of candidate solutions — chromosomes — is rated by a fitness function; the best are selected, paired, recombined and randomly mutated, and the next generation is formed from the offspring, an elite of the old generation and a few fresh random candidates. Repeated over many generations, the population drifts towards good solutions, even for problems that cannot be solved exactly in reasonable time.</p></div>
         </li>
         <li>
-          <h2>Where it comes from</h2>
+          <h2><span class="share-at" id="geneial-3"></span>Where it comes from<a class="share global-share" href="#geneial-3" data-share="geneial-3" aria-label="Copy link to geneial-3"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>geneial was created at RWTH’s Theory of Hybrid Systems group in the context of the DFG project OASys — online algorithms for the optimal control of hybrid propulsion systems. There it served as the framework for a genetic-algorithm-based control strategy for the energy management of parallel hybrid vehicles: when should the combustion engine run, when the electric motor?</p></div>
         </li>
         <li>
-          <h2>The library</h2>
+          <h2><span class="share-at" id="geneial-4"></span>The library<a class="share global-share" href="#geneial-4" data-share="geneial-4" aria-label="Copy link to geneial-4"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>geneial is a template-based C++11 library. Each stage of the loop in the figure above — stopping criteria, selection, coupling, crossover, choosing, mutation, replacement — is an operator with its own builder, so users plug in their own chromosome types, operators and fitness functions. Fitness evaluation can run multi-threaded, and observers and bookkeepers make runs analysable. The project comes with a CMake build, Boost unit tests, benchmarks, Doxygen documentation and CI. A minimal run:</p><pre><code>auto evaluator = std::make_shared&lt;DemoChromosomeEvaluator&gt;();
 
 ContinousMultiValueChromosomeFactory&lt;int,double&gt;::Builder factoryBuilder(evaluator);
@@ -140,7 +156,7 @@ algorithm-&gt;solve();
 std::cout &lt;&lt; *algorithm-&gt;getHighestFitnessChromosome() &lt;&lt; std::endl;</code></pre></div>
         </li>
         <li>
-          <h2>Wind farms</h2>
+          <h2><span class="share-at" id="geneial-5"></span>Wind farms<a class="share global-share" href="#geneial-5" data-share="geneial-5" aria-label="Copy link to geneial-5"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>Later I used geneial for a different problem <a class="cite" href="#Net17">[Net17]</a>: placing the turbines of an offshore wind farm, rated by annual energy production, net present value and internal rate of return on the Horns Rev test cases. The question was whether turbine positions should be free continuous coordinates or points on a grid. The answer was clear: as long as the grid is fine enough, <b>discretised gene parameters converge faster and reach better results</b> in every test case.</p></div>
         </li>
       </ul>
@@ -190,5 +206,7 @@ std::cout &lt;&lt; *algorithm-&gt;getHighestFitnessChromosome() &lt;&lt; std::en
   </main>
 </div>
 <script src="assets/site.js"></script>
+<script src="assets/search-core.js"></script>
+<script src="assets/search.js"></script>
 </body>
 </html>

@@ -48,7 +48,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/style.css">
-<noscript><style>.menu-toggle,.site-search,.search-label,.filters button,.map-options,.map-list{display:none!important}.index .menu{display:flex!important;position:static!important}.index{position:static!important}</style></noscript>
+<noscript><style>.menu-toggle,.search-toggle,.global-search,.site-search,.search-label,.filters button,.map-options,.map-list{display:none!important}.index .menu{display:flex!important;position:static!important}.index{position:static!important}</style></noscript>
 </head>
 <body id="top">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -65,10 +65,19 @@
         <span class="here mono" aria-hidden="true">ESACA</span>
         <div class="role">Dr. rer. nat.<br>IT Specialist<br>mgm technology partners</div>
       </div>
-      <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">menu</button>
+      <div class="bar-actions">
+        <button class="search-toggle" type="button" id="search-toggle" aria-label="Open search" aria-controls="menu"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/></svg></button>
+        <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">menu</button>
+      </div>
     </div>
 
     <div class="menu" id="menu">
+      <form class="global-search" id="global-search" role="search" data-index="assets/search-en.json">
+        <div class="global-search-field">
+          <input id="global-query" name="q" type="search" maxlength="160" autocomplete="off" placeholder="Search…" aria-label="Search this site" aria-controls="global-results">
+          <button type="submit" aria-label="Search"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/></svg></button>
+        </div>
+      </form>
       <nav aria-label="Pages">
         <ol class="mono">
         <li><a href="index.html"><span>00</span><span>About</span></a></li>
@@ -96,11 +105,18 @@
 
   <!-- ============ content ============ -->
   <main id="main" tabindex="-1">
+    <section class="global-results" id="global-results" aria-labelledby="global-search-title" hidden>
+      <div class="section-head"><h1 id="global-search-title" tabindex="-1">Search</h1><button class="global-search-close mono" type="button">Back to page ×</button></div>
+      <p class="global-search-status mono" role="status" aria-live="polite"></p>
+      <ol class="global-search-list"></ol>
+      <button class="global-search-more mono" type="button" hidden>Show more</button>
+      <button class="global-search-retry mono" type="button" hidden>Try again</button>
+    </section>
 
     <header class="page proj">
       <a class="back mono" href="projects.html">← all projects</a>
       <div class="section-head">
-        <h1><span class="mono">01</span>ESACA</h1>
+        <h1><span class="share-at" id="esaca-1"></span><span class="mono">01</span> ESACA<a class="share global-share" href="#esaca-1" data-share="esaca-1" aria-label="Copy link to esaca-1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h1>
         <span class="mono faint">since 2026</span>
       </div>
       <div class="proj-logo"><img src="assets/logos/esaca.svg" alt="" width="48" height="48"></div>
@@ -109,7 +125,7 @@
       <div class="links-top mono"><a href="https://esaca.eu" target="_blank" rel="noopener">esaca.eu ↗</a></div>
       <p class="art-link mono"><a href="research-ai4se.html#harness"><span>Background:</span> Part 2 · AI-Driven Software Engineering →</a></p>
     </header>
-    <figure class="media"><div class="dia-scroll" style="--vw:760px" tabindex="0"><svg class="dia" viewBox="0 0 760 330" role="img" aria-label="ESACA architecture: everything runs inside the organisation’s own perimeter">
+    <figure class="media" id="esaca-f1"><div class="dia-scroll" style="--vw:760px" tabindex="0"><svg class="dia" viewBox="0 0 760 330" role="img" aria-label="ESACA architecture: everything runs inside the organisation’s own perimeter">
   <defs><marker id="ea" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9" fill="none" stroke="currentColor" stroke-width="1.4"/></marker><marker id="eaa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9" fill="none" style="stroke:var(--accent)" stroke-width="1.4"/></marker></defs>
   <rect class="zone line" x="1" y="1" width="598" height="326" rx="4"/>
   <text x="16" y="22" class="s">YOUR DATA CENTRE · ON-PREM OR AIR-GAPPED</text>
@@ -153,24 +169,24 @@
   <text x="712" y="161" text-anchor="middle" class="s">public</text>
   <text x="712" y="176" text-anchor="middle" class="s">cloud APIs</text>
 </svg></div>
-      <figcaption class="mono">Agents, code, secrets and models stay inside the organisation’s perimeter. The agent works in a sandbox and only ever sees placeholder credentials; a second container decides — and logs — what may leave.</figcaption>
+      <figcaption class="mono">Agents, code, secrets and models stay inside the organisation’s perimeter. The agent works in a sandbox and only ever sees placeholder credentials; a second container decides — and logs — what may leave.<a class="share global-share" href="#esaca-f1" data-share="esaca-f1" aria-label="Copy link to esaca-f1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></figcaption>
     </figure>
     <section>
       <ul class="story">
         <li>
-          <h2>The problem</h2>
+          <h2><span class="share-at" id="esaca-2"></span>The problem<a class="share global-share" href="#esaca-2" data-share="esaca-2" aria-label="Copy link to esaca-2"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>Banks, utilities, public authorities and defence suppliers face the same dilemma. Agentic coding promises large productivity gains, but a cloud-based agent can send source code and secrets to a foreign provider, delete data or pull in a malicious extension — and it ties the organisation to one vendor’s model, prices and roadmap. Banning the tools only pushes teams into shadow IT, where nobody measures what the agents actually deliver.</p></div>
         </li>
         <li>
-          <h2>The idea</h2>
+          <h2><span class="share-at" id="esaca-3"></span>The idea<a class="share global-share" href="#esaca-3" data-share="esaca-3" aria-label="Copy link to esaca-3"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>ESACA — the <b>European Sovereign Agentic Coding Appliance</b> — is a standardised system that brings coding agents into the organisation’s own perimeter: on-premises or fully air-gapped, with no data egress, no external API calls and no hidden telemetry. It is model-independent and favours sovereign models running on the customer’s own hardware. ESACA is an initiative of mgm technology partners and Fsas Technologies, a Fujitsu company. In the terms of my <a href="research-ai4se.html#harness">article on AI-driven software engineering</a>, it is a harness for coding agents.</p></div>
         </li>
         <li>
-          <h2>The building blocks</h2>
+          <h2><span class="share-at" id="esaca-4"></span>The building blocks<a class="share global-share" href="#esaca-4" data-share="esaca-4" aria-label="Copy link to esaca-4"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><ul class="pts"><li><b>Sandbox</b> — the agent and the project run in one container, all outbound traffic goes through a second one. Access is deny-by-default, the agent only sees placeholder credentials, real secrets are injected on the way out, every decision is logged.</li><li><b>Configuration</b> — one versionable file describes the whole environment: access rules, agents, skills, plugins, tools and versions.</li><li><b>Hub</b> — proven configurations are shared and reused across projects.</li><li><b>Benchmark</b> — measures the complete system (agent + model + hardware) on the organisation’s own repositories, keeping hard metrics such as builds and tests apart from LLM-as-judge scores.</li><li><b>Workbench</b> — a guided path from ticket to plan to agents in isolated workspaces, ending in a mandatory human review before the normal merge process.</li></ul></div>
         </li>
         <li>
-          <h2>Who it is for</h2>
+          <h2><span class="share-at" id="esaca-5"></span>Who it is for<a class="share global-share" href="#esaca-5" data-share="esaca-5" aria-label="Copy link to esaca-5"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>Critical infrastructure and utilities, the public sector, and regulated industries such as defence, legal and healthcare — organisations that work under NIS-2, BaFin, ISO 27001 and GDPR. The adoption path goes step by step, from assistants to agents, multi-agent workflows and finally AI-native development, with people staying in the decision seat.</p></div>
         </li>
       </ul>
@@ -189,5 +205,7 @@
   </main>
 </div>
 <script src="assets/site.js"></script>
+<script src="assets/search-core.js"></script>
+<script src="assets/search.js"></script>
 </body>
 </html>

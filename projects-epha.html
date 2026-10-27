@@ -48,7 +48,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/style.css">
-<noscript><style>.menu-toggle,.site-search,.search-label,.filters button,.map-options,.map-list{display:none!important}.index .menu{display:flex!important;position:static!important}.index{position:static!important}</style></noscript>
+<noscript><style>.menu-toggle,.search-toggle,.global-search,.site-search,.search-label,.filters button,.map-options,.map-list{display:none!important}.index .menu{display:flex!important;position:static!important}.index{position:static!important}</style></noscript>
 </head>
 <body id="top">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -65,10 +65,19 @@
         <span class="here mono" aria-hidden="true">ePHA</span>
         <div class="role">Dr. rer. nat.<br>IT Specialist<br>mgm technology partners</div>
       </div>
-      <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">menu</button>
+      <div class="bar-actions">
+        <button class="search-toggle" type="button" id="search-toggle" aria-label="Open search" aria-controls="menu"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/></svg></button>
+        <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">menu</button>
+      </div>
     </div>
 
     <div class="menu" id="menu">
+      <form class="global-search" id="global-search" role="search" data-index="assets/search-en.json">
+        <div class="global-search-field">
+          <input id="global-query" name="q" type="search" maxlength="160" autocomplete="off" placeholder="Search…" aria-label="Search this site" aria-controls="global-results">
+          <button type="submit" aria-label="Search"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/></svg></button>
+        </div>
+      </form>
       <nav aria-label="Pages">
         <ol class="mono">
         <li><a href="index.html"><span>00</span><span>About</span></a></li>
@@ -96,11 +105,18 @@
 
   <!-- ============ content ============ -->
   <main id="main" tabindex="-1">
+    <section class="global-results" id="global-results" aria-labelledby="global-search-title" hidden>
+      <div class="section-head"><h1 id="global-search-title" tabindex="-1">Search</h1><button class="global-search-close mono" type="button">Back to page ×</button></div>
+      <p class="global-search-status mono" role="status" aria-live="polite"></p>
+      <ol class="global-search-list"></ol>
+      <button class="global-search-more mono" type="button" hidden>Show more</button>
+      <button class="global-search-retry mono" type="button" hidden>Try again</button>
+    </section>
 
     <header class="page proj">
       <a class="back mono" href="projects.html">← all projects</a>
       <div class="section-head">
-        <h1><span class="mono">01</span>ePHA</h1>
+        <h1><span class="share-at" id="epha-1"></span><span class="mono">01</span> ePHA<a class="share global-share" href="#epha-1" data-share="epha-1" aria-label="Copy link to epha-1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h1>
         <span class="mono faint">2024 — 2026</span>
       </div>
       <div class="proj-logo"><img src="assets/logos/epha.png" alt="" width="48" height="48"></div>
@@ -108,26 +124,26 @@
       <dl class="facts mono wide"><div><dt>Role</dt><dd>Lead developer</dd></div><div><dt>Users</dt><dd>Faculty 1, RWTH</dd></div><div><dt>Status</dt><dd>In production</dd></div><div><dt>Built with</dt><dd>MontiGem</dd></div></dl>
       <div class="links-top mono"><a href="https://epha.rwth-aachen.de/" target="_blank" rel="noopener">epha.rwth-aachen.de ↗</a></div>
     </header>
-    <figure class="media"><div class="dia-scroll" style="--vw:740px" tabindex="0"><svg class="dia" viewBox="0 0 740 160" role="img" aria-label="How a dissertation is displayed in ePHA, in four steps">
+    <figure class="media" id="epha-f1"><div class="dia-scroll" style="--vw:740px" tabindex="0"><svg class="dia" viewBox="0 0 740 160" role="img" aria-label="How a dissertation is displayed in ePHA, in four steps">
   <defs><marker id="pa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9" fill="none" stroke="currentColor" stroke-width="1.4"/></marker><marker id="paa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9" fill="none" style="stroke:var(--accent)" stroke-width="1.4"/></marker></defs>
   <rect class="box" x="0" y="40" width="172" height="76" rx="3"/><text x="86.0" y="66.0" text-anchor="middle" class="t">Doctoral office</text><text x="86.0" y="83.0" text-anchor="middle" class="s">creates the display:</text><text x="86.0" y="97.0" text-anchor="middle" class="s">thesis, reviews, period</text><text x="0" y="24" class="s a">01</text><path class="ln" d="M172 78H184" marker-end="url(#pa)"/><rect class="box" x="188" y="40" width="172" height="76" rx="3"/><text x="274.0" y="66.0" text-anchor="middle" class="t">Professors</text><text x="274.0" y="83.0" text-anchor="middle" class="s">are notified — at once</text><text x="274.0" y="97.0" text-anchor="middle" class="s">or weekly, by subject</text><text x="188" y="24" class="s a">02</text><path class="ln hl" d="M360 78H372" marker-end="url(#paa)"/><rect class="box hl" x="376" y="40" width="172" height="76" rx="3"/><text x="462.0" y="66.0" text-anchor="middle" class="t">Display period</text><text x="462.0" y="83.0" text-anchor="middle" class="s">read thesis, summary</text><text x="462.0" y="97.0" text-anchor="middle" class="s">and reviews online</text><text x="376" y="24" class="s a">03</text><path class="ln" d="M548 78H560" marker-end="url(#pa)"/><rect class="box" x="564" y="40" width="172" height="76" rx="3"/><text x="650.0" y="66.0" text-anchor="middle" class="t">Dean’s office</text><text x="650.0" y="83.0" text-anchor="middle" class="s">receives comments:</text><text x="650.0" y="97.0" text-anchor="middle" class="s">praise · criticism · neutral</text><text x="564" y="24" class="s a">04</text>
   <path class="ln dash" d="M86 116V140H650V120" marker-end="url(#pa)"/>
   <text x="365" y="154" text-anchor="middle" class="s">then: invitations to the defence</text>
 </svg></div>
-      <figcaption class="mono">The display of a thesis, from the doctoral office to the dean’s office — what used to be paper copies in a room is now a web application.</figcaption>
+      <figcaption class="mono">The display of a thesis, from the doctoral office to the dean’s office — what used to be paper copies in a room is now a web application.<a class="share global-share" href="#epha-f1" data-share="epha-f1" aria-label="Copy link to epha-f1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></figcaption>
     </figure>
     <section>
       <ul class="story">
         <li>
-          <h2>The problem</h2>
+          <h2><span class="share-at" id="epha-2"></span>The problem<a class="share global-share" href="#epha-2" data-share="epha-2" aria-label="Copy link to epha-2"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>At a German faculty, a dissertation or habilitation is not just accepted by the reviewers: for a fixed period, every professor of the faculty may read the thesis and the reviews and raise concerns before the faculty decides. Traditionally that meant paper copies in the dean’s office — professors had to come by during opening hours to read them.</p></div>
         </li>
         <li>
-          <h2>How it works</h2>
+          <h2><span class="share-at" id="epha-3"></span>How it works<a class="share global-share" href="#epha-3" data-share="epha-3" aria-label="Copy link to epha-3"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>The doctoral office creates a display for each thesis: candidate, title, subject group, reviewers and examiners, the documents as PDFs — thesis, summary, bibliography, reviews — and the display period. Professors are notified by e-mail, either immediately or in a weekly digest, filtered by the subject groups they care about. During the period they read everything online and can send a comment — praise, criticism or a neutral note — directly to the dean’s office. Invitations to the defence go out from the same application.</p></div>
         </li>
         <li>
-          <h2>Model-driven</h2>
+          <h2><span class="share-at" id="epha-4"></span>Model-driven<a class="share global-share" href="#epha-4" data-share="epha-4" aria-label="Copy link to epha-4"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>ePHA is a small application by design, and that is exactly where model-driven development pays off: the domain — theses, documents, reviewers, displays, comments, notification settings — is described as a class diagram, and the application is generated from it with the <a href="projects-montigem.html">MontiGem</a> tool chain. The result runs in production for the Faculty of Mathematics, Computer Science and Natural Sciences.</p></div>
         </li>
       </ul>
@@ -146,5 +162,7 @@
   </main>
 </div>
 <script src="assets/site.js"></script>
+<script src="assets/search-core.js"></script>
+<script src="assets/search.js"></script>
 </body>
 </html>

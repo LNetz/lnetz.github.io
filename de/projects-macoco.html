@@ -48,7 +48,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/style.css">
-<noscript><style>.menu-toggle,.site-search,.search-label,.filters button,.map-options,.map-list{display:none!important}.index .menu{display:flex!important;position:static!important}.index{position:static!important}</style></noscript>
+<noscript><style>.menu-toggle,.search-toggle,.global-search,.site-search,.search-label,.filters button,.map-options,.map-list{display:none!important}.index .menu{display:flex!important;position:static!important}.index{position:static!important}</style></noscript>
 </head>
 <body id="top">
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
@@ -65,10 +65,19 @@
         <span class="here mono" aria-hidden="true">MaCoCo</span>
         <div class="role">Dr. rer. nat.<br>IT-Spezialist<br>mgm technology partners</div>
       </div>
-      <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">Menü</button>
+      <div class="bar-actions">
+        <button class="search-toggle" type="button" id="search-toggle" aria-label="Suche öffnen" aria-controls="menu"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/></svg></button>
+        <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">Menü</button>
+      </div>
     </div>
 
     <div class="menu" id="menu">
+      <form class="global-search" id="global-search" role="search" data-index="../assets/search-de.json">
+        <div class="global-search-field">
+          <input id="global-query" name="q" type="search" maxlength="160" autocomplete="off" placeholder="Suchen…" aria-label="Website durchsuchen" aria-controls="global-results">
+          <button type="submit" aria-label="Suchen"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/></svg></button>
+        </div>
+      </form>
       <nav aria-label="Seiten">
         <ol class="mono">
         <li><a href="index.html"><span>00</span><span>Über mich</span></a></li>
@@ -96,11 +105,18 @@
 
   <!-- ============ content ============ -->
   <main id="main" tabindex="-1">
+    <section class="global-results" id="global-results" aria-labelledby="global-search-title" hidden>
+      <div class="section-head"><h1 id="global-search-title" tabindex="-1">Suche</h1><button class="global-search-close mono" type="button">Zurück zur Seite ×</button></div>
+      <p class="global-search-status mono" role="status" aria-live="polite"></p>
+      <ol class="global-search-list"></ol>
+      <button class="global-search-more mono" type="button" hidden>Mehr anzeigen</button>
+      <button class="global-search-retry mono" type="button" hidden>Erneut versuchen</button>
+    </section>
 
     <header class="page proj">
       <a class="back mono" href="projects.html">← alle Projekte</a>
       <div class="section-head">
-        <h1><span class="mono">01</span>MaCoCo</h1>
+        <h1><span class="share-at" id="macoco-1"></span><span class="mono">01</span> MaCoCo<a class="share global-share" href="#macoco-1" data-share="macoco-1" aria-label="Link kopieren: macoco-1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h1>
         <span class="mono faint">2018 — 2026</span>
       </div>
       <div class="proj-logo"><img src="../assets/logos/macoco.png" alt="" width="48" height="48"></div>
@@ -109,34 +125,34 @@
       <div class="links-top mono"><a href="https://www.se-rwth.de/projects/MaCoCo/" target="_blank" rel="noopener">Projekt ↗</a><a href="https://www.controlling.rwth-aachen.de/cms/controlling/forschung/forschungsprojekte/laufende-projekte/~mgaz/macoco-lehrstuhlcontrolling/" target="_blank" rel="noopener">Lehrstuhl Controlling ↗</a><a href="https://play.google.com/store/apps/details?id=macoco.stundenzettel.timetracker&amp;hl=de" target="_blank" rel="noopener">Android-App ↗</a></div>
       <p class="art-link mono"><a href="research-mde.html#practice"><span>Hintergrund:</span> Teil 1 · Modellgetriebene Softwareentwicklung →</a></p>
     </header>
-    <figure class="media">
+    <figure class="media" id="macoco-f1">
       <a class="yt frame-16x9" href="https://youtu.be/2AibynH6Bm0" data-yt="2AibynH6Bm0" target="_blank" rel="noopener" aria-label="MaCoCo-Imagefilm — Video abspielen">
         <img src="../assets/projects/macoco-video.jpg" alt="" width="1280" height="720" loading="lazy">
         <span class="play mono"><i aria-hidden="true">▶</i>Video abspielen</span>
       </a>
-      <figcaption class="mono"><b>MaCoCo-Imagefilm</b> — was das Cockpit für einen Lehrstuhl leistet, in wenigen Minuten. Das Video wird erst beim Start von YouTube geladen.</figcaption>
+      <figcaption class="mono"><b>MaCoCo-Imagefilm</b> — was das Cockpit für einen Lehrstuhl leistet, in wenigen Minuten. Das Video wird erst beim Start von YouTube geladen.<a class="share global-share" href="#macoco-f1" data-share="macoco-f1" aria-label="Link kopieren: macoco-f1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></figcaption>
     </figure>
     <section>
       <ul class="story">
         <li>
-          <h2>Das Problem</h2>
+          <h2><span class="share-at" id="macoco-2"></span>Das Problem<a class="share global-share" href="#macoco-2" data-share="macoco-2" aria-label="Link kopieren: macoco-2"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>Als die RWTH ihre Verwaltung auf SAP umstellte, war das System für die zentralen Stellen gemacht — nicht für die rund 400 Lehrstühle und Institute, die jeweils eigene Budgets führen. Sie müssen wissen, wie viel Geld auf welchem Drittmittelprojekt übrig ist, welcher Vertrag aus welchem Projekt finanziert wird und ob die Stundenzettel des Projekts vollständig sind. Die meisten führten das in Tabellen oder Eigenbauten: fehleranfällig, einzelplatzfähig und für niemanden sonst sichtbar.</p></div>
         </li>
         <li>
-          <h2>Das Cockpit</h2>
-          <div class="txt"><ul class="pts"><li><b>Finanzen</b> — Budgets, Einnahmen und Ausgaben über alle Konten und Projekte, mit geplanten Ausgaben und Prognosen.</li><li><b>Personal</b> — Stammdaten, Verträge und ihre Finanzierung; Personalkosten fließen automatisch in die Projekte, die sie tragen.</li><li><b>Projekte</b> — Stundenzettel für Geldgeber, die sie verlangen (mit begleitender Android-App), Besetzungsplanung und Organigramme.</li></ul><figure class="media"><div class="paper"><img src="../assets/projects/macoco-dashboard.jpg" alt="MaCoCo-Dashboard mit Finanzübersicht als Ringdiagramm, Budgetaufteilung und Listen von Konten mit hohem Restbudget oder negativem Saldo (Demodaten)" width="1600" height="1007" loading="lazy"></div>
-            <figcaption class="mono">Das Dashboard eines Lehrstuhls (Demodaten): Budget, Ausgaben, Planausgaben und die Konten, die Aufmerksamkeit brauchen.</figcaption></figure></div>
+          <h2><span class="share-at" id="macoco-3"></span>Das Cockpit<a class="share global-share" href="#macoco-3" data-share="macoco-3" aria-label="Link kopieren: macoco-3"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
+          <div class="txt"><ul class="pts"><li><b>Finanzen</b> — Budgets, Einnahmen und Ausgaben über alle Konten und Projekte, mit geplanten Ausgaben und Prognosen.</li><li><b>Personal</b> — Stammdaten, Verträge und ihre Finanzierung; Personalkosten fließen automatisch in die Projekte, die sie tragen.</li><li><b>Projekte</b> — Stundenzettel für Geldgeber, die sie verlangen (mit begleitender Android-App), Besetzungsplanung und Organigramme.</li></ul><figure class="media" id="macoco-f2"><div class="paper"><img src="../assets/projects/macoco-dashboard.jpg" alt="MaCoCo-Dashboard mit Finanzübersicht als Ringdiagramm, Budgetaufteilung und Listen von Konten mit hohem Restbudget oder negativem Saldo (Demodaten)" width="1600" height="1007" loading="lazy"></div>
+            <figcaption class="mono">Das Dashboard eines Lehrstuhls (Demodaten): Budget, Ausgaben, Planausgaben und die Konten, die Aufmerksamkeit brauchen.<a class="share global-share" href="#macoco-f2" data-share="macoco-f2" aria-label="Link kopieren: macoco-f2"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></figcaption></figure></div>
         </li>
         <li>
-          <h2>Aus Modellen gebaut</h2>
+          <h2><span class="share-at" id="macoco-4"></span>Aus Modellen gebaut<a class="share global-share" href="#macoco-4" data-share="macoco-4" aria-label="Link kopieren: macoco-4"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>MaCoCo begann 2016 als handgeschriebener Prototyp. Schritt für Schritt ersetzte generierter Code ihn — zuerst Datenklassen und Persistenz, dann die Commands, die Validierung aus OCL-Constraints und schließlich das ganze Frontend aus GUI-Modellen. Der Generator, der dabei entstand, wurde zu <a href="projects-montigem.html">MontiGem</a>. Heute ist die Domäne in Klassendiagrammen und GUI-Modellen beschrieben; handgeschriebene Geschäftslogik wird dort eingehängt, wo sie nötig ist, ohne je vom Generator überschrieben zu werden.</p><div class="stats"><div><b>~1.1 M</b><span>Zeilen Code</span></div><div><b>74 %</b><span>davon generiert</span></div><div><b>~150</b><span>Domänenklassen</span></div><div><b>60</b><span>GUI-Modelle</span></div></div><p class="mono faint"><a class="cite" href="#Net24">[Net24]</a></p></div>
         </li>
         <li>
-          <h2>Agil, mit den Nutzern</h2>
+          <h2><span class="share-at" id="macoco-5"></span>Agil, mit den Nutzern<a class="share global-share" href="#macoco-5" data-share="macoco-5" aria-label="Link kopieren: macoco-5"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>MaCoCo wird in einem Scrum-ähnlichen Zyklus gemeinsam mit Lead-Usern aus allen Fakultäten entwickelt. Ein Lenkungskreis — Datenschutz, Personalräte, Finanz- und Personalverwaltung, IT Center und Dekanate — tagt zweimal im Jahr, die Nutzer treffen sich monatlich. Kritische Korrekturen gehen sofort live, alles andere alle zwei bis drei Monate. Weil das System aus Modellen neu generiert wird, bleiben auch große Änderungen an der Domäne bezahlbar.</p></div>
         </li>
         <li>
-          <h2>Im Einsatz</h2>
+          <h2><span class="share-at" id="macoco-6"></span>Im Einsatz<a class="share global-share" href="#macoco-6" data-share="macoco-6" aria-label="Link kopieren: macoco-6"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>MaCoCo wird vom IT Center der RWTH betrieben und ist an SAP angebunden; jeder Lehrstuhl bekommt eine eigene Datenbank. Es wird an jedem Arbeitstag hochschulweit genutzt.</p><div class="stats"><div><b>200+</b><span>Lehrstühle &amp; Institute</span></div><div><b>~200</b><span>Logins pro Arbeitstag</span></div><div><b>2016</b><span>in Entwicklung seit</span></div></div></div>
         </li>
       </ul>
@@ -223,5 +239,7 @@
 </div>
 <script src="../assets/project.js"></script>
 <script src="../assets/site.js"></script>
+<script src="../assets/search-core.js"></script>
+<script src="../assets/search.js"></script>
 </body>
 </html>

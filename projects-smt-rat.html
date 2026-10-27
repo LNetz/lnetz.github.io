@@ -48,7 +48,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/style.css">
-<noscript><style>.menu-toggle,.site-search,.search-label,.filters button,.map-options,.map-list{display:none!important}.index .menu{display:flex!important;position:static!important}.index{position:static!important}</style></noscript>
+<noscript><style>.menu-toggle,.search-toggle,.global-search,.site-search,.search-label,.filters button,.map-options,.map-list{display:none!important}.index .menu{display:flex!important;position:static!important}.index{position:static!important}</style></noscript>
 </head>
 <body id="top">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -65,10 +65,19 @@
         <span class="here mono" aria-hidden="true">SMT-RAT</span>
         <div class="role">Dr. rer. nat.<br>IT Specialist<br>mgm technology partners</div>
       </div>
-      <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">menu</button>
+      <div class="bar-actions">
+        <button class="search-toggle" type="button" id="search-toggle" aria-label="Open search" aria-controls="menu"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/></svg></button>
+        <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">menu</button>
+      </div>
     </div>
 
     <div class="menu" id="menu">
+      <form class="global-search" id="global-search" role="search" data-index="assets/search-en.json">
+        <div class="global-search-field">
+          <input id="global-query" name="q" type="search" maxlength="160" autocomplete="off" placeholder="Search…" aria-label="Search this site" aria-controls="global-results">
+          <button type="submit" aria-label="Search"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/></svg></button>
+        </div>
+      </form>
       <nav aria-label="Pages">
         <ol class="mono">
         <li><a href="index.html"><span>00</span><span>About</span></a></li>
@@ -96,11 +105,18 @@
 
   <!-- ============ content ============ -->
   <main id="main" tabindex="-1">
+    <section class="global-results" id="global-results" aria-labelledby="global-search-title" hidden>
+      <div class="section-head"><h1 id="global-search-title" tabindex="-1">Search</h1><button class="global-search-close mono" type="button">Back to page ×</button></div>
+      <p class="global-search-status mono" role="status" aria-live="polite"></p>
+      <ol class="global-search-list"></ol>
+      <button class="global-search-more mono" type="button" hidden>Show more</button>
+      <button class="global-search-retry mono" type="button" hidden>Try again</button>
+    </section>
 
     <header class="page proj">
       <a class="back mono" href="projects.html">← all projects</a>
       <div class="section-head">
-        <h1><span class="mono">01</span>SMT-RAT</h1>
+        <h1><span class="share-at" id="smt-rat-1"></span><span class="mono">01</span> SMT-RAT<a class="share global-share" href="#smt-rat-1" data-share="smt-rat-1" aria-label="Copy link to smt-rat-1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h1>
         <span class="mono faint">2015</span>
       </div>
       <div class="proj-logo"><img src="assets/logos/smt-rat.png" alt="" width="48" height="48"></div>
@@ -109,30 +125,30 @@
       <div class="links-top mono"><a href="https://ths-rwth.github.io/smtrat/" target="_blank" rel="noopener">documentation ↗</a><a href="https://github.com/ths-rwth/smtrat" target="_blank" rel="noopener">github ↗</a></div>
       <p class="art-link mono"><a href="research-ea.html"><span>Background:</span> Part 4 · Evolutionary Algorithms →</a></p>
     </header>
-    <figure class="media"><div class="dia-scroll" style="--vw:760px" tabindex="0"><svg class="dia" viewBox="0 0 760 200" role="img" aria-label="Interval evaluation of x squared minus x for x between 0 and 1: as written the result is minus 1 to 1, as a Horner scheme minus 1 to 0, the true range is minus a quarter to 0">
+    <figure class="media" id="smt-rat-f1"><div class="dia-scroll" style="--vw:760px" tabindex="0"><svg class="dia" viewBox="0 0 760 200" role="img" aria-label="Interval evaluation of x squared minus x for x between 0 and 1: as written the result is minus 1 to 1, as a Horner scheme minus 1 to 0, the true range is minus a quarter to 0">
   <text x="0" y="16" class="s">EVALUATED ON THE INTERVAL x ∈ [0, 1]</text>
   <path class="ln dash" d="M480 30V172"/>
   <text x="0" y="53" class="t">x² − x</text><text x="120" y="53" class="s">as written</text><rect class="box" x="260" y="40" width="440" height="18" rx="2"/><text x="710" y="53" class="s">[−1, 1]</text><text x="0" y="99" class="t">x · (x − 1)</text><text x="120" y="99" class="s">Horner scheme</text><rect class="box hl" x="260" y="86" width="220" height="18" rx="2"/><text x="490" y="99" class="s">[−1, 0]</text><text x="0" y="145" class="t">true range</text><text x="120" y="145" class="s">what we want</text><rect class="zone" x="425.0" y="132" width="55.0" height="18" rx="2" style="fill:var(--accent);opacity:.35"/><text x="490" y="145" class="s">[−¼, 0]</text>
   <path class="ln" d="M250 172H710"/><path class="ln" d="M260 172V178"/><text x="260" y="194" text-anchor="middle" class="s">−1</text><path class="ln" d="M370.0 172V178"/><text x="370.0" y="194" text-anchor="middle" class="s">−½</text><path class="ln" d="M480 172V178"/><text x="480" y="194" text-anchor="middle" class="s">0</text><path class="ln" d="M590.0 172V178"/><text x="590.0" y="194" text-anchor="middle" class="s">½</text><path class="ln" d="M700 172V178"/><text x="700" y="194" text-anchor="middle" class="s">1</text>
 </svg></div>
-      <figcaption class="mono"><b>The dependency problem.</b> Interval arithmetic treats every occurrence of <i>x</i> as an independent value from [0, 1], so <i>x² − x</i> comes out as [−1, 1] — eight times wider than the true range. Rewritten as a Horner scheme, <i>x</i> appears less often and the result tightens to [−1, 0]. Tighter intervals let ICP cut away more of the search space in each step.</figcaption>
+      <figcaption class="mono"><b>The dependency problem.</b> Interval arithmetic treats every occurrence of <i>x</i> as an independent value from [0, 1], so <i>x² − x</i> comes out as [−1, 1] — eight times wider than the true range. Rewritten as a Horner scheme, <i>x</i> appears less often and the result tightens to [−1, 0]. Tighter intervals let ICP cut away more of the search space in each step.<a class="share global-share" href="#smt-rat-f1" data-share="smt-rat-f1" aria-label="Copy link to smt-rat-f1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></figcaption>
     </figure>
     <section>
       <ul class="story">
         <li>
-          <h2>The problem</h2>
+          <h2><span class="share-at" id="smt-rat-2"></span>The problem<a class="share global-share" href="#smt-rat-2" data-share="smt-rat-2" aria-label="Copy link to smt-rat-2"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>Many questions in verification and engineering boil down to one: is there an assignment of real numbers that satisfies a Boolean combination of polynomial constraints? Can this hybrid system reach an unsafe state, does this rewrite system terminate, does this inequality hold? Such formulas of <b>non-linear real arithmetic</b> are decidable, but the complete methods are expensive — at least exponential in the worst case.</p></div>
         </li>
         <li>
-          <h2>SMT-RAT</h2>
+          <h2><span class="share-at" id="smt-rat-3"></span>SMT-RAT<a class="share global-share" href="#smt-rat-3" data-share="smt-rat-3" aria-label="Copy link to smt-rat-3"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>SMT solvers combine a fast SAT solver for the Boolean structure with theory solvers for the arithmetic. <b>SMT-RAT</b> (Satisfiability-Modulo-Theories Real Algebra Toolbox), developed at RWTH’s Theory of Hybrid Systems group, makes the theory part modular: each method — simplex, virtual substitution, interval constraint propagation, cylindrical algebraic decomposition and more — is a module, and a <i>strategy</i> chains modules into a solver. Cheap, incomplete methods go first and hand a smaller problem to the expensive, complete ones. The toolbox is open source, reads SMT-LIB 2 and builds on the CArL library for polynomials.</p></div>
         </li>
         <li>
-          <h2>Interval constraint propagation</h2>
+          <h2><span class="share-at" id="smt-rat-4"></span>Interval constraint propagation<a class="share global-share" href="#smt-rat-4" data-share="smt-rat-4" aria-label="Copy link to smt-rat-4"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>Interval constraint propagation (ICP) works on boxes of intervals, one per variable. It uses each constraint to cut away parts of the box that cannot contain a solution — <i>contraction</i> — until the box is empty (unsatisfiable) or small enough to hand on. Its weak spot is interval arithmetic itself: it does not know that two occurrences of <code>x</code> are the same number. That <b>dependency problem</b> makes results wider than necessary (figure above), so ICP contracts less and needs more iterations.</p></div>
         </li>
         <li>
-          <h2>My contribution</h2>
+          <h2><span class="share-at" id="smt-rat-5"></span>My contribution<a class="share global-share" href="#smt-rat-5" data-share="smt-rat-5" aria-label="Copy link to smt-rat-5"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>I improved SMT-RAT’s ICP module in two ways <a class="cite" href="#Net15">[Net15]</a>. First, a new contraction method — interval <b>propagation</b> through the constraint — in addition to the existing Newton-based contraction. Second, a data structure for <b>multivariate Horner schemes</b>: polynomials are rewritten in nested form, which needs fewer operations and repeats variables less often, so the intervals stay tighter. Two heuristics choose the variable to factor out next — one fast, one aimed at the smallest over-approximation — and a simplification step compresses the result.</p><p>Evaluated on the standard SMT-LIB benchmark sets, the propagation clearly paid off: on <i>keymaera</i> (hybrid-systems verification) more instances were solved with fewer timeouts in little more than half the time, and on <i>hong</i> nearly twice as many test cases could be solved in the same time frame. The Horner schemes did make ICP more precise — up to 46&nbsp;% fewer contractions on some instances — but building them cost more time than the tighter intervals saved. An honest result that pointed to the next steps: choosing the heuristic per input, and evaluating polynomials from the perspective of a single variable.</p></div>
         </li>
       </ul>
@@ -164,5 +180,7 @@
   </main>
 </div>
 <script src="assets/site.js"></script>
+<script src="assets/search-core.js"></script>
+<script src="assets/search.js"></script>
 </body>
 </html>

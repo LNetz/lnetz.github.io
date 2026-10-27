@@ -48,7 +48,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/style.css">
-<noscript><style>.menu-toggle,.site-search,.search-label,.filters button,.map-options,.map-list{display:none!important}.index .menu{display:flex!important;position:static!important}.index{position:static!important}</style></noscript>
+<noscript><style>.menu-toggle,.search-toggle,.global-search,.site-search,.search-label,.filters button,.map-options,.map-list{display:none!important}.index .menu{display:flex!important;position:static!important}.index{position:static!important}</style></noscript>
 </head>
 <body id="top">
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
@@ -65,10 +65,19 @@
         <span class="here mono" aria-hidden="true">SMT-RAT</span>
         <div class="role">Dr. rer. nat.<br>IT-Spezialist<br>mgm technology partners</div>
       </div>
-      <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">Menü</button>
+      <div class="bar-actions">
+        <button class="search-toggle" type="button" id="search-toggle" aria-label="Suche öffnen" aria-controls="menu"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/></svg></button>
+        <button class="menu-toggle mono" type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">Menü</button>
+      </div>
     </div>
 
     <div class="menu" id="menu">
+      <form class="global-search" id="global-search" role="search" data-index="../assets/search-de.json">
+        <div class="global-search-field">
+          <input id="global-query" name="q" type="search" maxlength="160" autocomplete="off" placeholder="Suchen…" aria-label="Website durchsuchen" aria-controls="global-results">
+          <button type="submit" aria-label="Suchen"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/></svg></button>
+        </div>
+      </form>
       <nav aria-label="Seiten">
         <ol class="mono">
         <li><a href="index.html"><span>00</span><span>Über mich</span></a></li>
@@ -96,11 +105,18 @@
 
   <!-- ============ content ============ -->
   <main id="main" tabindex="-1">
+    <section class="global-results" id="global-results" aria-labelledby="global-search-title" hidden>
+      <div class="section-head"><h1 id="global-search-title" tabindex="-1">Suche</h1><button class="global-search-close mono" type="button">Zurück zur Seite ×</button></div>
+      <p class="global-search-status mono" role="status" aria-live="polite"></p>
+      <ol class="global-search-list"></ol>
+      <button class="global-search-more mono" type="button" hidden>Mehr anzeigen</button>
+      <button class="global-search-retry mono" type="button" hidden>Erneut versuchen</button>
+    </section>
 
     <header class="page proj">
       <a class="back mono" href="projects.html">← alle Projekte</a>
       <div class="section-head">
-        <h1><span class="mono">01</span>SMT-RAT</h1>
+        <h1><span class="share-at" id="smt-rat-1"></span><span class="mono">01</span> SMT-RAT<a class="share global-share" href="#smt-rat-1" data-share="smt-rat-1" aria-label="Link kopieren: smt-rat-1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h1>
         <span class="mono faint">2015</span>
       </div>
       <div class="proj-logo"><img src="../assets/logos/smt-rat.png" alt="" width="48" height="48"></div>
@@ -109,30 +125,30 @@
       <div class="links-top mono"><a href="https://ths-rwth.github.io/smtrat/" target="_blank" rel="noopener">Dokumentation ↗</a><a href="https://github.com/ths-rwth/smtrat" target="_blank" rel="noopener">github ↗</a></div>
       <p class="art-link mono"><a href="research-ea.html"><span>Hintergrund:</span> Teil 4 · Evolutionäre Algorithmen →</a></p>
     </header>
-    <figure class="media"><div class="dia-scroll" style="--vw:760px" tabindex="0"><svg class="dia" viewBox="0 0 760 200" role="img" aria-label="Intervallauswertung von x Quadrat minus x für x zwischen 0 und 1: wie geschrieben ergibt sich minus 1 bis 1, als Horner-Schema minus 1 bis 0, tatsächlich minus ein Viertel bis 0">
+    <figure class="media" id="smt-rat-f1"><div class="dia-scroll" style="--vw:760px" tabindex="0"><svg class="dia" viewBox="0 0 760 200" role="img" aria-label="Intervallauswertung von x Quadrat minus x für x zwischen 0 und 1: wie geschrieben ergibt sich minus 1 bis 1, als Horner-Schema minus 1 bis 0, tatsächlich minus ein Viertel bis 0">
   <text x="0" y="16" class="s">AUSGEWERTET AUF DEM INTERVALL x ∈ [0, 1]</text>
   <path class="ln dash" d="M480 30V172"/>
   <text x="0" y="53" class="t">x² − x</text><text x="120" y="53" class="s">wie geschrieben</text><rect class="box" x="260" y="40" width="440" height="18" rx="2"/><text x="710" y="53" class="s">[−1, 1]</text><text x="0" y="99" class="t">x · (x − 1)</text><text x="120" y="99" class="s">Horner-Schema</text><rect class="box hl" x="260" y="86" width="220" height="18" rx="2"/><text x="490" y="99" class="s">[−1, 0]</text><text x="0" y="145" class="t">tatsächlich</text><text x="120" y="145" class="s">das Ziel</text><rect class="zone" x="425.0" y="132" width="55.0" height="18" rx="2" style="fill:var(--accent);opacity:.35"/><text x="490" y="145" class="s">[−¼, 0]</text>
   <path class="ln" d="M250 172H710"/><path class="ln" d="M260 172V178"/><text x="260" y="194" text-anchor="middle" class="s">−1</text><path class="ln" d="M370.0 172V178"/><text x="370.0" y="194" text-anchor="middle" class="s">−½</text><path class="ln" d="M480 172V178"/><text x="480" y="194" text-anchor="middle" class="s">0</text><path class="ln" d="M590.0 172V178"/><text x="590.0" y="194" text-anchor="middle" class="s">½</text><path class="ln" d="M700 172V178"/><text x="700" y="194" text-anchor="middle" class="s">1</text>
 </svg></div>
-      <figcaption class="mono"><b>Das Abhängigkeitsproblem.</b> Intervallarithmetik behandelt jedes Vorkommen von <i>x</i> als unabhängigen Wert aus [0, 1], daher ergibt <i>x² − x</i> das Intervall [−1, 1] — achtmal breiter als der tatsächliche Wertebereich. Als Horner-Schema umgeschrieben kommt <i>x</i> seltener vor, und das Ergebnis schrumpft auf [−1, 0]. Engere Intervalle lassen ICP in jedem Schritt mehr vom Suchraum wegschneiden.</figcaption>
+      <figcaption class="mono"><b>Das Abhängigkeitsproblem.</b> Intervallarithmetik behandelt jedes Vorkommen von <i>x</i> als unabhängigen Wert aus [0, 1], daher ergibt <i>x² − x</i> das Intervall [−1, 1] — achtmal breiter als der tatsächliche Wertebereich. Als Horner-Schema umgeschrieben kommt <i>x</i> seltener vor, und das Ergebnis schrumpft auf [−1, 0]. Engere Intervalle lassen ICP in jedem Schritt mehr vom Suchraum wegschneiden.<a class="share global-share" href="#smt-rat-f1" data-share="smt-rat-f1" aria-label="Link kopieren: smt-rat-f1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></figcaption>
     </figure>
     <section>
       <ul class="story">
         <li>
-          <h2>Das Problem</h2>
+          <h2><span class="share-at" id="smt-rat-2"></span>Das Problem<a class="share global-share" href="#smt-rat-2" data-share="smt-rat-2" aria-label="Link kopieren: smt-rat-2"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>Viele Fragen aus Verifikation und Ingenieurwesen laufen auf eine hinaus: Gibt es eine Belegung mit reellen Zahlen, die eine boolesche Kombination polynomieller Bedingungen erfüllt? Kann dieses hybride System einen unsicheren Zustand erreichen, terminiert dieses Termersetzungssystem, gilt diese Ungleichung? Solche Formeln <b>nichtlinearer reeller Arithmetik</b> sind entscheidbar, aber die vollständigen Verfahren sind teuer — im schlimmsten Fall mindestens exponentiell.</p></div>
         </li>
         <li>
-          <h2>SMT-RAT</h2>
+          <h2><span class="share-at" id="smt-rat-3"></span>SMT-RAT<a class="share global-share" href="#smt-rat-3" data-share="smt-rat-3" aria-label="Link kopieren: smt-rat-3"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>SMT-Solver kombinieren einen schnellen SAT-Solver für die boolesche Struktur mit Theorie-Solvern für die Arithmetik. <b>SMT-RAT</b> (Satisfiability-Modulo-Theories Real Algebra Toolbox), entwickelt am Lehr- und Forschungsgebiet Theorie der hybriden Systeme der RWTH, macht den Theorie-Teil modular: Jedes Verfahren — Simplex, virtuelle Substitution, Intervall-Constraint-Propagation, zylindrisch-algebraische Zerlegung und mehr — ist ein Modul, und eine <i>Strategie</i> verkettet Module zu einem Solver. Günstige, unvollständige Verfahren kommen zuerst und reichen ein kleineres Problem an die teuren, vollständigen weiter. Der Werkzeugkasten ist Open Source, liest SMT-LIB 2 und baut für Polynome auf der Bibliothek CArL auf.</p></div>
         </li>
         <li>
-          <h2>Intervall-Constraint-Propagation</h2>
+          <h2><span class="share-at" id="smt-rat-4"></span>Intervall-Constraint-Propagation<a class="share global-share" href="#smt-rat-4" data-share="smt-rat-4" aria-label="Link kopieren: smt-rat-4"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>Intervall-Constraint-Propagation (ICP) arbeitet auf Boxen aus Intervallen, eines pro Variable. Sie nutzt jede Bedingung, um Teile der Box wegzuschneiden, die keine Lösung enthalten können — <i>Kontraktion</i> —, bis die Box leer (unerfüllbar) oder klein genug zur Weitergabe ist. Ihre Schwachstelle ist die Intervallarithmetik selbst: Sie weiß nicht, dass zwei Vorkommen von <code>x</code> dieselbe Zahl sind. Dieses <b>Abhängigkeitsproblem</b> macht Ergebnisse breiter als nötig (Abbildung oben), sodass ICP weniger kontrahiert und mehr Iterationen braucht.</p></div>
         </li>
         <li>
-          <h2>Mein Beitrag</h2>
+          <h2><span class="share-at" id="smt-rat-5"></span>Mein Beitrag<a class="share global-share" href="#smt-rat-5" data-share="smt-rat-5" aria-label="Link kopieren: smt-rat-5"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.3-1.3a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.3 1.3a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg></a></h2>
           <div class="txt"><p>Ich habe das ICP-Modul von SMT-RAT auf zwei Wegen verbessert <a class="cite" href="#Net15">[Net15]</a>. Erstens eine neue Kontraktionsmethode — <b>Propagation</b> von Intervallen durch die Bedingung — zusätzlich zur bestehenden, Newton-basierten Kontraktion. Zweitens eine Datenstruktur für <b>multivariate Horner-Schemata</b>: Polynome werden verschachtelt umgeschrieben, brauchen so weniger Operationen und wiederholen Variablen seltener, wodurch die Intervalle enger bleiben. Zwei Heuristiken wählen die nächste auszuklammernde Variable — eine schnelle, eine auf möglichst geringe Überapproximation ausgelegte —, und ein Vereinfachungsschritt komprimiert das Ergebnis.</p><p>Auf den üblichen SMT-LIB-Benchmarks hat sich die Propagation klar ausgezahlt: Auf <i>keymaera</i> (Verifikation hybrider Systeme) wurden mehr Instanzen mit weniger Timeouts in kaum mehr als der halben Zeit gelöst, und auf <i>hong</i> ließen sich im selben Zeitrahmen fast doppelt so viele Testfälle lösen. Die Horner-Schemata machten ICP zwar präziser — auf einzelnen Instanzen bis zu 46&nbsp;% weniger Kontraktionen —, ihr Aufbau kostete aber mehr Zeit, als die engeren Intervalle einsparten. Ein ehrliches Ergebnis, das die nächsten Schritte zeigte: die Heuristik je Eingabe wählen und Polynome aus der Sicht einer einzelnen Variable auswerten.</p></div>
         </li>
       </ul>
@@ -164,5 +180,7 @@
   </main>
 </div>
 <script src="../assets/site.js"></script>
+<script src="../assets/search-core.js"></script>
+<script src="../assets/search.js"></script>
 </body>
 </html>
