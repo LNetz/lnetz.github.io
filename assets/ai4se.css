@@ -11,6 +11,29 @@
   .art-fig.side figcaption { margin-top: 0; padding-bottom: 4px; }
 }
 
+/* ---- harness: responsibility boundaries, with independently laid out phone geometry ---- */
+.harness-stage { padding-bottom: 10rem; }
+.harness-canvas { position: relative; }
+.harness-stage.harness-wide { max-width: 640px; }
+.harness-stage.harness-tall { display: none; max-width: 358px; }
+.art-fig:has(> .harness-stage) { container-type: inline-size; }
+.dia.harness-wide text.s, .dia.harness-tall text.s { font-size: var(--t-label); }
+.dia .harness-head { font-size: var(--t-head); letter-spacing: .06em; }
+.dia .harness-wire { font-size: var(--t-label); }
+.dia .harness-icon { fill: none; stroke: var(--ink-2); stroke-width: 1; stroke-linecap: round; stroke-linejoin: round; }
+.harness-note summary { position: absolute; cursor: help; list-style: none; border-radius: 2px; }
+.harness-note summary::-webkit-details-marker { display: none; }
+.harness-note summary:hover, .harness-note summary:focus-visible { outline: 1px dotted var(--accent); outline-offset: -4px; }
+.harness-explain, .harness-hint { position: absolute; top: calc(100% + 12px); left: 0; width: 100%; padding: 14px 0; border-top: 1px solid var(--rule); background: var(--bg); color: var(--ink-2); font: 14px/1.55 var(--sans); }
+.harness-explain { z-index: 1; }
+.harness-hint { color: var(--ink-3); }
+.harness-canvas:has(.harness-note[open]) .harness-hint { visibility: hidden; }
+.harness-explain strong { display: block; margin-bottom: 6px; color: var(--ink); font-weight: 500; }
+@container (max-width: 639px) {
+  .harness-stage.harness-wide { display: none; }
+  .harness-stage.harness-tall { display: block; padding-bottom: 13rem; }
+}
+
 /* ---- intro: the almost-right JSON ---- */
 .art-fig.hook { max-width: 660px; }
 .art-fig.hook pre { margin: 0; }

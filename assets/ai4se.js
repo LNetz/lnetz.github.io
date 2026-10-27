@@ -435,6 +435,36 @@
   }
 
   const kinds = { nt: nextToken, nn: neural, wg: winograd, ag: agent, gm: grammar };
+  document.querySelectorAll(".harness-note").forEach(note => {
+    const summary = note.querySelector("summary");
+    const close = () => { note.open = false; };
+    const open = () => {
+      note.parentElement.querySelectorAll(".harness-note").forEach(other => {
+        if (other !== note) other.open = false;
+      });
+      note.open = true;
+    };
+    summary.addEventListener("pointerenter", e => {
+      if (e.pointerType === "mouse") open();
+    });
+    note.parentElement.addEventListener("pointerleave", () => {
+      if (!note.contains(document.activeElement)) close();
+    });
+    summary.addEventListener("focus", () => {
+      if (summary.matches(":focus-visible")) open();
+    });
+    note.addEventListener("focusout", e => {
+      if (!note.contains(e.relatedTarget)) close();
+    });
+    note.addEventListener("keydown", e => {
+      if (e.key === "Escape") { close(); e.stopPropagation(); }
+    });
+    summary.addEventListener("click", e => {
+      // Mouse hover already opened the explanation; touch/keyboard retain native toggling.
+      if (e.pointerType === "mouse") { e.preventDefault(); open(); }
+    });
+    note.addEventListener("toggle", () => { if (note.open) open(); });
+  });
   document.querySelectorAll("figure.demo[data-demo]").forEach(fig => {
     try { kinds[fig.dataset.demo]?.(fig); } catch (e) { console.error(e); }
   });

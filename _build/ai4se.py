@@ -53,6 +53,9 @@ REFS = [
     ("willison", _link("S. Willison: on the definition of “agent”. simonwillison.net (2025).", "https://simonwillison.net/2025/Sep/18/agents/")),
     ("boeckeler", _link("B. Böckeler: Harness engineering for coding agent users. martinfowler.com.", "https://martinfowler.com/articles/harness-engineering.html")),
     ("trivedy", _link("V. Trivedy: The Anatomy of an Agent Harness. LangChain Blog (2026).", "https://www.langchain.com/blog/the-anatomy-of-an-agent-harness")),
+    ("cf-harness", _link("Cloudflare: Harnesses. Agents documentation (accessed October 2026).", "https://developers.cloudflare.com/agents/harnesses/")),
+    ("anthropic-harness", _link("Anthropic: Effective harnesses for long-running agents (2025).", "https://www.anthropic.com/research/effective-harnesses-for-long-running-agents")),
+    ("anthropic-layers", _link("Anthropic: Trustworthy agents in practice (2026).", "https://www.anthropic.com/research/trustworthy-agents")),
     ("rumelhart", "D. E. Rumelhart, G. E. Hinton, R. J. Williams: Learning representations by back-propagating errors. Nature 323, 533–536 (1986)."),
     ("ouyang", "L. Ouyang et al.: Training language models to follow instructions with human feedback. Advances in Neural Information Processing Systems 35 (2022)."),
     ("sennrich", "R. Sennrich, B. Haddow, A. Birch: Neural machine translation of rare words with subword units. Proc. ACL, 1715–1725 (2016)."),
@@ -571,31 +574,88 @@ def dia_agent(lang):
 
 
 def dia_harness(lang):
-    """Agent = model + harness: everything around the model. The loop is drawn as a ring around the model.
-    360 wide: fits a phone as it is."""
-    L = lambda x: x[lang]
-    m = 'marker-end="url(#hna)"'
-    svg = f'''<svg class="dia" viewBox="0 0 360 430" role="img" aria-label="{L(T("Agent system with separate harness and model; the harness controls access to an isolated execution environment", "Agentensystem mit getrenntem Harness und Modell; der Harness steuert den Zugriff auf eine isolierte Ausführungsumgebung"))}">
-      {_arrow_defs("hna")}
-      {box(110, 0, 140, 44, L(T("You", "Sie")), L(T("the task", "die Aufgabe")))}
-      <path class="ln" d="M180 44V72" {m}/>
-      <rect class="zone" x="0" y="60" width="360" height="270" rx="6"/>
-      <text class="s" x="12" y="80">{L(T("AGENT SYSTEM", "AGENTENSYSTEM"))}</text>
-      <rect class="box" x="12" y="94" width="204" height="220" rx="3"/>
-      <text class="t" x="24" y="116">Harness</text>
-      <text class="s" x="24" y="146">{L(T("instructions · context", "Anweisungen · Kontext"))}</text>
-      <text class="s" x="24" y="172">{L(T("tool orchestration", "Werkzeugsteuerung"))}</text>
-      <text class="s" x="24" y="198">{L(T("checks · permissions", "Prüfungen · Rechte"))}</text>
-      <text class="s" x="24" y="240">{L(T("act · observe · repeat", "handeln · prüfen · weiter"))}</text>
-      {box(244, 160, 104, 56, L(T("Model", "Modell")), "LLM", cls="box hl")}
-      <path class="ln" d="M216 174H240" {m}/><path class="ln" d="M244 204H220" {m}/>
-      <path class="ln" d="M114 314V370" {m}/><path class="ln" d="M194 374V334H204V318" {m}/>
-      <text class="s halo" x="24" y="352">{L(T("authorized tools / results", "erlaubte Tools / Ergebnisse"))}</text>
-      {box(12, 378, 336, 48, L(T("Execution environment", "Ausführungsumgebung")), L(T("sandbox · files · terminal · apps", "Sandbox · Dateien · Terminal · Apps")))}
-    </svg>'''
-    return side_fig(svg, 360, T("Agent = model + harness. The model brings the language and the judgement; the harness brings everything else. Claude Code, Codex and Cursor are harnesses — with the same model inside they can still perform very differently.",
-                                "Agent = Modell + Harness. Das Modell bringt Sprache und Urteilsvermögen, der Harness alles andere. Claude Code, Codex und Cursor sind Harnesses — mit demselben Modell darin können sie trotzdem sehr unterschiedlich gut arbeiten."), lang,
-                    source=src("after", _RK["trivedy"]))
+    """Responsibility boundaries, not deployment boundaries. Separate phone geometry keeps type at 1:1."""
+    L = lambda x: html.escape(x[lang], quote=True)
+    def icon(kind, x, y):
+        # Small, consistent line glyphs; labels carry the meaning without relying on icons.
+        paths = {
+            "context": '<path d="M4 1H13V12H4Z M1 4V15H10"/>',
+            "control": '<path d="M2 3H8V13H14 M8 3H14 M11 0L14 3L11 6 M11 10L14 13L11 16"/>',
+            "tool": '<rect x="1" y="2" width="14" height="12" rx="1"/><path d="M4 6L7 8L4 10 M9 11H12"/>',
+            "model": '<rect x="3" y="3" width="10" height="10" rx="1"/><path d="M6 0V3 M10 0V3 M6 13V16 M10 13V16 M0 6H3 M0 10H3 M13 6H16 M13 10H16"/>',
+        }
+        return f'<g class="harness-icon" transform="translate({x} {y})" aria-hidden="true">{paths[kind]}</g>'
+    def drawing(phone):
+        w, hx, hw, mx, mw = (358, 40, 180, 278, 68) if phone else (640, 56, 264, 432, 176)
+        end, tx, cx = hx + hw, hx + 16, mx + mw / 2
+        ident = "hn-phone" if phone else "hn-wide"
+        marker = f'marker-end="url(#{ident})"'
+        # One marker per visible variant; a hidden SVG must never own the other's arrowheads.
+        defs = f'<defs><marker id="{ident}" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L6 3L0 6" fill="currentColor"/></marker></defs>'
+        rows = [
+            (150, "context", T("Context & state", "Kontext & Zustand"), T("rules · history", "Regeln · Verlauf"), T("memory · tool definitions", "Speicher · Tool-Definitionen") if not phone else T("memory · tools", "Speicher · Werkzeuge")),
+            (230, "control", T("Turn control", "Ablaufsteuerung"), T("continue · stop · ask", "weiter · Ende · fragen"), T("limits · retries · log", "Limits · Versuche · Log")),
+            (310, "tool", T("Tool execution", "Werkzeugausführung"), T("permissions · checks", "Rechte · Prüfungen"), T("run · return results", "ausführen · Ergebnis")),
+        ]
+        ruled = "".join(icon(kind, tx, y + 3) + f'<text class="t" x="{tx + 24}" y="{y + 16}">{L(title)}</text><text x="{tx}" y="{y + 38}">{L(a)}</text><text x="{tx}" y="{y + 54}">{L(b)}</text>' for y, kind, title, a, b in rows)
+        model = (f'<rect class="box hl" x="{mx}" y="150" width="{mw}" height="144" rx="3"/>'
+                 + icon("model", cx - 8, 180)
+                 + f'<text class="t" text-anchor="middle" x="{cx}" y="220">{L(T("Model", "Modell"))}</text>'
+                 + f'<text text-anchor="middle" x="{cx}" y="242">LLM</text>'
+                 + f'<text class="s" text-anchor="middle" x="{cx}" y="278">{L(T("proposal", "Vorschlag") if phone else T("proposes", "schlägt vor"))}</text>')
+        tools_x = end - 32
+        svg = f'''<svg class="dia harness-{'tall' if phone else 'wide'}" viewBox="0 0 {w} 524" role="img" aria-labelledby="{ident}-title {ident}-desc">
+          <title id="{ident}-title">{L(T("Model, harness and agent", "Modell, Harness und Agent"))}</title>
+          <desc id="{ident}-desc">{L(T("The agent combines model and harness. The harness assembles context for the model, handles its response and executes authorized tool calls. Tool results return as context for the next turn. Tools and the environment are shown separately.", "Der Agent verbindet Modell und Harness. Der Harness stellt Kontext für das Modell zusammen, verarbeitet dessen Ausgabe und führt erlaubte Werkzeugaufrufe aus. Ergebnisse fließen als Kontext in den nächsten Schritt. Werkzeuge und Umgebung sind getrennt dargestellt."))}</desc>
+          {defs}
+          {box(hx + (hw - 184) / 2, 0, 184, 40, L(T("You: set the goal", "Sie: das Ziel setzen")))}
+          <rect class="zone" x="0" y="64" width="{w}" height="348" rx="4"/>
+          <path class="ln" d="M{hx + hw / 2} 40V62" {marker}/>
+          <text class="harness-head" x="{hx}" y="86">{L(T("AGENT = MODEL + HARNESS", "AGENT = MODELL + HARNESS"))}</text>
+          <rect class="box" x="{hx}" y="106" width="{hw}" height="284" rx="3"/>
+          <text class="t" x="{tx}" y="132">Harness</text>
+          <path class="ln sw-hair dash-opt" d="M{hx + 8} 146H{end - 8}M{hx + 8} 222H{end - 8}M{hx + 8} 302H{end - 8}"/>
+          {ruled}
+          {model}
+          <path class="ln" d="M{end} 180H{mx}" {marker}/>
+          <text class="harness-wire" text-anchor="middle" x="{(end + mx) / 2}" y="169">{L(T("context", "Kontext"))}</text>
+          <path class="ln" d="M{mx} 260H{end}" {marker}/>
+          <text class="harness-wire" text-anchor="middle" x="{(end + mx) / 2}" y="249">{L(T("response", "Ausgabe"))}</text>
+          <path class="ln" d="M{end - 16} 286V314" {marker}/>
+          <path class="ln" d="M{tools_x} 390V456" {marker}/>
+          <text class="harness-wire halo" x="{tools_x + 10}" y="444">{L(T("call", "Aufruf"))}</text>
+          <path class="ln" d="M20 456V188H{hx}" {marker}/>
+          <text class="harness-wire halo" text-anchor="middle" transform="translate(20 326) rotate(-90)">{L(T("results → next turn", "Ergebnisse → nächster Schritt"))}</text>
+          {box(0, 456, w, 64, L(T("Tools & environment", "Werkzeuge & Umgebung")), L(T("terminal · tests · APIs · files", "Terminal · Tests · APIs · Dateien")))}
+        </svg>'''
+        explanations = [
+            T("Selects what the model sees: the task, project instructions, conversation history and tool definitions. It stores run state and brings relevant information back into context.",
+              "Wählt aus, was das Modell sieht: Aufgabe, Projektanweisungen, Gesprächsverlauf und Werkzeugdefinitionen. Hält den Zustand des Ablaufs fest und bringt relevante Informationen zurück in den Kontext."),
+            T("Handles each model response: continue with a tool call, return an answer or ask a person. Applies limits, handles retries and records the run.",
+              "Verarbeitet jede Modellausgabe: mit einem Werkzeugaufruf fortfahren, eine Antwort zurückgeben oder einen Menschen fragen. Beachtet Limits, behandelt erneute Versuche und protokolliert den Ablauf."),
+            T("Checks a proposed call against tool schemas and permissions, obtains approval when required, invokes the tool and returns its result or error. The model cannot grant itself permission.",
+              "Prüft einen vorgeschlagenen Aufruf gegen Werkzeugschemata und Rechte, holt nötige Freigaben ein, führt das Werkzeug aus und gibt Ergebnis oder Fehler zurück. Das Modell kann sich keine Rechte selbst erteilen."),
+            T("The learned component. Given the context supplied by the harness, it generates a response: a proposed tool call, an answer or a question. Generating a tool call does not execute it; the harness handles execution.",
+              "Die gelernte Komponente. Erzeugt aus dem vom Harness gelieferten Kontext eine Ausgabe: einen vorgeschlagenen Werkzeugaufruf, eine Antwort oder eine Frage. Ein erzeugter Werkzeugaufruf ist noch keine Ausführung; dafür sorgt der Harness."),
+            T("The systems the agent works with: test runners, terminals, APIs and files. Tools perform operations and return observations; the environment determines where they run and which resources are reachable. They remain separate from the model and the harness’s control logic.",
+              "Die Systeme, mit denen der Agent arbeitet: Test-Runner, Terminals, APIs und Dateien. Werkzeuge führen Operationen aus und liefern Beobachtungen; die Umgebung bestimmt Ausführungsort und erreichbare Ressourcen. Sie bleiben von Modell und Ablaufsteuerung des Harness getrennt."),
+        ]
+        regions = [(title, hx, y - 4, hw, 72) for y, _, title, _, _ in rows]
+        regions += [(T("Model", "Modell"), mx, 150, mw, 144),
+                    (T("Tools & environment", "Werkzeuge & Umgebung"), 0, 456, w, 64)]
+        notes = "".join(
+            f'<details class="harness-note">'
+            f'<summary style="left:{100 * x / w:.4f}%;top:{100 * y / 524:.4f}%;width:{100 * rw / w:.4f}%;height:{100 * rh / 524:.4f}%" aria-label="{L(title)}: {L(T("explanation", "Erklärung"))}"></summary>'
+            f'<div class="harness-explain"><strong>{L(title)}</strong><span>{L(explanation)}</span></div></details>'
+            for (title, x, y, rw, rh), explanation in zip(regions, explanations))
+        hint = L(T("Hover, focus or tap a harness section, the model or the tools to read its explanation here.",
+                   "Mit Maus, Tastatur oder Antippen einen Harness-Abschnitt, das Modell oder die Werkzeuge wählen: Die Erklärung erscheint hier."))
+        return (f'<div class="harness-stage harness-{"tall" if phone else "wide"}"><div class="harness-canvas">'
+                f'{svg}<div class="harness-hint">{hint}</div>{notes}</div></div>')
+    return fig(drawing(False) + drawing(True), T(
+        "The model proposes; the harness runs the process. A tool call only becomes an action when the harness executes it. Results enter the next model call as context. The boundary separates responsibilities, even if everything runs in one application. Turn control also handles final answers, approval requests and limits.",
+        "Das Modell schlägt vor; der Harness führt den Ablauf aus. Ein Werkzeugaufruf wird erst zur Handlung, wenn der Harness ihn ausführt. Ergebnisse gehen als Kontext in den nächsten Modellaufruf ein. Die Grenze trennt Zuständigkeiten, auch wenn alles in einer Anwendung läuft. Die Ablaufsteuerung behandelt auch Antworten, Freigaben und Limits."), lang, scroll=False,
+        source=T(f"Conceptual synthesis; see {r('cf-harness')} and {r('trivedy')}.", f"Begriffliche Synthese; siehe {r('cf-harness')} und {r('trivedy')}."))
 
 
 # =====================================================================
@@ -868,25 +928,34 @@ def body(lang, A):
                           """<ul class="pts"><li><b>Vor der ersten Frage.</b> Die Dokumente werden in Abschnitte von ein paar Absätzen zerlegt, jeder Abschnitt wird in ein Embedding übersetzt, und die Embeddings kommen in einen Vektorindex.</li><li><b>Bei jeder Frage.</b> Die Frage wird genauso eingebettet; der Index liefert die nächstgelegenen Abschnitte; sie werden in den Prompt kopiert, zusammen mit der Frage und der Anweisung, daraus zu antworten und die Quelle zu nennen.</li><li><b>Wo es schiefgeht.</b> Suche und Generierung können scheitern. Das Modell kann relevante Belege ignorieren oder Quellen erfinden; Suchprobleme entstehen durch Abschnitte an der falschen Stelle geschnitten, eine Frage mit anderen Wörtern als die Dokumente, eine Tabelle, die ihre Struktur verliert. Viele Systeme kombinieren deshalb semantische Suche mit einfacher Stichwortsuche und lassen ein zweites Modell die Treffer neu sortieren.</li></ul>"""),
                   T("Chunks, index, re-ranking", "Abschnitte, Index, Neusortierung")), T("RAG", "RAG")))
     S.append(("agent", 3, T("Agents: tools in a loop", "Agenten: Werkzeuge in einer Schleife"),
-        definition(T("Agent", "Agent"), T("An AI agent is a language model that uses tools in a loop to reach a goal — and decides for itself which step comes next.",
-                                          "Ein KI-Agent ist ein Sprachmodell, das in einer Schleife Werkzeuge einsetzt, um ein Ziel zu erreichen — und dabei selbst entscheidet, welcher Schritt als Nächstes kommt."), lang)
-        + L(T(f"<p>Chatbots may also use tools. Here, an agent means a goal-directed tool-using LLM with autonomy over its next steps. An agent gets a goal, acts — reads a file, runs the tests, edits code —, looks at the result and decides what to do next, until the goal is reached. Simon Willison puts it in one line: “An LLM agent runs tools in a loop to achieve a goal.” {r('willison')}</p>",
-              f"<p>Auch Chatbots können Werkzeuge nutzen. Hier bezeichnet Agent ein zielgerichtetes, werkzeugnutzendes LLM mit Autonomie über seine nächsten Schritte. Ein Agent bekommt ein Ziel, handelt — liest eine Datei, führt die Tests aus, ändert Code —, betrachtet das Ergebnis und entscheidet, was als Nächstes zu tun ist, bis das Ziel erreicht ist. Simon Willison fasst das in einem Satz: „An LLM agent runs tools in a loop to achieve a goal.“ {r('willison')}</p>"))
+        definition(T("Agent", "Agent"), T("An AI agent is a system in which a language model directs the use of tools in a loop to reach a goal, choosing its next steps from the results it observes.",
+                                          "Ein KI-Agent ist ein System, in dem ein Sprachmodell den Einsatz von Werkzeugen in einer Schleife steuert, um ein Ziel zu erreichen, und seine nächsten Schritte anhand der beobachteten Ergebnisse wählt."), lang)
+        + L(T(f"<p>Chatbots may also use tools. Here, an agent means a goal-directed system whose LLM chooses its next steps. An agent gets a goal, acts — reads a file, runs the tests, edits code —, looks at the result and decides what to do next, until the goal is reached. Simon Willison puts it in one line: “An LLM agent runs tools in a loop to achieve a goal.” {r('willison')}</p>",
+              f"<p>Auch Chatbots können Werkzeuge nutzen. Hier bezeichnet Agent ein zielgerichtetes System, dessen LLM die nächsten Schritte wählt. Ein Agent bekommt ein Ziel, handelt — liest eine Datei, führt die Tests aus, ändert Code —, betrachtet das Ergebnis und entscheidet, was als Nächstes zu tun ist, bis das Ziel erreicht ist. Simon Willison fasst das in einem Satz: „An LLM agent runs tools in a loop to achieve a goal.“ {r('willison')}</p>"))
         + dia_agent(lang)
         + L(T(f"<p>Anthropic draws the line against <i>workflows</i>: in a workflow, LLMs and tools follow paths a programmer laid down in advance; in an agent, the LLM directs its own process and its use of tools {r('anthropic')}. That makes agents flexible — and harder to predict.</p>",
               f"<p>Anthropic grenzt Agenten von <i>Workflows</i> ab: Im Workflow folgen LLMs und Werkzeuge Pfaden, die ein Programmierer vorher festgelegt hat; im Agenten steuert das LLM seinen Ablauf und seinen Werkzeuggebrauch selbst {r('anthropic')}. Das macht Agenten flexibel — und schwerer vorherzusagen.</p>")), T("Agents", "Agenten")))
-    S.append(("harness", 3, T("Harness: everything except the model", "Harness: alles außer dem Modell"),
-        definition("Harness", T("A harness is all the software around a language model that turns it into a working agent — everything in the agent except the model itself.",
-                                "Ein Harness ist die gesamte Software rund um ein Sprachmodell, die daraus einen arbeitsfähigen Agenten macht — alles am Agenten außer dem Modell selbst."), lang)
-        + L(T(f"""<p>The word comes from the harness of a horse. The horse brings the strength, but only the harness — collar, reins, the cart behind — turns that strength into directed, useful work. A language model on its own can only turn text into text. The harness runs the loop of gathering context, acting, checking the result and going again, and around it provides instructions, tools, context, guardrails and checks. Hence the short formula: <i>agent = model + harness</i>.</p>""",
-              f"""<p>Das Wort kommt vom Geschirr eines Pferdes. Das Pferd bringt die Kraft, aber erst das Geschirr — Kummet, Zügel, der Wagen dahinter — macht daraus gelenkte, nützliche Arbeit. Ein Sprachmodell allein kann nur Text in Text verwandeln. Der Harness führt die Schleife aus Kontext sammeln, handeln, Ergebnis prüfen und weitermachen, und stellt drumherum Anweisungen, Werkzeuge, Kontext, Leitplanken und Prüfungen bereit. Daher die kurze Formel: <i>Agent = Modell + Harness</i>.</p>"""))
+    S.append(("harness", 3, T("Harness: running the agent", "Harness: den Agenten betreiben"),
+        definition("Harness", T("An agent harness is the software and configuration that run the loop around a model: assemble context, call the model, execute permitted tool calls, and feed results into the next turn.",
+                                "Ein Agent-Harness ist die Software samt Konfiguration, die die Schleife um ein Modell betreibt: Kontext zusammenstellen, das Modell aufrufen, erlaubte Werkzeugaufrufe ausführen und Ergebnisse in den nächsten Schritt zurückführen."), lang)
+        + L(T(f"""<p><b>Why a separate term?</b> A model can generate a request to run a test; something else must actually run it, keep the result and call the model again. That machinery has its own design decisions and failure modes. Changing it can change the agent’s behaviour without changing the model’s weights. Cloudflare puts this execution loop at the centre of its definition {r('cf-harness')}.</p>
+<p><b>Model, harness, agent.</b> The <i>model</i> is the learned component: given context, it generates a response, which may contain tool calls. The <i>harness</i> manages the run: context and state, tool execution, permissions, continuation and stopping. The <i>agent</i> is the resulting goal-directed system in which the model chooses the next steps. The model proposes what to do; the harness determines what can execute and carries it out.</p>""",
+              f"""<p><b>Warum ein eigener Begriff?</b> Ein Modell kann einen Aufruf zum Ausführen eines Tests erzeugen; etwas anderes muss ihn tatsächlich ausführen, das Ergebnis festhalten und das Modell erneut aufrufen. Diese Software hat eigene Entwurfsentscheidungen und Fehlerquellen. Änderungen daran können das Verhalten des Agenten verändern, ohne die Modellgewichte anzutasten. Cloudflare stellt diese Ausführungsschleife ins Zentrum seiner Definition {r('cf-harness')}.</p>
+<p><b>Modell, Harness, Agent.</b> Das <i>Modell</i> ist die gelernte Komponente: Es erzeugt aus Kontext eine Ausgabe, die Werkzeugaufrufe enthalten kann. Der <i>Harness</i> verwaltet den Ablauf: Kontext und Zustand, Werkzeugausführung, Rechte, Fortsetzung und Abbruch. Der <i>Agent</i> ist das daraus entstehende zielgerichtete System, in dem das Modell die nächsten Schritte wählt. Das Modell schlägt vor, was zu tun ist; der Harness bestimmt, was ausgeführt werden darf, und führt es aus.</p>"""))
         + dia_harness(lang)
-        + L(T("<p>Retrieved documents, repository files and tool results are task data, not trusted instructions. The harness needs tool permissions, isolation and approval gates for consequential actions; syntax checks alone do not prevent prompt injection or unsafe execution.</p>",
-              "<p>Abgerufene Dokumente, Repository-Dateien und Werkzeugergebnisse sind Aufgabendaten, keine vertrauenswürdigen Anweisungen. Der Harness braucht Werkzeugrechte, Isolation und Freigaben für folgenreiche Aktionen; Syntaxprüfungen allein verhindern weder Prompt Injection noch unsichere Ausführung.</p>"))
-        + L(T(f"""<p>Part of the harness comes built in; teams add their own on top — project rules, extra tools, their own checks. Birgitta Böckeler sorts these additions into <i>guides</i>, which steer the agent before it acts, and <i>sensors</i>, which observe afterwards and help it correct itself {r('boeckeler')}.</p>
-<p>For anyone building with AI, this is the practical lesson: much of what makes an agent good or bad sits in the harness, not in the model. <a href="projects-esaca.html">ESACA</a>, the project I work on, is such a harness for companies — coding agents inside the company’s own perimeter. And the next chapter shows two harness parts for models: a parser as a sensor, a grammar as a guide.</p>""",
-              f"""<p>Ein Teil des Harness ist eingebaut; Teams ergänzen ihren eigenen — Projektregeln, zusätzliche Werkzeuge, eigene Prüfungen. Birgitta Böckeler teilt diese Ergänzungen in <i>Guides</i>, die den Agenten steuern, bevor er handelt, und <i>Sensoren</i>, die danach beobachten und ihm helfen, sich selbst zu korrigieren {r('boeckeler')}.</p>
-<p>Für alle, die mit KI bauen, ist das die praktische Lehre: Vieles, was einen Agenten gut oder schlecht macht, steckt im Harness, nicht im Modell. <a href="projects-esaca.html">ESACA</a>, das Projekt, an dem ich arbeite, ist so ein Harness für Unternehmen — Coding-Agenten innerhalb der eigenen Infrastruktur. Und das nächste Kapitel zeigt zwei Harness-Bausteine für Modelle: einen Parser als Sensor, eine Grammatik als Guide.</p>""")), T("Harness", "Harness")))
+        + L(T("""<p><b>One iteration: fix a failing test.</b> The harness supplies the task, project instructions and available tools. The model requests a test run. The harness checks permission, invokes the test runner and returns its output. The model uses that output to propose an edit or another test. The harness repeats the process, or ends it on a final response, a limit or a request for human input. A tool call is a request, not yet an executed action.</p>
+<p><b>Where is the boundary?</b> Here, the harness includes tool adapters and the rules for calling them; the test runner, repository and external services are the tools and environment it connects to. An <code>AGENTS.md</code> file configures the harness when it is loaded as project instructions. A source file read to fix a bug is task data. A test supplies feedback when the harness runs it and returns the result. A prompt alone does not provide an execution loop; an SDK or framework supplies a harness only insofar as it implements that loop.</p>""",
+              """<p><b>Ein Durchlauf: einen fehlschlagenden Test reparieren.</b> Der Harness stellt Aufgabe, Projektanweisungen und verfügbare Werkzeuge bereit. Das Modell fordert einen Testlauf an. Der Harness prüft die Berechtigung, ruft den Test-Runner auf und gibt dessen Ausgabe zurück. Das Modell nutzt diese Ausgabe, um eine Änderung oder einen weiteren Test vorzuschlagen. Der Harness wiederholt den Ablauf oder beendet ihn bei einer abschließenden Antwort, einem Limit oder einer Rückfrage an den Menschen. Ein Werkzeugaufruf ist eine Anforderung, noch keine ausgeführte Handlung.</p>
+<p><b>Wo verläuft die Grenze?</b> Hier umfasst der Harness die Werkzeugadapter und ihre Aufrufregeln; Test-Runner, Repository und externe Dienste sind die angebundenen Werkzeuge und die Umgebung. Eine <code>AGENTS.md</code>-Datei konfiguriert den Harness, wenn sie als Projektanweisung geladen wird. Eine Quelldatei, die zur Fehlersuche gelesen wird, ist Aufgabendaten. Ein Test liefert Feedback, wenn der Harness ihn ausführt und das Ergebnis zurückgibt. Ein Prompt allein stellt keine Ausführungsschleife bereit; ein SDK oder Framework liefert einen Harness nur insoweit, wie es diese Schleife implementiert.</p>"""))
+        + curious(lang, T(f"""<p>There is no single agreed boundary. Trivedy uses the broad shorthand <i>agent = model + harness</i>, including bundled infrastructure {r('trivedy')}. Anthropic’s safety account separates model, harness, tools and environment {r('anthropic-layers')}. This article uses an operational boundary: the harness controls the run and connects to tools and an environment. These are responsibilities, not necessarily separate processes or products. A coding product can bundle all of them.</p>
+<p>Nor does every harness feature belong in every agent. Persistent memory, context compaction, subagents and recovery are extensions, not defining requirements. Anthropic’s long-running-agent example shows why continuity across context windows needs deliberate support {r('anthropic-harness')}. A fixed workflow can use the same machinery; what makes it an agent here is the model’s control over the next steps.</p>""",
+                          f"""<p>Es gibt keine allgemein vereinbarte Grenze. Trivedy verwendet die breite Kurzform <i>Agent = Modell + Harness</i>, einschließlich mitgelieferter Infrastruktur {r('trivedy')}. Anthropics Sicherheitsbetrachtung trennt Modell, Harness, Werkzeuge und Umgebung {r('anthropic-layers')}. Dieser Artikel zieht eine betriebliche Grenze: Der Harness steuert den Ablauf und bindet Werkzeuge und Umgebung an. Das sind Zuständigkeiten, nicht zwingend getrennte Prozesse oder Produkte. Ein Coding-Produkt kann alles bündeln.</p>
+<p>Auch braucht nicht jeder Agent jede Harness-Funktion. Dauerhafter Speicher, Kontextkomprimierung, Subagenten und Wiederanlauf sind Erweiterungen, keine Definitionsmerkmale. Anthropics Beispiel für lang laufende Agenten zeigt, weshalb die Fortsetzung über Kontextfenster hinweg gezielte Unterstützung braucht {r('anthropic-harness')}. Ein fester Workflow kann dieselbe Technik nutzen; zum Agenten wird das System hier dadurch, dass das Modell die nächsten Schritte steuert.</p>"""),
+                  T("One term, different boundaries", "Ein Begriff, verschiedene Grenzen"))
+        + L(T(f"""<p><b>Why it matters in practice.</b> The same model can behave differently under different harnesses: it sees different context, has different tools and receives different feedback. Teams can improve the built-in harness through project rules and checks. Böckeler calls these <i>guides</i> before an action and <i>sensors</i> afterwards {r('boeckeler')}. Instructions ask the model to behave; permissions and isolation constrain what can execute. Retrieved content remains task data, and passing a syntax check does not establish safety or correctness.</p>
+<p><a href="projects-esaca.html">ESACA</a>, the project I work on, brings coding agents into a company’s own infrastructure. The next chapter examines two concrete ways of steering and checking model output: a grammar as a guide and a parser as a sensor.</p>""",
+              f"""<p><b>Warum das praktisch zählt.</b> Dasselbe Modell kann sich mit verschiedenen Harnesses unterschiedlich verhalten: Es sieht anderen Kontext, hat andere Werkzeuge und erhält anderes Feedback. Teams können den eingebauten Harness durch Projektregeln und Prüfungen ergänzen. Böckeler nennt diese <i>Guides</i> vor einer Handlung und <i>Sensoren</i> danach {r('boeckeler')}. Anweisungen bitten das Modell um ein Verhalten; Rechte und Isolation begrenzen, was ausgeführt werden kann. Abgerufene Inhalte bleiben Aufgabendaten, und eine bestandene Syntaxprüfung belegt weder Sicherheit noch Korrektheit.</p>
+<p><a href="projects-esaca.html">ESACA</a>, das Projekt, an dem ich arbeite, bringt Coding-Agenten in die unternehmenseigene Infrastruktur. Das nächste Kapitel betrachtet zwei konkrete Wege, Modellausgaben zu lenken und zu prüfen: eine Grammatik als Guide und einen Parser als Sensor.</p>""")), T("Harness", "Harness")))
 
     # ---------------- 03 Making output reliable ----------------
     S.append(("mde", 2, T("Making output reliable: LLMs and models", "Verlässliche Ausgaben: LLMs und Modelle"), L(T(
